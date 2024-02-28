@@ -1,0 +1,137 @@
+{{ define "content" }}
+<script src="https://api.mapbox.com/mapbox-gl-js/v2.10.0/mapbox-gl.js"></script>
+<link
+  href="https://api.mapbox.com/mapbox-gl-js/v2.10.0/mapbox-gl.css"
+  rel="stylesheet"
+/>
+
+<div class="flex flex-col w-full items-start">
+  <!-- Header -->
+  <div class="p-5 py-5">
+    <h1 class="text-2xl font-bold">Add a location</h1>
+  </div>
+
+  <!-- Messages -->
+  {{ template "flash" .messages }}
+
+  <!-- Content -->
+  <form
+    class="w-full"
+    method="post"
+  >
+    <div class="flex-grow container mx-auto p-5">
+      <div class="flex flex-row space-x-8">
+        <div class="flex flex-col">
+          <div
+            id="map"
+            class="w-96 h-96 rounded-lg shadow-lg mt-5"
+          ></div>
+          <div class="form-control">
+            <label class="label cursor-pointer">
+              <span class="label-text">Save map location</span>
+              <input
+                type="checkbox"
+                name="location"
+                class="checkbox"
+              />
+            </label>
+          </div>
+        </div>
+        <input
+          type="hidden"
+          name="latitude"
+          value="{{ .clue.Latitude }}"
+        />
+        <input
+          type="hidden"
+          name="longitude"
+          value="{{ .clue.Longitude }}"
+        />
+
+        <!-- Location Title and Content Textarea -->
+        <div class="flex-1">
+          <div class="mb-4">
+            <label
+              for="name"
+              class="block text-base font-bold mb-2"
+              >Location name</label
+            >
+            <input
+              type="text"
+              id="name"
+              name="name"
+              class="input input-bordered w-full"
+              placeholder="Enter title"
+            />
+          </div>
+          <div class="mb-4">
+            <label
+              for="content"
+              class="block text-base font-bold mb-2"
+              >Content</label
+            >
+            <textarea
+              id="content"
+              name="content"
+              rows="7"
+              class="textarea textarea-bordered w-full"
+              placeholder="Enter optional content here"
+            ></textarea>
+          </div>
+          <button class="btn btn-primary">Save</button>
+        </div>
+      </div>
+    </div>
+  </form>
+</div>
+
+<script>
+  coords = [170.5111643, -45.8650509]
+  zoom = 14
+  {{ if .location.Longitude }}
+  coords = [{{ .location.Longitude }}, {{ .location.Latitude }}]
+  zoom = 18
+  {{ end }}
+
+  mapboxgl.accessToken = 'pk.eyJ1IjoibmF0aGFuaG9sbG93cyIsImEiOiJjbHN6YmpleHEwbWRpMnFyb3JwMHpjZWx3In0.ZizoPaB-7dh-SthWBD2dBw';
+  var coordinates = document.getElementById('coordinates');
+  var map = new mapboxgl.Map({
+      container: 'map',
+      style: 'mapbox://styles/nathanhollows/clszboe2y005i01oid8ca37jm',
+      center: coords,
+      zoom: zoom
+  });
+
+  var marker = new mapboxgl.Marker({
+  })
+  .setLngLat(coords)
+  .addTo(map);
+
+  map.on('drag', function() {
+      centro=map.getCenter();
+      marker.setLngLat(centro);
+      // Set the latitude and longitude fields
+      document.querySelector('input[name="latitude"]').value = centro.lat;
+      document.querySelector('input[name="longitude"]').value = centro.lng;
+      // Set the switch to true
+      document.querySelector('input[name="location"]').checked = true;
+  });
+  map.on('zoom', function() {
+      centro=map.getCenter();
+      marker.setLngLat(centro);
+  });
+  // If the switch is checked, save the map location else don't
+  document.querySelector('input[name="switch"]').addEventListener('change', function(e) {
+      if (e.target.checked) {
+          centro=map.getCenter();
+          marker.setLngLat(centro);
+          // Set the latitude and longitude fields
+          document.querySelector('input[name="latitude"]').value = centro.lat;
+          document.querySelector('input[name="longitude"]').value = centro.lng;
+      } else {
+          document.querySelector('input[name="latitude"]').value = "";
+          document.querySelector('input[name="longitude"]').value = "";
+      }
+  });
+</script>
+{{ end }}

@@ -1,0 +1,228 @@
+{{ define "base" }}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0"
+    />
+    <link rel="stylesheet" href="{{ static "/css/tailwind.css" }}" />
+    <title>{{ .title }}</title>
+    <script
+      src="https://unpkg.com/htmx.org@1.8.5"
+      integrity="sha384-7aHh9lqPYGYZ7sTHvzP1t3BAfLhYSTy9ArHdP3Xsr9/3TlGurYgcPBoFmXX2TX/w"
+      crossorigin="anonymous"
+      defer
+    ></script>
+  </head>
+  <body>
+    <div
+      id="app"
+      class="m-auto"
+      data-v-app=""
+    >
+      <div class="bg-base-200">
+        <div class="navbar max-w-7xl font-bold m-auto">
+          <div class="navbar-start">
+            <div class="dropdown">
+              <div
+                tabindex="0"
+                role="button"
+                class="btn btn-ghost lg:hidden"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  class="h-5 w-5"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M4 6h16M4 12h8m-8 6h16"
+                  />
+                </svg>
+              </div>
+              <ul
+                tabindex="0"
+                class="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-52"
+              >
+                <li><a href="/admin/">Dashboard</a></li>
+                <li><a href="/admin/locations">Locations</a></li>
+                <li><a href="/admin/teams">Teams</a></li>
+              </ul>
+            </div>
+            <a class="btn btn-ghost text-xl">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                class="lucide lucide-qr-code -mb-1"
+              >
+                <rect
+                  width="5"
+                  height="5"
+                  x="3"
+                  y="3"
+                  rx="1"
+                />
+                <rect
+                  width="5"
+                  height="5"
+                  x="16"
+                  y="3"
+                  rx="1"
+                />
+                <rect
+                  width="5"
+                  height="5"
+                  x="3"
+                  y="16"
+                  rx="1"
+                />
+                <path d="M21 16h-3a2 2 0 0 0-2 2v3" />
+                <path d="M21 21v.01" />
+                <path d="M12 7v3a2 2 0 0 1-2 2H7" />
+                <path d="M3 12h.01" />
+                <path d="M12 3h.01" />
+                <path d="M12 16v.01" />
+                <path d="M16 12h1" />
+                <path d="M21 12v.01" />
+                <path d="M12 21v-1" />
+              </svg>
+              ScanScout</a
+            >
+          </div>
+          <div class="navbar-center hidden lg:flex">
+            <ul class="menu menu-horizontal px-1">
+              <li>
+                <a href="/admin/">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    class="lucide lucide-activity"
+                  >
+                    <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
+                  </svg>
+                  Activity
+                </a>
+              </li>
+              <li>
+                <a href="/admin/locations">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    class="lucide lucide-map-pin"
+                  >
+                    <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" />
+                    <circle
+                      cx="12"
+                      cy="10"
+                      r="3"
+                    />
+                  </svg>
+                  Locations</a
+                >
+              </li>
+              <li>
+                <a href="/admin/teams">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    class="lucide lucide-users"
+                  >
+                    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                    <circle
+                      cx="9"
+                      cy="7"
+                      r="4"
+                    />
+                    <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+                    <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                  </svg>
+                  Teams</a
+                >
+              </li>
+            </ul>
+          </div>
+          <div class="navbar-end">
+            <button
+              class="btn btn-ghost btn-sm tooltip tooltip-bottom flex"
+              data-tip="Change instance"
+              onclick="my_modal_4.showModal()"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                class="lucide lucide-compass"
+              >
+                <circle
+                  cx="12"
+                  cy="12"
+                  r="10"
+                />
+                <polygon
+                  points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"
+                />
+              </svg>
+              Laws200 Wānanga
+            </button>
+          </div>
+        </div>
+      </div>
+      <main class="max-w-7xl m-auto">{{ template "content" . }}</main>
+      <dialog
+        id="my_modal_4"
+        class="modal"
+      >
+        <div class="modal-box">
+          <h3 class="font-bold text-lg">Change ScanScout instance</h3>
+          <p class="py-4">No other instances to show.</p>
+          <div class="modal-action">
+            <form method="dialog">
+              <button class="btn">Nevermind</button>
+            </form>
+          </div>
+        </div>
+      </dialog>
+    </div>
+  </body>
+</html>
+{{ end }}

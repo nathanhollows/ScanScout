@@ -1,0 +1,26 @@
+{{ define "base" }}
+<!DOCTYPE html>
+<html
+  lang="en"
+  class="h-full"
+>
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0"
+    />
+    <link rel="stylesheet" href="{{ static "/css/tailwind.css" }}" />
+    <title>{{ .title }}</title>
+    <script
+      src="https://unpkg.com/htmx.org@1.8.5"
+      integrity="sha384-7aHh9lqPYGYZ7sTHvzP1t3BAfLhYSTy9ArHdP3Xsr9/3TlGurYgcPBoFmXX2TX/w"
+      crossorigin="anonymous"
+      defer
+    ></script>
+  </head>
+  <body class="h-full">
+    {{ template "content" . }}
+  </body>
+</html>
+{{ end }}

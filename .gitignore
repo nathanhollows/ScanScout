@@ -7,6 +7,7 @@
 *.dll
 *.so
 *.dylib
+ScanScout
 
 # Test binary, built with `go test -c`
 *.test
@@ -16,6 +17,17 @@
 
 # Dependency directories (remove the comment below to include it)
 # vendor/
+node_modules/
 
 # Go workspace file
 go.work
+
+# Database 
+*.db
+
+# Environment variables file
+.env
+
+# Generated files
+assets/posters/*
+assets/codes/*
