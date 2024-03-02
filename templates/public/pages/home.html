@@ -42,19 +42,18 @@
       <path d="M21 12v.01" />
       <path d="M12 21v-1" />
     </svg>
-    <h2 class="mt-5 text-center text-2xl font-bold leading-9 tracking-tight">
-      Scan Out
+    <h2 class="text-center text-2xl font-bold leading-9 tracking-tight">
+      Start
     </h2>
   </div>
-  <div class="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
+  <div class="sm:mx-auto sm:w-full sm:max-w-sm">
     <form
       class="space-y-6"
       method="post"
+      action="/next"
     >
-      <div>
-        <p class="text-center text-3xl pb-3">{{ .location.Name }}</p>
-        {{ template "flash" .messages }}
-      </div>
+      <p class="text-center text-3xl pb-3">{{ .location.Name }}</p>
+      {{ template "flash" .messages }}
       <div>
         <label
           class="form-control w-full"
@@ -93,8 +92,18 @@
           end
           }}
         >
-          Scan Out
+          Start
         </button>
+        {{ if .team }}
+        <p class="mt-5 text-center">
+          <a
+            href="/mylocations"
+            class="link"
+          >
+            See my scanned locations
+          </a>
+        </p>
+        {{ end }}
       </div>
     </form>
   </div>

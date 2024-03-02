@@ -38,7 +38,7 @@ func createRoutes() {
 	router.Use(middleware.StripSlashes)
 	router.Use(middleware.RedirectSlashes)
 
-	router.Get("/", publicScanHandler)
+	router.Get("/", publicHomeHandler)
 
 	// Session routes
 	router.Get("/login", adminLoginHandler)
@@ -46,10 +46,8 @@ func createRoutes() {
 
 	// Scanning in routes
 	router.Route("/s", func(r chi.Router) {
-		r.Get("/", publicScanHandler)
 		r.Get("/{code:[A-z]{5}}", publicScanHandler)
 		r.Post("/{code:[A-z]{5}}", publicScanPostHandler)
-		r.Post("/", publicScanPostHandler)
 	})
 
 	// Scanning out routes
@@ -59,6 +57,10 @@ func createRoutes() {
 		r.Post("/{code:[A-z]{5}}", publicScanOutPostHandler)
 		r.Post("/", adminLoginPostHandler)
 	})
+
+	// Next location routes
+	router.Get("/next", publicNextHandler)
+	router.Post("/next", publicNextHandler)
 
 	router.Route("/mylocations", func(r chi.Router) {
 		r.Get("/", publicMyLocationsHandler)

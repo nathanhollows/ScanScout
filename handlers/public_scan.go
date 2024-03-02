@@ -18,11 +18,23 @@ func publicScanHandler(w http.ResponseWriter, r *http.Request) {
 	code := chi.URLParam(r, "code")
 	data["code"] = code
 
+	location, err := models.FindLocationByCode(code)
+	if err != nil {
+		flash.Message{
+			Style:   "warning",
+			Title:   "Location code not found.",
+			Message: "Please double check the code and try again.",
+		}.Save(w, r)
+		http.Redirect(w, r, "/", http.StatusFound)
+		return
+	}
+	data["location"] = location
+
 	session, _ := sessions.Get(r, "scanscout")
 	teamCode := session.Values["team"]
 	var team *models.Team
 	if teamCode != nil {
-		team, err := models.FindTeamByCode(teamCode.(string))
+		team, err = models.FindTeamByCode(teamCode.(string))
 		if err == nil {
 			data["team"] = team
 		} else {
@@ -65,7 +77,7 @@ func publicScanHandler(w http.ResponseWriter, r *http.Request) {
 // publicScanPostHandler logs the scan
 func publicScanPostHandler(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
-	locationCode := r.FormValue("location")
+	locationCode := chi.URLParam(r, "code")
 	locationCode = strings.ToUpper(locationCode)
 
 	// Get the location
@@ -76,7 +88,7 @@ func publicScanPostHandler(w http.ResponseWriter, r *http.Request) {
 			Title:   "Location code not found.",
 			Message: "Please double check the code and try again.",
 		}.Save(w, r)
-		http.Redirect(w, r, "/s", http.StatusFound)
+		http.Redirect(w, r, "/", http.StatusFound)
 		return
 	}
 
@@ -90,7 +102,7 @@ func publicScanPostHandler(w http.ResponseWriter, r *http.Request) {
 			Title:   "Team code not found.",
 			Message: "Please double check the code and try again.",
 		}.Save(w, r)
-		http.Redirect(w, r, "/s", http.StatusFound)
+		http.Redirect(w, r, "/", http.StatusFound)
 		return
 	}
 
@@ -102,7 +114,7 @@ func publicScanPostHandler(w http.ResponseWriter, r *http.Request) {
 				Title:   "You are already scanned in elsewhere.",
 				Message: fmt.Sprint("Please scan out at ", team.BlockingLocation.Name, " before scanning in."),
 			}.Save(w, r)
-			http.Redirect(w, r, "/s", http.StatusFound)
+			http.Redirect(w, r, "/", http.StatusFound)
 			return
 		} else {
 			// Redirect to the scan out page
@@ -116,6 +128,36 @@ func publicScanPostHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	// Check if the team has already visited the location
+	if team.HasVisited(location) {
+		flash.Message{
+			Style:   "warning",
+			Title:   "You have already visited here.",
+			Message: "Please choose another location to visit.",
+		}.Save(w, r)
+		http.Redirect(w, r, "/next", http.StatusFound)
+		return
+	}
+
+	// Check if the location is one of the suggested locations
+	suggested := team.SuggestNextLocations(3)
+	found := false
+	for _, l := range *suggested {
+		if l.Code == locationCode {
+			found = true
+			break
+		}
+	}
+	if !found {
+		flash.Message{
+			Style:   "warning",
+			Title:   "Wrong location.",
+			Message: "Please scan in at one of the following locations.",
+		}.Save(w, r)
+		http.Redirect(w, r, "/next", http.StatusFound)
+		return
+	}
+
 	// Log the scan
 	err = location.LogScan(teamCode)
 	if err != nil {
@@ -125,7 +167,7 @@ func publicScanPostHandler(w http.ResponseWriter, r *http.Request) {
 			Message: "Please check the codes and try again.",
 		}.Save(w, r)
 		log.Error(err)
-		http.Redirect(w, r, "/s", http.StatusFound)
+		http.Redirect(w, r, "/", http.StatusFound)
 		return
 	}
 
@@ -158,6 +200,18 @@ func publicScanOutHandler(w http.ResponseWriter, r *http.Request) {
 	data := templateData(r)
 	code := chi.URLParam(r, "code")
 	data["code"] = code
+
+	location, err := models.FindLocationByCode(code)
+	if err != nil {
+		flash.Message{
+			Style:   "warning",
+			Title:   "Location code not found.",
+			Message: "Please double check the code and try again.",
+		}.Save(w, r)
+		http.Redirect(w, r, "/", http.StatusFound)
+		return
+	}
+	data["location"] = location
 
 	// Get the team code from the session
 	session, _ := sessions.Get(r, "scanscout")
@@ -194,7 +248,7 @@ func publicScanOutHandler(w http.ResponseWriter, r *http.Request) {
 
 func publicScanOutPostHandler(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
-	locationCode := r.FormValue("location")
+	locationCode := chi.URLParam(r, "code")
 	locationCode = strings.ToUpper(locationCode)
 
 	// Get the location
@@ -205,7 +259,7 @@ func publicScanOutPostHandler(w http.ResponseWriter, r *http.Request) {
 			Title:   "Location code not found.",
 			Message: "Please double check the code and try again.",
 		}.Save(w, r)
-		http.Redirect(w, r, "/o", http.StatusFound)
+		http.Redirect(w, r, "/mylocations", http.StatusFound)
 		return
 	}
 
@@ -221,7 +275,7 @@ func publicScanOutPostHandler(w http.ResponseWriter, r *http.Request) {
 			Title:   "Team code not found.",
 			Message: "Please double check the code and try again.",
 		}.Save(w, r)
-		http.Redirect(w, r, "/o", http.StatusFound)
+		http.Redirect(w, r, "/mylocations", http.StatusFound)
 		return
 	}
 
@@ -232,7 +286,7 @@ func publicScanOutPostHandler(w http.ResponseWriter, r *http.Request) {
 			Title:   "You're all set!",
 			Message: "You don't need to scan out.",
 		}.Save(w, r)
-		http.Redirect(w, r, "/o", http.StatusFound)
+		http.Redirect(w, r, "/next", http.StatusFound)
 		return
 	} else if team.MustScanOut != locationCode {
 		flash.Message{
@@ -240,7 +294,7 @@ func publicScanOutPostHandler(w http.ResponseWriter, r *http.Request) {
 			Title:   "You are scanned in elsewhere.",
 			Message: fmt.Sprint("You need to scan out at ", team.BlockingLocation.Name, " before scanning anywhere else."),
 		}.Save(w, r)
-		http.Redirect(w, r, "/o", http.StatusFound)
+		http.Redirect(w, r, "/mylocations", http.StatusFound)
 		return
 	}
 
@@ -253,7 +307,7 @@ func publicScanOutPostHandler(w http.ResponseWriter, r *http.Request) {
 			Message: "Please check the codes and try again.",
 		}.Save(w, r)
 		log.Error(err)
-		http.Redirect(w, r, "/o", http.StatusFound)
+		http.Redirect(w, r, "/mylocations", http.StatusFound)
 		return
 	}
 
@@ -266,7 +320,6 @@ func publicScanOutPostHandler(w http.ResponseWriter, r *http.Request) {
 		Title:   "Success!",
 		Message: "You have scanned out.",
 	}.Save(w, r)
-	http.Redirect(w, r, "/s", http.StatusFound)
+	http.Redirect(w, r, "/next", http.StatusFound)
 
-	return
 }

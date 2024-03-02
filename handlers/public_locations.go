@@ -3,6 +3,7 @@ package handlers
 import (
 	"net/http"
 
+	"github.com/charmbracelet/log"
 	"github.com/go-chi/chi"
 	"github.com/nathanhollows/ScanScout/flash"
 	"github.com/nathanhollows/ScanScout/models"
@@ -14,21 +15,30 @@ func publicMyLocationsHandler(w http.ResponseWriter, r *http.Request) {
 	data := templateData(r)
 	data["title"] = "My Locations"
 
-	// Get the list of locations from the session
-	locationCodes := getLocationsFromSession(r)
-	locations := models.FindLocationsByCodes(locationCodes)
+	// Get the team code from the session
+	session, _ := sessions.Get(r, "scanscout")
+	teamCode := session.Values["team"]
+	var team *models.Team
+	var err error
+	if teamCode != nil {
+		team, err = models.FindTeamByCode(teamCode.(string))
+		if err == nil {
+			data["team"] = team
+		} else {
+			log.Error(err)
+		}
+	}
 
-	if locations == nil {
+	if team == nil || len(team.Scans) == 0 {
 		flash.Message{
 			Style:   "danger",
 			Title:   "No locations found.",
 			Message: "Please scan in at least one location.",
 		}.Save(w, r)
-		http.Redirect(w, r, "/s", http.StatusFound)
+		http.Redirect(w, r, "/", http.StatusFound)
 		return
 	}
 
-	data["locations"] = locations
 	data["messages"] = flash.Get(w, r)
 	render(w, data, false, "mylocations")
 }
@@ -47,7 +57,7 @@ func publicSpecificLocationsHandler(w http.ResponseWriter, r *http.Request) {
 			Title:   "No locations found.",
 			Message: "Please scan in at least one location.",
 		}.Save(w, r)
-		http.Redirect(w, r, "/s", http.StatusFound)
+		http.Redirect(w, r, "/", http.StatusFound)
 		return
 	}
 
@@ -65,7 +75,7 @@ func publicSpecificLocationsHandler(w http.ResponseWriter, r *http.Request) {
 			Title:   "Location not found.",
 			Message: "Please scan in at this location first.",
 		}.Save(w, r)
-		http.Redirect(w, r, "/s", http.StatusFound)
+		http.Redirect(w, r, "/", http.StatusFound)
 		return
 	}
 
@@ -77,7 +87,7 @@ func publicSpecificLocationsHandler(w http.ResponseWriter, r *http.Request) {
 			Title:   "Location not found.",
 			Message: "Please double check the code and try again.",
 		}.Save(w, r)
-		http.Redirect(w, r, "/s", http.StatusFound)
+		http.Redirect(w, r, "/", http.StatusFound)
 		return
 	}
 

@@ -9,7 +9,6 @@ import (
 
 	"github.com/charmbracelet/log"
 	"github.com/go-pdf/fpdf"
-	"github.com/google/uuid"
 )
 
 // Instance represents a single planned activity belonging to a user
@@ -27,18 +26,6 @@ type Instance struct {
 }
 
 type Instances []Instance
-
-func CreateDummyInstance() (*Instance, error) {
-	instance := &Instance{
-		ID:   uuid.New().String(),
-		Name: "LAWS200 Wānanga",
-	}
-	err := instance.Save()
-	if err != nil {
-		return nil, err
-	}
-	return instance, nil
-}
 
 func (i *Instance) Save() error {
 	ctx := context.Background()
@@ -80,7 +67,6 @@ func FindAllInstances(userId string) (Instances, error) {
 
 // FindInstanceByID finds an instance by ID
 func FindInstanceByID(id string) (*Instance, error) {
-	CreateDummyInstance()
 	ctx := context.Background()
 	instance := &Instance{}
 	err := db.NewSelect().
@@ -292,4 +278,10 @@ func generatePosterPage(pdf *fpdf.Fpdf, location *Location, instance *Instance, 
 	pdf.SetY(240)
 	pdf.SetX((210 - 130) / 2)
 	pdf.MultiCell(130, 10, reminderText, fpdf.BorderNone, fpdf.AlignCenter, false)
+
+	// Add the date to the bottom of the poster in small text
+	pdf.SetFont("OpenSans", "", 10)
+	pdf.SetY(270)
+	pdf.SetX((210 - pdf.GetStringWidth("4th March")) / 2)
+	pdf.Cell(0, 0, "4th March")
 }

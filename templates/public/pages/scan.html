@@ -47,33 +47,12 @@
     </h2>
   </div>
   <div class="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
-    {{ template "flash" .messages }}
     <form
       class="space-y-6"
       method="post"
     >
-      <div>
-        <label
-          class="form-control w-full"
-          for="location"
-          ><div class="label font-bold">
-            <span class="label-text">Location code</span>
-          </div>
-          <input
-            id="location"
-            name="location"
-            type="text"
-            maxlength="6"
-            value="{{.code}}"
-            class="input input-bordered text-center input-lg w-full uppercase font-mono text-2xl tracking-widest"
-            {{
-            if
-            .blocked
-            }}disabled{{
-            end
-            }}
-        /></label>
-      </div>
+      <p class="text-center text-3xl pb-3">{{ .location.Name }}</p>
+      {{ template "flash" .messages }} {{ if not .blocked }}
       <div>
         <label
           class="form-control w-full"
@@ -125,6 +104,7 @@
         </p>
         {{ end }}
       </div>
+      {{ end }}
     </form>
   </div>
 </div>

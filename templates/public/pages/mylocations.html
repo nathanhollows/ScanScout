@@ -6,43 +6,30 @@
     </h2>
   </div>
   <div class="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
-    {{ template "flash" .messages }} {{ if .locations }}
+    {{ template "flash" .messages }} {{ if .team.BlockingLocation.Code }}
+    <p class="text-center mb-5">
+      You are currently scanned into
+      <a
+        href="/mylocations/{{ .team.BlockingLocation.Code }}"
+        class="link"
+        >{{ .team.BlockingLocation.Name }}</a
+      >.
+    </p>
+    {{ end }} {{ if .team }}
     <ul class="list-none text-center mb-5">
-      {{ range .locations }}
+      {{ range .team.Scans }} {{ if ne .Location.Code
+      $.team.BlockingLocation.Code }}
       <li class="">
         <a
-          href="/mylocations/{{ .Code }}"
+          href="/mylocations/{{ .Location.Code }}"
           class="link"
         >
-          {{ .Name }}
+          {{ .Location.Name }}
         </a>
       </li>
-      {{ end }}
+      {{ end }} {{ end }}
     </ul>
     {{ end }}
-    <p class="text-center">
-      <a
-        href="/s"
-        class="btn btn-ghost btn-outline mt-5"
-      >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="24"
-          height="24"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          class="lucide lucide-arrow-left"
-        >
-          <path d="m12 19-7-7 7-7" />
-          <path d="M19 12H5" />
-        </svg>
-        Scan another</a
-      >
-    </p>
   </div>
+  {{ end }}
 </div>
-{{ end }}
