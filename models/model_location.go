@@ -37,6 +37,7 @@ func FindAllLocations() ([]*Location, error) {
 	var locations []*Location
 	err := db.NewSelect().
 		Model(&locations).
+		Order("name ASC").
 		Scan(context.Background())
 	if err != nil {
 		log.Error(err)
@@ -94,6 +95,7 @@ func (l *Location) Save() error {
 
 // LogScan creates a new scan entry for the location if it's valid
 func (l *Location) LogScan(teamCode string) error {
+	teamCode = strings.ToUpper(teamCode)
 	// Check if a team exists with the code
 	team, err := FindTeamByCode(teamCode)
 	if err != nil || team == nil {
@@ -128,6 +130,7 @@ func (l *Location) LogScan(teamCode string) error {
 
 func (l *Location) LogScanOut(teamCode string) error {
 	// Find the open scan
+	teamCode = strings.ToUpper(teamCode)
 	scan, err := FindScan(teamCode, l.Code)
 	if err != nil {
 		return err

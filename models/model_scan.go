@@ -2,6 +2,7 @@ package models
 
 import (
 	"context"
+	"strings"
 	"time"
 
 	"github.com/charmbracelet/log"
@@ -37,6 +38,8 @@ func (s *Scan) Save() error {
 
 // FindScan finds a scan by team and location
 func FindScan(teamCode, locationCode string) (*Scan, error) {
+	teamCode = strings.ToUpper(teamCode)
+	locationCode = strings.ToUpper(locationCode)
 	var scan Scan
 	err := db.NewSelect().Model(&scan).Where("team_id = ?", teamCode).Where("location_id = ?", locationCode).Scan(context.Background())
 	if err != nil {

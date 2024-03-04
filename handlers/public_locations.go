@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"net/http"
+	"strings"
 
 	"github.com/charmbracelet/log"
 	"github.com/go-chi/chi"
@@ -17,11 +18,15 @@ func publicMyLocationsHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Get the team code from the session
 	session, _ := sessions.Get(r, "scanscout")
-	teamCode := session.Values["team"]
+	teamCode := ""
+	tcode := session.Values["team"]
+	if tcode != nil {
+		teamCode = strings.ToUpper(tcode.(string))
+	}
 	var team *models.Team
 	var err error
-	if teamCode != nil {
-		team, err = models.FindTeamByCode(teamCode.(string))
+	if teamCode != "" {
+		team, err = models.FindTeamByCode(teamCode)
 		if err == nil {
 			data["team"] = team
 		} else {
@@ -47,6 +52,7 @@ func publicMyLocationsHandler(w http.ResponseWriter, r *http.Request) {
 func publicSpecificLocationsHandler(w http.ResponseWriter, r *http.Request) {
 	data := templateData(r)
 	locationCode := chi.URLParam(r, "code")
+	locationCode = strings.ToUpper(locationCode)
 	data["code"] = locationCode
 
 	// Get the list of locations from the session

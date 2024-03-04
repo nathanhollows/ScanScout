@@ -58,13 +58,13 @@
       You may choose any of the following locations. Use the map below to help
       find where you want to go.
     </p>
-      {{ range .locations }}
+    {{ range .locations }}
     <p class="text-center pb-3">
-      <em> {{ .Name }}</em> <br><span class="badge badge-ghost">
+      <em> {{ .Name }}</em> <br /><span class="badge badge-ghost">
         {{ .CurrentCount }} Teams Visiting
       </span>
     </p>
-      {{ end }}
+    {{ end }}
     <div
       id="map"
       class="w-full h-96 rounded-lg shadow-lg mt-5"
@@ -72,43 +72,38 @@
   </div>
 </div>
 <script>
- coords = [170.5111643, -45.8650509]
- zoom = 14
- {{ if .location.Longitude }}
- coords = [{{ .location.Longitude }}, {{ .location.Latitude }}]
- zoom = 18
- {{ end }}
+  coords = [170.5111643, -45.8650509]
+  zoom = 14
+  {{ if .location.Longitude }}
+  coords = [{{ .location.Longitude }}, {{ .location.Latitude }}]
+  zoom = 18
+  {{ end }}
 
- mapboxgl.accessToken = 'pk.eyJ1IjoibmF0aGFuaG9sbG93cyIsImEiOiJjbHN6YmpleHEwbWRpMnFyb3JwMHpjZWx3In0.ZizoPaB-7dh-SthWBD2dBw';
- var map = new mapboxgl.Map({
-      container: 'map',
-      style: 'mapbox://styles/nathanhollows/clszboe2y005i01oid8ca37jm',
-      center: coords,
-      zoom: zoom
- });
+  mapboxgl.accessToken = 'pk.eyJ1IjoibmF0aGFuaG9sbG93cyIsImEiOiJjbHN6YmpleHEwbWRpMnFyb3JwMHpjZWx3In0.ZizoPaB-7dh-SthWBD2dBw';
+  var map = new mapboxgl.Map({
+       container: 'map',
+       style: 'mapbox://styles/nathanhollows/clszboe2y005i01oid8ca37jm',
+       center: coords,
+       zoom: zoom
+  });
 
- let markerArray = []
- let marker; // Declare marker variable outside the loop
+  let markerArray = []
+  let marker; // Declare marker variable outside the loop
 
- {{ range .locations }}
- marker = new mapboxgl.Marker()
-    .setLngLat([{{ .Lng }}, {{ .Lat }}]);
- marker.addTo(map);
- markerArray.push(marker);
- {{ end }}
+  {{ range .locations }}
+  marker = new mapboxgl.Marker()
+     .setLngLat([{{ .Lng }}, {{ .Lat }}]);
+  marker.addTo(map);
+  markerArray.push(marker);
+  {{ end }}
 
- // Calculate the bounds
- let bounds = new mapboxgl.LngLatBounds();
- markerArray.forEach(function(marker) {
-    bounds.extend(marker.getLngLat());
- });
-
- // Fit the map to the bounds
- map.fitBounds(bounds, { padding: 50 });
-</script>
+  // Calculate the bounds
+  let bounds = new mapboxgl.LngLatBounds();
+  markerArray.forEach(function(marker) {
+     bounds.extend(marker.getLngLat());
   });
 
   // Fit the map to the bounds
-  map.fitBounds(bounds, { padding: 100 });
+  map.fitBounds(bounds, { padding: 50 });
 </script>
 {{ end }}

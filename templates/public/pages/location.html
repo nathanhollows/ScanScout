@@ -8,7 +8,7 @@
   <div class="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
     {{ template "flash" .messages }}
 
-    <p class="text-center">{{ .location.Content }}</p>
+    <div class="prose">{{ md .location.Content }}</div>
     <p class="text-center mt-10">
       <a
         href="/mylocations"

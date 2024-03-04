@@ -12,6 +12,7 @@ import (
 
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
+	"github.com/gomarkdown/markdown"
 	"github.com/nathanhollows/ScanScout/filesystem"
 	"github.com/nathanhollows/ScanScout/flash"
 	"github.com/nathanhollows/ScanScout/sessions"
@@ -191,6 +192,10 @@ var funcs = template.FuncMap{
 		}
 		return float32(a) / float32(b)
 	},
+	"nl2br": func(s string) template.HTML {
+		// Replace newlines with <br> tags
+		return template.HTML(strings.Replace(s, "\n", "<br>", -1))
+	},
 	"progress": func(a, b int) float32 {
 		if a == 0 || b == 0 {
 			return 0
@@ -219,6 +224,11 @@ var funcs = template.FuncMap{
 	"toDuration": func(seconds float64) string {
 		return time.Duration(int(seconds) * int(time.Second)).String()
 
+	},
+	"md": func(s string) template.HTML {
+		// Convert markdown to HTML
+		content := []byte(s)
+		return template.HTML(markdown.ToHTML(content, nil, nil))
 	},
 }
 

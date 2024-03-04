@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"hash/fnv"
 	"math/rand"
+	"strings"
 
 	"github.com/charmbracelet/log"
 	"github.com/nathanhollows/ScanScout/helpers"
@@ -34,6 +35,7 @@ func FindAllTeams() (Teams, error) {
 // FindTeamByCode returns a team by code
 func FindTeamByCode(code string) (*Team, error) {
 	ctx := context.Background()
+	code = strings.ToUpper(code)
 	var team Team
 	err := db.NewSelect().Model(&team).Where("team.code = ?", code).
 		Relation("Scans").
@@ -45,6 +47,7 @@ func FindTeamByCode(code string) (*Team, error) {
 
 // FindTeamByCodeAndInstance returns a team by code
 func FindTeamByCodeAndInstance(code, instance string) (*Team, error) {
+	code = strings.ToUpper(code)
 	ctx := context.Background()
 	var team Team
 	err := db.NewSelect().Model(&team).Where("team.code = ? and team.instance_id = ?", code, instance).
@@ -140,4 +143,74 @@ func (t *Team) Update() error {
 	ctx := context.Background()
 	_, err := db.NewUpdate().Model(t).WherePK().Exec(ctx)
 	return err
+}
+
+// TeamActivityOverview returns a list of teams and their activity
+func TeamActivityOverview() ([]map[string]interface{}, error) {
+	ctx := context.Background()
+
+	// Get all locations
+	locations, err := FindAllLocations()
+	if err != nil {
+		return nil, err
+	}
+
+	// Query all teams which have visited a location
+	var teams Teams
+	err = db.NewSelect().Model(&teams).
+		Relation("Scans").
+		Order("team.code ASC").
+		Scan(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	// Construct an array of team activity
+	// Each team has a list of every location, and a duration of time spent at each location
+	// For each location we also mark if the team has visited it, is currently visiting it, or has not visited it
+	// The duration is calculated by the time between TimeIn and TimeOut
+	// If TimeOut is not set, the duration is calculated by the time between TimeIn and now
+	// If TimeIn is not set, the duration is 0
+	count := 0
+	for _, team := range teams {
+		if len(team.Scans) > 0 {
+			count++
+		}
+	}
+	activity := make([]map[string]interface{}, count)
+	count = 0
+	for _, team := range teams {
+		if len(team.Scans) == 0 {
+			continue
+		}
+		activity[count] = make(map[string]interface{})
+		activity[count]["team"] = team
+		activity[count]["locations"] = make([]map[string]interface{}, len(locations))
+		for j, location := range locations {
+			activity[count]["locations"].([]map[string]interface{})[j] = make(map[string]interface{})
+			activity[count]["locations"].([]map[string]interface{})[j]["location"] = location
+			activity[count]["locations"].([]map[string]interface{})[j]["visited"] = false
+			activity[count]["locations"].([]map[string]interface{})[j]["visiting"] = false
+			activity[count]["locations"].([]map[string]interface{})[j]["duration"] = 0
+			activity[count]["locations"].([]map[string]interface{})[j]["time_in"] = ""
+			activity[count]["locations"].([]map[string]interface{})[j]["time_out"] = ""
+		}
+		for _, scan := range team.Scans {
+			for j, location := range locations {
+				if scan.LocationID == location.Code {
+					activity[count]["locations"].([]map[string]interface{})[j]["visited"] = true
+					activity[count]["locations"].([]map[string]interface{})[j]["time_in"] = scan.TimeIn
+					if scan.TimeOut.IsZero() {
+						activity[count]["locations"].([]map[string]interface{})[j]["visiting"] = true
+					} else {
+						activity[count]["locations"].([]map[string]interface{})[j]["time_out"] = scan.TimeOut
+						activity[count]["locations"].([]map[string]interface{})[j]["duration"] = scan.TimeOut.Sub(scan.TimeIn).Seconds()
+					}
+				}
+			}
+		}
+		count++
+	}
+
+	return activity, err
 }

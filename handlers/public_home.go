@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"net/http"
+	"strings"
 
 	"github.com/charmbracelet/log"
 	"github.com/nathanhollows/ScanScout/flash"
@@ -15,9 +16,13 @@ func publicHomeHandler(w http.ResponseWriter, r *http.Request) {
 
 	session, _ := sessions.Get(r, "scanscout")
 	teamCode := session.Values["team"]
+	if teamCode == nil {
+		teamCode = ""
+	}
+	teamCode = strings.ToUpper(teamCode.(string))
 	var team *models.Team
 	var err error
-	if teamCode != nil {
+	if teamCode != "" {
 		team, err = models.FindTeamByCode(teamCode.(string))
 		if err == nil {
 			data["team"] = team

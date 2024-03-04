@@ -16,6 +16,7 @@ import (
 func publicScanHandler(w http.ResponseWriter, r *http.Request) {
 	data := templateData(r)
 	code := chi.URLParam(r, "code")
+	code = strings.ToUpper(code)
 	data["code"] = code
 
 	location, err := models.FindLocationByCode(code)
@@ -31,10 +32,14 @@ func publicScanHandler(w http.ResponseWriter, r *http.Request) {
 	data["location"] = location
 
 	session, _ := sessions.Get(r, "scanscout")
-	teamCode := session.Values["team"]
+	teamCode := ""
+	tcode := session.Values["team"]
+	if tcode != nil {
+		teamCode = strings.ToUpper(tcode.(string))
+	}
 	var team *models.Team
-	if teamCode != nil {
-		team, err = models.FindTeamByCode(teamCode.(string))
+	if teamCode != "" {
+		team, err = models.FindTeamByCode(teamCode)
 		if err == nil {
 			data["team"] = team
 		} else {
@@ -48,7 +53,7 @@ func publicScanHandler(w http.ResponseWriter, r *http.Request) {
 			flash.Message{
 				Style:   "warning",
 				Title:   "You are already scanned in.",
-				Message: fmt.Sprint("You need to scan out at ", team.BlockingLocation.Name, " before scanning in elsewhere."),
+				Message: fmt.Sprint("You need to scan out at ", team.BlockingLocation.Name, "."),
 			}.Save(w, r)
 			data["blocked"] = true
 		} else if code == team.MustScanOut {
@@ -64,7 +69,7 @@ func publicScanHandler(w http.ResponseWriter, r *http.Request) {
 			flash.Message{
 				Style:   "warning",
 				Title:   "You are already scanned in.",
-				Message: fmt.Sprint("You need to scan out at ", team.BlockingLocation.Name, " before scanning in elsewhere."),
+				Message: fmt.Sprint("You need to scan out at ", team.BlockingLocation.Name, "."),
 			}.Save(w, r)
 			data["blocked"] = true
 		}
@@ -95,7 +100,7 @@ func publicScanPostHandler(w http.ResponseWriter, r *http.Request) {
 	// Check if a team exists with the code
 	teamCode := r.FormValue("team")
 	teamCode = strings.ToUpper(teamCode)
-	team, err := models.FindTeamByCodeAndInstance(teamCode, location.InstanceID)
+	team, err := models.FindTeamByCode(teamCode)
 	if err != nil || team == nil {
 		flash.Message{
 			Style:   "warning",
@@ -199,7 +204,7 @@ func publicScanPostHandler(w http.ResponseWriter, r *http.Request) {
 func publicScanOutHandler(w http.ResponseWriter, r *http.Request) {
 	data := templateData(r)
 	code := chi.URLParam(r, "code")
-	data["code"] = code
+	code = strings.ToUpper(code)
 
 	location, err := models.FindLocationByCode(code)
 	if err != nil {
@@ -215,8 +220,23 @@ func publicScanOutHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Get the team code from the session
 	session, _ := sessions.Get(r, "scanscout")
-	teamCode := session.Values["team"]
-	team, err := models.FindTeamByCode(teamCode.(string))
+	teamCode := ""
+	sessionCode := session.Values["team"]
+	if sessionCode != nil {
+		teamCode = sessionCode.(string)
+	}
+	teamCode = strings.ToUpper(teamCode)
+
+	if teamCode == "" {
+		flash.Message{
+			Style:   "warning",
+			Title:   "Team code not found.",
+			Message: "Please double check the code and try again.",
+		}.Save(w, r)
+		http.Redirect(w, r, "/", http.StatusFound)
+		return
+	}
+	team, err := models.FindTeamByCode(teamCode)
 	if err == nil {
 		data["team"] = team
 	} else {
@@ -236,7 +256,7 @@ func publicScanOutHandler(w http.ResponseWriter, r *http.Request) {
 			flash.Message{
 				Style:   "warning",
 				Title:   "You are scanned in elsewhere.",
-				Message: fmt.Sprint("You need to scan out at ", team.BlockingLocation.Name, " before scanning anywhere else."),
+				Message: fmt.Sprint("You need to scan out at ", team.BlockingLocation.Name, "."),
 			}.Save(w, r)
 			data["blocked"] = true
 		}
@@ -292,7 +312,7 @@ func publicScanOutPostHandler(w http.ResponseWriter, r *http.Request) {
 		flash.Message{
 			Style:   "warning",
 			Title:   "You are scanned in elsewhere.",
-			Message: fmt.Sprint("You need to scan out at ", team.BlockingLocation.Name, " before scanning anywhere else."),
+			Message: fmt.Sprint("You need to scan out at ", team.BlockingLocation.Name, "."),
 		}.Save(w, r)
 		http.Redirect(w, r, "/mylocations", http.StatusFound)
 		return

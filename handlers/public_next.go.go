@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"net/http"
+	"strings"
 
 	"github.com/charmbracelet/log"
 	"github.com/nathanhollows/ScanScout/flash"
@@ -13,30 +14,39 @@ import (
 func publicNextHandler(w http.ResponseWriter, r *http.Request) {
 	data := templateData(r)
 
+	// Get the team code
+	teamCode := ""
 	session, _ := sessions.Get(r, "scanscout")
-	teamCode := session.Values["team"]
-
-	if teamCode == nil {
+	if r.Method == "POST" {
 		r.ParseForm()
 		teamCode = r.Form.Get("team")
-		if teamCode == "" {
-			flash.Message{
-				Style:   "warning",
-				Title:   "No team code found.",
-				Message: "Please enter your team code and try again.",
-			}.Save(w, r)
-			http.Redirect(w, r, "/", http.StatusFound)
-			return
-		} else {
-			session.Values["team"] = teamCode
-			session.Save(r, w)
+	} else {
+		code := session.Values["team"]
+		if code != nil {
+			teamCode = code.(string)
 		}
 	}
+	teamCode = strings.ToUpper(teamCode)
 
+	// If no team code is found, redirect to the home page
+	if teamCode == "" {
+		flash.Message{
+			Style:   "warning",
+			Title:   "No team code found.",
+			Message: "Please enter your team code and try again.",
+		}.Save(w, r)
+		http.Redirect(w, r, "/", http.StatusFound)
+		return
+	} else {
+		session.Values["team"] = teamCode
+		session.Save(r, w)
+	}
+
+	// Get the team
 	var team *models.Team
 	var err error
-	if teamCode != nil {
-		team, err = models.FindTeamByCode(teamCode.(string))
+	if teamCode != "" {
+		team, err = models.FindTeamByCode(teamCode)
 		if err == nil {
 			data["team"] = team
 		} else {
@@ -51,8 +61,16 @@ func publicNextHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	data["locations"] = team.SuggestNextLocations(3)
+	// If team is currently blocked, then show an alert
+	if team.MustScanOut != "" {
+		flash.Message{
+			Style:   "info",
+			Title:   "You are already scanned in.",
+			Message: "You must scan out of " + team.BlockingLocation.Name + " before you can scan in to your next location.",
+		}.Save(w, r)
+	}
 
+	data["locations"] = team.SuggestNextLocations(3)
 	data["messages"] = flash.Get(w, r)
 	render(w, data, false, "next")
 }
