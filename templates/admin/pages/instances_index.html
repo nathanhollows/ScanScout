@@ -3,7 +3,7 @@
   <h1 class="text-2xl p-5 font-bold">Instances</h1>
 
   <button
-    class="btn btn-secondary"
+    class="btn btn-primary"
     onclick="my_modal_1.showModal()"
   >
     Create a new instance
@@ -26,12 +26,12 @@
         <td>
           <a
             href="/admin/instances/{{ .ID }}/edit"
-            class="btn btn-primary btn-sm"
-            >Edit</a
-          >
+            class="btn btn-sm"
+            >Edit</a>
+
           <a
             href="/admin/instances/{{ .ID }}/delete"
-            class="btn btn-danger btn-sm"
+            class="btn btn-warning btn-sm"
             >Delete</a
           >
         </td>
@@ -42,5 +42,34 @@
 </div>
 {{ else }}
 <p class="py-4">No instances to show.</p>
-{{ end }} {{ template "modal" . }} {{ end }} {{ define "modal" }} {{ template
-"flash" .messages }} {{ end }}
+{{ end }} 
+
+{{ template "modal" . }} 
+<dialog id="my_modal_1" class="modal">
+  <div class="modal-box">
+    <form method="post" action="/admin/instances/new">
+      <h3 class="text-lg font-bold">Create a new instance</h3>
+      <label class="form-control w-full">
+        <div class="label">
+          <span class="label-text">What is the name of the new instance?</span>
+        </div>
+        <input type="text" class="input input-bordered w-full" name="name" />
+      </label>
+      <div class="modal-action">
+        <button
+          class="btn"
+          onclick="my_modal_1.close()"
+        > 
+          Nevermind
+        </button>
+        <button type="submit" class="btn btn-primary">Save</button>
+      </div>
+    </form>
+  </div>
+</dialog>
+{{ end }} 
+
+{{ define "modal" }} 
+{{ template
+"flash" .messages }} 
+{{ end }}

@@ -95,8 +95,7 @@ func createRoutes() {
 
 		r.Route("/instances", func(r chi.Router) {
 			r.Get("/", adminInstancesHandler)
-			r.Get("/new", adminInstancesHandler)
-			r.Post("/new", adminInstancesHandler)
+			r.Post("/new", adminInstanceCreateHandler)
 			r.Get("/{id}", adminInstancesHandler)
 			r.Post("/{id}", adminInstancesHandler)
 		})

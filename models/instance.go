@@ -9,6 +9,7 @@ import (
 
 	"github.com/charmbracelet/log"
 	"github.com/go-pdf/fpdf"
+	"github.com/google/uuid"
 )
 
 // Instance represents a single planned activity belonging to a user
@@ -18,7 +19,7 @@ type Instance struct {
 
 	ID                string            `bun:",pk,type:varchar(36)" json:"id"`
 	Name              string            `bun:",type:varchar(255)" json:"name"`
-	UserId            string            `bun:",type:varchar(36)" json:"user_id"`
+	UserID            string            `bun:",type:varchar(36)" json:"user_id"`
 	User              User              `bun:"rel:has-one,join:user_id=user_id" json:"user"`
 	Teams             Teams             `bun:"rel:has-many,join:id=instance_id" json:"teams"`
 	InstanceLocations InstanceLocations `bun:"rel:has-many,join:id=instance_id" json:"instance_locations"`
@@ -29,6 +30,9 @@ type Instances []Instance
 
 func (i *Instance) Save() error {
 	ctx := context.Background()
+	if i.ID == "" {
+		i.ID = uuid.New().String()
+	}
 	_, err := db.NewInsert().Model(i).Exec(ctx)
 	if err != nil {
 		return err
