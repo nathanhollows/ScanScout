@@ -37,3 +37,13 @@ func adminAuthMiddleware(next http.Handler) http.Handler {
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
+
+// Get user from context
+func GetUserFromContext(r *http.Request) *models.User {
+	ctxKey := userContextKey("user")
+	user, ok := r.Context().Value(ctxKey).(*models.User)
+	if !ok {
+		return nil
+	}
+	return user
+}
