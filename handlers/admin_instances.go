@@ -155,13 +155,13 @@ func adminInstanceSwitchHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Redirect to the instances page
+	// Redirect to user back to the previous page
 	flash.Message{
 		Title:   "Success",
 		Message: "You are now using " + instance.Name + " as your current instance",
 		Style:   flash.Success,
 	}.Save(w, r)
-	http.Redirect(w, r, "/admin/instances", http.StatusSeeOther)
+	http.Redirect(w, r, r.Header.Get("Referer"), http.StatusSeeOther)
 	return
 
 }
