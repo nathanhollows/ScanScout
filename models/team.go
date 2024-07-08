@@ -14,8 +14,9 @@ import (
 
 type Team struct {
 	baseModel
-	belongsToInstance
 
+	InstanceID       string   `bun:",notnull" json:"instance_id"`
+	Instance         Instance `bun:"rel:has-one,join:instance_id=id" json:"instance"`
 	Code             string   `bun:",unique,pk" json:"code"`
 	Scans            Scans    `bun:"rel:has-many,join:code=team_id" json:"scans"`
 	MustScanOut      string   `bun:"" json:"must_scan_out"`

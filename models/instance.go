@@ -16,13 +16,13 @@ import (
 type Instance struct {
 	baseModel
 
-	ID        string    `bun:",pk,type:varchar(36)" json:"id"`
-	Name      string    `bun:",type:varchar(255)" json:"name"`
-	UserId    string    `bun:",type:varchar(36)" json:"user_id"`
-	User      User      `bun:"rel:has-one,join:user_id=user_id" json:"user"`
-	Teams     Teams     `bun:"rel:has-many,join:id=instance_id" json:"teams"`
-	Locations Locations `bun:"rel:has-many,join:id=instance_id" json:"locations"`
-	Scans     Scans     `bun:"rel:has-many,join:id=instance_id" json:"scans"`
+	ID                string            `bun:",pk,type:varchar(36)" json:"id"`
+	Name              string            `bun:",type:varchar(255)" json:"name"`
+	UserId            string            `bun:",type:varchar(36)" json:"user_id"`
+	User              User              `bun:"rel:has-one,join:user_id=user_id" json:"user"`
+	Teams             Teams             `bun:"rel:has-many,join:id=instance_id" json:"teams"`
+	InstanceLocations InstanceLocations `bun:"rel:has-many,join:id=instance_id" json:"instance_locations"`
+	Scans             Scans             `bun:"rel:has-many,join:id=instance_id" json:"scans"`
 }
 
 type Instances []Instance
@@ -218,11 +218,11 @@ func (i *Instance) GeneratePosters() (string, error) {
 	pdf.AddUTF8Font("ArchivoBlack", "", "./assets/fonts/ArchivoBlack-Regular.ttf")
 	pdf.AddUTF8Font("OpenSans", "", "./assets/fonts/OpenSans.ttf")
 
-	for _, location := range i.Locations {
-		location.GenerateQRCode()
-		generatePosterPage(pdf, location, i, true)
-		if location.MustScanOut {
-			generatePosterPage(pdf, location, i, false)
+	for _, location := range i.InstanceLocations {
+		location.Location.GenerateQRCode()
+		generatePosterPage(pdf, &location.Location, i, true)
+		if location.Location.MustScanOut {
+			generatePosterPage(pdf, &location.Location, i, false)
 		}
 	}
 

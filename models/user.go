@@ -3,18 +3,22 @@ package models
 import (
 	"context"
 	"errors"
+	"net/http"
 
 	"github.com/charmbracelet/log"
+	"github.com/nathanhollows/ScanScout/sessions"
 	"golang.org/x/crypto/bcrypt"
 )
 
 type User struct {
 	baseModel
 
-	UserID    string    `bun:",pk,type:varchar(36)" json:"user_id"`
-	Email     string    `bun:",unique,pk" json:"email"`
-	Password  string    `bun:",type:varchar(255)" json:"password"`
-	Instances Instances `bun:"rel:has-many,join:user_id=user_id" json:"instances"`
+	UserID            string    `bun:",pk,type:varchar(36)" json:"user_id"`
+	Email             string    `bun:",unique,pk" json:"email"`
+	Password          string    `bun:",type:varchar(255)" json:"password"`
+	Instances         Instances `bun:"rel:has-many,join:user_id=user_id" json:"instances"`
+	CurrentInstanceId string    `bun:",type:varchar(36)" json:"current_instance_id"`
+	CurrentInstance   *Instance `bun:"rel:has-one,join:current_instance_id=id" json:"current_instance"`
 }
 
 type Users []*User
@@ -50,7 +54,27 @@ func FindUserByEmail(email string) (*User, error) {
 	ctx := context.Background()
 	// Find the user by email
 	user := &User{}
-	err := db.NewSelect().Model(user).Where("email = ?", email).Scan(ctx)
+	err := db.NewSelect().
+		Model(user).
+		Where("email = ?", email).
+		Relation("CurrentInstance").
+		Scan(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return user, nil
+}
+
+// FindUserByID finds a user by their user id
+func FindUserByID(userID string) (*User, error) {
+	ctx := context.Background()
+	// Find the user by user id
+	user := &User{}
+	err := db.NewSelect().
+		Model(user).
+		Where("User.user_id = ?", userID).
+		Relation("CurrentInstance").
+		Scan(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -75,4 +99,27 @@ func hashAndSalt(password string) string {
 	}
 
 	return string(hash)
+}
+
+// FindUserBySession finds the user by the session
+func FindUserBySession(r *http.Request) (*User, error) {
+	// Get the session
+	session, err := sessions.Get(r, "admin")
+	if err != nil {
+		return nil, err
+	}
+
+	// Get the user id from the session
+	userID, ok := session.Values["user_id"].(string)
+	if !ok {
+		return nil, errors.New("User not found")
+	}
+
+	// Find the user by the user id
+	user, err := FindUserByID(userID)
+	if err != nil {
+		return nil, err
+	}
+
+	return user, nil
 }

@@ -195,7 +195,7 @@ func publicScanPostHandler(w http.ResponseWriter, r *http.Request) {
 		session.Values["locations"] = append(session.Values["locations"].([]string), locationCode)
 	}
 	session.Values["team"] = teamCode
-	session.Values["instance"] = location.InstanceID
+	// session.Values["instance"] = location.InstanceID
 	session.Save(r, w)
 
 	http.Redirect(w, r, "/mylocations/"+locationCode, http.StatusFound)

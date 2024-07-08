@@ -1,0 +1,46 @@
+{{ define "content" }}
+<div class="flex flex-row justify-between items-center w-full py-5">
+  <h1 class="text-2xl p-5 font-bold">Instances</h1>
+
+  <button
+    class="btn btn-secondary"
+    onclick="my_modal_1.showModal()"
+  >
+    Create a new instance
+  </button>
+</div>
+
+{{ if .instances }}
+<div class=":">
+  <table class="table">
+    <thead>
+      <tr>
+        <th class="text-left">Name</th>
+        <th class="text-left">Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {{ range .instances }}
+      <tr>
+        <td>{{ .Name }}</td>
+        <td>
+          <a
+            href="/admin/instances/{{ .ID }}/edit"
+            class="btn btn-primary btn-sm"
+            >Edit</a
+          >
+          <a
+            href="/admin/instances/{{ .ID }}/delete"
+            class="btn btn-danger btn-sm"
+            >Delete</a
+          >
+        </td>
+      </tr>
+      {{ end }}
+    </tbody>
+  </table>
+</div>
+{{ else }}
+<p class="py-4">No instances to show.</p>
+{{ end }} {{ template "modal" . }} {{ end }} {{ define "modal" }} {{ template
+"flash" .messages }} {{ end }}

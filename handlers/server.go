@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"context"
 	"fmt"
 	"html/template"
 	"log"
@@ -15,11 +16,14 @@ import (
 	"github.com/gomarkdown/markdown"
 	"github.com/nathanhollows/ScanScout/filesystem"
 	"github.com/nathanhollows/ScanScout/flash"
+	"github.com/nathanhollows/ScanScout/models"
 	"github.com/nathanhollows/ScanScout/sessions"
 )
 
 var router *chi.Mux
 var server *http.Server
+
+type userContextKey string
 
 func Start() {
 
@@ -83,11 +87,19 @@ func createRoutes() {
 			r.Get("/qr/{id}.zip", adminLocationQRZipHandler)
 			r.Get("/posters/{id}.pdf", adminLocationPostersHandler)
 		})
+
 		r.Route("/teams", func(r chi.Router) {
 			r.Get("/", adminTeamsHandler)
 			r.Post("/add", adminTeamsAddHandler)
 		})
-		r.Get("/admin/instances", adminLocationsHandler)
+
+		r.Route("/instances", func(r chi.Router) {
+			r.Get("/", adminInstancesHandler)
+			r.Get("/new", adminInstancesHandler)
+			r.Post("/new", adminInstancesHandler)
+			r.Get("/{id}", adminInstancesHandler)
+			r.Post("/{id}", adminInstancesHandler)
+		})
 	})
 
 	workDir, _ := os.Getwd()
@@ -113,15 +125,29 @@ func adminAuthMiddleware(next http.Handler) http.Handler {
 			http.Redirect(w, r, "/login", http.StatusSeeOther)
 			return
 		}
-		next.ServeHTTP(w, r)
+		// Find the user by the session
+		user, err := models.FindUserBySession(r)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		key := userContextKey("user")
+		ctx := context.WithValue(r.Context(), key, user)
+		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
 
 func templateData(r *http.Request) map[string]interface{} {
-	return map[string]interface{}{
+	ctxKey := userContextKey("user")
+	user, ok := r.Context().Value(userContextKey(ctxKey)).(*models.User)
+	data := map[string]interface{}{
 		"hxrequest": r.Header.Get("HX-Request") == "true",
 		"layout":    "base",
 	}
+	if ok {
+		data["user"] = user
+	}
+	return data
 }
 
 func render(w http.ResponseWriter, data map[string]interface{}, admin bool, patterns ...string) error {
