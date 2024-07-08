@@ -26,14 +26,16 @@ var server *http.Server
 type userContextKey string
 
 func Start() {
-
 	createRoutes()
 
 	server = &http.Server{
 		Addr:    os.Getenv("SERVER_ADDR"),
 		Handler: router,
 	}
-	fmt.Println(server.ListenAndServe())
+	log.Println("Server starting on", os.Getenv("SERVER_ADDR"))
+	if err := server.ListenAndServe(); err != nil {
+		log.Fatalf("Server failed to start: %v", err)
+	}
 }
 
 func createRoutes() {
