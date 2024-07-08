@@ -10,11 +10,11 @@
     <link rel="stylesheet" href="{{ static "/css/tailwind.css" }}" />
     <title>{{ .title }}</title>
     <script
-      src="https://unpkg.com/htmx.org@1.8.5"
-      integrity="sha384-7aHh9lqPYGYZ7sTHvzP1t3BAfLhYSTy9ArHdP3Xsr9/3TlGurYgcPBoFmXX2TX/w"
-      crossorigin="anonymous"
-      defer
-    ></script>
+    src="https://unpkg.com/htmx.org@1.8.5"
+    integrity="sha384-7aHh9lqPYGYZ7sTHvzP1t3BAfLhYSTy9ArHdP3Xsr9/3TlGurYgcPBoFmXX2TX/w"
+    crossorigin="anonymous"
+    defer
+  ></script>
   </head>
   <body>
     <div
@@ -206,7 +206,7 @@
             </button>
             <button
               class="btn btn-ghost btn-circle tooltip tooltip-bottom"
-              data-tip="Change instance"
+              data-tip="Preferences"
               onclick="my_modal_4.showModal()"
             >
               <svg
@@ -251,9 +251,29 @@
         class="modal"
       >
         <div class="modal-box">
-          <h3 class="font-bold text-lg">Change ScanScout instance</h3>
-          <p class="py-4">No other instances to show.</p>
+          <h3 class="font-bold text-lg mb-3">Change ScanScout instance</h3>
+          <ul class="menu bg-base-200 rounded-box w-full">
+            {{ range .instances }}
+              {{ if eq .ID $.user.CurrentInstance.ID }}
+            <li>
+              <span>
+              {{ .Name }}
+              <span class="badge badge-info badge-sm ">Active</span>
+              </span>
+            </li>
+              {{ else }}
+            <li>
+              <a
+                href="/admin/instances/{{ .ID }}/switch"
+              >
+                {{ .Name }}
+              </a>
+            </li>
+              {{ end }}
+              {{ end }}
+          </ul>
           <div class="modal-action">
+            <a href="/admin/instances" class="btn btn-secondary">Manage</a>
             <form method="dialog">
               <button class="btn">Nevermind</button>
             </form>

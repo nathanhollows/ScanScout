@@ -156,6 +156,11 @@ func render(w http.ResponseWriter, data map[string]interface{}, admin bool, patt
 	baseDir := "templates/public/"
 	if admin {
 		baseDir = "templates/admin/"
+		instances, err := models.FindAllInstances(data["user"].(*models.User).UserID)
+		if err != nil {
+			return err
+		}
+		data["instances"] = instances
 	}
 
 	err := parse(data, baseDir, patterns...).ExecuteTemplate(w, "base", data)
