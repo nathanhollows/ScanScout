@@ -220,6 +220,7 @@
                 stroke-linecap="round"
                 stroke-linejoin="round"
                 class="lucide lucide-user-round-cog"
+                style="margin-left: 0.9em;"
               >
                 <path d="M2 21a8 8 0 0 1 10.434-7.62" />
                 <circle
@@ -254,23 +255,21 @@
           <h3 class="font-bold text-lg mb-3">Change ScanScout instance</h3>
           <ul class="menu bg-base-200 rounded-box w-full">
             {{ range .instances }}
-              {{ if eq .ID $.user.CurrentInstance.ID }}
+            {{ if eq .ID $.user.CurrentInstance.ID }}
             <li>
               <span>
-              {{ .Name }}
-              <span class="badge badge-info badge-sm ">Active</span>
+                {{ .Name }}
+                <span class="badge badge-info badge-sm ">Active</span>
               </span>
             </li>
-              {{ else }}
+            {{ else }}
             <li>
-              <a
-                href="/admin/instances/{{ .ID }}/switch"
-              >
+              <a href="/admin/instances/{{ .ID }}/switch">
                 {{ .Name }}
               </a>
             </li>
-              {{ end }}
-              {{ end }}
+            {{ end }}
+            {{ end }}
           </ul>
           <div class="modal-action">
             <a href="/admin/instances" class="btn btn-secondary">Manage</a>

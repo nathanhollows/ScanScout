@@ -27,10 +27,14 @@ type Users []*User
 func (u *User) Save() error {
 	ctx := context.Background()
 	_, err := db.NewInsert().Model(u).Exec(ctx)
-	if err != nil {
-		return err
-	}
-	return nil
+	return err
+}
+
+// Update the user in the database
+func (u *User) Update() error {
+	ctx := context.Background()
+	_, err := db.NewUpdate().Model(u).WherePK("user_id").Exec(ctx)
+	return err
 }
 
 // AuthenticateUser checks the user's credentials and returns the user if they are valid

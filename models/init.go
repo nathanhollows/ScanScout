@@ -51,6 +51,8 @@ func InitDB() {
 	))
 
 	var models = []interface{}{
+		(*CompletionCriteria)(nil),
+		(*InstanceLocation)(nil),
 		(*Team)(nil),
 		(*Location)(nil),
 		(*Scan)(nil),

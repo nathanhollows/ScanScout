@@ -98,6 +98,7 @@ func createRoutes() {
 			r.Post("/new", adminInstanceCreateHandler)
 			r.Get("/{id}", adminInstancesHandler)
 			r.Post("/{id}", adminInstancesHandler)
+			r.Get("/{id}/switch", adminInstanceSwitchHandler)
 		})
 	})
 

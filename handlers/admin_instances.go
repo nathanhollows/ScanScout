@@ -1,8 +1,10 @@
 package handlers
 
 import (
+	"fmt"
 	"net/http"
 
+	"github.com/go-chi/chi"
 	"github.com/nathanhollows/ScanScout/flash"
 	"github.com/nathanhollows/ScanScout/models"
 )
@@ -108,5 +110,69 @@ func adminInstanceCreateHandler(w http.ResponseWriter, r *http.Request) {
 		Style:   flash.Success,
 	}.Save(w, r)
 	http.Redirect(w, r, "/admin/instances/"+instance.ID, http.StatusSeeOther)
+}
+
+// adminInstanceSwitchHandler switches the current instance
+func adminInstanceSwitchHandler(w http.ResponseWriter, r *http.Request) {
+	setDefaultHeaders(w)
+	data := templateData(r)
+	data["title"] = "Switch Instance"
+
+	// Get the current user
+	user, ok := data["user"].(*models.User)
+	if !ok || user == nil {
+		flash.Message{
+			Title:   "Error",
+			Message: "User not authenticated",
+			Style:   flash.Error,
+		}.Save(w, r)
+		http.Redirect(w, r, "/login", http.StatusSeeOther)
+		return
+	}
+
+	// Get the instance ID from the URL
+	id := chi.URLParam(r, "id")
+	if id == "" {
+		flash.Message{
+			Title:   "Error",
+			Message: "Instance ID is required",
+			Style:   flash.Error,
+		}.Save(w, r)
+		http.Redirect(w, r, "/admin/instances", http.StatusSeeOther)
+		return
+	}
+
+	// Find the instance
+	instance, err := models.FindInstanceByID(id)
+	if err != nil {
+		flash.Message{
+			Title:   "Error",
+			Message: "Instance not found",
+			Style:   flash.Error,
+		}.Save(w, r)
+		http.Redirect(w, r, "/admin/instances", http.StatusSeeOther)
+		return
+	}
+
+	// Set the current instance
+	user.CurrentInstanceId = instance.ID
+	if err := user.Update(); err != nil {
+		flash.Message{
+			Title:   "Error",
+			Message: "Error updating user",
+			Style:   flash.Error,
+		}.Save(w, r)
+		http.Redirect(w, r, "/admin/instances", http.StatusSeeOther)
+		return
+	}
+
+	// Redirect to the instances page
+	flash.Message{
+		Title:   "Success",
+		Message: "You are now using " + instance.Name + " as your current instance",
+		Style:   flash.Success,
+	}.Save(w, r)
+	http.Redirect(w, r, "/admin/instances", http.StatusSeeOther)
+	return
 
 }

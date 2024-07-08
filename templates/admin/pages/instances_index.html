@@ -10,6 +10,10 @@
   </button>
 </div>
 
+<div class="flex flex-row justify-between items-center w-full py-5">
+{{ template "flash" .messages }} 
+</div>
+
 {{ if .instances }}
 <div class=":">
   <table class="table">
@@ -70,6 +74,4 @@
 {{ end }} 
 
 {{ define "modal" }} 
-{{ template
-"flash" .messages }} 
 {{ end }}

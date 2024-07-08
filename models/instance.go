@@ -76,7 +76,7 @@ func FindInstanceByID(id string) (*Instance, error) {
 	err := db.NewSelect().
 		Model(instance).
 		Where("id = ?", id).
-		Relation("Locations").
+		Relation("InstanceLocations").
 		Scan(ctx)
 	if err != nil {
 		return nil, err
