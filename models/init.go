@@ -14,6 +14,10 @@ import (
 	"github.com/uptrace/bun/extra/bundebug"
 )
 
+type contextKey string
+
+const UserIDKey contextKey = "userID"
+
 var db *bun.DB
 
 func InitDB() {
@@ -77,4 +81,13 @@ type baseModel struct {
 
 type belongsToInstance struct {
 	InstanceID string `bun:",notnull" json:"instance_id"`
+}
+
+// GetUserFromContext gets the user from the context
+func GetUserFromContext(ctx context.Context) *User {
+	user, ok := ctx.Value(UserIDKey).(*User)
+	if !ok {
+		return nil
+	}
+	return user
 }

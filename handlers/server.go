@@ -11,8 +11,6 @@ import (
 var router *chi.Mux
 var server *http.Server
 
-type userContextKey string
-
 func Start() {
 	createRoutes()
 

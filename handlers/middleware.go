@@ -33,14 +33,7 @@ func adminAuthMiddleware(next http.Handler) http.Handler {
 			return
 		}
 
-		ctx := context.WithValue(r.Context(), userContextKey("user"), user)
+		ctx := context.WithValue(r.Context(), models.UserIDKey, user)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
-}
-
-// Get user from context
-func GetUserFromContext(ctx context.Context) *models.User {
-	// Don't need to check if the key exists because we know it does
-	// Same goes for the type assertion
-	return ctx.Value(userContextKey("user")).(*models.User)
 }

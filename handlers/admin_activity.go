@@ -14,7 +14,7 @@ func adminActivityHandler(w http.ResponseWriter, r *http.Request) {
 	data["title"] = "Activity tracker"
 
 	// Get the list of locations
-	locations, err := models.FindAllLocations()
+	locations, err := models.FindAllLocations(r.Context())
 	if err != nil {
 		log.Error(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -22,8 +22,8 @@ func adminActivityHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	data["locations"] = locations
 
-	// Get the list of activity and their activity
-	activity, err := models.TeamActivityOverview()
+	// Get the list of teams and their activity
+	activity, err := models.TeamActivityOverview(r.Context())
 	if err != nil {
 		log.Error(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)

@@ -16,7 +16,7 @@ func adminLocationsHandler(w http.ResponseWriter, r *http.Request) {
 	data := templateData(r)
 	data["title"] = "Locations"
 
-	locations, err := models.FindAllLocations()
+	locations, err := models.FindAllLocations(r.Context())
 	if err != nil {
 		flash.Message{
 			Title:   "Error",
@@ -174,7 +174,7 @@ func adminLocationQRZipHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	archive, err := instance.ZipQRCodes()
+	archive, err := instance.ZipQRCodes(r.Context())
 	if err != nil {
 		flash.Message{
 			Title:   "Error",
@@ -207,7 +207,7 @@ func adminLocationPostersHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	posters, err := instance.GeneratePosters()
+	posters, err := instance.GeneratePosters(r.Context())
 	if err != nil {
 		log.Error(err)
 		flash.Message{

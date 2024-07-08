@@ -78,6 +78,7 @@ func FindUserByID(userID string) (*User, error) {
 		Model(user).
 		Where("User.user_id = ?", userID).
 		Relation("CurrentInstance").
+		Relation("Instances").
 		Scan(ctx)
 	if err != nil {
 		return nil, err

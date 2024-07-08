@@ -33,12 +33,12 @@ type Location struct {
 type Locations []*Location
 
 // FindAll returns all locations
-func FindAllLocations() ([]*Location, error) {
+func FindAllLocations(ctx context.Context) ([]*Location, error) {
 	var locations []*Location
 	err := db.NewSelect().
 		Model(&locations).
 		Order("name ASC").
-		Scan(context.Background())
+		Scan(ctx)
 	if err != nil {
 		log.Error(err)
 	}

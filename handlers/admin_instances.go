@@ -26,18 +26,8 @@ func adminInstancesHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Get the list of instances
-	instances, err := models.FindAllInstances(user.UserID)
-	if err != nil {
-		flash.Message{
-			Title:   "Error",
-			Message: err.Error(),
-			Style:   flash.Error,
-		}.Save(w, r)
-		http.Redirect(w, r, "/admin", http.StatusSeeOther)
-		return
-	}
-	data["instances"] = instances
+	// NOTE:
+	// Instances are already loaded in the template data
 
 	// Render the template
 	data["messages"] = flash.Get(w, r)

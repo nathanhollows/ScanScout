@@ -147,11 +147,9 @@ func (t *Team) Update() error {
 }
 
 // TeamActivityOverview returns a list of teams and their activity
-func TeamActivityOverview() ([]map[string]interface{}, error) {
-	ctx := context.Background()
-
+func TeamActivityOverview(ctx context.Context) ([]map[string]interface{}, error) {
 	// Get all locations
-	locations, err := FindAllLocations()
+	locations, err := FindAllLocations(ctx)
 	if err != nil {
 		return nil, err
 	}

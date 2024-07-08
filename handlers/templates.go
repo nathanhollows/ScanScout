@@ -15,32 +15,29 @@ import (
 )
 
 func templateData(r *http.Request) map[string]interface{} {
-	ctxKey := userContextKey("user")
-	user, ok := r.Context().Value(ctxKey).(*models.User)
+	user, ok := r.Context().Value(models.UserIDKey).(*models.User)
 	data := map[string]interface{}{
 		"hxrequest": r.Header.Get("HX-Request") == "true",
 		"layout":    "base",
 	}
 	if ok && user != nil {
 		data["user"] = user
+		data["instances"] = user.Instances
 	}
 	return data
 }
 
-func render(w http.ResponseWriter, data map[string]interface{}, admin bool, patterns ...string) error {
+func render(
+	w http.ResponseWriter,
+	data map[string]interface{},
+	admin bool,
+	patterns ...string,
+) error {
 	w.Header().Set("Content-Type", "text/html")
 
 	baseDir := "templates/public/"
 	if admin {
 		baseDir = "templates/admin/"
-		user, ok := data["user"].(*models.User)
-		if ok && user != nil {
-			instances, err := models.FindAllInstances(user.UserID)
-			if err != nil {
-				return err
-			}
-			data["instances"] = instances
-		}
 	}
 
 	err := parse(data, baseDir, patterns...).ExecuteTemplate(w, "base", data)

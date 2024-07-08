@@ -3,6 +3,7 @@ package models
 import (
 	"archive/zip"
 	"context"
+	"errors"
 	"io"
 	"os"
 	"strings"
@@ -59,10 +60,13 @@ func (i *Instance) Delete() error {
 }
 
 // FindAllInstances finds all instances
-func FindAllInstances(userId string) (Instances, error) {
-	ctx := context.Background()
+func FindAllInstances(ctx context.Context) (Instances, error) {
 	instances := Instances{}
-	err := db.NewSelect().Model(&instances).Where("user_id = ?", userId).Scan(ctx)
+	user, ok := ctx.Value(UserIDKey).(*User)
+	if !ok {
+		return nil, errors.New("User not found in context")
+	}
+	err := db.NewSelect().Model(&instances).Where("user_id = ?", user.UserID).Scan(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -84,8 +88,8 @@ func FindInstanceByID(id string) (*Instance, error) {
 	return instance, nil
 }
 
-func (i *Instance) ZipQRCodes() (string, error) {
-	locations, err := FindAllLocations()
+func (i *Instance) ZipQRCodes(ctx context.Context) (string, error) {
+	locations, err := FindAllLocations(ctx)
 	if err != nil {
 		return "", err
 	}
@@ -155,7 +159,7 @@ func (i *Instance) ZipQRCodes() (string, error) {
 	return path, nil
 }
 
-func (i *Instance) ZipPosters() (string, error) {
+func (i *Instance) ZipPosters(ctx context.Context) (string, error) {
 	// Create a zip file
 	path := "./assets/posters/" + i.ID + ".zip"
 	archive, err := os.Create(path)
@@ -170,7 +174,7 @@ func (i *Instance) ZipPosters() (string, error) {
 
 	// Collect the paths
 	var paths []string
-	locations, err := FindAllLocations()
+	locations, err := FindAllLocations(ctx)
 	if err != nil {
 		return "", err
 	}
@@ -216,7 +220,7 @@ func (i *Instance) ZipPosters() (string, error) {
 	return path, nil
 }
 
-func (i *Instance) GeneratePosters() (string, error) {
+func (i *Instance) GeneratePosters(ctx context.Context) (string, error) {
 	// Set up the document
 	pdf := fpdf.New(fpdf.OrientationPortrait, fpdf.UnitMillimeter, fpdf.PageSizeA4, "")
 	pdf.AddUTF8Font("ArchivoBlack", "", "./assets/fonts/ArchivoBlack-Regular.ttf")
