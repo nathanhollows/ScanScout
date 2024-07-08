@@ -1,18 +1,11 @@
 package handlers
 
 import (
-	"fmt"
-	"html/template"
 	"log"
 	"net/http"
 	"os"
-	"path/filepath"
-	"strings"
-	"time"
 
 	"github.com/go-chi/chi"
-	"github.com/gomarkdown/markdown"
-	"github.com/nathanhollows/ScanScout/models"
 )
 
 var router *chi.Mux
