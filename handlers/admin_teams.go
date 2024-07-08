@@ -16,7 +16,7 @@ func adminTeamsHandler(w http.ResponseWriter, r *http.Request) {
 
 	data["messages"] = flash.Get(w, r)
 
-	teams, err := models.FindAllTeams()
+	teams, err := models.FindAllTeams(r.Context())
 	if err != nil {
 		flash.Message{
 			Title:   "Error",
@@ -46,7 +46,7 @@ func adminTeamsAddHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Add the teams
-	err = models.AddTeams(count)
+	err = models.AddTeams(r.Context(), count)
 	if err != nil {
 		flash.Message{
 			Title:   "Error",

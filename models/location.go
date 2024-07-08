@@ -32,19 +32,6 @@ type Location struct {
 
 type Locations []*Location
 
-// FindAll returns all locations
-func FindAllLocations(ctx context.Context) ([]*Location, error) {
-	var locations []*Location
-	err := db.NewSelect().
-		Model(&locations).
-		Order("name ASC").
-		Scan(ctx)
-	if err != nil {
-		log.Error(err)
-	}
-	return locations, err
-}
-
 // FindLocationByCode returns a location by code
 func FindLocationByCode(code string) (*Location, error) {
 	code = strings.ToUpper(code)
@@ -94,10 +81,10 @@ func (l *Location) Save() error {
 }
 
 // LogScan creates a new scan entry for the location if it's valid
-func (l *Location) LogScan(teamCode string) error {
+func (l *Location) LogScan(ctx context.Context, teamCode string) error {
 	teamCode = strings.ToUpper(teamCode)
 	// Check if a team exists with the code
-	team, err := FindTeamByCode(teamCode)
+	team, err := FindTeamByCode(ctx, teamCode)
 	if err != nil || team == nil {
 		return err
 	}
@@ -230,7 +217,8 @@ func saveQRCode(qrc *qrcode.QRCode, path string) error {
 		return err
 	}
 
-	if qrc.Save(w); err != nil {
+	err = qrc.Save(w)
+	if err != nil {
 		fmt.Printf("could not generate QRCode: %v", err)
 		return err
 	} else {

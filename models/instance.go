@@ -89,12 +89,12 @@ func FindInstanceByID(id string) (*Instance, error) {
 }
 
 func (i *Instance) ZipQRCodes(ctx context.Context) (string, error) {
-	locations, err := FindAllLocations(ctx)
+	locations, err := FindAllInstanceLocations(ctx)
 	if err != nil {
 		return "", err
 	}
 	for _, location := range locations {
-		err = location.GenerateQRCode()
+		err = location.Location.GenerateQRCode()
 		if err != nil {
 			return "", err
 		}
@@ -115,9 +115,9 @@ func (i *Instance) ZipQRCodes(ctx context.Context) (string, error) {
 	// Collect the paths
 	var paths []string
 	for _, location := range locations {
-		paths = append(paths, location.getQRFilename(true))
-		if location.MustScanOut {
-			paths = append(paths, location.getQRFilename(false))
+		paths = append(paths, location.Location.getQRFilename(true))
+		if location.Location.MustScanOut {
+			paths = append(paths, location.Location.getQRFilename(false))
 		}
 	}
 
@@ -174,12 +174,12 @@ func (i *Instance) ZipPosters(ctx context.Context) (string, error) {
 
 	// Collect the paths
 	var paths []string
-	locations, err := FindAllLocations(ctx)
+	instanceLocations, err := FindAllInstanceLocations(ctx)
 	if err != nil {
 		return "", err
 	}
-	for _, location := range locations {
-		paths = append(paths, location.getQRFilename(true))
+	for _, instanceLocation := range instanceLocations {
+		paths = append(paths, instanceLocation.Location.getQRFilename(true))
 	}
 
 	// Add each file to the zip

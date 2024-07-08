@@ -17,7 +17,7 @@ type User struct {
 	Email             string    `bun:",unique,pk" json:"email"`
 	Password          string    `bun:",type:varchar(255)" json:"password"`
 	Instances         Instances `bun:"rel:has-many,join:user_id=user_id" json:"instances"`
-	CurrentInstanceId string    `bun:",type:varchar(36)" json:"current_instance_id"`
+	CurrentInstanceID string    `bun:",type:varchar(36)" json:"current_instance_id"`
 	CurrentInstance   *Instance `bun:"rel:has-one,join:current_instance_id=id" json:"current_instance"`
 }
 

@@ -26,19 +26,21 @@ type Team struct {
 type Teams []Team
 
 // FindAll returns all teams
-func FindAllTeams() (Teams, error) {
-	ctx := context.Background()
+func FindAllTeams(ctx context.Context) (Teams, error) {
+	user := GetUserFromContext(ctx)
 	var teams Teams
-	err := db.NewSelect().Model(&teams).Scan(ctx)
+	err := db.NewSelect().
+		Model(&teams).
+		Where("team.instance_id = ?", user.CurrentInstanceID).
+		Scan(ctx)
 	return teams, err
 }
 
 // FindTeamByCode returns a team by code
-func FindTeamByCode(code string) (*Team, error) {
-	ctx := context.Background()
+func FindTeamByCode(ctx context.Context, code string) (*Team, error) {
 	code = strings.ToUpper(code)
 	var team Team
-	err := db.NewSelect().Model(&team).Where("team.code = ?", code).
+	err := db.NewSelect().Model(&team).Where("team.code = ? AND team.instance_id = ?", code).
 		Relation("Scans").
 		Relation("Scans.Location").
 		Relation("BlockingLocation").
@@ -128,12 +130,13 @@ func (t *Team) SuggestNextLocations(limit int) *Locations {
 }
 
 // AddTeams adds the given number of teams
-func AddTeams(count int) error {
-	ctx := context.Background()
+func AddTeams(ctx context.Context, count int) error {
+	user := GetUserFromContext(ctx)
 	teams := make(Teams, count)
 	for i := 0; i < count; i++ {
 		teams[i] = Team{
-			Code: helpers.NewCode(4),
+			Code:       helpers.NewCode(4),
+			InstanceID: user.CurrentInstanceID,
 		}
 	}
 	_, err := db.NewInsert().Model(&teams).Exec(ctx)
@@ -148,8 +151,8 @@ func (t *Team) Update() error {
 
 // TeamActivityOverview returns a list of teams and their activity
 func TeamActivityOverview(ctx context.Context) ([]map[string]interface{}, error) {
-	// Get all locations
-	locations, err := FindAllLocations(ctx)
+	// Get all instanceLocations
+	instanceLocations, err := FindAllInstanceLocations(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -184,8 +187,8 @@ func TeamActivityOverview(ctx context.Context) ([]map[string]interface{}, error)
 		}
 		activity[count] = make(map[string]interface{})
 		activity[count]["team"] = team
-		activity[count]["locations"] = make([]map[string]interface{}, len(locations))
-		for j, location := range locations {
+		activity[count]["locations"] = make([]map[string]interface{}, len(instanceLocations))
+		for j, location := range instanceLocations {
 			activity[count]["locations"].([]map[string]interface{})[j] = make(map[string]interface{})
 			activity[count]["locations"].([]map[string]interface{})[j]["location"] = location
 			activity[count]["locations"].([]map[string]interface{})[j]["visited"] = false
@@ -195,8 +198,8 @@ func TeamActivityOverview(ctx context.Context) ([]map[string]interface{}, error)
 			activity[count]["locations"].([]map[string]interface{})[j]["time_out"] = ""
 		}
 		for _, scan := range team.Scans {
-			for j, location := range locations {
-				if scan.LocationID == location.Code {
+			for j, instanceLocation := range instanceLocations {
+				if scan.LocationID == instanceLocation.Location.Code {
 					activity[count]["locations"].([]map[string]interface{})[j]["visited"] = true
 					activity[count]["locations"].([]map[string]interface{})[j]["time_in"] = scan.TimeIn
 					if scan.TimeOut.IsZero() {

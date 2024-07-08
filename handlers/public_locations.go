@@ -26,7 +26,7 @@ func publicMyLocationsHandler(w http.ResponseWriter, r *http.Request) {
 	var team *models.Team
 	var err error
 	if teamCode != "" {
-		team, err = models.FindTeamByCode(teamCode)
+		team, err = models.FindTeamByCode(r.Context(), teamCode)
 		if err == nil {
 			data["team"] = team
 		} else {

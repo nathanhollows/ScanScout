@@ -14,7 +14,7 @@ func adminActivityHandler(w http.ResponseWriter, r *http.Request) {
 	data["title"] = "Activity tracker"
 
 	// Get the list of locations
-	locations, err := models.FindAllLocations(r.Context())
+	locations, err := models.FindAllInstanceLocations(r.Context())
 	if err != nil {
 		log.Error(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)

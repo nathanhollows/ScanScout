@@ -23,7 +23,7 @@ func publicHomeHandler(w http.ResponseWriter, r *http.Request) {
 	var team *models.Team
 	var err error
 	if teamCode != "" {
-		team, err = models.FindTeamByCode(teamCode.(string))
+		team, err = models.FindTeamByCode(r.Context(), teamCode.(string))
 		if err == nil {
 			data["team"] = team
 		} else {

@@ -16,7 +16,7 @@ func adminLocationsHandler(w http.ResponseWriter, r *http.Request) {
 	data := templateData(r)
 	data["title"] = "Locations"
 
-	locations, err := models.FindAllLocations(r.Context())
+	locations, err := models.FindAllInstanceLocations(r.Context())
 	if err != nil {
 		flash.Message{
 			Title:   "Error",

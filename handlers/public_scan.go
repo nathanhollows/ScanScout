@@ -39,7 +39,7 @@ func publicScanHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	var team *models.Team
 	if teamCode != "" {
-		team, err = models.FindTeamByCode(teamCode)
+		team, err = models.FindTeamByCode(r.Context(), teamCode)
 		if err == nil {
 			data["team"] = team
 		} else {
@@ -100,7 +100,7 @@ func publicScanPostHandler(w http.ResponseWriter, r *http.Request) {
 	// Check if a team exists with the code
 	teamCode := r.FormValue("team")
 	teamCode = strings.ToUpper(teamCode)
-	team, err := models.FindTeamByCode(teamCode)
+	team, err := models.FindTeamByCode(r.Context(), teamCode)
 	if err != nil || team == nil {
 		flash.Message{
 			Style:   "warning",
@@ -164,7 +164,7 @@ func publicScanPostHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Log the scan
-	err = location.LogScan(teamCode)
+	err = location.LogScan(r.Context(), teamCode)
 	if err != nil {
 		flash.Message{
 			Style:   "warning",
@@ -236,7 +236,7 @@ func publicScanOutHandler(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/", http.StatusFound)
 		return
 	}
-	team, err := models.FindTeamByCode(teamCode)
+	team, err := models.FindTeamByCode(r.Context(), teamCode)
 	if err == nil {
 		data["team"] = team
 	} else {
@@ -288,7 +288,7 @@ func publicScanOutPostHandler(w http.ResponseWriter, r *http.Request) {
 	teamCode := r.FormValue("team")
 	teamCode = strings.ToUpper(teamCode)
 
-	team, err := models.FindTeamByCode(teamCode)
+	team, err := models.FindTeamByCode(r.Context(), teamCode)
 	if err != nil {
 		flash.Message{
 			Style:   "warning",

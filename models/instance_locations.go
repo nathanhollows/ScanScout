@@ -1,5 +1,11 @@
 package models
 
+import (
+	"context"
+
+	"github.com/charmbracelet/log"
+)
+
 type InstanceLocation struct {
 	baseModel
 
@@ -13,3 +19,19 @@ type InstanceLocation struct {
 }
 
 type InstanceLocations []InstanceLocation
+
+// FindAll returns all locations
+func FindAllInstanceLocations(ctx context.Context) (InstanceLocations, error) {
+	user := GetUserFromContext(ctx)
+
+	var instanceLocations InstanceLocations
+	err := db.NewSelect().
+		Model(&instanceLocations).
+		Where("instance_location.instance_id = ?", user.CurrentInstance.ID).
+		Relation("Location").
+		Scan(ctx)
+	if err != nil {
+		log.Error(err)
+	}
+	return instanceLocations, err
+}

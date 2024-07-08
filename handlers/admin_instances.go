@@ -144,7 +144,7 @@ func adminInstanceSwitchHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Set the current instance
-	user.CurrentInstanceId = instance.ID
+	user.CurrentInstanceID = instance.ID
 	if err := user.Update(); err != nil {
 		flash.Message{
 			Title:   "Error",
