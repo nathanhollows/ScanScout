@@ -18,13 +18,13 @@ import (
 type Instance struct {
 	baseModel
 
-	ID                string            `bun:",pk,type:varchar(36)" json:"id"`
-	Name              string            `bun:",type:varchar(255)" json:"name"`
-	UserID            string            `bun:",type:varchar(36)" json:"user_id"`
-	User              User              `bun:"rel:has-one,join:user_id=user_id" json:"user"`
-	Teams             Teams             `bun:"rel:has-many,join:id=instance_id" json:"teams"`
-	InstanceLocations InstanceLocations `bun:"rel:has-many,join:id=instance_id" json:"instance_locations"`
-	Scans             Scans             `bun:"rel:has-many,join:id=instance_id" json:"scans"`
+	ID                string    `bun:",pk,type:varchar(36)" json:"id"`
+	Name              string    `bun:",type:varchar(255)" json:"name"`
+	UserID            string    `bun:",type:varchar(36)" json:"user_id"`
+	User              User      `bun:"rel:has-one,join:user_id=user_id" json:"user"`
+	Teams             Teams     `bun:"rel:has-many,join:id=instance_id" json:"teams"`
+	InstanceLocations Locations `bun:"rel:has-many,join:id=instance_id" json:"instance_locations"`
+	Scans             Scans     `bun:"rel:has-many,join:id=instance_id" json:"scans"`
 }
 
 type Instances []Instance
@@ -104,7 +104,7 @@ func (i *Instance) ZipQRCodes(ctx context.Context) (string, error) {
 		return "", err
 	}
 	for _, location := range locations {
-		err = location.Location.GenerateQRCode()
+		err = location.Coords.GenerateQRCode()
 		if err != nil {
 			return "", err
 		}
@@ -125,10 +125,12 @@ func (i *Instance) ZipQRCodes(ctx context.Context) (string, error) {
 	// Collect the paths
 	var paths []string
 	for _, location := range locations {
-		paths = append(paths, location.Location.getQRFilename(true))
-		if location.Location.MustScanOut {
-			paths = append(paths, location.Location.getQRFilename(false))
-		}
+		paths = append(paths, location.Coords.getQRFilename(true))
+		// Commented out because we don't need to scan out
+		// TODO: Implement scan out on a Locations level
+		// if location.Coords.MustScanOut {
+		// 	paths = append(paths, location.Coords.getQRFilename(false))
+		// }
 	}
 
 	// Add each file to the zip
@@ -189,7 +191,7 @@ func (i *Instance) ZipPosters(ctx context.Context) (string, error) {
 		return "", err
 	}
 	for _, instanceLocation := range instanceLocations {
-		paths = append(paths, instanceLocation.Location.getQRFilename(true))
+		paths = append(paths, instanceLocation.Coords.getQRFilename(true))
 	}
 
 	// Add each file to the zip
@@ -237,11 +239,11 @@ func (i *Instance) GeneratePosters(ctx context.Context) (string, error) {
 	pdf.AddUTF8Font("OpenSans", "", "./assets/fonts/OpenSans.ttf")
 
 	for _, location := range i.InstanceLocations {
-		location.Location.GenerateQRCode()
-		generatePosterPage(pdf, &location.Location, i, true)
-		if location.Location.MustScanOut {
-			generatePosterPage(pdf, &location.Location, i, false)
-		}
+		location.Coords.GenerateQRCode()
+		generatePosterPage(pdf, &location.Coords, i, true)
+		// if location.Coords.MustScanOut {
+		// 	generatePosterPage(pdf, &location.Coords, i, false)
+		// }
 	}
 
 	path := "./assets/posters/" + i.ID + ".pdf"
@@ -253,7 +255,7 @@ func (i *Instance) GeneratePosters(ctx context.Context) (string, error) {
 	return path, nil
 }
 
-func generatePosterPage(pdf *fpdf.Fpdf, location *Location, instance *Instance, scanIn bool) {
+func generatePosterPage(pdf *fpdf.Fpdf, location *Coords, instance *Instance, scanIn bool) {
 	pdf.AddPage()
 
 	if !scanIn {

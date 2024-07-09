@@ -176,10 +176,10 @@ func publicScanPostHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if location.MustScanOut {
-		team.MustScanOut = location.Code
-		team.Update(r.Context())
-	}
+	// if location.MustScanOut {
+	// 	team.MustScanOut = location.Code
+	// 	team.Update(r.Context())
+	// }
 
 	flash.Message{
 		Style:   "success",

@@ -15,27 +15,26 @@ import (
 	qrwriter "github.com/yeqown/go-qrcode/writer/standard"
 )
 
-type Location struct {
+type Coords struct {
 	baseModel
 
-	Code              string            `bun:",unique,pk" json:"code"`
-	Lat               float64           `bun:",type:float" json:"lat"`
-	Lng               float64           `bun:",type:float" json:"lng"`
-	Name              string            `bun:",type:varchar(255)" json:"name"`
-	Content           string            `bun:",type:text" json:"content"`
-	TotalVisits       int               `bun:",type:int" json:"total_visits"`
-	CurrentCount      int               `bun:",type:int" json:"current_count"`
-	AvgDuration       float64           `bun:",type:float" json:"avg_duration"`
-	MustScanOut       bool              `bun:"default:false" json:"must_scan_out"`
-	InstanceLocations InstanceLocations `bun:"rel:has-many,join:code=location_id" json:"instance_locations"`
+	Code         string    `bun:",unique,pk" json:"code"`
+	Lat          float64   `bun:",type:float" json:"lat"`
+	Lng          float64   `bun:",type:float" json:"lng"`
+	Name         string    `bun:",type:varchar(255)" json:"name"`
+	Content      string    `bun:",type:text" json:"content"`
+	TotalVisits  int       `bun:",type:int" json:"total_visits"`
+	CurrentCount int       `bun:",type:int" json:"current_count"`
+	AvgDuration  float64   `bun:",type:float" json:"avg_duration"`
+	Locations    Locations `bun:"rel:has-many,join:code=coords_id" json:"instance_locations"`
 }
 
-type Locations []*Location
+type BaseLocations []*Coords
 
 // FindLocationByCode returns a location by code
-func FindLocationByCode(ctx context.Context, code string) (*Location, error) {
+func FindLocationByCode(ctx context.Context, code string) (*Coords, error) {
 	code = strings.ToUpper(code)
-	var location Location
+	var location Coords
 	err := db.NewSelect().
 		Model(&location).
 		Where("code = ?", code).
@@ -47,8 +46,8 @@ func FindLocationByCode(ctx context.Context, code string) (*Location, error) {
 }
 
 // FindLocationsByCodes returns a list of locations by code
-func FindLocationsByCodes(ctx context.Context, codes []string) Locations {
-	var locations Locations
+func FindLocationsByCodes(ctx context.Context, codes []string) BaseLocations {
+	var locations BaseLocations
 	err := db.NewSelect().
 		Model(&locations).
 		Where("code in (?)", bun.In(codes)).
@@ -60,7 +59,7 @@ func FindLocationsByCodes(ctx context.Context, codes []string) Locations {
 }
 
 // Save saves or updates a location
-func (l *Location) Save(ctx context.Context) error {
+func (l *Coords) Save(ctx context.Context) error {
 	insert := false
 	var err error
 	if l.Code == "" {
@@ -80,7 +79,7 @@ func (l *Location) Save(ctx context.Context) error {
 }
 
 // LogScan creates a new scan entry for the location if it's valid
-func (l *Location) LogScan(ctx context.Context, teamCode string) error {
+func (l *Coords) LogScan(ctx context.Context, teamCode string) error {
 	teamCode = strings.ToUpper(teamCode)
 	// Check if a team exists with the code
 	team, err := FindTeamByCode(ctx, teamCode)
@@ -114,7 +113,7 @@ func (l *Location) LogScan(ctx context.Context, teamCode string) error {
 	return nil
 }
 
-func (l *Location) LogScanOut(ctx context.Context, teamCode string) error {
+func (l *Coords) LogScanOut(ctx context.Context, teamCode string) error {
 	// Find the open scan
 	teamCode = strings.ToUpper(teamCode)
 	scan, err := FindScan(ctx, teamCode, l.Code)
@@ -137,7 +136,7 @@ func (l *Location) LogScanOut(ctx context.Context, teamCode string) error {
 	return nil
 }
 
-func (l *Location) GenerateQRCode() error {
+func (l *Coords) GenerateQRCode() error {
 	// Only generate the QR code if it doesn't exist
 	if l.checkQRPath(true) && l.checkQRPath(false) {
 		return nil
@@ -152,21 +151,23 @@ func (l *Location) GenerateQRCode() error {
 		return err
 	}
 
-	if l.MustScanOut {
-		qrc, err := l.generateQRCode(false)
-		if err != nil {
-			return err
-		}
-
-		if err := saveQRCode(qrc, l.getQRPath(false)); err != nil {
-			return err
-		}
-	}
+	// Commented out for now
+	// This is for the scan out QR code
+	// if l.MustScanOut {
+	// 	qrc, err := l.generateQRCode(false)
+	// 	if err != nil {
+	// 		return err
+	// 	}
+	//
+	// 	if err := saveQRCode(qrc, l.getQRPath(false)); err != nil {
+	// 		return err
+	// 	}
+	// }
 
 	return nil
 }
 
-func (l *Location) getScanURL(scanningIn bool) string {
+func (l *Coords) getScanURL(scanningIn bool) string {
 	var url string
 	if scanningIn {
 		url = os.Getenv("SITE_URL") + "/s/" + l.Code
@@ -176,7 +177,7 @@ func (l *Location) getScanURL(scanningIn bool) string {
 	return url
 }
 
-func (l *Location) getQRFilename(scanningIn bool) string {
+func (l *Coords) getQRFilename(scanningIn bool) string {
 	var path string
 	if scanningIn {
 		path = l.Code + " " + l.Name + " in.png"
@@ -186,16 +187,16 @@ func (l *Location) getQRFilename(scanningIn bool) string {
 	return path
 }
 
-func (l *Location) getQRPath(scanningIn bool) string {
+func (l *Coords) getQRPath(scanningIn bool) string {
 	return "./assets/codes/" + l.getQRFilename(scanningIn)
 }
 
-func (l *Location) checkQRPath(scanningIn bool) bool {
+func (l *Coords) checkQRPath(scanningIn bool) bool {
 	_, err := os.Stat(l.getQRPath(scanningIn))
 	return err == nil
 }
 
-func (l *Location) generateQRCode(scanningIn bool) (*qrcode.QRCode, error) {
+func (l *Coords) generateQRCode(scanningIn bool) (*qrcode.QRCode, error) {
 	url := l.getScanURL(scanningIn)
 	qrc, err := qrcode.New(url)
 	if err != nil {
@@ -226,7 +227,7 @@ func saveQRCode(qrc *qrcode.QRCode, path string) error {
 }
 
 // SetCoords sets the latitude and longitude of the location
-func (l *Location) SetCoords(lat, lng float64) error {
+func (l *Coords) SetCoords(lat, lng float64) error {
 	l.Lat = lat
 	l.Lng = lng
 	return nil

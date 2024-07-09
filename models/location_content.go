@@ -7,17 +7,17 @@ import (
 	"github.com/google/uuid"
 )
 
-type InstanceLocationContent struct {
+type LocationContent struct {
 	baseModel
 
 	ID      string `bun:",pk" json:"id"`
 	Content string `bun:"," json:"content"`
 }
 
-type InstanceLocationContents []InstanceLocationContent
+type LocationContents []LocationContent
 
 // Save saves or updates an instance location content
-func (i *InstanceLocationContent) Save(ctx context.Context) error {
+func (i *LocationContent) Save(ctx context.Context) error {
 	var err error
 	if i.ID == "" {
 		i.ID = uuid.New().String()

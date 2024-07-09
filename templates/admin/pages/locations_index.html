@@ -5,7 +5,7 @@
   <h1 class="text-2xl p-5 font-bold">Locations ({{ len .locations }})</h1>
   <span class="flex md:flex-row flex-wrap justify-center space-x-3">
     <a
-      class="btn btn-base btn-outline mb-3 md:mb-0"
+      class="btn btn-base btn-coords_id mb-3 md:mb-0"
       href="/admin/locations/qr/136069ce-f2e2-410c-9ac5-09ea2a0c874e.zip"
     >
       <svg
@@ -92,7 +92,7 @@
     class="flex flex-row justify-between items-center space-x-3 bg-white rounded-lg p-4 border join-item"
   >
     <div class="flex flex-row items-center space-x-3 grow">
-      {{ if .Location.Lat }}
+      {{ if .Coords.Lat }}
       <svg
         xmlns="http://www.w3.org/2000/svg"
         width="24"
@@ -149,17 +149,17 @@
         class="badge badge-ghost basis-20 tooltip"
         data-tip="Unique location code"
       >
-        {{ .Location.Code }}
+        {{ .Coords.Code }}
       </div>
       <a
-        href="/admin/locations/{{ .Location.Code }}"
+        href="/admin/locations/{{ .Coords.Code }}"
         class="link flex-grow"
-        >{{ .Location.Name }}</a
+        >{{ .Coords.Name }}</a
       >
 
       <span
         class="tooltip flex space-x-2"
-        data-tip="{{ .Location.CurrentCount }} currently visiting, {{ .Location.TotalVisits }} scans total"
+        data-tip="{{ .Coords.CurrentCount }} currently visiting, {{ .Coords.TotalVisits }} scans total"
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -181,9 +181,9 @@
           <path d="M9 9h.01" />
           <path d="M15 9h.01" />
         </svg>
-        <strong> {{ .Location.CurrentCount }} </strong> /
-        <strong>{{ .Location.TotalVisits }} </strong>
-        {{ if .Location.AvgDuration }}
+        <strong> {{ .Coords.CurrentCount }} </strong> /
+        <strong>{{ .Coords.TotalVisits }} </strong>
+        {{ if .Coords.AvgDuration }}
         <p class="flex flex-row space-x-3 text-center">
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -215,7 +215,7 @@
               r="8"
             />
           </svg>
-          <span> {{ toDuration .Location.AvgDuration }} </span>
+          <span> {{ toDuration .Coords.AvgDuration }} </span>
         </p>
         {{ end }}
       </span>

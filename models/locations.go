@@ -7,25 +7,25 @@ import (
 	"github.com/google/uuid"
 )
 
-type InstanceLocation struct {
+type Location struct {
 	baseModel
 
 	ID         string `bun:",pk" json:"id"`
 	InstanceID string `bun:",notnull" json:"instance_id"`
-	LocationID string `bun:",notnull" json:"location_id"`
+	CoordsID   string `bun:",notnull" json:"coords_id"`
 	CriteriaID string `bun:",notnull" json:"criteria_id"`
 	ContentID  string `bun:",notnull" json:"content_id"`
 
-	Instance Instance                `bun:"rel:has-one,join:instance_id=id" json:"instance"`
-	Location Location                `bun:"rel:has-one,join:location_id=code" json:"location"`
-	Criteria CompletionCriteria      `bun:"rel:has-one,join:criteria_id=id" json:"criteria"`
-	Content  InstanceLocationContent `bun:"rel:has-one,join:content_id=id" json:"content"`
+	Instance Instance           `bun:"rel:has-one,join:instance_id=id" json:"instance"`
+	Coords   Coords             `bun:"rel:has-one,join:coords_id=code" json:"coords"`
+	Criteria CompletionCriteria `bun:"rel:has-one,join:criteria_id=id" json:"criteria"`
+	Content  LocationContent    `bun:"rel:has-one,join:content_id=id" json:"content"`
 }
 
-type InstanceLocations []InstanceLocation
+type Locations []Location
 
 // Save saves or updates an instance location
-func (i *InstanceLocation) Save(ctx context.Context) error {
+func (i *Location) Save(ctx context.Context) error {
 	var err error
 	if i.ID == "" {
 		i.ID = uuid.New().String()
@@ -41,14 +41,14 @@ func (i *InstanceLocation) Save(ctx context.Context) error {
 }
 
 // FindAll returns all locations
-func FindAllInstanceLocations(ctx context.Context) (InstanceLocations, error) {
+func FindAllInstanceLocations(ctx context.Context) (Locations, error) {
 	user := GetUserFromContext(ctx)
 
-	var instanceLocations InstanceLocations
+	var instanceLocations Locations
 	err := db.NewSelect().
 		Model(&instanceLocations).
-		Where("instance_location.instance_id = ?", user.CurrentInstance.ID).
-		Relation("Location").
+		Where("location.instance_id = ?", user.CurrentInstance.ID).
+		Relation("Coords").
 		Relation("Criteria").
 		Relation("Content").
 		Scan(ctx)
@@ -59,12 +59,12 @@ func FindAllInstanceLocations(ctx context.Context) (InstanceLocations, error) {
 }
 
 // FindInstanceLocationById finds an instance location by InstanceLocationID
-func FindInstanceLocationById(ctx context.Context, id string) (*InstanceLocation, error) {
-	var instanceLocation InstanceLocation
+func FindInstanceLocationById(ctx context.Context, id string) (*Location, error) {
+	var instanceLocation Location
 	err := db.NewSelect().
 		Model(&instanceLocation).
-		Where("instance_location.id = ?", id).
-		Relation("Location").
+		Where("location.id = ?", id).
+		Relation("Coords").
 		Relation("Criteria").
 		Relation("Content").
 		Scan(ctx)
@@ -75,13 +75,13 @@ func FindInstanceLocationById(ctx context.Context, id string) (*InstanceLocation
 }
 
 // FindInstanceLocationByLocationAndInstance finds an instance location by location and instance
-func FindInstanceLocationByLocationAndInstance(ctx context.Context, locationCode, instanceID string) (*InstanceLocation, error) {
-	var instanceLocation InstanceLocation
+func FindInstanceLocationByLocationAndInstance(ctx context.Context, locationCode, instanceID string) (*Location, error) {
+	var instanceLocation Location
 	err := db.NewSelect().
 		Model(&instanceLocation).
-		Where("instance_location.location_id = ?", locationCode).
-		Where("instance_location.instance_id = ?", instanceID).
-		Relation("Location").
+		Where("location.coords_id = ?", locationCode).
+		Where("location.instance_id = ?", instanceID).
+		Relation("Coords").
 		Relation("Criteria").
 		Relation("Content").
 		Scan(ctx)

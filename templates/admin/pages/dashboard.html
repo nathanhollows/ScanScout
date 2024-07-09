@@ -43,14 +43,14 @@
         <div class="flex flex-row items-center space-x-3 grow">
           <strong> {{ add $index 1 }} </strong>
           <a
-            href="/admin/locations/{{ .Location.Code }}"
+            href="/admin/locations/{{ .Coords.Code }}"
             class="link flex-grow"
-            >{{ .Location.Name }}</a
+            >{{ .Coords.Name }}</a
           >
 
           <span
             class="tooltip flex space-x-2"
-            data-tip="{{ .Location.CurrentCount }} currently visiting, {{ .Location.TotalVisits }} scans total"
+            data-tip="{{ .Coords.CurrentCount }} currently visiting, {{ .Coords.TotalVisits }} scans total"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -72,9 +72,9 @@
               <path d="M9 9h.01" />
               <path d="M15 9h.01" />
             </svg>
-            <strong> {{ .Location.CurrentCount }} </strong> /
-            <strong>{{ .Location.TotalVisits }} </strong>
-            {{ if .Location.AvgDuration }}
+            <strong> {{ .Coords.CurrentCount }} </strong> /
+            <strong>{{ .Coords.TotalVisits }} </strong>
+            {{ if .Coords.AvgDuration }}
             <p class="flex flex-row space-x-3 text-center">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -106,7 +106,7 @@
                   r="8"
                 />
               </svg>
-              <span> {{ toDuration .Location.AvgDuration }} </span>
+              <span> {{ toDuration .Coords.AvgDuration }} </span>
             </p>
             {{ end }}
           </span>
@@ -187,9 +187,9 @@
   let marker; // Declare marker variable outside the loop
 
   {{ range .locations }}
-  {{ if .Location.Lat }}
+  {{ if .Coords.Lat }}
   marker = new mapboxgl.Marker()
-     .setLngLat([{{ .Location.Lng }}, {{ .Location.Lat }}]);
+     .setLngLat([{{ .Coords.Lng }}, {{ .Coords.Lat }}]);
   marker.addTo(map);
   markerArray.push(marker);
   {{ end }}

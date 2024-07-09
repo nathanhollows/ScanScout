@@ -12,6 +12,7 @@ func adminDashboardHandler(w http.ResponseWriter, r *http.Request) {
 	setDefaultHeaders(w)
 	data := templateData(r)
 	data["title"] = "Activity tracker"
+	data["breadcrumbs"] = []map[string]string{{"link": "/admin", "text": "Admin"}, {"link": "/admin/dashboard", "text": "Dashboard"}}
 
 	// Get the list of locations
 	locations, err := models.FindAllInstanceLocations(r.Context())

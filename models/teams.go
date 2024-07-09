@@ -20,7 +20,7 @@ type Team struct {
 	Code             string   `bun:",unique,pk" json:"code"`
 	Scans            Scans    `bun:"rel:has-many,join:code=team_id" json:"scans"`
 	MustScanOut      string   `bun:"" json:"must_scan_out"`
-	BlockingLocation Location `bun:"rel:has-one,join:must_scan_out=code" json:"blocking_location"`
+	BlockingLocation Coords   `bun:"rel:has-one,join:must_scan_out=code" json:"blocking_location"`
 }
 
 type Teams []Team
@@ -62,7 +62,7 @@ func FindTeamByCodeAndInstance(ctx context.Context, code, instance string) (*Tea
 }
 
 // HasVisited returns true if the team has visited the given location
-func (t *Team) HasVisited(location *Location) bool {
+func (t *Team) HasVisited(location *Coords) bool {
 	for _, s := range t.Scans {
 		if s.LocationID == location.Code {
 			return true
@@ -72,8 +72,8 @@ func (t *Team) HasVisited(location *Location) bool {
 }
 
 // SuggestNextLocation returns the next location to scan in
-func (t *Team) SuggestNextLocations(ctx context.Context, limit int) *Locations {
-	var locations Locations
+func (t *Team) SuggestNextLocations(ctx context.Context, limit int) *BaseLocations {
+	var locations BaseLocations
 
 	// Get the list of locations the team has already visited
 	visited := make([]string, len(t.Scans))
@@ -196,7 +196,7 @@ func TeamActivityOverview(ctx context.Context) ([]map[string]interface{}, error)
 		}
 		for _, scan := range team.Scans {
 			for j, instanceLocation := range instanceLocations {
-				if scan.LocationID == instanceLocation.Location.Code {
+				if scan.LocationID == instanceLocation.Coords.Code {
 					activity[count]["locations"].([]map[string]interface{})[j]["visited"] = true
 					activity[count]["locations"].([]map[string]interface{})[j]["time_in"] = scan.TimeIn
 					if scan.TimeOut.IsZero() {

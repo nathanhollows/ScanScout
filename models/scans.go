@@ -16,7 +16,7 @@ type Scan struct {
 	LocationID  string    `bun:",pk,type:string" json:"location_id"`
 	TimeIn      time.Time `bun:",type:datetime" json:"time_in"`
 	TimeOut     time.Time `bun:",type:datetime" json:"time_out"`
-	Location    Location  `bun:"rel:has-one,join:location_id=code" json:"location"`
+	Location    Coords    `bun:"rel:has-one,join:location_id=code" json:"location"`
 	MustScanOut int       `bun:"" json:"must_scan_out"`
 }
 
