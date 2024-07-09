@@ -145,7 +145,7 @@ func publicScanPostHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Check if the location is one of the suggested locations
-	suggested := team.SuggestNextLocations(3)
+	suggested := team.SuggestNextLocations(r.Context(), 3)
 	found := false
 	for _, l := range *suggested {
 		if l.Code == locationCode {
@@ -178,7 +178,7 @@ func publicScanPostHandler(w http.ResponseWriter, r *http.Request) {
 
 	if location.MustScanOut {
 		team.MustScanOut = location.Code
-		team.Update()
+		team.Update(r.Context())
 	}
 
 	flash.Message{
@@ -333,7 +333,7 @@ func publicScanOutPostHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Clear the must scan out field
 	team.MustScanOut = ""
-	team.Update()
+	team.Update(r.Context())
 
 	flash.Message{
 		Style:   "success",

@@ -49,9 +49,8 @@ func FindTeamByCode(ctx context.Context, code string) (*Team, error) {
 }
 
 // FindTeamByCodeAndInstance returns a team by code
-func FindTeamByCodeAndInstance(code, instance string) (*Team, error) {
+func FindTeamByCodeAndInstance(ctx context.Context, code, instance string) (*Team, error) {
 	code = strings.ToUpper(code)
-	ctx := context.Background()
 	var team Team
 	err := db.NewSelect().Model(&team).Where("team.code = ? and team.instance_id = ?", code, instance).
 		Relation("BlockingLocation").
@@ -73,8 +72,7 @@ func (t *Team) HasVisited(location *Location) bool {
 }
 
 // SuggestNextLocation returns the next location to scan in
-func (t *Team) SuggestNextLocations(limit int) *Locations {
-	ctx := context.Background()
+func (t *Team) SuggestNextLocations(ctx context.Context, limit int) *Locations {
 	var locations Locations
 
 	// Get the list of locations the team has already visited
@@ -143,8 +141,7 @@ func AddTeams(ctx context.Context, count int) error {
 	return err
 }
 
-func (t *Team) Update() error {
-	ctx := context.Background()
+func (t *Team) Update(ctx context.Context) error {
 	_, err := db.NewUpdate().Model(t).WherePK().Exec(ctx)
 	return err
 }

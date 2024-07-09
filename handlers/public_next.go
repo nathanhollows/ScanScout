@@ -70,7 +70,7 @@ func publicNextHandler(w http.ResponseWriter, r *http.Request) {
 		}.Save(w, r)
 	}
 
-	data["locations"] = team.SuggestNextLocations(3)
+	data["locations"] = team.SuggestNextLocations(r.Context(), 3)
 	data["messages"] = flash.Get(w, r)
 	render(w, data, false, "next")
 }
