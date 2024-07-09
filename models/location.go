@@ -225,6 +225,13 @@ func saveQRCode(qrc *qrcode.QRCode, path string) error {
 	}
 }
 
+// SetCoords sets the latitude and longitude of the location
+func (l *Location) SetCoords(lat, lng float64) error {
+	l.Lat = lat
+	l.Lng = lng
+	return nil
+}
+
 // // GeneratePoster pre-emptively generates the poster for the new clue
 // func (c Clue) GeneratePoster() error {
 // 	imgb, _ := os.Open("assets/poster.png")

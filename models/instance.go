@@ -56,6 +56,20 @@ func (i *Instance) Delete(ctx context.Context) error {
 	return nil
 }
 
+// GetCurrentUserInstance gets the current instance from the context
+func GetCurrentUserInstance(ctx context.Context) (*Instance, error) {
+	user, ok := ctx.Value(UserIDKey).(*User)
+	if !ok {
+		return nil, errors.New("User not found in context")
+	}
+
+	if user.CurrentInstance == nil {
+		return nil, errors.New("Current instance not found")
+	}
+
+	return user.CurrentInstance, nil
+}
+
 // FindAllInstances finds all instances
 func FindAllInstances(ctx context.Context) (Instances, error) {
 	instances := Instances{}
