@@ -22,6 +22,7 @@ func createRoutes() {
 	// Session routes
 	router.Get("/login", adminLoginHandler)
 	router.Post("/login", adminLoginPostHandler)
+	router.Get("/logout", adminLogoutHandler)
 
 	// Scanning in routes
 	router.Route("/s", func(r chi.Router) {

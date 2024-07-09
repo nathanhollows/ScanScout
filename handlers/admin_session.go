@@ -58,6 +58,21 @@ func adminLoginPostHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 // Logout destroys the user session
-func Logout(w http.ResponseWriter, r *http.Request) error {
-	return nil
+func adminLogoutHandler(w http.ResponseWriter, r *http.Request) {
+	session, err := sessions.Get(r, "admin")
+	if err != nil {
+		log.Error("Error getting session: ", err)
+		flash.Message{
+			Title:   "Error",
+			Message: "An error occurred while trying to log out.",
+			Style:   flash.Error,
+		}.Save(w, r)
+		// Redirect to the login page
+		http.Redirect(w, r, helpers.URL("/login"), http.StatusSeeOther)
+		return
+	}
+	session.Options.MaxAge = -1
+	session.Save(r, w)
+	http.Redirect(w, r, helpers.URL("/login"), http.StatusSeeOther)
+	return
 }
