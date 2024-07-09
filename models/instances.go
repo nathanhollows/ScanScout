@@ -98,8 +98,9 @@ func FindInstanceByID(ctx context.Context, id string) (*Instance, error) {
 	return instance, nil
 }
 
-func (i *Instance) ZipQRCodes(ctx context.Context) (string, error) {
-	locations, err := FindAllInstanceLocations(ctx)
+func GenerateQRCodeArchive(ctx context.Context) (string, error) {
+	instanceID := ctx.Value(UserIDKey).(*User).CurrentInstanceID
+	locations, err := FindAllLocations(ctx)
 	if err != nil {
 		return "", err
 	}
@@ -111,7 +112,7 @@ func (i *Instance) ZipQRCodes(ctx context.Context) (string, error) {
 	}
 
 	// Create a zip file
-	path := "./assets/codes/" + i.ID + ".zip"
+	path := "./assets/codes/" + instanceID + ".zip"
 	archive, err := os.Create(path)
 	if err != nil {
 		log.Error(err)
@@ -186,7 +187,7 @@ func (i *Instance) ZipPosters(ctx context.Context) (string, error) {
 
 	// Collect the paths
 	var paths []string
-	instanceLocations, err := FindAllInstanceLocations(ctx)
+	instanceLocations, err := FindAllLocations(ctx)
 	if err != nil {
 		return "", err
 	}
@@ -232,22 +233,25 @@ func (i *Instance) ZipPosters(ctx context.Context) (string, error) {
 	return path, nil
 }
 
-func (i *Instance) GeneratePosters(ctx context.Context) (string, error) {
+func GeneratePosters(ctx context.Context) (string, error) {
+	instanceID := ctx.Value(UserIDKey).(*User).CurrentInstanceID
+	instance, err := FindInstanceByID(ctx, instanceID)
+
 	// Set up the document
 	pdf := fpdf.New(fpdf.OrientationPortrait, fpdf.UnitMillimeter, fpdf.PageSizeA4, "")
 	pdf.AddUTF8Font("ArchivoBlack", "", "./assets/fonts/ArchivoBlack-Regular.ttf")
 	pdf.AddUTF8Font("OpenSans", "", "./assets/fonts/OpenSans.ttf")
 
-	for _, location := range i.InstanceLocations {
+	for _, location := range instance.InstanceLocations {
 		location.Coords.GenerateQRCode()
-		generatePosterPage(pdf, &location.Coords, i, true)
+		generatePosterPage(pdf, &location.Coords, instance, true)
 		// if location.Coords.MustScanOut {
 		// 	generatePosterPage(pdf, &location.Coords, i, false)
 		// }
 	}
 
-	path := "./assets/posters/" + i.ID + ".pdf"
-	err := pdf.OutputFileAndClose(path)
+	path := "./assets/posters/" + instance.ID + " posters.pdf"
+	err = pdf.OutputFileAndClose(path)
 	if err != nil {
 		return "", err
 	}
@@ -255,7 +259,7 @@ func (i *Instance) GeneratePosters(ctx context.Context) (string, error) {
 	return path, nil
 }
 
-func generatePosterPage(pdf *fpdf.Fpdf, location *Coords, instance *Instance, scanIn bool) {
+func generatePosterPage(pdf *fpdf.Fpdf, coords *Coords, instance *Instance, scanIn bool) {
 	pdf.AddPage()
 
 	if !scanIn {
@@ -273,13 +277,13 @@ func generatePosterPage(pdf *fpdf.Fpdf, location *Coords, instance *Instance, sc
 
 	// Add the location name
 	pdf.SetFont("OpenSans", "", 24)
-	locationName := location.Name
+	locationName := coords.Name
 	pdf.SetY(40)
 	pdf.SetX((210 - pdf.GetStringWidth(locationName)) / 2)
 	pdf.Cell(40, 70, locationName)
 
 	// Add the image
-	pdf.Image(location.getQRPath(scanIn), 50, 90, 110, 0, false, "", 0, "")
+	pdf.Image(coords.getQRPath(scanIn), 50, 90, 110, 0, false, "", 0, "")
 
 	// Add Scan In/Out
 	scanText := "Scan In"

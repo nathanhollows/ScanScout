@@ -54,13 +54,13 @@ func createRoutes() {
 		r.Route("/locations", func(r chi.Router) {
 			r.Get("/", adminLocationsHandler)
 			r.Get("/new", adminLocationNewHandler)
-			r.Post("/new", adminLocationSaveHandler)
+			r.Post("/new", adminLocationNewPostHandler)
 			r.Get("/{id}", adminLocationEditHandler)
-			r.Post("/{id}", adminLocationSaveHandler)
+			// r.Post("/{id}", adminLocationSaveHandler)
 			// Disabled for now
 			// r.Get("/qr/{id}.png", adminLocationQRHandler)
-			r.Get("/qr/{id}.zip", adminLocationQRZipHandler)
-			r.Get("/posters/{id}.pdf", adminLocationPostersHandler)
+			r.Get("/qr-codes.zip", adminLocationQRZipHandler)
+			r.Get("/posters.pdf", adminLocationPostersHandler)
 		})
 
 		r.Route("/teams", func(r chi.Router) {

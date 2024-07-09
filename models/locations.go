@@ -2,9 +2,11 @@ package models
 
 import (
 	"context"
+	"strings"
 
 	"github.com/charmbracelet/log"
 	"github.com/google/uuid"
+	"github.com/uptrace/bun"
 )
 
 type Location struct {
@@ -40,8 +42,37 @@ func (i *Location) Save(ctx context.Context) error {
 	return err
 }
 
+// FindLocationByCode returns a location by code
+func FindLocationByCode(ctx context.Context, code string) (*Location, error) {
+	code = strings.ToUpper(code)
+	var location Location
+	err := db.NewSelect().
+		Model(&location).
+		Where("coords_id = ?", code).
+		Where("instance_id = ?", GetUserFromContext(ctx).CurrentInstance.ID).
+		Scan(ctx)
+	if err != nil {
+		log.Error(err)
+	}
+	return &location, err
+}
+
+// FindLocationsByCodes returns a list of locations by code
+func FindLocationsByCodes(ctx context.Context, codes []string) Locations {
+	var locations Locations
+	err := db.NewSelect().
+		Model(&locations).
+		Where("coords_id in (?)", bun.In(codes)).
+		Where("instance_id = ?", GetUserFromContext(ctx).CurrentInstance.ID).
+		Scan(ctx)
+	if err != nil {
+		log.Error(err)
+	}
+	return locations
+}
+
 // FindAll returns all locations
-func FindAllInstanceLocations(ctx context.Context) (Locations, error) {
+func FindAllLocations(ctx context.Context) (Locations, error) {
 	user := GetUserFromContext(ctx)
 
 	var instanceLocations Locations

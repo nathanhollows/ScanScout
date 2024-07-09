@@ -15,7 +15,7 @@ func adminDashboardHandler(w http.ResponseWriter, r *http.Request) {
 	data["breadcrumbs"] = []map[string]string{{"link": "/admin", "text": "Admin"}, {"link": "/admin/dashboard", "text": "Dashboard"}}
 
 	// Get the list of locations
-	locations, err := models.FindAllInstanceLocations(r.Context())
+	locations, err := models.FindAllLocations(r.Context())
 	if err != nil {
 		log.Error(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)

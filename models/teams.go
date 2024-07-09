@@ -149,7 +149,7 @@ func (t *Team) Update(ctx context.Context) error {
 // TeamActivityOverview returns a list of teams and their activity
 func TeamActivityOverview(ctx context.Context) ([]map[string]interface{}, error) {
 	// Get all instanceLocations
-	instanceLocations, err := FindAllInstanceLocations(ctx)
+	instanceLocations, err := FindAllLocations(ctx)
 	if err != nil {
 		return nil, err
 	}

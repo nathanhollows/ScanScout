@@ -10,7 +10,6 @@ import (
 
 	"github.com/charmbracelet/log"
 	"github.com/nathanhollows/Rapua/helpers"
-	"github.com/uptrace/bun"
 	qrcode "github.com/yeqown/go-qrcode/v2"
 	qrwriter "github.com/yeqown/go-qrcode/writer/standard"
 )
@@ -30,33 +29,6 @@ type Coords struct {
 }
 
 type BaseLocations []*Coords
-
-// FindLocationByCode returns a location by code
-func FindLocationByCode(ctx context.Context, code string) (*Coords, error) {
-	code = strings.ToUpper(code)
-	var location Coords
-	err := db.NewSelect().
-		Model(&location).
-		Where("code = ?", code).
-		Scan(ctx)
-	if err != nil {
-		log.Error(err)
-	}
-	return &location, err
-}
-
-// FindLocationsByCodes returns a list of locations by code
-func FindLocationsByCodes(ctx context.Context, codes []string) BaseLocations {
-	var locations BaseLocations
-	err := db.NewSelect().
-		Model(&locations).
-		Where("code in (?)", bun.In(codes)).
-		Scan(ctx)
-	if err != nil {
-		log.Error(err)
-	}
-	return locations
-}
 
 // Save saves or updates a location
 func (l *Coords) Save(ctx context.Context) error {
