@@ -35,7 +35,7 @@
       class="w-full h-96 rounded-lg shadow-lg my-5"
     ></div>
     <div class="join join-vertical w-full">
-      {{ if not (len .locations) }}
+      {{ if (len .locations) }}
       {{ range $index, $location := .locations }}
       <div
         class="flex flex-row justify-between items-center space-x-3 bg-white rounded-lg p-4 border join-item"
@@ -43,14 +43,14 @@
         <div class="flex flex-row items-center space-x-3 grow">
           <strong> {{ add $index 1 }} </strong>
           <a
-            href="/admin/locations/{{ .Code }}"
+            href="/admin/locations/{{ .Location.Code }}"
             class="link flex-grow"
-            >{{ .Name }}</a
+            >{{ .Location.Name }}</a
           >
 
           <span
             class="tooltip flex space-x-2"
-            data-tip="{{ .CurrentCount }} currently visiting, {{ .TotalVisits }} scans total"
+            data-tip="{{ .Location.CurrentCount }} currently visiting, {{ .Location.TotalVisits }} scans total"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -72,9 +72,9 @@
               <path d="M9 9h.01" />
               <path d="M15 9h.01" />
             </svg>
-            <strong> {{ .CurrentCount }} </strong> /
-            <strong>{{ .TotalVisits }} </strong>
-            {{ if .AvgDuration }}
+            <strong> {{ .Location.CurrentCount }} </strong> /
+            <strong>{{ .Location.TotalVisits }} </strong>
+            {{ if .Location.AvgDuration }}
             <p class="flex flex-row space-x-3 text-center">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -106,7 +106,7 @@
                   r="8"
                 />
               </svg>
-              <span> {{ toDuration .AvgDuration }} </span>
+              <span> {{ toDuration .Location.AvgDuration }} </span>
             </p>
             {{ end }}
           </span>
@@ -187,10 +187,12 @@
   let marker; // Declare marker variable outside the loop
 
   {{ range .locations }}
+  {{ if .Location.Lat }}
   marker = new mapboxgl.Marker()
-     .setLngLat([{{ .Lng }}, {{ .Lat }}]);
+     .setLngLat([{{ .Location.Lng }}, {{ .Location.Lat }}]);
   marker.addTo(map);
   markerArray.push(marker);
+  {{ end }}
   {{ end }}
 
   // Calculate the bounds
