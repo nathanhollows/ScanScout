@@ -27,7 +27,7 @@ func adminInstancesHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// NOTE:
-	// Instances are already loaded in the template data
+	// data["instances"] are already loaded in the template data
 
 	// Render the template
 	data["messages"] = flash.Get(w, r)
