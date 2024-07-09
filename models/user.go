@@ -24,23 +24,21 @@ type User struct {
 type Users []*User
 
 // Save the user to the database
-func (u *User) Save() error {
-	ctx := context.Background()
+func (u *User) Save(ctx context.Context) error {
 	_, err := db.NewInsert().Model(u).Exec(ctx)
 	return err
 }
 
 // Update the user in the database
-func (u *User) Update() error {
-	ctx := context.Background()
+func (u *User) Update(ctx context.Context) error {
 	_, err := db.NewUpdate().Model(u).WherePK("user_id").Exec(ctx)
 	return err
 }
 
 // AuthenticateUser checks the user's credentials and returns the user if they are valid
-func AuthenticateUser(email, password string) (*User, error) {
+func AuthenticateUser(ctx context.Context, email, password string) (*User, error) {
 	// Find the user by email
-	user, err := FindUserByEmail(email)
+	user, err := FindUserByEmail(ctx, email)
 	if err != nil {
 		return nil, err
 	}
@@ -54,8 +52,7 @@ func AuthenticateUser(email, password string) (*User, error) {
 }
 
 // FindUserByEmail finds a user by their email address
-func FindUserByEmail(email string) (*User, error) {
-	ctx := context.Background()
+func FindUserByEmail(ctx context.Context, email string) (*User, error) {
 	// Find the user by email
 	user := &User{}
 	err := db.NewSelect().
@@ -70,8 +67,7 @@ func FindUserByEmail(email string) (*User, error) {
 }
 
 // FindUserByID finds a user by their user id
-func FindUserByID(userID string) (*User, error) {
-	ctx := context.Background()
+func FindUserByID(ctx context.Context, userID string) (*User, error) {
 	// Find the user by user id
 	user := &User{}
 	err := db.NewSelect().
@@ -121,7 +117,7 @@ func FindUserBySession(r *http.Request) (*User, error) {
 	}
 
 	// Find the user by the user id
-	user, err := FindUserByID(userID)
+	user, err := FindUserByID(r.Context(), userID)
 	if err != nil {
 		return nil, err
 	}

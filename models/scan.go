@@ -23,8 +23,7 @@ type Scan struct {
 type Scans []Scan
 
 // Save saves or updates a scan
-func (s *Scan) Save() error {
-	ctx := context.Background()
+func (s *Scan) Save(ctx context.Context) error {
 	var err error
 	if s.CreatedAt.IsZero() {
 		_, err = db.NewInsert().Model(s).Exec(ctx)
@@ -38,11 +37,11 @@ func (s *Scan) Save() error {
 }
 
 // FindScan finds a scan by team and location
-func FindScan(teamCode, locationCode string) (*Scan, error) {
+func FindScan(ctx context.Context, teamCode, locationCode string) (*Scan, error) {
 	teamCode = strings.ToUpper(teamCode)
 	locationCode = strings.ToUpper(locationCode)
 	var scan Scan
-	err := db.NewSelect().Model(&scan).Where("team_id = ?", teamCode).Where("location_id = ?", locationCode).Scan(context.Background())
+	err := db.NewSelect().Model(&scan).Where("team_id = ?", teamCode).Where("location_id = ?", locationCode).Scan(ctx)
 	if err != nil {
 		log.Error(err)
 	}

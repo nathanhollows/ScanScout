@@ -82,7 +82,7 @@ func adminInstanceCreateHandler(w http.ResponseWriter, r *http.Request) {
 		UserID: user.UserID,
 	}
 
-	if err := instance.Save(); err != nil {
+	if err := instance.Save(r.Context()); err != nil {
 		flash.Message{
 			Title:   "Error",
 			Message: "Error saving instance",
@@ -132,7 +132,7 @@ func adminInstanceSwitchHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Find the instance
-	instance, err := models.FindInstanceByID(id)
+	instance, err := models.FindInstanceByID(r.Context(), id)
 	if err != nil {
 		flash.Message{
 			Title:   "Error",
@@ -145,7 +145,7 @@ func adminInstanceSwitchHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Set the current instance
 	user.CurrentInstanceID = instance.ID
-	if err := user.Update(); err != nil {
+	if err := user.Update(r.Context()); err != nil {
 		flash.Message{
 			Title:   "Error",
 			Message: "Error updating user",

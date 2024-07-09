@@ -86,7 +86,7 @@ func publicSpecificLocationsHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Get the location
-	location, err := models.FindLocationByCode(locationCode)
+	location, err := models.FindLocationByCode(r.Context(), locationCode)
 	if err != nil {
 		flash.Message{
 			Style:   "danger",

@@ -42,7 +42,7 @@ func adminLocationEditHandler(w http.ResponseWriter, r *http.Request) {
 	// Get the location from the chi context
 	code := chi.URLParam(r, "id")
 
-	location, err := models.FindLocationByCode(code)
+	location, err := models.FindLocationByCode(r.Context(), code)
 	if err != nil {
 		flash.Message{
 			Title:   "Error",
@@ -94,7 +94,7 @@ func adminLocationSaveHandler(w http.ResponseWriter, r *http.Request) {
 	location := &models.Location{}
 	var err error
 	if r.Form.Has("code") {
-		location, err = models.FindLocationByCode(r.FormValue("code"))
+		location, err = models.FindLocationByCode(r.Context(), r.FormValue("code"))
 		if err != nil {
 			flash.Message{
 				Title:   "Error",
@@ -113,7 +113,7 @@ func adminLocationSaveHandler(w http.ResponseWriter, r *http.Request) {
 	location.Lng = lng
 
 	// Save the location
-	err = location.Save()
+	err = location.Save(r.Context())
 	if err != nil {
 		flash.Message{
 			Title:   "Error",
@@ -137,7 +137,7 @@ func adminLocationSaveHandler(w http.ResponseWriter, r *http.Request) {
 func adminLocationQRHandler(w http.ResponseWriter, r *http.Request) {
 	code := chi.URLParam(r, "id")
 
-	location, err := models.FindLocationByCode(code)
+	location, err := models.FindLocationByCode(r.Context(), code)
 	if err != nil {
 		flash.Message{
 			Title:   "Error",
@@ -163,7 +163,7 @@ func adminLocationQRHandler(w http.ResponseWriter, r *http.Request) {
 func adminLocationQRZipHandler(w http.ResponseWriter, r *http.Request) {
 	code := chi.URLParam(r, "id")
 
-	instance, err := models.FindInstanceByID(code)
+	instance, err := models.FindInstanceByID(r.Context(), code)
 	if err != nil {
 		flash.Message{
 			Title:   "Error",
@@ -195,7 +195,7 @@ func adminLocationQRZipHandler(w http.ResponseWriter, r *http.Request) {
 func adminLocationPostersHandler(w http.ResponseWriter, r *http.Request) {
 	code := chi.URLParam(r, "id")
 
-	instance, err := models.FindInstanceByID(code)
+	instance, err := models.FindInstanceByID(r.Context(), code)
 	if err != nil {
 		log.Error(err)
 		flash.Message{

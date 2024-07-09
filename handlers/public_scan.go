@@ -19,7 +19,7 @@ func publicScanHandler(w http.ResponseWriter, r *http.Request) {
 	code = strings.ToUpper(code)
 	data["code"] = code
 
-	location, err := models.FindLocationByCode(code)
+	location, err := models.FindLocationByCode(r.Context(), code)
 	if err != nil {
 		flash.Message{
 			Style:   "warning",
@@ -86,7 +86,7 @@ func publicScanPostHandler(w http.ResponseWriter, r *http.Request) {
 	locationCode = strings.ToUpper(locationCode)
 
 	// Get the location
-	location, err := models.FindLocationByCode(locationCode)
+	location, err := models.FindLocationByCode(r.Context(), locationCode)
 	if err != nil {
 		flash.Message{
 			Style:   "warning",
@@ -206,7 +206,7 @@ func publicScanOutHandler(w http.ResponseWriter, r *http.Request) {
 	code := chi.URLParam(r, "code")
 	code = strings.ToUpper(code)
 
-	location, err := models.FindLocationByCode(code)
+	location, err := models.FindLocationByCode(r.Context(), code)
 	if err != nil {
 		flash.Message{
 			Style:   "warning",
@@ -272,7 +272,7 @@ func publicScanOutPostHandler(w http.ResponseWriter, r *http.Request) {
 	locationCode = strings.ToUpper(locationCode)
 
 	// Get the location
-	location, err := models.FindLocationByCode(locationCode)
+	location, err := models.FindLocationByCode(r.Context(), locationCode)
 	if err != nil {
 		flash.Message{
 			Style:   "warning",
@@ -319,7 +319,7 @@ func publicScanOutPostHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Log the scan
-	err = location.LogScanOut(teamCode)
+	err = location.LogScanOut(r.Context(), teamCode)
 	if err != nil {
 		flash.Message{
 			Style:   "warning",

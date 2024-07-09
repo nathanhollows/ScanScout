@@ -25,7 +25,7 @@ func adminLoginPostHandler(w http.ResponseWriter, r *http.Request) {
 	password := r.Form.Get("password")
 
 	// Try to authenticate the user
-	user, err := models.AuthenticateUser(email, password)
+	user, err := models.AuthenticateUser(r.Context(), email, password)
 	if err != nil {
 		log.Error("Error authenticating user: ", err)
 		flash.Message{

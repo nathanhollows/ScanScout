@@ -29,8 +29,7 @@ type Instance struct {
 
 type Instances []Instance
 
-func (i *Instance) Save() error {
-	ctx := context.Background()
+func (i *Instance) Save(ctx context.Context) error {
 	if i.ID == "" {
 		i.ID = uuid.New().String()
 	}
@@ -41,8 +40,7 @@ func (i *Instance) Save() error {
 	return nil
 }
 
-func (i *Instance) Update() error {
-	ctx := context.Background()
+func (i *Instance) Update(ctx context.Context) error {
 	_, err := db.NewUpdate().Model(i).WherePK().Exec(ctx)
 	if err != nil {
 		return err
@@ -50,8 +48,7 @@ func (i *Instance) Update() error {
 	return nil
 }
 
-func (i *Instance) Delete() error {
-	ctx := context.Background()
+func (i *Instance) Delete(ctx context.Context) error {
 	_, err := db.NewDelete().Model(i).WherePK().Exec(ctx)
 	if err != nil {
 		return err
@@ -74,8 +71,7 @@ func FindAllInstances(ctx context.Context) (Instances, error) {
 }
 
 // FindInstanceByID finds an instance by ID
-func FindInstanceByID(id string) (*Instance, error) {
-	ctx := context.Background()
+func FindInstanceByID(ctx context.Context, id string) (*Instance, error) {
 	instance := &Instance{}
 	err := db.NewSelect().
 		Model(instance).

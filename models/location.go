@@ -33,13 +33,13 @@ type Location struct {
 type Locations []*Location
 
 // FindLocationByCode returns a location by code
-func FindLocationByCode(code string) (*Location, error) {
+func FindLocationByCode(ctx context.Context, code string) (*Location, error) {
 	code = strings.ToUpper(code)
 	var location Location
 	err := db.NewSelect().
 		Model(&location).
 		Where("code = ?", code).
-		Scan(context.Background())
+		Scan(ctx)
 	if err != nil {
 		log.Error(err)
 	}
@@ -47,12 +47,12 @@ func FindLocationByCode(code string) (*Location, error) {
 }
 
 // FindLocationsByCodes returns a list of locations by code
-func FindLocationsByCodes(codes []string) Locations {
+func FindLocationsByCodes(ctx context.Context, codes []string) Locations {
 	var locations Locations
 	err := db.NewSelect().
 		Model(&locations).
 		Where("code in (?)", bun.In(codes)).
-		Scan(context.Background())
+		Scan(ctx)
 	if err != nil {
 		log.Error(err)
 	}
@@ -60,7 +60,7 @@ func FindLocationsByCodes(codes []string) Locations {
 }
 
 // Save saves or updates a location
-func (l *Location) Save() error {
+func (l *Location) Save(ctx context.Context) error {
 	insert := false
 	var err error
 	if l.Code == "" {
@@ -68,7 +68,6 @@ func (l *Location) Save() error {
 		insert = true
 	}
 
-	ctx := context.Background()
 	if insert {
 		_, err = db.NewInsert().Model(l).Exec(ctx)
 	} else {
@@ -103,29 +102,29 @@ func (l *Location) LogScan(ctx context.Context, teamCode string) error {
 	// Update the location stats
 	l.CurrentCount++
 	l.TotalVisits++
-	l.Save()
+	l.Save(ctx)
 
 	scan := Scan{
 		TeamID:     team.Code,
 		LocationID: l.Code,
 		TimeIn:     time.Now().UTC(),
 	}
-	scan.Save()
+	scan.Save(ctx)
 
 	return nil
 }
 
-func (l *Location) LogScanOut(teamCode string) error {
+func (l *Location) LogScanOut(ctx context.Context, teamCode string) error {
 	// Find the open scan
 	teamCode = strings.ToUpper(teamCode)
-	scan, err := FindScan(teamCode, l.Code)
+	scan, err := FindScan(ctx, teamCode, l.Code)
 	if err != nil {
 		return err
 	}
 
 	// Check if the team must scan out
 	scan.TimeOut = time.Now().UTC()
-	scan.Save()
+	scan.Save(ctx)
 
 	// Update the location stats
 	l.AvgDuration =
@@ -133,7 +132,7 @@ func (l *Location) LogScanOut(teamCode string) error {
 			scan.TimeOut.Sub(scan.TimeIn).Seconds()) /
 			float64(l.TotalVisits+1)
 	l.CurrentCount--
-	l.Save()
+	l.Save(ctx)
 
 	return nil
 }
