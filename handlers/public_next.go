@@ -5,9 +5,9 @@ import (
 	"strings"
 
 	"github.com/charmbracelet/log"
-	"github.com/nathanhollows/ScanScout/flash"
-	"github.com/nathanhollows/ScanScout/models"
-	"github.com/nathanhollows/ScanScout/sessions"
+	"github.com/nathanhollows/Rapua/flash"
+	"github.com/nathanhollows/Rapua/models"
+	"github.com/nathanhollows/Rapua/sessions"
 )
 
 // publicNextHandler shows the team the next location(s) to scan in

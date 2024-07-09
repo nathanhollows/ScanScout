@@ -8,7 +8,7 @@ import (
 	"strings"
 
 	"github.com/charmbracelet/log"
-	"github.com/nathanhollows/ScanScout/helpers"
+	"github.com/nathanhollows/Rapua/helpers"
 	"github.com/uptrace/bun"
 )
 

@@ -4,7 +4,7 @@ import (
 	"net/http"
 
 	"github.com/charmbracelet/log"
-	"github.com/nathanhollows/ScanScout/models"
+	"github.com/nathanhollows/Rapua/models"
 )
 
 // Dashboard shows the admin dashboard

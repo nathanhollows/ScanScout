@@ -1,5 +1,5 @@
 {
-  "name": "scanscout",
+  "name": "Rapua",
   "version": "1.0.0",
   "description": " A simple to use QR code based navigation utility built for educators ",
   "main": "index.js",
@@ -11,7 +11,7 @@
     "build": "tailwindcss build -o assets/css/tailwind.css",
     "watch": "tailwindcss build -o assets/css/tailwind.css --watch"
   },
-  "githug": "nathanhollows/ScanScout",
+  "github": "nathanhollows/Rapua",
   "author": "Nathan Hollows",
   "license": "ISC",
   "dependencies": {

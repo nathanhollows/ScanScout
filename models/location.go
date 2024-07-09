@@ -9,7 +9,7 @@ import (
 	"time"
 
 	"github.com/charmbracelet/log"
-	"github.com/nathanhollows/ScanScout/helpers"
+	"github.com/nathanhollows/Rapua/helpers"
 	"github.com/uptrace/bun"
 	qrcode "github.com/yeqown/go-qrcode/v2"
 	qrwriter "github.com/yeqown/go-qrcode/writer/standard"

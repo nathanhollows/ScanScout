@@ -1,4 +1,4 @@
-module github.com/nathanhollows/ScanScout
+module github.com/nathanhollows/Rapua
 
 go 1.20
 

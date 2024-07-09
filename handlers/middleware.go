@@ -4,9 +4,9 @@ import (
 	"context"
 	"net/http"
 
-	"github.com/nathanhollows/ScanScout/flash"
-	"github.com/nathanhollows/ScanScout/models"
-	"github.com/nathanhollows/ScanScout/sessions"
+	"github.com/nathanhollows/Rapua/flash"
+	"github.com/nathanhollows/Rapua/models"
+	"github.com/nathanhollows/Rapua/sessions"
 )
 
 func adminAuthMiddleware(next http.Handler) http.Handler {

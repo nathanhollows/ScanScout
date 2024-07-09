@@ -4,10 +4,10 @@ import (
 	"net/http"
 
 	"github.com/charmbracelet/log"
-	"github.com/nathanhollows/ScanScout/flash"
-	"github.com/nathanhollows/ScanScout/helpers"
-	"github.com/nathanhollows/ScanScout/models"
-	"github.com/nathanhollows/ScanScout/sessions"
+	"github.com/nathanhollows/Rapua/flash"
+	"github.com/nathanhollows/Rapua/helpers"
+	"github.com/nathanhollows/Rapua/models"
+	"github.com/nathanhollows/Rapua/sessions"
 )
 
 // adminLoginHandler is the handler for the admin login page

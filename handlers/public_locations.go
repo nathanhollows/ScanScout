@@ -6,9 +6,9 @@ import (
 
 	"github.com/charmbracelet/log"
 	"github.com/go-chi/chi"
-	"github.com/nathanhollows/ScanScout/flash"
-	"github.com/nathanhollows/ScanScout/models"
-	"github.com/nathanhollows/ScanScout/sessions"
+	"github.com/nathanhollows/Rapua/flash"
+	"github.com/nathanhollows/Rapua/models"
+	"github.com/nathanhollows/Rapua/sessions"
 )
 
 // publicMyLocationsHandler shows the found locations page

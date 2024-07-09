@@ -6,7 +6,7 @@ import (
 	"net/http"
 
 	"github.com/charmbracelet/log"
-	"github.com/nathanhollows/ScanScout/sessions"
+	"github.com/nathanhollows/Rapua/sessions"
 	"golang.org/x/crypto/bcrypt"
 )
 

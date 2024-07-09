@@ -4,8 +4,8 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/nathanhollows/ScanScout/flash"
-	"github.com/nathanhollows/ScanScout/models"
+	"github.com/nathanhollows/Rapua/flash"
+	"github.com/nathanhollows/Rapua/models"
 )
 
 // Teams shows admin the teams

@@ -4,8 +4,8 @@ import (
 	"net/http"
 
 	"github.com/go-chi/chi"
-	"github.com/nathanhollows/ScanScout/flash"
-	"github.com/nathanhollows/ScanScout/models"
+	"github.com/nathanhollows/Rapua/flash"
+	"github.com/nathanhollows/Rapua/models"
 )
 
 // adminInstancesHandler shows admin the instances

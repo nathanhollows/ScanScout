@@ -7,7 +7,7 @@ import (
 
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
-	"github.com/nathanhollows/ScanScout/filesystem"
+	"github.com/nathanhollows/Rapua/filesystem"
 )
 
 func createRoutes() {

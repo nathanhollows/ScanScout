@@ -11,7 +11,7 @@ import (
 
 	"github.com/charmbracelet/log"
 	"github.com/gomarkdown/markdown"
-	"github.com/nathanhollows/ScanScout/models"
+	"github.com/nathanhollows/Rapua/models"
 )
 
 func templateData(r *http.Request) map[string]interface{} {
