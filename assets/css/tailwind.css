@@ -3858,6 +3858,10 @@ html {
   stroke: currentColor;
 }
 
+.stroke-info {
+  stroke: var(--fallback-in,oklch(var(--in)/1));
+}
+
 .p-2 {
   padding: 0.5rem;
 }
@@ -3893,6 +3897,11 @@ html {
 .py-5 {
   padding-top: 1.25rem;
   padding-bottom: 1.25rem;
+}
+
+.px-5 {
+  padding-left: 1.25rem;
+  padding-right: 1.25rem;
 }
 
 .pb-3 {

@@ -50,7 +50,7 @@ func createRoutes() {
 
 	router.Route("/admin", func(r chi.Router) {
 		r.Use(adminAuthMiddleware)
-		r.Get("/", adminActivityHandler)
+		r.Get("/", adminDashboardHandler)
 		r.Route("/locations", func(r chi.Router) {
 			r.Get("/", adminLocationsHandler)
 			r.Get("/new", adminLocationNewHandler)
