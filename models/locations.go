@@ -42,6 +42,19 @@ func (i *Location) Save(ctx context.Context) error {
 	return err
 }
 
+// Delete removes the location from the database
+// This will also delete the location content
+func (i *Location) Delete(ctx context.Context) error {
+	// Delete the location content
+	err := i.Content.Delete(ctx)
+	if err != nil {
+		return err
+	}
+
+	_, err = db.NewDelete().Model(i).WherePK().Exec(ctx)
+	return err
+}
+
 // FindLocationByCode returns a location by code
 func FindLocationByCode(ctx context.Context, code string) (*Location, error) {
 	code = strings.ToUpper(code)
@@ -49,7 +62,10 @@ func FindLocationByCode(ctx context.Context, code string) (*Location, error) {
 	err := db.NewSelect().
 		Model(&location).
 		Where("coords_id = ?", code).
-		Where("instance_id = ?", GetUserFromContext(ctx).CurrentInstance.ID).
+		Where("instance_id = ?", GetUserFromContext(ctx).CurrentInstanceID).
+		Relation("Coords").
+		Relation("Criteria").
+		Relation("Content").
 		Scan(ctx)
 	if err != nil {
 		log.Error(err)

@@ -25,6 +25,12 @@ type Team struct {
 
 type Teams []Team
 
+// Delete removes the team from the database
+func (t *Team) Delete(ctx context.Context) error {
+	_, err := db.NewDelete().Model(t).WherePK().Exec(ctx)
+	return err
+}
+
 // FindAll returns all teams
 func FindAllTeams(ctx context.Context) (Teams, error) {
 	user := GetUserFromContext(ctx)

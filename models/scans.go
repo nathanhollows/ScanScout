@@ -36,6 +36,12 @@ func (s *Scan) Save(ctx context.Context) error {
 	return err
 }
 
+// Delete removes the scan from the database
+func (s *Scan) Delete(ctx context.Context) error {
+	_, err := db.NewDelete().Model(s).WherePK().Exec(ctx)
+	return err
+}
+
 // FindScan finds a scan by team and location
 func FindScan(ctx context.Context, teamCode, locationCode string) (*Scan, error) {
 	teamCode = strings.ToUpper(teamCode)

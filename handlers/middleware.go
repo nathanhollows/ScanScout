@@ -3,6 +3,7 @@ package handlers
 import (
 	"context"
 	"net/http"
+	"regexp"
 
 	"github.com/nathanhollows/Rapua/flash"
 	"github.com/nathanhollows/Rapua/models"
@@ -35,5 +36,31 @@ func adminAuthMiddleware(next http.Handler) http.Handler {
 
 		ctx := context.WithValue(r.Context(), models.UserIDKey, user)
 		next.ServeHTTP(w, r.WithContext(ctx))
+	})
+}
+
+// Ensure the user has an instance selected, otherwise redirect to the instances page
+func adminCheckInstanceMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		user := r.Context().Value(models.UserIDKey).(*models.User)
+
+		// Check if the route contains /admin/instances
+		reg := regexp.MustCompile(`/admin/instances/?`)
+		if reg.MatchString(r.URL.Path) {
+			next.ServeHTTP(w, r)
+			return
+		}
+
+		if user.CurrentInstance == nil {
+			flash.Message{
+				Title:   "Error",
+				Message: "Please select an instance to continue",
+				Style:   flash.Error,
+			}.Save(w, r)
+			http.Redirect(w, r, "/admin/instances", http.StatusSeeOther)
+			return
+		}
+
+		next.ServeHTTP(w, r)
 	})
 }

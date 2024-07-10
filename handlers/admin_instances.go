@@ -3,6 +3,7 @@ package handlers
 import (
 	"net/http"
 
+	"github.com/charmbracelet/log"
 	"github.com/go-chi/chi"
 	"github.com/nathanhollows/Rapua/flash"
 	"github.com/nathanhollows/Rapua/models"
@@ -92,13 +93,25 @@ func adminInstanceCreateHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Switch to the new instance
+	user.CurrentInstanceID = instance.ID
+	if err := user.Update(r.Context()); err != nil {
+		flash.Message{
+			Title:   "Error",
+			Message: "Error updating user",
+			Style:   flash.Error,
+		}.Save(w, r)
+		http.Redirect(w, r, "/admin/instances", http.StatusSeeOther)
+		return
+	}
+
 	// Redirect to the new instance
 	flash.Message{
 		Title:   "Success",
 		Message: "Instance created successfully",
 		Style:   flash.Success,
 	}.Save(w, r)
-	http.Redirect(w, r, "/admin/instances/"+instance.ID, http.StatusSeeOther)
+	http.Redirect(w, r, "/admin/instances/", http.StatusSeeOther)
 }
 
 // adminInstanceSwitchHandler switches the current instance
@@ -164,4 +177,105 @@ func adminInstanceSwitchHandler(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, r.Header.Get("Referer"), http.StatusSeeOther)
 	return
 
+}
+
+// adminInstanceDeleteHandler deletes an instance
+func adminInstanceDeleteHandler(w http.ResponseWriter, r *http.Request) {
+	setDefaultHeaders(w)
+	data := templateData(r)
+	data["title"] = "Delete Instance"
+
+	// Parse the form
+	if err := r.ParseForm(); err != nil {
+		flash.Message{
+			Title:   "Error",
+			Message: "Error parsing form",
+			Style:   flash.Error,
+		}.Save(w, r)
+		log.Error(err, "ctx", r.Context(), "form", r.Form)
+		http.Redirect(w, r, "/admin/instances", http.StatusSeeOther)
+		return
+	}
+
+	// Get the instance ID from the URL
+	id := r.Form.Get("id")
+	if id == "" {
+		flash.Message{
+			Title:   "Error",
+			Message: "Instance ID is required",
+			Style:   flash.Error,
+		}.Save(w, r)
+		http.Redirect(w, r, "/admin/instances", http.StatusSeeOther)
+		return
+	}
+
+	// Find the instance
+	instance, err := models.FindInstanceByID(r.Context(), id)
+	if err != nil {
+		flash.Message{
+			Title:   "Error",
+			Message: "Instance not found",
+			Style:   flash.Error,
+		}.Save(w, r)
+		http.Redirect(w, r, "/admin/instances", http.StatusSeeOther)
+		return
+	}
+
+	// Verify the user is the owner of the instance
+	user := data["user"].(*models.User)
+	if user.UserID != instance.UserID {
+		flash.Message{
+			Title:   "Error",
+			Message: "You do not have permission to delete this instance",
+			Style:   flash.Error,
+		}.Save(w, r)
+		http.Redirect(w, r, "/admin/instances", http.StatusSeeOther)
+		return
+	}
+
+	// Before submitting the form, the user must confirm the deletion by
+	// typing the instance name. If the name does not match, redirect back
+	// to the form.
+	if r.Form.Get("name") != instance.Name {
+		flash.Message{
+			Title:   "Error",
+			Message: "Please type the instance name to confirm deletion",
+			Style:   flash.Error,
+		}.Save(w, r)
+		http.Redirect(w, r, "/admin/instances/"+instance.ID, http.StatusSeeOther)
+		return
+	}
+
+	// Update the user's current instance if it matches the instance being deleted
+	if user.CurrentInstanceID == instance.ID {
+		user.CurrentInstanceID = ""
+		if err := user.Update(r.Context()); err != nil {
+			flash.Message{
+				Title:   "Error",
+				Message: "Error updating user",
+				Style:   flash.Error,
+			}.Save(w, r)
+			http.Redirect(w, r, "/admin/instances", http.StatusSeeOther)
+			return
+		}
+	}
+
+	// Delete the instance
+	if err := instance.Delete(r.Context()); err != nil {
+		flash.Message{
+			Title:   "Error",
+			Message: "Error deleting instance",
+			Style:   flash.Error,
+		}.Save(w, r)
+		http.Redirect(w, r, "/admin/instances", http.StatusSeeOther)
+		return
+	}
+
+	// Redirect to the instances page
+	flash.Message{
+		Title:   "Success",
+		Message: "Instance deleted successfully",
+		Style:   flash.Success,
+	}.Save(w, r)
+	http.Redirect(w, r, "/admin/instances", http.StatusSeeOther)
 }

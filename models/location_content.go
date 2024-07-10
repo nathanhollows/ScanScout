@@ -30,3 +30,9 @@ func (i *LocationContent) Save(ctx context.Context) error {
 	}
 	return err
 }
+
+// Delete removes the location content from the database
+func (i *LocationContent) Delete(ctx context.Context) error {
+	_, err := db.NewDelete().Model(i).WherePK().Exec(ctx)
+	return err
+}
