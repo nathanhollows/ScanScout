@@ -3871,6 +3871,14 @@ html {
   width: 2.5rem;
 }
 
+.w-64 {
+  width: 16rem;
+}
+
+.w-auto {
+  width: auto;
+}
+
 .max-w-7xl {
   max-width: 80rem;
 }
