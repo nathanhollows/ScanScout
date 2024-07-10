@@ -5,9 +5,9 @@ import (
 	"strings"
 
 	"github.com/charmbracelet/log"
-	"github.com/nathanhollows/ScanScout/flash"
-	"github.com/nathanhollows/ScanScout/models"
-	"github.com/nathanhollows/ScanScout/sessions"
+	"github.com/nathanhollows/Rapua/flash"
+	"github.com/nathanhollows/Rapua/models"
+	"github.com/nathanhollows/Rapua/sessions"
 )
 
 // publicNextHandler shows the team the next location(s) to scan in
@@ -46,7 +46,7 @@ func publicNextHandler(w http.ResponseWriter, r *http.Request) {
 	var team *models.Team
 	var err error
 	if teamCode != "" {
-		team, err = models.FindTeamByCode(teamCode)
+		team, err = models.FindTeamByCode(r.Context(), teamCode)
 		if err == nil {
 			data["team"] = team
 		} else {
@@ -70,7 +70,7 @@ func publicNextHandler(w http.ResponseWriter, r *http.Request) {
 		}.Save(w, r)
 	}
 
-	data["locations"] = team.SuggestNextLocations(3)
+	data["locations"] = team.SuggestNextLocations(r.Context(), 3)
 	data["messages"] = flash.Get(w, r)
 	render(w, data, false, "next")
 }

@@ -4,10 +4,10 @@ import (
 	"net/http"
 
 	"github.com/charmbracelet/log"
-	"github.com/nathanhollows/ScanScout/flash"
-	"github.com/nathanhollows/ScanScout/helpers"
-	"github.com/nathanhollows/ScanScout/models"
-	"github.com/nathanhollows/ScanScout/sessions"
+	"github.com/nathanhollows/Rapua/flash"
+	"github.com/nathanhollows/Rapua/helpers"
+	"github.com/nathanhollows/Rapua/models"
+	"github.com/nathanhollows/Rapua/sessions"
 )
 
 // adminLoginHandler is the handler for the admin login page
@@ -25,7 +25,7 @@ func adminLoginPostHandler(w http.ResponseWriter, r *http.Request) {
 	password := r.Form.Get("password")
 
 	// Try to authenticate the user
-	user, err := models.AuthenticateUser(email, password)
+	user, err := models.AuthenticateUser(r.Context(), email, password)
 	if err != nil {
 		log.Error("Error authenticating user: ", err)
 		flash.Message{
@@ -58,6 +58,21 @@ func adminLoginPostHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 // Logout destroys the user session
-func Logout(w http.ResponseWriter, r *http.Request) error {
-	return nil
+func adminLogoutHandler(w http.ResponseWriter, r *http.Request) {
+	session, err := sessions.Get(r, "admin")
+	if err != nil {
+		log.Error("Error getting session: ", err)
+		flash.Message{
+			Title:   "Error",
+			Message: "An error occurred while trying to log out.",
+			Style:   flash.Error,
+		}.Save(w, r)
+		// Redirect to the login page
+		http.Redirect(w, r, helpers.URL("/login"), http.StatusSeeOther)
+		return
+	}
+	session.Options.MaxAge = -1
+	session.Save(r, w)
+	http.Redirect(w, r, helpers.URL("/login"), http.StatusSeeOther)
+	return
 }

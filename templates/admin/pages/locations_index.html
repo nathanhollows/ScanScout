@@ -4,58 +4,62 @@
 <div class="flex flex-col md:flex-row justify-between items-center w-full py-5">
   <h1 class="text-2xl p-5 font-bold">Locations ({{ len .locations }})</h1>
   <span class="flex md:flex-row flex-wrap justify-center space-x-3">
-    <a
-      class="btn btn-base btn-outline mb-3 md:mb-0"
-      href="/admin/locations/qr/136069ce-f2e2-410c-9ac5-09ea2a0c874e.zip"
-    >
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        width="24"
-        height="24"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        stroke-width="2"
-        stroke-linecap="round"
-        stroke-linejoin="round"
-        class="lucide lucide-image-down"
+    {{ if .locations }}
+    <div class="join">
+      <a
+        class="btn btn-base btn-outline join-item mb-3 md:mb-0"
+        href="/admin/locations/qr-codes.zip"
       >
-        <path
-          d="M10.3 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v10l-3.1-3.1a2 2 0 0 0-2.814.014L6 21"
-        />
-        <path d="m14 19 3 3v-5.5" />
-        <path d="m17 22 3-3" />
-        <circle
-          cx="9"
-          cy="9"
-          r="2"
-        />
-      </svg>
-      Download QR codes
-    </a>
-    <a
-      class="btn btn-base btn-outline"
-      href="/admin/locations/posters/136069ce-f2e2-410c-9ac5-09ea2a0c874e.pdf"
-    >
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        width="24"
-        height="24"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        stroke-width="2"
-        stroke-linecap="round"
-        stroke-linejoin="round"
-        class="lucide lucide-file-down"
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          class="lucide lucide-image-down"
+        >
+          <path
+            d="M10.3 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v10l-3.1-3.1a2 2 0 0 0-2.814.014L6 21"
+          />
+          <path d="m14 19 3 3v-5.5" />
+          <path d="m17 22 3-3" />
+          <circle
+            cx="9"
+            cy="9"
+            r="2"
+          />
+        </svg>
+        Download QR codes
+      </a>
+      <a
+        class="btn btn-base btn-outline join-item"
+        href="/admin/locations/posters.pdf"
       >
-        <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z" />
-        <path d="M14 2v4a2 2 0 0 0 2 2h4" />
-        <path d="M12 18v-6" />
-        <path d="m9 15 3 3 3-3" />
-      </svg>
-      Download Posters
-    </a>
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          class="lucide lucide-file-down"
+        >
+          <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z" />
+          <path d="M14 2v4a2 2 0 0 0 2 2h4" />
+          <path d="M12 18v-6" />
+          <path d="m9 15 3 3 3-3" />
+        </svg>
+        Download Posters
+      </a>
+    </div>
+    {{ end }}
     <a
       href="/admin/locations/new"
       class="btn btn-primary"
@@ -92,7 +96,7 @@
     class="flex flex-row justify-between items-center space-x-3 bg-white rounded-lg p-4 border join-item"
   >
     <div class="flex flex-row items-center space-x-3 grow">
-      {{ if .Lat }}
+      {{ if .Coords.Lat }}
       <svg
         xmlns="http://www.w3.org/2000/svg"
         width="24"
@@ -149,17 +153,17 @@
         class="badge badge-ghost basis-20 tooltip"
         data-tip="Unique location code"
       >
-        {{ .Code }}
+        {{ .Coords.Code }}
       </div>
       <a
-        href="/admin/locations/{{ .Code }}"
+        href="/admin/locations/{{ .Coords.Code }}"
         class="link flex-grow"
-        >{{ .Name }}</a
+      >{{ .Coords.Name }}</a
       >
 
       <span
         class="tooltip flex space-x-2"
-        data-tip="{{ .CurrentCount }} currently visiting, {{ .TotalVisits }} scans total"
+        data-tip="{{ .Coords.CurrentCount }} currently visiting, {{ .Coords.TotalVisits }} scans total"
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -181,9 +185,9 @@
           <path d="M9 9h.01" />
           <path d="M15 9h.01" />
         </svg>
-        <strong> {{ .CurrentCount }} </strong> /
-        <strong>{{ .TotalVisits }} </strong>
-        {{ if .AvgDuration }}
+        <strong> {{ .Coords.CurrentCount }} </strong> /
+        <strong>{{ .Coords.TotalVisits }} </strong>
+        {{ if .Coords.AvgDuration }}
         <p class="flex flex-row space-x-3 text-center">
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -215,7 +219,7 @@
               r="8"
             />
           </svg>
-          <span> {{ toDuration .AvgDuration }} </span>
+          <span> {{ toDuration .Coords.AvgDuration }} </span>
         </p>
         {{ end }}
       </span>

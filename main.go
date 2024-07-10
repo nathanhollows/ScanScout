@@ -4,9 +4,9 @@ package main
 
 import (
 	"github.com/joho/godotenv"
-	"github.com/nathanhollows/ScanScout/handlers"
-	"github.com/nathanhollows/ScanScout/models"
-	"github.com/nathanhollows/ScanScout/sessions"
+	"github.com/nathanhollows/Rapua/handlers"
+	"github.com/nathanhollows/Rapua/models"
+	"github.com/nathanhollows/Rapua/sessions"
 )
 
 func main() {

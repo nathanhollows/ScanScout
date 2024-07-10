@@ -6,9 +6,9 @@ import (
 
 	"github.com/charmbracelet/log"
 	"github.com/go-chi/chi"
-	"github.com/nathanhollows/ScanScout/flash"
-	"github.com/nathanhollows/ScanScout/models"
-	"github.com/nathanhollows/ScanScout/sessions"
+	"github.com/nathanhollows/Rapua/flash"
+	"github.com/nathanhollows/Rapua/models"
+	"github.com/nathanhollows/Rapua/sessions"
 )
 
 // publicMyLocationsHandler shows the found locations page
@@ -26,7 +26,7 @@ func publicMyLocationsHandler(w http.ResponseWriter, r *http.Request) {
 	var team *models.Team
 	var err error
 	if teamCode != "" {
-		team, err = models.FindTeamByCode(teamCode)
+		team, err = models.FindTeamByCode(r.Context(), teamCode)
 		if err == nil {
 			data["team"] = team
 		} else {
@@ -86,7 +86,7 @@ func publicSpecificLocationsHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Get the location
-	location, err := models.FindLocationByCode(locationCode)
+	location, err := models.FindLocationByCode(r.Context(), locationCode)
 	if err != nil {
 		flash.Message{
 			Style:   "danger",
@@ -98,7 +98,7 @@ func publicSpecificLocationsHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	data["location"] = location
-	data["title"] = location.Name
+	data["title"] = location.Coords.Name
 	data["messages"] = flash.Get(w, r)
 	render(w, data, false, "location")
 }

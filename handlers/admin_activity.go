@@ -4,17 +4,18 @@ import (
 	"net/http"
 
 	"github.com/charmbracelet/log"
-	"github.com/nathanhollows/ScanScout/models"
+	"github.com/nathanhollows/Rapua/models"
 )
 
 // Dashboard shows the admin dashboard
-func adminActivityHandler(w http.ResponseWriter, r *http.Request) {
+func adminDashboardHandler(w http.ResponseWriter, r *http.Request) {
 	setDefaultHeaders(w)
 	data := templateData(r)
 	data["title"] = "Activity tracker"
+	data["breadcrumbs"] = []map[string]string{{"link": "/admin", "text": "Admin"}, {"link": "/admin/dashboard", "text": "Dashboard"}}
 
 	// Get the list of locations
-	locations, err := models.FindAllLocations()
+	locations, err := models.FindAllLocations(r.Context())
 	if err != nil {
 		log.Error(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -22,8 +23,8 @@ func adminActivityHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	data["locations"] = locations
 
-	// Get the list of activity and their activity
-	activity, err := models.TeamActivityOverview()
+	// Get the list of teams and their activity
+	activity, err := models.TeamActivityOverview(r.Context())
 	if err != nil {
 		log.Error(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -32,5 +33,5 @@ func adminActivityHandler(w http.ResponseWriter, r *http.Request) {
 	data["activity"] = activity
 
 	// Render the template
-	render(w, data, true, "activity")
+	render(w, data, true, "dashboard")
 }

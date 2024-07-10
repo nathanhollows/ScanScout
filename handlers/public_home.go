@@ -5,9 +5,9 @@ import (
 	"strings"
 
 	"github.com/charmbracelet/log"
-	"github.com/nathanhollows/ScanScout/flash"
-	"github.com/nathanhollows/ScanScout/models"
-	"github.com/nathanhollows/ScanScout/sessions"
+	"github.com/nathanhollows/Rapua/flash"
+	"github.com/nathanhollows/Rapua/models"
+	"github.com/nathanhollows/Rapua/sessions"
 )
 
 // publicHomeHandler shows the public home page
@@ -23,7 +23,7 @@ func publicHomeHandler(w http.ResponseWriter, r *http.Request) {
 	var team *models.Team
 	var err error
 	if teamCode != "" {
-		team, err = models.FindTeamByCode(teamCode.(string))
+		team, err = models.FindTeamByCode(r.Context(), teamCode.(string))
 		if err == nil {
 			data["team"] = team
 		} else {

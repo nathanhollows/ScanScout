@@ -9,71 +9,29 @@ import (
 	"time"
 
 	"github.com/charmbracelet/log"
-	"github.com/nathanhollows/ScanScout/helpers"
-	"github.com/uptrace/bun"
+	"github.com/nathanhollows/Rapua/helpers"
 	qrcode "github.com/yeqown/go-qrcode/v2"
 	qrwriter "github.com/yeqown/go-qrcode/writer/standard"
 )
 
-type Location struct {
+type Coords struct {
 	baseModel
-	belongsToInstance
 
-	Code         string  `bun:",unique,pk" json:"code"`
-	Lat          float64 `bun:",type:float" json:"lat"`
-	Lng          float64 `bun:",type:float" json:"lng"`
-	Name         string  `bun:",type:varchar(255)" json:"name"`
-	Content      string  `bun:",type:text" json:"content"`
-	TotalVisits  int     `bun:",type:int" json:"total_visits"`
-	CurrentCount int     `bun:",type:int" json:"current_count"`
-	AvgDuration  float64 `bun:",type:float" json:"avg_duration"`
-	MustScanOut  bool    `bun:"default:false" json:"must_scan_out"`
+	Code         string    `bun:",unique,pk" json:"code"`
+	Lat          float64   `bun:",type:float" json:"lat"`
+	Lng          float64   `bun:",type:float" json:"lng"`
+	Name         string    `bun:",type:varchar(255)" json:"name"`
+	Content      string    `bun:",type:text" json:"content"`
+	TotalVisits  int       `bun:",type:int" json:"total_visits"`
+	CurrentCount int       `bun:",type:int" json:"current_count"`
+	AvgDuration  float64   `bun:",type:float" json:"avg_duration"`
+	Locations    Locations `bun:"rel:has-many,join:code=coords_id" json:"instance_locations"`
 }
 
-type Locations []*Location
-
-// FindAll returns all locations
-func FindAllLocations() ([]*Location, error) {
-	var locations []*Location
-	err := db.NewSelect().
-		Model(&locations).
-		Order("name ASC").
-		Scan(context.Background())
-	if err != nil {
-		log.Error(err)
-	}
-	return locations, err
-}
-
-// FindLocationByCode returns a location by code
-func FindLocationByCode(code string) (*Location, error) {
-	code = strings.ToUpper(code)
-	var location Location
-	err := db.NewSelect().
-		Model(&location).
-		Where("code = ?", code).
-		Scan(context.Background())
-	if err != nil {
-		log.Error(err)
-	}
-	return &location, err
-}
-
-// FindLocationsByCodes returns a list of locations by code
-func FindLocationsByCodes(codes []string) Locations {
-	var locations Locations
-	err := db.NewSelect().
-		Model(&locations).
-		Where("code in (?)", bun.In(codes)).
-		Scan(context.Background())
-	if err != nil {
-		log.Error(err)
-	}
-	return locations
-}
+type BaseLocations []*Coords
 
 // Save saves or updates a location
-func (l *Location) Save() error {
+func (l *Coords) Save(ctx context.Context) error {
 	insert := false
 	var err error
 	if l.Code == "" {
@@ -81,7 +39,6 @@ func (l *Location) Save() error {
 		insert = true
 	}
 
-	ctx := context.Background()
 	if insert {
 		_, err = db.NewInsert().Model(l).Exec(ctx)
 	} else {
@@ -94,10 +51,10 @@ func (l *Location) Save() error {
 }
 
 // LogScan creates a new scan entry for the location if it's valid
-func (l *Location) LogScan(teamCode string) error {
+func (l *Coords) LogScan(ctx context.Context, teamCode string) error {
 	teamCode = strings.ToUpper(teamCode)
 	// Check if a team exists with the code
-	team, err := FindTeamByCode(teamCode)
+	team, err := FindTeamByCode(ctx, teamCode)
 	if err != nil || team == nil {
 		return err
 	}
@@ -116,29 +73,29 @@ func (l *Location) LogScan(teamCode string) error {
 	// Update the location stats
 	l.CurrentCount++
 	l.TotalVisits++
-	l.Save()
+	l.Save(ctx)
 
 	scan := Scan{
 		TeamID:     team.Code,
 		LocationID: l.Code,
 		TimeIn:     time.Now().UTC(),
 	}
-	scan.Save()
+	scan.Save(ctx)
 
 	return nil
 }
 
-func (l *Location) LogScanOut(teamCode string) error {
+func (l *Coords) LogScanOut(ctx context.Context, teamCode string) error {
 	// Find the open scan
 	teamCode = strings.ToUpper(teamCode)
-	scan, err := FindScan(teamCode, l.Code)
+	scan, err := FindScan(ctx, teamCode, l.Code)
 	if err != nil {
 		return err
 	}
 
 	// Check if the team must scan out
 	scan.TimeOut = time.Now().UTC()
-	scan.Save()
+	scan.Save(ctx)
 
 	// Update the location stats
 	l.AvgDuration =
@@ -146,12 +103,12 @@ func (l *Location) LogScanOut(teamCode string) error {
 			scan.TimeOut.Sub(scan.TimeIn).Seconds()) /
 			float64(l.TotalVisits+1)
 	l.CurrentCount--
-	l.Save()
+	l.Save(ctx)
 
 	return nil
 }
 
-func (l *Location) GenerateQRCode() error {
+func (l *Coords) GenerateQRCode() error {
 	// Only generate the QR code if it doesn't exist
 	if l.checkQRPath(true) && l.checkQRPath(false) {
 		return nil
@@ -166,21 +123,23 @@ func (l *Location) GenerateQRCode() error {
 		return err
 	}
 
-	if l.MustScanOut {
-		qrc, err := l.generateQRCode(false)
-		if err != nil {
-			return err
-		}
-
-		if err := saveQRCode(qrc, l.getQRPath(false)); err != nil {
-			return err
-		}
-	}
+	// Commented out for now
+	// This is for the scan out QR code
+	// if l.MustScanOut {
+	// 	qrc, err := l.generateQRCode(false)
+	// 	if err != nil {
+	// 		return err
+	// 	}
+	//
+	// 	if err := saveQRCode(qrc, l.getQRPath(false)); err != nil {
+	// 		return err
+	// 	}
+	// }
 
 	return nil
 }
 
-func (l *Location) getScanURL(scanningIn bool) string {
+func (l *Coords) getScanURL(scanningIn bool) string {
 	var url string
 	if scanningIn {
 		url = os.Getenv("SITE_URL") + "/s/" + l.Code
@@ -190,7 +149,7 @@ func (l *Location) getScanURL(scanningIn bool) string {
 	return url
 }
 
-func (l *Location) getQRFilename(scanningIn bool) string {
+func (l *Coords) getQRFilename(scanningIn bool) string {
 	var path string
 	if scanningIn {
 		path = l.Code + " " + l.Name + " in.png"
@@ -200,16 +159,16 @@ func (l *Location) getQRFilename(scanningIn bool) string {
 	return path
 }
 
-func (l *Location) getQRPath(scanningIn bool) string {
+func (l *Coords) getQRPath(scanningIn bool) string {
 	return "./assets/codes/" + l.getQRFilename(scanningIn)
 }
 
-func (l *Location) checkQRPath(scanningIn bool) bool {
+func (l *Coords) checkQRPath(scanningIn bool) bool {
 	_, err := os.Stat(l.getQRPath(scanningIn))
 	return err == nil
 }
 
-func (l *Location) generateQRCode(scanningIn bool) (*qrcode.QRCode, error) {
+func (l *Coords) generateQRCode(scanningIn bool) (*qrcode.QRCode, error) {
 	url := l.getScanURL(scanningIn)
 	qrc, err := qrcode.New(url)
 	if err != nil {
@@ -230,12 +189,20 @@ func saveQRCode(qrc *qrcode.QRCode, path string) error {
 		return err
 	}
 
-	if qrc.Save(w); err != nil {
+	err = qrc.Save(w)
+	if err != nil {
 		fmt.Printf("could not generate QRCode: %v", err)
 		return err
 	} else {
 		return nil
 	}
+}
+
+// SetCoords sets the latitude and longitude of the location
+func (l *Coords) SetCoords(lat, lng float64) error {
+	l.Lat = lat
+	l.Lng = lng
+	return nil
 }
 
 // // GeneratePoster pre-emptively generates the poster for the new clue

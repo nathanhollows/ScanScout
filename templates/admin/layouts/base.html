@@ -10,11 +10,11 @@
     <link rel="stylesheet" href="{{ static "/css/tailwind.css" }}" />
     <title>{{ .title }}</title>
     <script
-      src="https://unpkg.com/htmx.org@1.8.5"
-      integrity="sha384-7aHh9lqPYGYZ7sTHvzP1t3BAfLhYSTy9ArHdP3Xsr9/3TlGurYgcPBoFmXX2TX/w"
-      crossorigin="anonymous"
-      defer
-    ></script>
+    src="https://unpkg.com/htmx.org@1.8.5"
+    integrity="sha384-7aHh9lqPYGYZ7sTHvzP1t3BAfLhYSTy9ArHdP3Xsr9/3TlGurYgcPBoFmXX2TX/w"
+    crossorigin="anonymous"
+    defer
+  ></script>
   </head>
   <body>
     <div
@@ -99,7 +99,7 @@
                 <path d="M21 12v.01" />
                 <path d="M12 21v-1" />
               </svg>
-              ScanScout</a
+              Rapua</a
             >
           </div>
           <div class="navbar-center hidden lg:flex">
@@ -176,53 +176,119 @@
             </ul>
           </div>
           <div class="navbar-end">
-            <button
-              class="btn btn-ghost btn-sm tooltip tooltip-bottom flex"
-              data-tip="Change instance"
-              onclick="my_modal_4.showModal()"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                class="lucide lucide-compass"
+            <div class="dropdown dropdown-end">
+              <button
+                tabindex="0"
+                class="btn btn-ghost btn-sm tooltip tooltip-bottom flex"
+                data-tip="Change instance"
               >
-                <circle
-                  cx="12"
-                  cy="12"
-                  r="10"
-                />
-                <polygon
-                  points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"
-                />
-              </svg>
-              Te Rapu Hamu
-            </button>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  class="lucide lucide-compass"
+                >
+                  <circle
+                    cx="12"
+                    cy="12"
+                    r="10"
+                  />
+                  <polygon
+                    points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"
+                  />
+                </svg>
+                {{ if .user.CurrentInstance }}
+                {{ .user.CurrentInstance.Name }}
+                {{ else }}
+                <em>No instance selected</em>
+                {{ end }}
+              </button>
+              <ul
+                tabindex="0"
+                class="menu menu-sm dropdown-content bg-base-100 rounded-box z-[1] mt-3 w-52 p-2 shadow">
+                {{ if .instances }}
+                <li>    
+                  <h2 class="menu-title">Change instance</h2>
+                  <ul>
+                    {{ range .instances }}
+                    {{ if $.user.CurrentInstance }}
+                    {{ if ne .ID $.user.CurrentInstance.ID }}
+                    <li>
+                      <a href="/admin/instances/{{ .ID }}/switch">
+                        {{ .Name }}
+                      </a>
+                    </li>
+                    {{ end }}
+                    {{ else }}
+                    <li>
+                      <a href="/admin/instances/{{ .ID }}/switch">
+                        {{ .Name }}
+                      </a>
+                    </li>
+                    {{ end }}
+                    {{ end }}
+                  </ul>
+                </li>
+                {{ end }}
+                <hr class="my-2">
+                <li>
+                  <a href="/admin/instances">
+                    Manage instances
+                  </a>
+                </li>
+
+              </ul>
+            </div>
           </div>
+          <button
+            class="btn btn-ghost btn-circle tooltip tooltip-bottom"
+            data-tip="Preferences"
+            onclick="my_modal_4.showModal()"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              class="lucide lucide-user-round-cog"
+              style="margin-left: 0.9em;"
+            >
+              <path d="M2 21a8 8 0 0 1 10.434-7.62" />
+              <circle
+                cx="10"
+                cy="8"
+                r="5"
+              />
+              <circle
+                cx="18"
+                cy="18"
+                r="3"
+              />
+              <path d="m19.5 14.3-.4.9" />
+              <path d="m16.9 20.8-.4.9" />
+              <path d="m21.7 19.5-.9-.4" />
+              <path d="m15.2 16.9-.9-.4" />
+              <path d="m21.7 16.5-.9.4" />
+              <path d="m15.2 19.1-.9.4" />
+              <path d="m19.5 21.7-.4-.9" />
+              <path d="m16.9 15.2-.4-.9" />
+            </svg>
+          </button>
         </div>
       </div>
-      <main class="max-w-7xl m-auto">{{ template "content" . }}</main>
-      <dialog
-        id="my_modal_4"
-        class="modal"
-      >
-        <div class="modal-box">
-          <h3 class="font-bold text-lg">Change ScanScout instance</h3>
-          <p class="py-4">No other instances to show.</p>
-          <div class="modal-action">
-            <form method="dialog">
-              <button class="btn">Nevermind</button>
-            </form>
-          </div>
-        </div>
-      </dialog>
     </div>
+    <main class="max-w-7xl m-auto">{{ template "content" . }}</main>
   </body>
 </html>
 {{ end }}

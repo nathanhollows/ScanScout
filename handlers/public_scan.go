@@ -7,9 +7,9 @@ import (
 
 	"github.com/charmbracelet/log"
 	"github.com/go-chi/chi"
-	"github.com/nathanhollows/ScanScout/flash"
-	"github.com/nathanhollows/ScanScout/models"
-	"github.com/nathanhollows/ScanScout/sessions"
+	"github.com/nathanhollows/Rapua/flash"
+	"github.com/nathanhollows/Rapua/models"
+	"github.com/nathanhollows/Rapua/sessions"
 )
 
 // publicScanHandler shows the public scan page
@@ -19,7 +19,7 @@ func publicScanHandler(w http.ResponseWriter, r *http.Request) {
 	code = strings.ToUpper(code)
 	data["code"] = code
 
-	location, err := models.FindLocationByCode(code)
+	location, err := models.FindLocationByCode(r.Context(), code)
 	if err != nil {
 		flash.Message{
 			Style:   "warning",
@@ -39,7 +39,7 @@ func publicScanHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	var team *models.Team
 	if teamCode != "" {
-		team, err = models.FindTeamByCode(teamCode)
+		team, err = models.FindTeamByCode(r.Context(), teamCode)
 		if err == nil {
 			data["team"] = team
 		} else {
@@ -86,7 +86,7 @@ func publicScanPostHandler(w http.ResponseWriter, r *http.Request) {
 	locationCode = strings.ToUpper(locationCode)
 
 	// Get the location
-	location, err := models.FindLocationByCode(locationCode)
+	location, err := models.FindLocationByCode(r.Context(), locationCode)
 	if err != nil {
 		flash.Message{
 			Style:   "warning",
@@ -100,7 +100,7 @@ func publicScanPostHandler(w http.ResponseWriter, r *http.Request) {
 	// Check if a team exists with the code
 	teamCode := r.FormValue("team")
 	teamCode = strings.ToUpper(teamCode)
-	team, err := models.FindTeamByCode(teamCode)
+	team, err := models.FindTeamByCode(r.Context(), teamCode)
 	if err != nil || team == nil {
 		flash.Message{
 			Style:   "warning",
@@ -134,7 +134,7 @@ func publicScanPostHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Check if the team has already visited the location
-	if team.HasVisited(location) {
+	if team.HasVisited(&location.Coords) {
 		flash.Message{
 			Style:   "warning",
 			Title:   "You have already visited here.",
@@ -145,7 +145,7 @@ func publicScanPostHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Check if the location is one of the suggested locations
-	suggested := team.SuggestNextLocations(3)
+	suggested := team.SuggestNextLocations(r.Context(), 3)
 	found := false
 	for _, l := range *suggested {
 		if l.Code == locationCode {
@@ -164,7 +164,7 @@ func publicScanPostHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Log the scan
-	err = location.LogScan(teamCode)
+	err = location.Coords.LogScan(r.Context(), teamCode)
 	if err != nil {
 		flash.Message{
 			Style:   "warning",
@@ -176,10 +176,10 @@ func publicScanPostHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if location.MustScanOut {
-		team.MustScanOut = location.Code
-		team.Update()
-	}
+	// if location.MustScanOut {
+	// 	team.MustScanOut = location.Code
+	// 	team.Update(r.Context())
+	// }
 
 	flash.Message{
 		Style:   "success",
@@ -195,7 +195,7 @@ func publicScanPostHandler(w http.ResponseWriter, r *http.Request) {
 		session.Values["locations"] = append(session.Values["locations"].([]string), locationCode)
 	}
 	session.Values["team"] = teamCode
-	session.Values["instance"] = location.InstanceID
+	// session.Values["instance"] = location.InstanceID
 	session.Save(r, w)
 
 	http.Redirect(w, r, "/mylocations/"+locationCode, http.StatusFound)
@@ -206,7 +206,7 @@ func publicScanOutHandler(w http.ResponseWriter, r *http.Request) {
 	code := chi.URLParam(r, "code")
 	code = strings.ToUpper(code)
 
-	location, err := models.FindLocationByCode(code)
+	location, err := models.FindLocationByCode(r.Context(), code)
 	if err != nil {
 		flash.Message{
 			Style:   "warning",
@@ -236,7 +236,7 @@ func publicScanOutHandler(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/", http.StatusFound)
 		return
 	}
-	team, err := models.FindTeamByCode(teamCode)
+	team, err := models.FindTeamByCode(r.Context(), teamCode)
 	if err == nil {
 		data["team"] = team
 	} else {
@@ -272,7 +272,7 @@ func publicScanOutPostHandler(w http.ResponseWriter, r *http.Request) {
 	locationCode = strings.ToUpper(locationCode)
 
 	// Get the location
-	location, err := models.FindLocationByCode(locationCode)
+	location, err := models.FindLocationByCode(r.Context(), locationCode)
 	if err != nil {
 		flash.Message{
 			Style:   "warning",
@@ -288,7 +288,7 @@ func publicScanOutPostHandler(w http.ResponseWriter, r *http.Request) {
 	teamCode := r.FormValue("team")
 	teamCode = strings.ToUpper(teamCode)
 
-	team, err := models.FindTeamByCode(teamCode)
+	team, err := models.FindTeamByCode(r.Context(), teamCode)
 	if err != nil {
 		flash.Message{
 			Style:   "warning",
@@ -319,7 +319,7 @@ func publicScanOutPostHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Log the scan
-	err = location.LogScanOut(teamCode)
+	err = location.Coords.LogScanOut(r.Context(), teamCode)
 	if err != nil {
 		flash.Message{
 			Style:   "warning",
@@ -333,7 +333,7 @@ func publicScanOutPostHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Clear the must scan out field
 	team.MustScanOut = ""
-	team.Update()
+	team.Update(r.Context())
 
 	flash.Message{
 		Style:   "success",
