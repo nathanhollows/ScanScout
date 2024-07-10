@@ -93,7 +93,7 @@
   zoom = 18
   {{ end }}
 
-  mapboxgl.accessToken = 'pk.eyJ1IjoibmF0aGFuaG9sbG93cyIsImEiOiJjbHN6YmpleHEwbWRpMnFyb3JwMHpjZWx3In0.ZizoPaB-7dh-SthWBD2dBw';
+  mapboxgl.accessToken = '{{ getEnv "MAPBOX_KEY" }}';
   var coordinates = document.getElementById('coordinates');
   var map = new mapboxgl.Map({
       container: 'map',

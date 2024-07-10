@@ -76,6 +76,9 @@ func parse(data map[string]interface{}, baseDir string, patterns ...string) *tem
 }
 
 var funcs = template.FuncMap{
+	"getEnv": func(key string) string {
+		return os.Getenv(key)
+	},
 	// Render a string as HTML
 	"html": func(v string) template.HTML {
 		return template.HTML(v)
