@@ -24,7 +24,7 @@ func CreateUser(ctx context.Context, user *models.User, passwordConfirm string) 
 	user.Password = hashedPassword
 
 	// Generate UUID for user
-	user.UserID = uuid.New().String()
+	user.ID = uuid.New().String()
 
 	return repositories.CreateUser(ctx, user)
 }

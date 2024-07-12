@@ -22,7 +22,7 @@ type Instance struct {
 	ID                string    `bun:",pk,type:varchar(36)" json:"id"`
 	Name              string    `bun:",type:varchar(255)" json:"name"`
 	UserID            string    `bun:",type:varchar(36)" json:"user_id"`
-	User              User      `bun:"rel:has-one,join:user_id=user_id" json:"user"`
+	User              User      `bun:"rel:has-one,join:user_id=id" json:"user"`
 	Teams             Teams     `bun:"rel:has-many,join:id=instance_id" json:"teams"`
 	InstanceLocations Locations `bun:"rel:has-many,join:id=instance_id" json:"instance_locations"`
 	Scans             Scans     `bun:"rel:has-many,join:id=instance_id" json:"scans"`
@@ -103,7 +103,7 @@ func FindAllInstances(ctx context.Context) (Instances, error) {
 	if !ok {
 		return nil, errors.New("User not found in context")
 	}
-	err := db.DB.NewSelect().Model(&instances).Where("user_id = ?", user.UserID).Scan(ctx)
+	err := db.DB.NewSelect().Model(&instances).Where("user_id = ?", user.ID).Scan(ctx)
 	if err != nil {
 		return nil, err
 	}

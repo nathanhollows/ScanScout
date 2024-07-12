@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"log/slog"
 	"net/http"
 
 	"github.com/charmbracelet/log"
@@ -80,7 +81,7 @@ func adminInstanceCreateHandler(w http.ResponseWriter, r *http.Request) {
 	// Create the new instance
 	instance := &models.Instance{
 		Name:   name,
-		UserID: user.UserID,
+		UserID: user.ID,
 	}
 
 	if err := instance.Save(r.Context()); err != nil {
@@ -164,6 +165,7 @@ func adminInstanceSwitchHandler(w http.ResponseWriter, r *http.Request) {
 			Message: "Error updating user",
 			Style:   flash.Error,
 		}.Save(w, r)
+		slog.Error("Error updating user", "err", err.Error())
 		http.Redirect(w, r, "/admin/instances", http.StatusSeeOther)
 		return
 	}
@@ -223,7 +225,7 @@ func adminInstanceDeleteHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Verify the user is the owner of the instance
 	user := data["user"].(*models.User)
-	if user.UserID != instance.UserID {
+	if user.ID != instance.UserID {
 		flash.Message{
 			Title:   "Error",
 			Message: "You do not have permission to delete this instance",

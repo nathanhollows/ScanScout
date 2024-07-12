@@ -14,11 +14,11 @@ import (
 type User struct {
 	baseModel
 
-	UserID            string    `bun:",unique,pk,type:varchar(36)" json:"user_id"`
+	ID                string    `bun:",unique,pk,type:varchar(36)" json:"id"`
 	Name              string    `bun:",type:varchar(255)" json:"name"`
 	Email             string    `bun:",unique,pk" json:"email"`
 	Password          string    `bun:",type:varchar(255)" json:"password"`
-	Instances         Instances `bun:"rel:has-many,join:user_id=user_id" json:"instances"`
+	Instances         Instances `bun:"rel:has-many,join:id=user_id" json:"instances"`
 	CurrentInstanceID string    `bun:",type:varchar(36)" json:"current_instance_id"`
 	CurrentInstance   *Instance `bun:"rel:has-one,join:current_instance_id=id" json:"current_instance"`
 }
@@ -33,7 +33,7 @@ func (u *User) Save(ctx context.Context) error {
 
 // Update the user in the database
 func (u *User) Update(ctx context.Context) error {
-	_, err := db.DB.NewUpdate().Model(u).WherePK("user_id").Exec(ctx)
+	_, err := db.DB.NewUpdate().Model(u).WherePK("id").Exec(ctx)
 	return err
 }
 

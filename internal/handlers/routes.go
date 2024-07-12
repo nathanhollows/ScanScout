@@ -8,6 +8,7 @@ import (
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
 	"github.com/nathanhollows/Rapua/internal/filesystem"
+	"github.com/nathanhollows/Rapua/internal/handlers/internal/middlewares"
 )
 
 func setupRouter() *chi.Mux {
@@ -52,8 +53,8 @@ func setupRouter() *chi.Mux {
 	})
 
 	router.Route("/admin", func(r chi.Router) {
-		r.Use(adminAuthMiddleware)
-		r.Use(adminCheckInstanceMiddleware)
+		r.Use(middlewares.AdminAuthMiddleware)
+		r.Use(middlewares.AdminCheckInstanceMiddleware)
 		r.Get("/", adminDashboardHandler)
 		r.Route("/locations", func(r chi.Router) {
 			r.Get("/", adminLocationsHandler)
