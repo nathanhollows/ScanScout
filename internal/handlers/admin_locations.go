@@ -11,7 +11,7 @@ import (
 )
 
 // Locations shows admin the geosites
-func adminLocationsHandler(w http.ResponseWriter, r *http.Request) {
+func AdminLocationsHandler(w http.ResponseWriter, r *http.Request) {
 	setDefaultHeaders(w)
 	data := templateData(r)
 	data["title"] = "Locations"
@@ -33,7 +33,7 @@ func adminLocationsHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 // LocationEdit shows the form to edit a location
-func adminLocationEditHandler(w http.ResponseWriter, r *http.Request) {
+func AdminLocationEditHandler(w http.ResponseWriter, r *http.Request) {
 	setDefaultHeaders(w)
 	data := templateData(r)
 	data["title"] = "Edit Location"
@@ -58,7 +58,7 @@ func adminLocationEditHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 // LocationNew shows the form to create a new location
-func adminLocationNewHandler(w http.ResponseWriter, r *http.Request) {
+func AdminLocationNewHandler(w http.ResponseWriter, r *http.Request) {
 	setDefaultHeaders(w)
 	data := templateData(r)
 	data["title"] = "Add a Location"
@@ -68,8 +68,8 @@ func adminLocationNewHandler(w http.ResponseWriter, r *http.Request) {
 	render(w, data, true, "locations_new")
 }
 
-// adminLocationNewPostHandler creates a new location
-func adminLocationNewPostHandler(w http.ResponseWriter, r *http.Request) {
+// AdminLocationNewPostHandler creates a new location
+func AdminLocationNewPostHandler(w http.ResponseWriter, r *http.Request) {
 	setDefaultHeaders(w)
 	r.ParseForm()
 
@@ -205,7 +205,7 @@ func adminGenerateQRHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func adminLocationQRZipHandler(w http.ResponseWriter, r *http.Request) {
+func AdminLocationQRZipHandler(w http.ResponseWriter, r *http.Request) {
 	archive, err := models.GenerateQRCodeArchive(r.Context())
 	if err != nil {
 		flash.Message{
@@ -225,7 +225,7 @@ func adminLocationQRZipHandler(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func adminLocationPostersHandler(w http.ResponseWriter, r *http.Request) {
+func AdminLocationPostersHandler(w http.ResponseWriter, r *http.Request) {
 	posters, err := models.GeneratePosters(r.Context())
 	if err != nil {
 		log.Error(err)

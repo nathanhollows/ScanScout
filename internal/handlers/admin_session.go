@@ -12,8 +12,8 @@ import (
 	"github.com/nathanhollows/Rapua/internal/sessions"
 )
 
-// adminLoginHandler is the handler for the admin login page
-func adminLoginHandler(w http.ResponseWriter, r *http.Request) {
+// AdminLoginHandler is the handler for the admin login page
+func AdminLoginHandler(w http.ResponseWriter, r *http.Request) {
 	data := templateData(r)
 	data["title"] = "Login"
 	data["messages"] = flash.Get(w, r)
@@ -21,7 +21,7 @@ func adminLoginHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 // LoginPost handles the login form submission
-func adminLoginFormHandler(w http.ResponseWriter, r *http.Request) {
+func AdminLoginFormHandler(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
 	email := r.Form.Get("email")
 	password := r.Form.Get("password")
@@ -59,7 +59,7 @@ func adminLoginFormHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 // Logout destroys the user session
-func adminLogoutHandler(w http.ResponseWriter, r *http.Request) {
+func AdminLogoutHandler(w http.ResponseWriter, r *http.Request) {
 	session, err := sessions.Get(r, "admin")
 	if err != nil {
 		log.Error("Error getting session: ", err)
@@ -77,8 +77,8 @@ func adminLogoutHandler(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, helpers.URL("/login"), http.StatusSeeOther)
 }
 
-// adminRegisterHandler is the handler for the admin register page
-func adminRegisterHandler(w http.ResponseWriter, r *http.Request) {
+// AdminRegisterHandler is the handler for the admin register page
+func AdminRegisterHandler(w http.ResponseWriter, r *http.Request) {
 	setDefaultHeaders(w)
 	data := templateData(r)
 	data["title"] = "New user"
@@ -86,8 +86,8 @@ func adminRegisterHandler(w http.ResponseWriter, r *http.Request) {
 	render(w, data, false, "register")
 }
 
-// adminRegisterFormHandler handles the form submission for creating a new user
-func adminRegisterFormHandler(w http.ResponseWriter, r *http.Request) {
+// AdminRegisterFormHandler handles the form submission for creating a new user
+func AdminRegisterFormHandler(w http.ResponseWriter, r *http.Request) {
 	setDefaultHeaders(w)
 	data := templateData(r)
 	data["title"] = "New user"

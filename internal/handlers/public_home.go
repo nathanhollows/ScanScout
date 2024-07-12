@@ -10,8 +10,8 @@ import (
 	"github.com/nathanhollows/Rapua/internal/sessions"
 )
 
-// publicHomeHandler shows the public home page
-func publicHomeHandler(w http.ResponseWriter, r *http.Request) {
+// PublicHomeHandler shows the public home page
+func PublicHomeHandler(w http.ResponseWriter, r *http.Request) {
 	data := templateData(r)
 
 	session, _ := sessions.Get(r, "scanscout")

@@ -7,8 +7,8 @@ import (
 	"github.com/nathanhollows/Rapua/internal/models"
 )
 
-// Dashboard shows the admin dashboard
-func adminDashboardHandler(w http.ResponseWriter, r *http.Request) {
+// AdminDashboard shows the admin dashboard
+func AdminDashboardHandler(w http.ResponseWriter, r *http.Request) {
 	setDefaultHeaders(w)
 	data := templateData(r)
 	data["title"] = "Activity tracker"

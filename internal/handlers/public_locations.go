@@ -11,8 +11,8 @@ import (
 	"github.com/nathanhollows/Rapua/internal/sessions"
 )
 
-// publicMyLocationsHandler shows the found locations page
-func publicMyLocationsHandler(w http.ResponseWriter, r *http.Request) {
+// PublicMyLocationsHandler shows the found locations page
+func PublicMyLocationsHandler(w http.ResponseWriter, r *http.Request) {
 	data := templateData(r)
 	data["title"] = "My Locations"
 
@@ -48,15 +48,15 @@ func publicMyLocationsHandler(w http.ResponseWriter, r *http.Request) {
 	render(w, data, false, "mylocations")
 }
 
-// publicSpecificLocationsHandler shows the page for a specific location
-func publicSpecificLocationsHandler(w http.ResponseWriter, r *http.Request) {
+// PublicSpecificLocationsHandler shows the page for a specific location
+func PublicSpecificLocationsHandler(w http.ResponseWriter, r *http.Request) {
 	data := templateData(r)
 	locationCode := chi.URLParam(r, "code")
 	locationCode = strings.ToUpper(locationCode)
 	data["code"] = locationCode
 
 	// Get the list of locations from the session
-	locations := getLocationsFromSession(r)
+	locations := GetLocationsFromSession(r)
 	if locations == nil {
 		flash.Message{
 			Style:   "danger",
@@ -103,7 +103,7 @@ func publicSpecificLocationsHandler(w http.ResponseWriter, r *http.Request) {
 	render(w, data, false, "location")
 }
 
-func getLocationsFromSession(r *http.Request) []string {
+func GetLocationsFromSession(r *http.Request) []string {
 	session, err := sessions.Get(r, "scanscout")
 	if err != nil || session.Values["locations"] == nil {
 		return nil

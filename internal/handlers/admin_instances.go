@@ -10,8 +10,8 @@ import (
 	"github.com/nathanhollows/Rapua/internal/models"
 )
 
-// adminInstancesHandler shows admin the instances
-func adminInstancesHandler(w http.ResponseWriter, r *http.Request) {
+// AdminInstancesHandler shows admin the instances
+func AdminInstancesHandler(w http.ResponseWriter, r *http.Request) {
 	setDefaultHeaders(w)
 	data := templateData(r)
 	data["title"] = "Instances"
@@ -38,8 +38,8 @@ func adminInstancesHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// adminInstanceCreateHandler creates a new instance
-func adminInstanceCreateHandler(w http.ResponseWriter, r *http.Request) {
+// AdminInstanceCreateHandler creates a new instance
+func AdminInstanceCreateHandler(w http.ResponseWriter, r *http.Request) {
 	setDefaultHeaders(w)
 	data := templateData(r)
 	data["title"] = "New Instance"
@@ -115,8 +115,8 @@ func adminInstanceCreateHandler(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/admin/instances/", http.StatusSeeOther)
 }
 
-// adminInstanceSwitchHandler switches the current instance
-func adminInstanceSwitchHandler(w http.ResponseWriter, r *http.Request) {
+// AdminInstanceSwitchHandler switches the current instance
+func AdminInstanceSwitchHandler(w http.ResponseWriter, r *http.Request) {
 	setDefaultHeaders(w)
 	data := templateData(r)
 	data["title"] = "Switch Instance"
@@ -181,8 +181,8 @@ func adminInstanceSwitchHandler(w http.ResponseWriter, r *http.Request) {
 
 }
 
-// adminInstanceDeleteHandler deletes an instance
-func adminInstanceDeleteHandler(w http.ResponseWriter, r *http.Request) {
+// AdminInstanceDeleteHandler deletes an instance
+func AdminInstanceDeleteHandler(w http.ResponseWriter, r *http.Request) {
 	setDefaultHeaders(w)
 	data := templateData(r)
 	data["title"] = "Delete Instance"

@@ -9,7 +9,7 @@ import (
 )
 
 // Teams shows admin the teams
-func adminTeamsHandler(w http.ResponseWriter, r *http.Request) {
+func AdminTeamsHandler(w http.ResponseWriter, r *http.Request) {
 	setDefaultHeaders(w)
 	data := templateData(r)
 	data["title"] = "Teams"
@@ -32,7 +32,7 @@ func adminTeamsHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 // AddTeams creates new teams equal to the number of teams in the request
-func adminTeamsAddHandler(w http.ResponseWriter, r *http.Request) {
+func AdminTeamsAddHandler(w http.ResponseWriter, r *http.Request) {
 	countStr := r.FormValue("count")
 	count, err := strconv.Atoi(countStr)
 	if err != nil || count < 1 {

@@ -4,8 +4,8 @@ package main
 
 import (
 	"github.com/joho/godotenv"
-	"github.com/nathanhollows/Rapua/internal/handlers"
 	"github.com/nathanhollows/Rapua/internal/models"
+	"github.com/nathanhollows/Rapua/internal/server"
 	"github.com/nathanhollows/Rapua/internal/sessions"
 	"github.com/nathanhollows/Rapua/pkg/db"
 )
@@ -15,5 +15,5 @@ func main() {
 	db.Connect()
 	models.CreateTables()
 	sessions.Start()
-	handlers.Start()
+	server.Start()
 }

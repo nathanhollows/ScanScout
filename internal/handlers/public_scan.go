@@ -12,8 +12,8 @@ import (
 	"github.com/nathanhollows/Rapua/internal/sessions"
 )
 
-// publicScanHandler shows the public scan page
-func publicScanHandler(w http.ResponseWriter, r *http.Request) {
+// PublicScanHandler shows the public scan page
+func PublicScanHandler(w http.ResponseWriter, r *http.Request) {
 	data := templateData(r)
 	code := chi.URLParam(r, "code")
 	code = strings.ToUpper(code)
@@ -79,8 +79,8 @@ func publicScanHandler(w http.ResponseWriter, r *http.Request) {
 	render(w, data, false, "scan")
 }
 
-// publicScanPostHandler logs the scan
-func publicScanPostHandler(w http.ResponseWriter, r *http.Request) {
+// PublicScanPostHandler logs the scan
+func PublicScanPostHandler(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
 	locationCode := chi.URLParam(r, "code")
 	locationCode = strings.ToUpper(locationCode)
@@ -201,7 +201,7 @@ func publicScanPostHandler(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/mylocations/"+locationCode, http.StatusFound)
 }
 
-func publicScanOutHandler(w http.ResponseWriter, r *http.Request) {
+func PublicScanOutHandler(w http.ResponseWriter, r *http.Request) {
 	data := templateData(r)
 	code := chi.URLParam(r, "code")
 	code = strings.ToUpper(code)
@@ -266,7 +266,7 @@ func publicScanOutHandler(w http.ResponseWriter, r *http.Request) {
 	render(w, data, false, "scanout")
 }
 
-func publicScanOutPostHandler(w http.ResponseWriter, r *http.Request) {
+func PublicScanOutPostHandler(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
 	locationCode := chi.URLParam(r, "code")
 	locationCode = strings.ToUpper(locationCode)

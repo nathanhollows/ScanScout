@@ -10,8 +10,8 @@ import (
 	"github.com/nathanhollows/Rapua/internal/sessions"
 )
 
-// publicNextHandler shows the team the next location(s) to scan in
-func publicNextHandler(w http.ResponseWriter, r *http.Request) {
+// PublicNextHandler shows the team the next location(s) to scan in
+func PublicNextHandler(w http.ResponseWriter, r *http.Request) {
 	data := templateData(r)
 
 	// Get the team code
