@@ -23,7 +23,7 @@ func setupRouter() *chi.Mux {
 
 	// Session routes
 	router.Get("/login", adminLoginHandler)
-	router.Post("/login", adminLoginPostHandler)
+	router.Post("/login", adminLoginFormHandler)
 	router.Get("/logout", adminLogoutHandler)
 	router.Get("/register", adminRegisterHandler)
 	router.Post("/register", adminRegisterFormHandler)
@@ -39,7 +39,6 @@ func setupRouter() *chi.Mux {
 		r.Get("/", publicScanOutHandler)
 		r.Get("/{code:[A-z]{5}}", publicScanOutHandler)
 		r.Post("/{code:[A-z]{5}}", publicScanOutPostHandler)
-		r.Post("/", adminLoginPostHandler)
 	})
 
 	// Next location routes

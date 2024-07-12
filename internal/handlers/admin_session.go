@@ -6,7 +6,7 @@ import (
 	"github.com/charmbracelet/log"
 	"github.com/nathanhollows/Rapua/internal/flash"
 	"github.com/nathanhollows/Rapua/internal/helpers"
-	"github.com/nathanhollows/Rapua/internal/models"
+	"github.com/nathanhollows/Rapua/internal/services"
 	"github.com/nathanhollows/Rapua/internal/sessions"
 )
 
@@ -19,13 +19,13 @@ func adminLoginHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 // LoginPost handles the login form submission
-func adminLoginPostHandler(w http.ResponseWriter, r *http.Request) {
+func adminLoginFormHandler(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
 	email := r.Form.Get("email")
 	password := r.Form.Get("password")
 
 	// Try to authenticate the user
-	user, err := models.AuthenticateUser(r.Context(), email, password)
+	user, err := services.AuthenticateUser(r.Context(), email, password)
 	if err != nil {
 		log.Error("Error authenticating user: ", err)
 		flash.Message{
@@ -54,7 +54,6 @@ func adminLoginPostHandler(w http.ResponseWriter, r *http.Request) {
 	session.Save(r, w)
 
 	http.Redirect(w, r, helpers.URL("/admin"), http.StatusSeeOther)
-
 }
 
 // Logout destroys the user session
@@ -74,5 +73,4 @@ func adminLogoutHandler(w http.ResponseWriter, r *http.Request) {
 	session.Options.MaxAge = -1
 	session.Save(r, w)
 	http.Redirect(w, r, helpers.URL("/login"), http.StatusSeeOther)
-	return
 }
