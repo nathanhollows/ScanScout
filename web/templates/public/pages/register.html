@@ -5,7 +5,7 @@
   </div>
   <div class="flex-none">
     <ul class="menu menu-horizontal px-1">
-      <li><a href="/register" class="btn btn-sm btn-primary">Register</a></li>
+      <li><a href="/login" class="btn btn-sm btn-primary">Login</a></li>
     </ul>
   </div>
 </div>
@@ -53,7 +53,7 @@
       <path d="M12 21v-1" />
     </svg>
     <h2 class="mt-5 text-center text-2xl font-bold leading-9 tracking-tight">
-      Login to Rapua
+      Register for Rapua
     </h2>
   </div>
   <div class="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
@@ -62,6 +62,21 @@
       class="space-y-6"
       method="post"
     >
+      <div>
+        <label
+          class="form-control w-full"
+          for="location"
+          ><div class="label font-bold">
+            <span class="label-text">Name</span>
+          </div>
+          <input
+            id="name"
+            name="name"
+            type="test"
+            class="input input-bordered input-lg w-full"
+            placeholder="Jane Doe"
+        /></label>
+      </div>
       <div>
         <label
           class="form-control w-full"
@@ -92,11 +107,25 @@
         /></label>
       </div>
       <div>
+        <label
+          class="form-control w-full"
+          for="team"
+          ><div class="label font-bold">
+            <span class="label-text">Confirm Password</span>
+          </div>
+          <input
+            id="password-confirm"
+            name="password-confirm"
+            type="password"
+            class="input input-bordered input-lg w-full text-2xl"
+          /></label>
+      </div>
+      <div>
         <button
           type="submit"
           class="btn btn-neutral w-full"
         >
-          Sign in
+          Register
         </button>
       </div>
     </form>

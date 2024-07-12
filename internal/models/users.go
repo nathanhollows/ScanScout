@@ -14,7 +14,8 @@ import (
 type User struct {
 	baseModel
 
-	UserID            string    `bun:",pk,type:varchar(36)" json:"user_id"`
+	UserID            string    `bun:",unique,pk,type:varchar(36)" json:"user_id"`
+	Name              string    `bun:",type:varchar(255)" json:"name"`
 	Email             string    `bun:",unique,pk" json:"email"`
 	Password          string    `bun:",type:varchar(255)" json:"password"`
 	Instances         Instances `bun:"rel:has-many,join:user_id=user_id" json:"instances"`

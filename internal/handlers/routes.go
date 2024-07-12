@@ -25,6 +25,8 @@ func setupRouter() *chi.Mux {
 	router.Get("/login", adminLoginHandler)
 	router.Post("/login", adminLoginPostHandler)
 	router.Get("/logout", adminLogoutHandler)
+	router.Get("/register", adminRegisterHandler)
+	router.Post("/register", adminRegisterFormHandler)
 
 	// Scanning in routes
 	router.Route("/s", func(r chi.Router) {
