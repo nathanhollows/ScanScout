@@ -5,12 +5,9 @@ import (
 	"log"
 	"time"
 
+	"github.com/nathanhollows/Rapua/internal/contextkeys"
 	"github.com/nathanhollows/Rapua/pkg/db"
 )
-
-type contextKey string
-
-const UserIDKey contextKey = "userID"
 
 func CreateTables() {
 	var models = []interface{}{
@@ -44,7 +41,7 @@ type belongsToInstance struct {
 
 // GetUserFromContext gets the user from the context
 func GetUserFromContext(ctx context.Context) *User {
-	user, ok := ctx.Value(UserIDKey).(*User)
+	user, ok := ctx.Value(contextkeys.UserIDKey).(*User)
 	if !ok {
 		return nil
 	}

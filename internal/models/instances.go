@@ -11,6 +11,7 @@ import (
 	"github.com/charmbracelet/log"
 	"github.com/go-pdf/fpdf"
 	"github.com/google/uuid"
+	"github.com/nathanhollows/Rapua/internal/contextkeys"
 	"github.com/nathanhollows/Rapua/pkg/db"
 )
 
@@ -84,7 +85,7 @@ func (i *Instance) Delete(ctx context.Context) error {
 
 // GetCurrentUserInstance gets the current instance from the context
 func GetCurrentUserInstance(ctx context.Context) (*Instance, error) {
-	user, ok := ctx.Value(UserIDKey).(*User)
+	user, ok := ctx.Value(contextkeys.UserIDKey).(*User)
 	if !ok {
 		return nil, errors.New("User not found in context")
 	}
@@ -99,7 +100,7 @@ func GetCurrentUserInstance(ctx context.Context) (*Instance, error) {
 // FindAllInstances finds all instances
 func FindAllInstances(ctx context.Context) (Instances, error) {
 	instances := Instances{}
-	user, ok := ctx.Value(UserIDKey).(*User)
+	user, ok := ctx.Value(contextkeys.UserIDKey).(*User)
 	if !ok {
 		return nil, errors.New("User not found in context")
 	}
@@ -125,7 +126,7 @@ func FindInstanceByID(ctx context.Context, id string) (*Instance, error) {
 }
 
 func GenerateQRCodeArchive(ctx context.Context) (string, error) {
-	instanceID := ctx.Value(UserIDKey).(*User).CurrentInstanceID
+	instanceID := ctx.Value(contextkeys.UserIDKey).(*User).CurrentInstanceID
 	locations, err := FindAllLocations(ctx)
 	if err != nil {
 		return "", err
@@ -260,7 +261,7 @@ func (i *Instance) ZipPosters(ctx context.Context) (string, error) {
 }
 
 func GeneratePosters(ctx context.Context) (string, error) {
-	instanceID := ctx.Value(UserIDKey).(*User).CurrentInstanceID
+	instanceID := ctx.Value(contextkeys.UserIDKey).(*User).CurrentInstanceID
 	instance, err := FindInstanceByID(ctx, instanceID)
 
 	// Set up the document

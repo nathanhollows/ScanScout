@@ -6,6 +6,7 @@ import (
 
 	"github.com/charmbracelet/log"
 	"github.com/go-chi/chi"
+	"github.com/nathanhollows/Rapua/internal/contextkeys"
 	"github.com/nathanhollows/Rapua/internal/flash"
 	"github.com/nathanhollows/Rapua/internal/models"
 )
@@ -73,7 +74,7 @@ func AdminLocationNewPostHandler(w http.ResponseWriter, r *http.Request) {
 	setDefaultHeaders(w)
 	r.ParseForm()
 
-	user := r.Context().Value(models.UserIDKey).(*models.User)
+	user := r.Context().Value(contextkeys.UserIDKey).(*models.User)
 
 	var err error
 
@@ -218,7 +219,7 @@ func AdminLocationQRZipHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Overwrite the file download header
-	instance := r.Context().Value(models.UserIDKey).(*models.User).CurrentInstance
+	instance := r.Context().Value(contextkeys.UserIDKey).(*models.User).CurrentInstance
 	w.Header().Set("Content-Disposition", "attachment; filename="+instance.Name+" QR codes .zip")
 	// Serve the file
 	http.ServeFile(w, r, archive)
@@ -239,7 +240,7 @@ func AdminLocationPostersHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Overwrite the file download header
-	instance := r.Context().Value(models.UserIDKey).(*models.User).CurrentInstance
+	instance := r.Context().Value(contextkeys.UserIDKey).(*models.User).CurrentInstance
 	w.Header().Set("Content-Disposition", "attachment; filename="+instance.Name+" posters.pdf")
 	// Serve the file
 	http.ServeFile(w, r, posters)

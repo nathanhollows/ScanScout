@@ -11,11 +11,12 @@ import (
 
 	"github.com/charmbracelet/log"
 	"github.com/gomarkdown/markdown"
+	"github.com/nathanhollows/Rapua/internal/contextkeys"
 	"github.com/nathanhollows/Rapua/internal/models"
 )
 
 func templateData(r *http.Request) map[string]interface{} {
-	user, ok := r.Context().Value(models.UserIDKey).(*models.User)
+	user, ok := r.Context().Value(contextkeys.UserIDKey).(*models.User)
 	data := map[string]interface{}{
 		"hxrequest": r.Header.Get("HX-Request") == "true",
 		"layout":    "base",

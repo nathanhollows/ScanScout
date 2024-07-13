@@ -15,48 +15,71 @@ import (
 func SetupRouter() *chi.Mux {
 	router := chi.NewRouter()
 
-	router = chi.NewRouter()
 	router.Use(middleware.Compress(5))
 	router.Use(middleware.CleanPath)
 	router.Use(middleware.StripSlashes)
 	router.Use(middleware.RedirectSlashes)
 
+	// Public routes
+	setupPublicRoutes(router)
+
+	// Admin routes
+	setupAdminRoutes(router)
+
+	// Static files
+	workDir, _ := os.Getwd()
+	filesDir := filesystem.Myfs{Dir: http.Dir(filepath.Join(workDir, "web/static"))}
+	filesystem.FileServer(router, "/assets", filesDir)
+
+	return router
+}
+
+func setupPublicRoutes(router chi.Router) {
 	router.Get("/", handlers.PublicHomeHandler)
 
-	// Session routes
-	router.Get("/login", handlers.AdminLoginHandler)
-	router.Post("/login", handlers.AdminLoginFormHandler)
+	router.Route("/login", func(r chi.Router) {
+		r.Get("/", handlers.AdminLoginHandler)
+		r.Post("/", handlers.AdminLoginFormHandler)
+	})
 	router.Get("/logout", handlers.AdminLogoutHandler)
-	router.Get("/register", handlers.AdminRegisterHandler)
-	router.Post("/register", handlers.AdminRegisterFormHandler)
+	router.Route("/register", func(r chi.Router) {
+		r.Get("/", handlers.AdminRegisterHandler)
+		r.Post("/", handlers.AdminRegisterFormHandler)
+	})
 
-	// Scanning in routes
 	router.Route("/s", func(r chi.Router) {
+		r.Use(middlewares.TeamMiddleware)
 		r.Get("/{code:[A-z]{5}}", handlers.PublicScanHandler)
 		r.Post("/{code:[A-z]{5}}", handlers.PublicScanPostHandler)
 	})
 
-	// Scanning out routes
 	router.Route("/o", func(r chi.Router) {
+		r.Use(middlewares.TeamMiddleware)
 		r.Get("/", handlers.PublicScanOutHandler)
 		r.Get("/{code:[A-z]{5}}", handlers.PublicScanOutHandler)
 		r.Post("/{code:[A-z]{5}}", handlers.PublicScanOutPostHandler)
 	})
 
-	// Next location routes
-	router.Get("/next", handlers.PublicNextHandler)
-	router.Post("/next", handlers.PublicNextHandler)
+	router.Route("/next", func(r chi.Router) {
+		r.Use(middlewares.TeamMiddleware)
+		r.Get("/", handlers.PublicNextHandler)
+		r.Post("/", handlers.PublicNextHandler)
+	})
 
 	router.Route("/mylocations", func(r chi.Router) {
+		r.Use(middlewares.TeamMiddleware)
 		r.Get("/", handlers.PublicMyLocationsHandler)
 		r.Get("/{code:[A-z]{5}}", handlers.PublicSpecificLocationsHandler)
 		r.Post("/{code:[A-z]{5}}", handlers.PublicSpecificLocationsHandler)
 	})
+}
 
+func setupAdminRoutes(router chi.Router) {
 	router.Route("/admin", func(r chi.Router) {
 		r.Use(middlewares.AdminAuthMiddleware)
 		r.Use(middlewares.AdminCheckInstanceMiddleware)
 		r.Get("/", handlers.AdminDashboardHandler)
+
 		r.Route("/locations", func(r chi.Router) {
 			r.Get("/", handlers.AdminLocationsHandler)
 			r.Get("/new", handlers.AdminLocationNewHandler)
@@ -83,10 +106,4 @@ func SetupRouter() *chi.Mux {
 			r.Post("/delete", handlers.AdminInstanceDeleteHandler)
 		})
 	})
-
-	workDir, _ := os.Getwd()
-	filesDir := filesystem.Myfs{Dir: http.Dir(filepath.Join(workDir, "web/static"))}
-	filesystem.FileServer(router, "/assets", filesDir)
-
-	return router
 }
