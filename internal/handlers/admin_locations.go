@@ -19,11 +19,7 @@ func AdminLocationsHandler(w http.ResponseWriter, r *http.Request) {
 
 	locations, err := models.FindAllLocations(r.Context())
 	if err != nil {
-		flash.Message{
-			Title:   "Error",
-			Message: "Locations could not be retrieved",
-			Style:   flash.Error,
-		}.Save(w, r)
+		flash.NewError("Error finding locations").Save(w, r)
 		return
 	} else {
 		data["locations"] = locations
@@ -45,11 +41,7 @@ func AdminLocationEditHandler(w http.ResponseWriter, r *http.Request) {
 
 	location, err := models.FindLocationByCode(r.Context(), code)
 	if err != nil {
-		flash.Message{
-			Title:   "Error",
-			Message: "Location could not be found",
-			Style:   flash.Error,
-		}.Save(w, r)
+		flash.NewError("Location could not be found").Save(w, r)
 		http.Redirect(w, r, "/admin/locations", http.StatusSeeOther)
 		return
 	}
@@ -89,11 +81,7 @@ func AdminLocationNewPostHandler(w http.ResponseWriter, r *http.Request) {
 	content.Content = r.FormValue("content")
 	err = content.Save(r.Context())
 	if err != nil {
-		flash.Message{
-			Title:   "Error",
-			Message: "Content could not be saved",
-			Style:   flash.Error,
-		}.Save(w, r)
+		flash.NewError("Content could not be saved").Save(w, r)
 		log.Error(err, "ctx", r.Context(), "content", content)
 		http.Redirect(w, r, r.Header.Get("referer"), http.StatusSeeOther)
 		return
@@ -102,11 +90,7 @@ func AdminLocationNewPostHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Either a location or coordinates are required
 	if !r.Form.Has("locationCode") && (!r.Form.Has("longitude") || !r.Form.Has("latitude")) {
-		flash.Message{
-			Title:   "Error",
-			Message: "Location or coordinates are required",
-			Style:   flash.Error,
-		}.Save(w, r)
+		flash.NewError("Location or coordinates are required").Save(w, r)
 		http.Redirect(w, r, r.Header.Get("referer"), http.StatusSeeOther)
 		return
 	}
@@ -120,21 +104,13 @@ func AdminLocationNewPostHandler(w http.ResponseWriter, r *http.Request) {
 	if r.FormValue("location") == "on" {
 		lng, err = strconv.ParseFloat(r.FormValue("longitude"), 64)
 		if err != nil {
-			flash.Message{
-				Title:   "Error",
-				Message: "Invalid coordinates",
-				Style:   flash.Error,
-			}.Save(w, r)
+			flash.NewError("Invalid coordinates").Save(w, r)
 			http.Redirect(w, r, r.Header.Get("referer"), http.StatusSeeOther)
 			return
 		}
 		lat, err = strconv.ParseFloat(r.FormValue("latitude"), 64)
 		if err != nil {
-			flash.Message{
-				Title:   "Error",
-				Message: "Invalid coordinates",
-				Style:   flash.Error,
-			}.Save(w, r)
+			flash.NewError("Invalid coordinates").Save(w, r)
 			http.Redirect(w, r, r.Header.Get("referer"), http.StatusSeeOther)
 			return
 		}
@@ -148,11 +124,7 @@ func AdminLocationNewPostHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	err = coords.Save(r.Context())
 	if err != nil {
-		flash.Message{
-			Title:   "Error",
-			Message: "Location could not be saved",
-			Style:   flash.Error,
-		}.Save(w, r)
+		flash.NewError("Location could not be saved").Save(w, r)
 		http.Redirect(w, r, r.Header.Get("referer"), http.StatusSeeOther)
 		return
 	}
@@ -161,21 +133,13 @@ func AdminLocationNewPostHandler(w http.ResponseWriter, r *http.Request) {
 	// Save the InstanceLocation
 	err = location.Save(r.Context())
 	if err != nil {
-		flash.Message{
-			Title:   "Error",
-			Message: "Location could not be saved",
-			Style:   flash.Error,
-		}.Save(w, r)
+		flash.NewError("Location could not be saved").Save(w, r)
 		log.Error(err, "ctx", r.Context(), "instanceLocation", location)
 		http.Redirect(w, r, r.Header.Get("referer"), http.StatusSeeOther)
 		return
 	}
 
-	flash.Message{
-		Title:   "Success",
-		Message: "Location saved",
-		Style:   flash.Success,
-	}.Save(w, r)
+	flash.NewSuccess("Location saved").Save(w, r)
 	http.Redirect(w, r, "/admin/locations/"+location.CoordsID, http.StatusSeeOther)
 
 }
@@ -185,22 +149,14 @@ func adminGenerateQRHandler(w http.ResponseWriter, r *http.Request) {
 
 	location, err := models.FindLocationByCode(r.Context(), code)
 	if err != nil {
-		flash.Message{
-			Title:   "Error",
-			Message: "Location could not be found",
-			Style:   flash.Error,
-		}.Save(w, r)
+		flash.NewError("Location could not be found").Save(w, r)
 		http.Redirect(w, r, "/admin/locations", http.StatusSeeOther)
 		return
 	}
 
 	err = location.Coords.GenerateQRCode()
 	if err != nil {
-		flash.Message{
-			Title:   "Error",
-			Message: "QR code could not be generated",
-			Style:   flash.Error,
-		}.Save(w, r)
+		flash.NewError("QR code could not be generated").Save(w, r)
 		http.Redirect(w, r, "/admin/locations", http.StatusSeeOther)
 		return
 	}
@@ -209,11 +165,7 @@ func adminGenerateQRHandler(w http.ResponseWriter, r *http.Request) {
 func AdminLocationQRZipHandler(w http.ResponseWriter, r *http.Request) {
 	archive, err := models.GenerateQRCodeArchive(r.Context())
 	if err != nil {
-		flash.Message{
-			Title:   "Error",
-			Message: "QR codes could not be zipped",
-			Style:   flash.Error,
-		}.Save(w, r)
+		flash.NewError("QR codes could not be zipped").Save(w, r)
 		http.Redirect(w, r, "/admin/locations", http.StatusSeeOther)
 		return
 	}
@@ -230,11 +182,7 @@ func AdminLocationPostersHandler(w http.ResponseWriter, r *http.Request) {
 	posters, err := models.GeneratePosters(r.Context())
 	if err != nil {
 		log.Error(err)
-		flash.Message{
-			Title:   "Error",
-			Message: "Posters could not be generated",
-			Style:   flash.Error,
-		}.Save(w, r)
+		flash.NewError("Posters could not be generated").Save(w, r)
 		http.Redirect(w, r, "/admin/locations", http.StatusSeeOther)
 		return
 	}

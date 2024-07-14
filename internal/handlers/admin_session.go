@@ -43,11 +43,7 @@ func AdminLoginFormHandler(w http.ResponseWriter, r *http.Request) {
 	session, err := sessions.Get(r, "admin")
 	if err != nil {
 		log.Error("Error getting session: ", err)
-		flash.Message{
-			Title:   "Error",
-			Message: "An error occurred while trying to log in.",
-			Style:   flash.Error,
-		}.Save(w, r)
+		flash.NewError("An error occurred while trying to log in. Please try again.").Save(w, r)
 		// Redirect to the login page
 		http.Redirect(w, r, helpers.URL("/login"), http.StatusSeeOther)
 		return
@@ -63,11 +59,7 @@ func AdminLogoutHandler(w http.ResponseWriter, r *http.Request) {
 	session, err := sessions.Get(r, "admin")
 	if err != nil {
 		log.Error("Error getting session: ", err)
-		flash.Message{
-			Title:   "Error",
-			Message: "An error occurred while trying to log out.",
-			Style:   flash.Error,
-		}.Save(w, r)
+		flash.NewError("An error occurred while trying to log out. Please try again.").Save(w, r)
 		// Redirect to the login page
 		http.Redirect(w, r, helpers.URL("/login"), http.StatusSeeOther)
 		return
@@ -103,19 +95,11 @@ func AdminRegisterFormHandler(w http.ResponseWriter, r *http.Request) {
 	err := services.CreateUser(r.Context(), &user, confirmPassword)
 	if err != nil {
 		slog.Error("Error creating user ", "err", err.Error())
-		flash.Message{
-			Title:   "Error",
-			Message: err.Error(),
-			Style:   flash.Error,
-		}.Save(w, r)
+		flash.NewError("Error creating user. Please try again.").Save(w, r)
 		http.Redirect(w, r, "/register", http.StatusSeeOther)
 		return
 	}
 
-	flash.Message{
-		Title:   "Success",
-		Message: "User created successfully. Please log in to continue.",
-		Style:   flash.Success,
-	}.Save(w, r)
+	flash.NewSuccess("User created successfully. Please log in to continue.").Save(w, r)
 	http.Redirect(w, r, "/login", http.StatusSeeOther)
 }

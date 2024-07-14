@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"log/slog"
 	"net/http"
 	"strconv"
 
@@ -18,11 +19,7 @@ func AdminTeamsHandler(w http.ResponseWriter, r *http.Request) {
 
 	teams, err := models.FindAllTeams(r.Context())
 	if err != nil {
-		flash.Message{
-			Title:   "Error",
-			Message: "Error finding teams",
-			Style:   flash.Error,
-		}.Save(w, r)
+		flash.NewError("Error finding teams").Save(w, r)
 	} else {
 		data["teams"] = teams
 	}
@@ -36,11 +33,7 @@ func AdminTeamsAddHandler(w http.ResponseWriter, r *http.Request) {
 	countStr := r.FormValue("count")
 	count, err := strconv.Atoi(countStr)
 	if err != nil || count < 1 {
-		flash.Message{
-			Title:   "Error",
-			Message: "Invalid number of teams",
-			Style:   flash.Error,
-		}.Save(w, r)
+		flash.NewError("Invalid number of teams").Save(w, r)
 		http.Redirect(w, r, "/admin/teams", http.StatusSeeOther)
 		return
 	}
@@ -48,17 +41,10 @@ func AdminTeamsAddHandler(w http.ResponseWriter, r *http.Request) {
 	// Add the teams
 	err = models.AddTeams(r.Context(), count)
 	if err != nil {
-		flash.Message{
-			Title:   "Error",
-			Message: "Error adding teams",
-			Style:   flash.Error,
-		}.Save(w, r)
+		slog.Error("Error adding teams", "error", err, "ctx", r.Context())
+		flash.NewError("Error adding teams").Save(w, r)
 	} else {
-		flash.Message{
-			Title:   "Success",
-			Message: "Teams added",
-			Style:   flash.Success,
-		}.Save(w, r)
+		flash.NewSuccess("Teams added").Save(w, r)
 	}
 
 	// Redirect to the teams page

@@ -20,7 +20,7 @@ func Start() {
 		Addr:    os.Getenv("SERVER_ADDR"),
 		Handler: router,
 	}
-	slog.Info("Server started on %s", os.Getenv("SERVER_ADDR"))
+	slog.Info("Server started", "addr", os.Getenv("SERVER_ADDR"))
 	if err := server.ListenAndServe(); err != nil {
 		log.Fatalf("Server failed to start: %v", err)
 	}
