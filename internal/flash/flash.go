@@ -61,3 +61,28 @@ func Get(w http.ResponseWriter, r *http.Request) []interface{} {
 	}
 	return nil
 }
+
+// NewDefault adds a new default message into the cookie storage.
+func NewDefault(message string) Message {
+	return Message{Title: "Notice", Message: message, Style: Default}
+}
+
+// NewSuccess adds a new success message into the cookie storage.
+func NewSuccess(message string) Message {
+	return Message{Title: "Success", Message: message, Style: Success}
+}
+
+// NewError adds a new error message into the cookie storage.
+func NewError(message string) Message {
+	return Message{Title: "Error", Message: message, Style: Error}
+}
+
+// NewWarning adds a new warning message into the cookie storage.
+func NewWarning(message string) Message {
+	return Message{Title: "Warning", Message: message, Style: Warning}
+}
+
+// NewInfo adds a new info message into the cookie storage.
+func NewInfo(message string) Message {
+	return Message{Title: "Info", Message: message, Style: Info}
+}
