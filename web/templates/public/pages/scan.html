@@ -64,19 +64,8 @@
             id="team"
             name="team"
             type="text"
-            {{
-            if
-            .blocked
-            }}disabled{{
-            end
-            }}
-            {{
-            if
-            .team
-            }}value="{{.team.Code }}"
-            {{
-            end
-            }}
+            {{ if .blocked }}disabled{{ end }}
+            {{ if .team }}value="{{.team.Code }}" {{ end }}
             class="input input-bordered input-lg w-full text-2xl font-mono text-center uppercase tracking-widest"
         /></label>
       </div>
