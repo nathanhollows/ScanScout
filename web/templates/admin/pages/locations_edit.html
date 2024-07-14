@@ -7,8 +7,8 @@
 
 <div class="flex flex-col w-full items-start">
   <!-- Header -->
-  <div class="p-5 py-5">
-    <h1 class="text-2xl font-bold">{{ .location.Coords.Name }}</h1>
+  <div class="p-5">
+    <h1 class="text-2xl font-bold">{{ .location.Marker.Name }}</h1>
   </div>
 
   <!-- Messages -->
@@ -41,17 +41,17 @@
         <input
           type="hidden"
           name="code"
-          value="{{ .location.Coords.Code }}"
+          value="{{ .location.Marker.Code }}"
         />
         <input
           type="hidden"
           name="latitude"
-          value="{{ .location.Coords.Lat }}"
+          value="{{ .location.Marker.Lat }}"
         />
         <input
           type="hidden"
           name="longitude"
-          value="{{ .location.Coords.Lng }}"
+          value="{{ .location.Marker.Lng }}"
         />
 
         <!-- Location Title and Content Textarea -->
@@ -67,7 +67,7 @@
               id="name"
               name="name"
               class="input input-bordered w-full"
-              value="{{ .location.Coords.Name }}"
+              value="{{ .location.Marker.Name }}"
               placeholder="Enter title"
             />
           </div>
@@ -97,8 +97,8 @@
 <script>
   coords = [170.5111643, -45.8650509]
   zoom = 14
-  {{ if .location.Coords.Lng }}
-  coords = [{{ .location.Coords.Lng }}, {{ .location.Coords.Lat }}]
+  {{ if .location.Marker.Lng }}
+  coords = [{{ .location.Marker.Lng }}, {{ .location.Marker.Lat }}]
   zoom = 18
   {{ end }}
 

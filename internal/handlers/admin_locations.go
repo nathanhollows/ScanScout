@@ -1,8 +1,8 @@
 package handlers
 
 import (
+	"log/slog"
 	"net/http"
-	"strconv"
 
 	"github.com/charmbracelet/log"
 	"github.com/go-chi/chi"
@@ -50,6 +50,49 @@ func AdminLocationEditHandler(w http.ResponseWriter, r *http.Request) {
 	render(w, data, true, "locations_edit")
 }
 
+// AdminLocationEditPostHandler handles saving a location
+func AdminLocationEditPostHandler(w http.ResponseWriter, r *http.Request) {
+	setDefaultHeaders(w)
+
+	if r.Method != http.MethodPost {
+		http.Error(w, "Invalid request method", http.StatusMethodNotAllowed)
+		return
+	}
+
+	err := r.ParseForm()
+	if err != nil {
+		flash.NewError("Error parsing form").Save(w, r)
+		http.Redirect(w, r, "/admin/locations", http.StatusSeeOther)
+		return
+	}
+
+	locationCode := chi.URLParam(r, "id")
+
+	location, err := models.FindInstanceLocationById(r.Context(), locationCode)
+	if err != nil {
+		slog.Error("Error finding location", "err", err)
+		flash.NewError("Location not found").Save(w, r)
+		http.Redirect(w, r, "/admin/locations", http.StatusSeeOther)
+		return
+	}
+
+	newName := r.FormValue("name")
+	newContent := r.FormValue("content")
+	lat := r.FormValue("latitude")
+	lng := r.FormValue("longitude")
+
+	err = gameManagerService.UpdateLocation(r.Context(), location, newName, newContent, lat, lng)
+	if err != nil {
+		log.Error(err)
+		flash.NewError("Error saving location: "+err.Error()).Save(w, r)
+		http.Redirect(w, r, "/admin/locations", http.StatusSeeOther)
+		return
+	}
+
+	flash.NewSuccess("Location saved successfully").Save(w, r)
+	http.Redirect(w, r, "/admin/locations", http.StatusSeeOther)
+}
+
 // LocationNew shows the form to create a new location
 func AdminLocationNewHandler(w http.ResponseWriter, r *http.Request) {
 	setDefaultHeaders(w)
@@ -68,80 +111,22 @@ func AdminLocationNewPostHandler(w http.ResponseWriter, r *http.Request) {
 
 	user := r.Context().Value(contextkeys.UserIDKey).(*models.User)
 
-	var err error
+	name := r.FormValue("name")
+	content := r.FormValue("content")
+	criteriaID := r.FormValue("criteria")
+	lat := r.FormValue("latitude")
+	lng := r.FormValue("longitude")
 
-	// Create a new InstanceLocation
-	location := &models.Location{
-		InstanceID: user.CurrentInstanceID,
-		CriteriaID: r.FormValue("criteria"),
-	}
-
-	// Create the Content
-	content := models.LocationContent{}
-	content.Content = r.FormValue("content")
-	err = content.Save(r.Context())
-	if err != nil {
-		flash.NewError("Content could not be saved").Save(w, r)
-		log.Error(err, "ctx", r.Context(), "content", content)
-		http.Redirect(w, r, r.Header.Get("referer"), http.StatusSeeOther)
-		return
-	}
-	location.ContentID = content.ID
-
-	// Either a location or coordinates are required
-	if !r.Form.Has("locationCode") && (!r.Form.Has("longitude") || !r.Form.Has("latitude")) {
-		flash.NewError("Location or coordinates are required").Save(w, r)
-		http.Redirect(w, r, r.Header.Get("referer"), http.StatusSeeOther)
-		return
-	}
-
-	if r.Form.Has("coordsID") {
-		location.CoordsID = r.FormValue("coordsID")
-	}
-
-	// Parse coordinates if location is enabled
-	var lng, lat float64
-	if r.FormValue("location") == "on" {
-		lng, err = strconv.ParseFloat(r.FormValue("longitude"), 64)
-		if err != nil {
-			flash.NewError("Invalid coordinates").Save(w, r)
-			http.Redirect(w, r, r.Header.Get("referer"), http.StatusSeeOther)
-			return
-		}
-		lat, err = strconv.ParseFloat(r.FormValue("latitude"), 64)
-		if err != nil {
-			flash.NewError("Invalid coordinates").Save(w, r)
-			http.Redirect(w, r, r.Header.Get("referer"), http.StatusSeeOther)
-			return
-		}
-	}
-
-	// Create a new coords
-	coords := &models.Coords{
-		Name: r.FormValue("name"),
-		Lat:  lat,
-		Lng:  lng,
-	}
-	err = coords.Save(r.Context())
+	err := gameManagerService.CreateLocation(r.Context(), user, name, content, criteriaID, lat, lng)
 	if err != nil {
 		flash.NewError("Location could not be saved").Save(w, r)
-		http.Redirect(w, r, r.Header.Get("referer"), http.StatusSeeOther)
-		return
-	}
-	location.CoordsID = coords.Code
-
-	// Save the InstanceLocation
-	err = location.Save(r.Context())
-	if err != nil {
-		flash.NewError("Location could not be saved").Save(w, r)
-		log.Error(err, "ctx", r.Context(), "instanceLocation", location)
+		log.Error(err, "ctx", r.Context())
 		http.Redirect(w, r, r.Header.Get("referer"), http.StatusSeeOther)
 		return
 	}
 
 	flash.NewSuccess("Location saved").Save(w, r)
-	http.Redirect(w, r, "/admin/locations/"+location.CoordsID, http.StatusSeeOther)
-
+	http.Redirect(w, r, "/admin/locations", http.StatusSeeOther)
 }
 
 func adminGenerateQRHandler(w http.ResponseWriter, r *http.Request) {
@@ -154,7 +139,7 @@ func adminGenerateQRHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = location.Coords.GenerateQRCode()
+	err = location.Marker.GenerateQRCode()
 	if err != nil {
 		flash.NewError("QR code could not be generated").Save(w, r)
 		http.Redirect(w, r, "/admin/locations", http.StatusSeeOther)

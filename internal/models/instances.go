@@ -20,16 +20,32 @@ import (
 type Instance struct {
 	baseModel
 
-	ID                string    `bun:",pk,type:varchar(36)" json:"id"`
-	Name              string    `bun:",type:varchar(255)" json:"name"`
-	UserID            string    `bun:",type:varchar(36)" json:"user_id"`
-	User              User      `bun:"rel:has-one,join:user_id=id" json:"user"`
-	Teams             Teams     `bun:"rel:has-many,join:id=instance_id" json:"teams"`
-	InstanceLocations Locations `bun:"rel:has-many,join:id=instance_id" json:"instance_locations"`
-	Scans             Scans     `bun:"rel:has-many,join:id=instance_id" json:"scans"`
+	ID         string `bun:",pk,type:varchar(36)" json:"id"`
+	Name       string `bun:",type:varchar(255)" json:"name"`
+	UserID     string `bun:",type:varchar(36)" json:"user_id"`
+	CriteriaID string `bun:",type:varchar(36)" json:"criteria_id"`
+
+	Criteria          CompletionCriteria `bun:"rel:has-one,join:criteria_id=id" json:"criteria"`
+	NavigationMode    NavigationMode     `bun:",type:varchar(255)" json:"navigation_mode"`
+	User              User               `bun:"rel:has-one,join:user_id=id" json:"user"`
+	Teams             Teams              `bun:"rel:has-many,join:id=instance_id" json:"teams"`
+	InstanceLocations Locations          `bun:"rel:has-many,join:id=instance_id" json:"instance_locations"`
+	Scans             Scans              `bun:"rel:has-many,join:id=instance_id" json:"scans"`
 }
 
 type Instances []Instance
+
+// NavigationMode represents the mode of navigation for an instance
+type NavigationMode string
+
+const (
+	// FreeRoamMode is a navigation mode where users can scan in and out of locations in any order
+	FreeRoamMode NavigationMode = "free roam"
+	// OrderedMode is a navigation mode where users must scan in and out of locations in a specific order
+	OrderedMode NavigationMode = "ordered"
+	// PseudoRandomMode is a navigation mode where users must scan in and out of locations in a random orde
+	PseudoRandomMode NavigationMode = "pseudo-random"
+)
 
 func (i *Instance) Save(ctx context.Context) error {
 	if i.ID == "" {
@@ -132,7 +148,7 @@ func GenerateQRCodeArchive(ctx context.Context) (string, error) {
 		return "", err
 	}
 	for _, location := range locations {
-		err = location.Coords.GenerateQRCode()
+		err = location.Marker.GenerateQRCode()
 		if err != nil {
 			return "", err
 		}
@@ -153,7 +169,7 @@ func GenerateQRCodeArchive(ctx context.Context) (string, error) {
 	// Collect the paths
 	var paths []string
 	for _, location := range locations {
-		paths = append(paths, location.Coords.getQRFilename(true))
+		paths = append(paths, location.Marker.getQRFilename(true))
 		// Commented out because we don't need to scan out
 		// TODO: Implement scan out on a Locations level
 		// if location.Coords.MustScanOut {
@@ -219,7 +235,7 @@ func (i *Instance) ZipPosters(ctx context.Context) (string, error) {
 		return "", err
 	}
 	for _, instanceLocation := range instanceLocations {
-		paths = append(paths, instanceLocation.Coords.getQRFilename(true))
+		paths = append(paths, instanceLocation.Marker.getQRFilename(true))
 	}
 
 	// Add each file to the zip
@@ -270,8 +286,8 @@ func GeneratePosters(ctx context.Context) (string, error) {
 	pdf.AddUTF8Font("OpenSans", "", "./assets/fonts/OpenSans.ttf")
 
 	for _, location := range instance.InstanceLocations {
-		location.Coords.GenerateQRCode()
-		generatePosterPage(pdf, &location.Coords, instance, true)
+		location.Marker.GenerateQRCode()
+		generatePosterPage(pdf, &location.Marker, instance, true)
 		// if location.Coords.MustScanOut {
 		// 	generatePosterPage(pdf, &location.Coords, i, false)
 		// }
@@ -286,7 +302,7 @@ func GeneratePosters(ctx context.Context) (string, error) {
 	return path, nil
 }
 
-func generatePosterPage(pdf *fpdf.Fpdf, coords *Coords, instance *Instance, scanIn bool) {
+func generatePosterPage(pdf *fpdf.Fpdf, coords *Marker, instance *Instance, scanIn bool) {
 	pdf.AddPage()
 
 	if !scanIn {

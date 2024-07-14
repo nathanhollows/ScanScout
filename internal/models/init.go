@@ -15,7 +15,7 @@ func CreateTables() {
 		(*Location)(nil),
 		(*LocationContent)(nil),
 		(*Team)(nil),
-		(*Coords)(nil),
+		(*Marker)(nil),
 		(*Scan)(nil),
 		(*Instance)(nil),
 		(*User)(nil),

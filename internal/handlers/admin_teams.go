@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"log/slog"
 	"net/http"
 	"strconv"
 
@@ -15,14 +14,21 @@ func AdminTeamsHandler(w http.ResponseWriter, r *http.Request) {
 	data := templateData(r)
 	data["title"] = "Teams"
 
-	data["messages"] = flash.Get(w, r)
+	user, ok := data["user"].(*models.User)
+	if !ok || user == nil {
+		flash.NewError("User not authenticated").Save(w, r)
+		http.Redirect(w, r, "/login", http.StatusSeeOther)
+		return
+	}
 
-	teams, err := models.FindAllTeams(r.Context())
+	teams, err := gameManagerService.GetAllTeams(r.Context(), user)
 	if err != nil {
 		flash.NewError("Error finding teams").Save(w, r)
 	} else {
 		data["teams"] = teams
 	}
+
+	data["messages"] = flash.Get(w, r)
 
 	// Render the template
 	render(w, data, true, "teams_index")
@@ -30,6 +36,15 @@ func AdminTeamsHandler(w http.ResponseWriter, r *http.Request) {
 
 // AddTeams creates new teams equal to the number of teams in the request
 func AdminTeamsAddHandler(w http.ResponseWriter, r *http.Request) {
+	setDefaultHeaders(w)
+
+	user, ok := templateData(r)["user"].(*models.User)
+	if !ok || user == nil {
+		flash.NewError("User not authenticated").Save(w, r)
+		http.Redirect(w, r, "/login", http.StatusSeeOther)
+		return
+	}
+
 	countStr := r.FormValue("count")
 	count, err := strconv.Atoi(countStr)
 	if err != nil || count < 1 {
@@ -39,10 +54,9 @@ func AdminTeamsAddHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Add the teams
-	err = models.AddTeams(r.Context(), count)
+	err = gameManagerService.AddTeams(r.Context(), user, count)
 	if err != nil {
-		slog.Error("Error adding teams", "error", err, "ctx", r.Context())
-		flash.NewError("Error adding teams").Save(w, r)
+		flash.NewError("Error adding teams: "+err.Error()).Save(w, r)
 	} else {
 		flash.NewSuccess("Teams added").Save(w, r)
 	}

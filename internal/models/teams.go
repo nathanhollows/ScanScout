@@ -21,7 +21,7 @@ type Team struct {
 	Code             string   `bun:",unique,pk" json:"code"`
 	Scans            Scans    `bun:"rel:has-many,join:code=team_id" json:"scans"`
 	MustScanOut      string   `bun:"" json:"must_scan_out"`
-	BlockingLocation Coords   `bun:"rel:has-one,join:must_scan_out=code" json:"blocking_location"`
+	BlockingLocation Marker   `bun:"rel:has-one,join:must_scan_out=code" json:"blocking_location"`
 }
 
 type Teams []Team
@@ -69,7 +69,7 @@ func FindTeamByCodeAndInstance(ctx context.Context, code, instance string) (*Tea
 }
 
 // HasVisited returns true if the team has visited the given location
-func (t *Team) HasVisited(location *Coords) bool {
+func (t *Team) HasVisited(location *Marker) bool {
 	for _, s := range t.Scans {
 		if s.LocationID == location.Code {
 			return true
@@ -79,8 +79,8 @@ func (t *Team) HasVisited(location *Coords) bool {
 }
 
 // SuggestNextLocation returns the next location to scan in
-func (t *Team) SuggestNextLocations(ctx context.Context, limit int) *BaseLocations {
-	var locations BaseLocations
+func (t *Team) SuggestNextLocations(ctx context.Context, limit int) *Markers {
+	var locations Markers
 
 	// Get the list of locations the team has already visited
 	visited := make([]string, len(t.Scans))
@@ -203,7 +203,7 @@ func TeamActivityOverview(ctx context.Context) ([]map[string]interface{}, error)
 		}
 		for _, scan := range team.Scans {
 			for j, instanceLocation := range instanceLocations {
-				if scan.LocationID == instanceLocation.Coords.Code {
+				if scan.LocationID == instanceLocation.Marker.Code {
 					activity[count]["locations"].([]map[string]interface{})[j]["visited"] = true
 					activity[count]["locations"].([]map[string]interface{})[j]["time_in"] = scan.TimeIn
 					if scan.TimeOut.IsZero() {
@@ -219,4 +219,17 @@ func TeamActivityOverview(ctx context.Context) ([]map[string]interface{}, error)
 	}
 
 	return activity, err
+}
+
+// GetVisitedLocations returns locations visited by the team
+func (t *Team) GetVisitedLocations(ctx context.Context) ([]*Location, error) {
+	var locations []*Location
+	err := db.DB.NewSelect().Model(&locations).
+		Where("marker_id in (SELECT location_id FROM scans WHERE team_id = ?)", t.Code).
+		Scan(ctx)
+	if err != nil {
+		log.Error(err)
+		return nil, err
+	}
+	return locations, nil
 }

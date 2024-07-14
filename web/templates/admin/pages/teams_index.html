@@ -1,5 +1,5 @@
 {{ define "content" }}
-<div class="flex flex-row justify-between items-center w-full py-5">
+<div class="flex flex-row justify-between items-center w-full">
   <h1 class="text-2xl p-5 font-bold">Teams</h1>
 
   <button
@@ -10,7 +10,9 @@
   </button>
 </div>
 
-{{ template "flash" .messages }} {{ if not .teams }}
+<div class="p-5">
+{{ template "flash" .messages }} 
+{{ if not .teams }}
 <div class="alert">
   <svg
     xmlns="http://www.w3.org/2000/svg"
@@ -45,6 +47,7 @@
   <span> <strong>Nothing to see!</strong> The are no teams to display. </span>
 </div>
 {{ end }}
+</div>
 
 <!-- Show checked in teams -->
 <div class="w-full p-5">

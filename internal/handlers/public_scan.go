@@ -134,7 +134,7 @@ func PublicScanPostHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Check if the team has already visited the location
-	if team.HasVisited(&location.Coords) {
+	if team.HasVisited(&location.Marker) {
 		flash.Message{
 			Style:   "warning",
 			Title:   "You have already visited here.",
@@ -164,7 +164,7 @@ func PublicScanPostHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Log the scan
-	err = location.Coords.LogScan(r.Context(), teamCode)
+	err = location.Marker.LogScan(r.Context(), teamCode)
 	if err != nil {
 		flash.Message{
 			Style:   "warning",
@@ -319,7 +319,7 @@ func PublicScanOutPostHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Log the scan
-	err = location.Coords.LogScanOut(r.Context(), teamCode)
+	err = location.Marker.LogScanOut(r.Context(), teamCode)
 	if err != nil {
 		flash.Message{
 			Style:   "warning",

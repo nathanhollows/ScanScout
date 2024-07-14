@@ -98,7 +98,7 @@ func PublicSpecificLocationsHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	data["location"] = location
-	data["title"] = location.Coords.Name
+	data["title"] = location.Marker.Name
 	data["messages"] = flash.Get(w, r)
 	render(w, data, false, "location")
 }

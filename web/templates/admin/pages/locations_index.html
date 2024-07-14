@@ -1,7 +1,7 @@
 {{ define "content" }}
 
 <!-- Header -->
-<div class="flex flex-col md:flex-row justify-between items-center w-full py-5">
+<div class="flex flex-col md:flex-row justify-between items-center w-full">
   <h1 class="text-2xl p-5 font-bold">Locations ({{ len .locations }})</h1>
   <span class="flex md:flex-row flex-wrap justify-center space-x-3">
     {{ if len .locations }}
@@ -85,8 +85,44 @@
 </div>
 
 <!-- Messages -->
+<div class="p-5">
 {{ template "flash" .messages }}
-
+{{ if not .locations }}
+<div class="alert">
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width="24"
+    height="24"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    stroke-width="2"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    class="lucide lucide-alert-circle text-neutral"
+  >
+    <circle
+      cx="12"
+      cy="12"
+      r="10"
+    />
+    <line
+      x1="12"
+      x2="12"
+      y1="8"
+      y2="12"
+    />
+    <line
+      x1="12"
+      x2="12.01"
+      y1="16"
+      y2="16"
+    />
+  </svg>
+  <span> <strong>Nothing to see!</strong> The are no locations to display. </span>
+</div>
+{{ end }}
+</div>
 <!-- Locations -->
 
 <div class="join join-vertical w-full shadow mb-5">
@@ -96,7 +132,7 @@
     class="flex flex-row justify-between items-center space-x-3 bg-white rounded-lg p-4 border join-item"
   >
     <div class="flex flex-row items-center space-x-3 grow">
-      {{ if .Coords.Lat }}
+      {{ if .Marker.Lat }}
       <svg
         xmlns="http://www.w3.org/2000/svg"
         width="24"
@@ -153,17 +189,17 @@
         class="badge badge-ghost basis-20 tooltip"
         data-tip="Unique location code"
       >
-        {{ .Coords.Code }}
+        {{ .Marker.Code }}
       </div>
       <a
-        href="/admin/locations/{{ .Coords.Code }}"
+        href="/admin/locations/{{ .Marker.Code }}"
         class="link flex-grow"
-      >{{ .Coords.Name }}</a
+      >{{ .Marker.Name }}</a
       >
 
       <span
         class="tooltip flex space-x-2"
-        data-tip="{{ .Coords.CurrentCount }} currently visiting, {{ .Coords.TotalVisits }} scans total"
+        data-tip="{{ .Marker.CurrentCount }} currently visiting, {{ .Marker.TotalVisits }} scans total"
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -185,9 +221,9 @@
           <path d="M9 9h.01" />
           <path d="M15 9h.01" />
         </svg>
-        <strong> {{ .Coords.CurrentCount }} </strong> /
-        <strong>{{ .Coords.TotalVisits }} </strong>
-        {{ if .Coords.AvgDuration }}
+        <strong> {{ .Marker.CurrentCount }} </strong> /
+        <strong>{{ .Marker.TotalVisits }} </strong>
+        {{ if .Marker.AvgDuration }}
         <p class="flex flex-row space-x-3 text-center">
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -219,7 +255,7 @@
               r="8"
             />
           </svg>
-          <span> {{ toDuration .Coords.AvgDuration }} </span>
+          <span> {{ toDuration .Marker.AvgDuration }} </span>
         </p>
         {{ end }}
       </span>
