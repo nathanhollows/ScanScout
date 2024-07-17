@@ -119,25 +119,19 @@
         >
           Team Code
         </th>
-        <th scope="col">1</th>
-        <th scope="col">2</th>
-        <th scope="col">3</th>
-        <th scope="col">4</th>
-        <th scope="col">5</th>
-        <th scope="col">6</th>
-        <th scope="col">7</th>
-        <th scope="col">8</th>
-        <th scope="col">9</th>
-        <th scope="col">10</th>
-        <th scope="col">11</th>
-        <th scope="col">12</th>
+        {{ range $i, $e := .locations }}
+        <th scope="col">{{ add $i 1 }}</th>
+        {{ end }}
       </tr>
     </thead>
     <tbody>
-      {{ range .activity }}
+      {{ $count := 0 }}
+      {{ range .teams }}
+      {{ if not .HasStarted }}{{ continue }}{{ end }}
+      {{ $count = add $count 1 }}
       <tr>
-        <th scope="row">{{ .team.Code }}</th>
-        {{ range .locations}}
+        <th scope="row">{{ .Code }}</th>
+        {{ range .Scans}}
         <td class="text-center">
           {{ if .visiting }}●{{ else if .visited }}✔{{ end }}
         </td>
@@ -145,7 +139,7 @@
       </tr>
       {{ end }} 
 
-      {{ if not .activity }}
+      {{ if not $count }}
       <tr>
         <th
           scope="row"

@@ -7,6 +7,7 @@ import (
 
 	"github.com/go-chi/chi"
 	"github.com/nathanhollows/Rapua/internal/routes"
+	"github.com/nathanhollows/Rapua/internal/services"
 	"golang.org/x/exp/slog"
 )
 
@@ -14,7 +15,10 @@ var router *chi.Mux
 var server *http.Server
 
 func Start() {
-	router = routes.SetupRouter()
+	gameplayService := &services.GameplayService{}
+	gameManagerService := &services.GameManagerService{}
+
+	router = routes.SetupRouter(gameplayService, gameManagerService)
 
 	server = &http.Server{
 		Addr:    os.Getenv("SERVER_ADDR"),

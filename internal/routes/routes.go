@@ -9,10 +9,13 @@ import (
 	"github.com/go-chi/chi/middleware"
 	"github.com/nathanhollows/Rapua/internal/filesystem"
 	"github.com/nathanhollows/Rapua/internal/handlers"
+	admin "github.com/nathanhollows/Rapua/internal/handlers/admin"
+	players "github.com/nathanhollows/Rapua/internal/handlers/players"
 	"github.com/nathanhollows/Rapua/internal/middlewares"
+	"github.com/nathanhollows/Rapua/internal/services"
 )
 
-func SetupRouter() *chi.Mux {
+func SetupRouter(gameplayService *services.GameplayService, gameManagerService *services.GameManagerService) *chi.Mux {
 	router := chi.NewRouter()
 
 	router.Use(middleware.Compress(5))
@@ -23,8 +26,11 @@ func SetupRouter() *chi.Mux {
 	// Public routes
 	setupPublicRoutes(router)
 
+	// Player routes
+	setupPlayerRoutes(router, gameplayService)
+
 	// Admin routes
-	setupAdminRoutes(router)
+	setupAdminRoutes(router, gameManagerService)
 
 	// Static files
 	workDir, _ := os.Getwd()
@@ -34,8 +40,40 @@ func SetupRouter() *chi.Mux {
 	return router
 }
 
+// Setup the player routes
+func setupPlayerRoutes(router chi.Router, gameplayService *services.GameplayService) {
+	var playerHandler = players.NewPlayerHandler(gameplayService)
+
+	// Home route
+	// Takes a GET request to show the home page
+	// Takes a POST request to submit the home page form
+	router.Get("/", playerHandler.Home)
+	router.Post("/", playerHandler.Home)
+
+	// Show the next available locations
+	router.Route("/next", func(r chi.Router) {
+		r.Use(middlewares.TeamMiddleware)
+		r.Get("/", playerHandler.Next)
+		r.Post("/", playerHandler.Next)
+	})
+
+	// Check in to a location
+	router.Route("/s", func(r chi.Router) {
+		r.Use(middlewares.TeamMiddleware)
+		r.Get("/{code:[A-z]{5}}", playerHandler.Scan)
+		r.Post("/{code:[A-z]{5}}", playerHandler.ScanPost)
+	})
+
+	// Check out of a location
+	router.Route("/o", func(r chi.Router) {
+		r.Use(middlewares.TeamMiddleware)
+		r.Get("/", playerHandler.ScanOut)
+		r.Get("/{code:[A-z]{5}}", playerHandler.ScanOut)
+		r.Post("/{code:[A-z]{5}}", playerHandler.ScanOutPost)
+	})
+}
+
 func setupPublicRoutes(router chi.Router) {
-	router.Get("/", handlers.PublicHomeHandler)
 
 	router.Route("/login", func(r chi.Router) {
 		r.Get("/", handlers.AdminLoginHandler)
@@ -47,25 +85,6 @@ func setupPublicRoutes(router chi.Router) {
 		r.Post("/", handlers.AdminRegisterFormHandler)
 	})
 
-	router.Route("/s", func(r chi.Router) {
-		r.Use(middlewares.TeamMiddleware)
-		r.Get("/{code:[A-z]{5}}", handlers.PublicScanHandler)
-		r.Post("/{code:[A-z]{5}}", handlers.PublicScanPostHandler)
-	})
-
-	router.Route("/o", func(r chi.Router) {
-		r.Use(middlewares.TeamMiddleware)
-		r.Get("/", handlers.PublicScanOutHandler)
-		r.Get("/{code:[A-z]{5}}", handlers.PublicScanOutHandler)
-		r.Post("/{code:[A-z]{5}}", handlers.PublicScanOutPostHandler)
-	})
-
-	router.Route("/next", func(r chi.Router) {
-		r.Use(middlewares.TeamMiddleware)
-		r.Get("/", handlers.PublicNextHandler)
-		r.Post("/", handlers.PublicNextHandler)
-	})
-
 	router.Route("/mylocations", func(r chi.Router) {
 		r.Use(middlewares.TeamMiddleware)
 		r.Get("/", handlers.PublicMyLocationsHandler)
@@ -74,11 +93,14 @@ func setupPublicRoutes(router chi.Router) {
 	})
 }
 
-func setupAdminRoutes(router chi.Router) {
+func setupAdminRoutes(router chi.Router, gameManagerService *services.GameManagerService) {
+	var adminHandler = admin.NewAdminHandler(gameManagerService)
+
 	router.Route("/admin", func(r chi.Router) {
 		r.Use(middlewares.AdminAuthMiddleware)
 		r.Use(middlewares.AdminCheckInstanceMiddleware)
-		r.Get("/", handlers.AdminDashboardHandler)
+
+		r.Get("/", adminHandler.Activity)
 
 		r.Route("/locations", func(r chi.Router) {
 			r.Get("/", handlers.AdminLocationsHandler)
@@ -98,12 +120,12 @@ func setupAdminRoutes(router chi.Router) {
 		})
 
 		r.Route("/instances", func(r chi.Router) {
-			r.Get("/", handlers.AdminInstancesHandler)
-			r.Post("/new", handlers.AdminInstanceCreateHandler)
-			r.Get("/{id}", handlers.AdminInstancesHandler)
-			r.Post("/{id}", handlers.AdminInstancesHandler)
-			r.Get("/{id}/switch", handlers.AdminInstanceSwitchHandler)
-			r.Post("/delete", handlers.AdminInstanceDeleteHandler)
+			r.Get("/", adminHandler.AdminInstancesHandler)
+			r.Post("/new", adminHandler.AdminInstanceCreateHandler)
+			r.Get("/{id}", adminHandler.AdminInstancesHandler)
+			r.Post("/{id}", adminHandler.AdminInstancesHandler)
+			r.Get("/{id}/switch", adminHandler.AdminInstanceSwitchHandler)
+			r.Post("/delete", adminHandler.AdminInstanceDeleteHandler)
 		})
 	})
 }

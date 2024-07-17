@@ -5,26 +5,24 @@ import (
 
 	"github.com/go-chi/chi"
 	"github.com/nathanhollows/Rapua/internal/flash"
+	"github.com/nathanhollows/Rapua/internal/handlers"
 	"github.com/nathanhollows/Rapua/internal/models"
-	"github.com/nathanhollows/Rapua/internal/services"
 )
 
-var gameManagerService = services.NewGameManagerService()
-
-// AdminInstancesHandler shows admin the instances
-func AdminInstancesHandler(w http.ResponseWriter, r *http.Request) {
-	setDefaultHeaders(w)
-	data := templateData(r)
+// Instances shows admin the instances
+func (h *AdminHandler) Instances(w http.ResponseWriter, r *http.Request) {
+	handlers.SetDefaultHeaders(w)
+	data := handlers.TemplateData(r)
 	data["title"] = "Instances"
 
 	data["messages"] = flash.Get(w, r)
-	render(w, data, true, "instances_index")
+	handlers.Render(w, data, true, "instances_index")
 }
 
-// AdminInstanceCreateHandler creates a new instance
-func AdminInstanceCreateHandler(w http.ResponseWriter, r *http.Request) {
-	setDefaultHeaders(w)
-	data := templateData(r)
+// InstancesCreate creates a new instance
+func (h *AdminHandler) InstancesCreate(w http.ResponseWriter, r *http.Request) {
+	handlers.SetDefaultHeaders(w)
+	data := handlers.TemplateData(r)
 	data["title"] = "New Instance"
 
 	user, ok := data["user"].(*models.User)
@@ -41,7 +39,7 @@ func AdminInstanceCreateHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	name := r.FormValue("name")
-	_, err := gameManagerService.CreateInstance(r.Context(), name, user)
+	_, err := h.GameManagerService.CreateInstance(r.Context(), name, user)
 	if err != nil {
 		flash.NewError("Error creating instance: "+err.Error()).Save(w, r)
 		http.Redirect(w, r, "/admin/instances", http.StatusSeeOther)
@@ -52,10 +50,10 @@ func AdminInstanceCreateHandler(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/admin/instances/", http.StatusSeeOther)
 }
 
-// AdminInstanceSwitchHandler switches the current instance
-func AdminInstanceSwitchHandler(w http.ResponseWriter, r *http.Request) {
-	setDefaultHeaders(w)
-	data := templateData(r)
+// InstanceSwitch switches the current instance
+func (h *AdminHandler) InstanceSwitch(w http.ResponseWriter, r *http.Request) {
+	handlers.SetDefaultHeaders(w)
+	data := handlers.TemplateData(r)
 	data["title"] = "Switch Instance"
 
 	user, ok := data["user"].(*models.User)
@@ -72,7 +70,7 @@ func AdminInstanceSwitchHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	instance, err := gameManagerService.SwitchInstance(r.Context(), user, id)
+	instance, err := h.GameManagerService.SwitchInstance(r.Context(), user, id)
 	if err != nil {
 		flash.NewError("Error switching instance: "+err.Error()).Save(w, r)
 		http.Redirect(w, r, "/admin/instances", http.StatusSeeOther)
@@ -83,10 +81,10 @@ func AdminInstanceSwitchHandler(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, r.Header.Get("Referer"), http.StatusSeeOther)
 }
 
-// AdminInstanceDeleteHandler deletes an instance
-func AdminInstanceDeleteHandler(w http.ResponseWriter, r *http.Request) {
-	setDefaultHeaders(w)
-	data := templateData(r)
+// InstanceDelete deletes an instance
+func (h *AdminHandler) InstanceDelete(w http.ResponseWriter, r *http.Request) {
+	handlers.SetDefaultHeaders(w)
+	data := handlers.TemplateData(r)
 	data["title"] = "Delete Instance"
 
 	if err := r.ParseForm(); err != nil {
@@ -105,7 +103,7 @@ func AdminInstanceDeleteHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err := gameManagerService.DeleteInstance(r.Context(), user, id, confirmName)
+	err := h.GameManagerService.DeleteInstance(r.Context(), user, id, confirmName)
 	if err != nil {
 		flash.NewError("Error deleting instance: "+err.Error()).Save(w, r)
 		http.Redirect(w, r, "/admin/instances", http.StatusSeeOther)
