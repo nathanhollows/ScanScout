@@ -49,6 +49,18 @@ func (m Message) Save(w http.ResponseWriter, r *http.Request) {
 	session.Save(r, w)
 }
 
+// Set the title of the message.
+func (m Message) SetTitle(title string) Message {
+	m.Title = title
+	return m
+}
+
+// Set the message of the message.
+func (m Message) SetMessage(message string) Message {
+	m.Message = message
+	return m
+}
+
 // Get flash messages from the cookie storage.
 func Get(w http.ResponseWriter, r *http.Request) []interface{} {
 	session, err := sessions.Get(r, "scanscout")

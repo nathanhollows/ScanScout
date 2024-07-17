@@ -74,8 +74,8 @@
 <script>
   coords = [170.5111643, -45.8650509]
   zoom = 14
-  {{ if .location.Longitude }}
-  coords = [{{ .location.Longitude }}, {{ .location.Latitude }}]
+  {{ if .location.Marker.Lng }}
+  coords = [{{ .location.Marker.Lng }}, {{ .location.Marker.Lat }}]
   zoom = 18
   {{ end }}
 
@@ -91,10 +91,12 @@
   let marker; // Declare marker variable outside the loop
 
   {{ range .locations }}
+  {{ if .Marker.Lng }}
   marker = new mapboxgl.Marker()
-     .setLngLat([{{ .Lng }}, {{ .Lat }}]);
+     .setLngLat([{{ .Marker.Lng }},{{ .Marker.Lat }}]);
   marker.addTo(map);
   markerArray.push(marker);
+  {{ end }}
   {{ end }}
 
   // Calculate the bounds

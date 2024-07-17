@@ -8,24 +8,22 @@ import (
 	"github.com/charmbracelet/log"
 	"github.com/go-chi/chi"
 	"github.com/nathanhollows/Rapua/internal/flash"
+	"github.com/nathanhollows/Rapua/internal/handlers"
 	"github.com/nathanhollows/Rapua/internal/models"
 	"github.com/nathanhollows/Rapua/internal/sessions"
 )
 
-// PublicScanHandler shows the public scan page
-func PublicScanHandler(w http.ResponseWriter, r *http.Request) {
-	data := templateData(r)
+// PlayerHandler handles the player routes
+func (h *PlayerHandler) Scan(w http.ResponseWriter, r *http.Request) {
+	data := handlers.TemplateData(r)
 	code := chi.URLParam(r, "code")
 	code = strings.ToUpper(code)
 	data["code"] = code
 
 	location, err := models.FindLocationByCode(r.Context(), code)
 	if err != nil {
-		flash.Message{
-			Style:   "warning",
-			Title:   "Location code not found.",
-			Message: "Please double check the code and try again.",
-		}.Save(w, r)
+		flash.NewWarning("Please double check the code and try again.").
+			SetTitle("Location code note found").Save(w, r)
 		http.Redirect(w, r, "/", http.StatusFound)
 		return
 	}
@@ -50,37 +48,30 @@ func PublicScanHandler(w http.ResponseWriter, r *http.Request) {
 	// Check if the team must scan out
 	if team != nil && team.MustScanOut != "" {
 		if code == "" {
-			flash.Message{
-				Style:   "warning",
-				Title:   "You are already scanned in.",
-				Message: fmt.Sprint("You need to scan out at ", team.BlockingLocation.Name, "."),
-			}.Save(w, r)
+			flash.NewWarning("Please scan out at the location you scanned in at.").
+				SetTitle("You are already scanned in.").Save(w, r)
 			data["blocked"] = true
 		} else if code == team.MustScanOut {
 			// Construct a message with a link to the scan out page
 			message := fmt.Sprintf("Do you want to <a href=\"/o/%s\" class=\"link\">scan out</a> instead?", code)
-			flash.Message{
-				Style:   "",
-				Title:   "You are already scanned in.",
-				Message: message,
-			}.Save(w, r)
+			flash.NewDefault(message).
+				SetTitle("You are already scanned in.").
+				Save(w, r)
 			data["blocked"] = true
 		} else {
-			flash.Message{
-				Style:   "warning",
-				Title:   "You are already scanned in.",
-				Message: fmt.Sprint("You need to scan out at ", team.BlockingLocation.Name, "."),
-			}.Save(w, r)
+			flash.NewWarning(fmt.Sprintf("You need to scan out at %s.", team.BlockingLocation.Name)).
+				SetTitle("You are already scanned in.").
+				Save(w, r)
 			data["blocked"] = true
 		}
 	}
 
 	data["messages"] = flash.Get(w, r)
-	render(w, data, false, "scan")
+	handlers.Render(w, data, false, "scan")
 }
 
-// PublicScanPostHandler logs the scan
-func PublicScanPostHandler(w http.ResponseWriter, r *http.Request) {
+// ScanPost handles the POST request for scanning in
+func (h *PlayerHandler) ScanPost(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
 	locationCode := chi.URLParam(r, "code")
 	locationCode = strings.ToUpper(locationCode)
@@ -88,11 +79,8 @@ func PublicScanPostHandler(w http.ResponseWriter, r *http.Request) {
 	// Get the location
 	location, err := models.FindLocationByCode(r.Context(), locationCode)
 	if err != nil {
-		flash.Message{
-			Style:   "warning",
-			Title:   "Location code not found.",
-			Message: "Please double check the code and try again.",
-		}.Save(w, r)
+		flash.NewWarning("Please double check the code and try again.").
+			SetTitle("Location code not found").Save(w, r)
 		http.Redirect(w, r, "/", http.StatusFound)
 		return
 	}
@@ -102,11 +90,8 @@ func PublicScanPostHandler(w http.ResponseWriter, r *http.Request) {
 	teamCode = strings.ToUpper(teamCode)
 	team, err := models.FindTeamByCode(r.Context(), teamCode)
 	if err != nil || team == nil {
-		flash.Message{
-			Style:   "warning",
-			Title:   "Team code not found.",
-			Message: "Please double check the code and try again.",
-		}.Save(w, r)
+		flash.NewWarning("Please double check the code and try again.").
+			SetTitle("Team code not found").Save(w, r)
 		http.Redirect(w, r, "/", http.StatusFound)
 		return
 	}
@@ -114,20 +99,16 @@ func PublicScanPostHandler(w http.ResponseWriter, r *http.Request) {
 	// Check if the team must scan out
 	if team.MustScanOut != "" {
 		if locationCode != team.MustScanOut {
-			flash.Message{
-				Style:   "warning",
-				Title:   "You are already scanned in elsewhere.",
-				Message: fmt.Sprint("Please scan out at ", team.BlockingLocation.Name, " before scanning in."),
-			}.Save(w, r)
+			flash.NewWarning(fmt.Sprintf("You need to scan out at %s.", team.BlockingLocation.Name)).
+				SetTitle("You are already scanned in.").
+				Save(w, r)
 			http.Redirect(w, r, "/", http.StatusFound)
 			return
 		} else {
 			// Redirect to the scan out page
-			flash.Message{
-				Style:   "info",
-				Title:   "You are already scanned in.",
-				Message: "Do you want to scan out?",
-			}.Save(w, r)
+			flash.NewInfo("Do you want to scan out instead?").
+				SetTitle("You are already scanned in.").
+				Save(w, r)
 			http.Redirect(w, r, "/o/"+locationCode, http.StatusFound)
 			return
 		}
@@ -135,11 +116,9 @@ func PublicScanPostHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Check if the team has already visited the location
 	if team.HasVisited(&location.Marker) {
-		flash.Message{
-			Style:   "warning",
-			Title:   "You have already visited here.",
-			Message: "Please choose another location to visit.",
-		}.Save(w, r)
+		flash.NewWarning("Please choose another location to visit").
+			SetTitle("You have already visited here.").
+			Save(w, r)
 		http.Redirect(w, r, "/next", http.StatusFound)
 		return
 	}
@@ -154,11 +133,9 @@ func PublicScanPostHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	if !found {
-		flash.Message{
-			Style:   "warning",
-			Title:   "Wrong location.",
-			Message: "Please scan in at one of the following locations.",
-		}.Save(w, r)
+		flash.NewWarning("Please choose another location to visit").
+			SetTitle("Nice try.").
+			Save(w, r)
 		http.Redirect(w, r, "/next", http.StatusFound)
 		return
 	}
@@ -166,11 +143,9 @@ func PublicScanPostHandler(w http.ResponseWriter, r *http.Request) {
 	// Log the scan
 	err = location.Marker.LogScan(r.Context(), teamCode)
 	if err != nil {
-		flash.Message{
-			Style:   "warning",
-			Title:   "Couldn't scan in.",
-			Message: "Please check the codes and try again.",
-		}.Save(w, r)
+		flash.NewWarning("Please double check the code and try again.").
+			SetTitle("Couldn't scan in.").
+			Save(w, r)
 		log.Error(err)
 		http.Redirect(w, r, "/", http.StatusFound)
 		return
@@ -181,11 +156,7 @@ func PublicScanPostHandler(w http.ResponseWriter, r *http.Request) {
 	// 	team.Update(r.Context())
 	// }
 
-	flash.Message{
-		Style:   "success",
-		Title:   "Success!",
-		Message: "You have scanned in.",
-	}.Save(w, r)
+	flash.NewSuccess("You have scanned in.").Save(w, r)
 
 	// Append the location to the session
 	session, _ := sessions.Get(r, "scanscout")
@@ -201,18 +172,15 @@ func PublicScanPostHandler(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/mylocations/"+locationCode, http.StatusFound)
 }
 
-func PublicScanOutHandler(w http.ResponseWriter, r *http.Request) {
-	data := templateData(r)
+func (h *PlayerHandler) ScanOut(w http.ResponseWriter, r *http.Request) {
+	data := handlers.TemplateData(r)
 	code := chi.URLParam(r, "code")
 	code = strings.ToUpper(code)
 
 	location, err := models.FindLocationByCode(r.Context(), code)
 	if err != nil {
-		flash.Message{
-			Style:   "warning",
-			Title:   "Location code not found.",
-			Message: "Please double check the code and try again.",
-		}.Save(w, r)
+		flash.NewWarning("Please double check the code and try again.").
+			SetTitle("Location code not found").Save(w, r)
 		http.Redirect(w, r, "/", http.StatusFound)
 		return
 	}
@@ -228,11 +196,8 @@ func PublicScanOutHandler(w http.ResponseWriter, r *http.Request) {
 	teamCode = strings.ToUpper(teamCode)
 
 	if teamCode == "" {
-		flash.Message{
-			Style:   "warning",
-			Title:   "Team code not found.",
-			Message: "Please double check the code and try again.",
-		}.Save(w, r)
+		flash.NewWarning("Please double check the code and try again").
+			SetTitle("Team code not found").Save(w, r)
 		http.Redirect(w, r, "/", http.StatusFound)
 		return
 	}
@@ -246,27 +211,21 @@ func PublicScanOutHandler(w http.ResponseWriter, r *http.Request) {
 	// Check if team actually needs to scan out
 	if team != nil {
 		if team.MustScanOut == "" {
-			flash.Message{
-				Style:   "",
-				Title:   "You're all set!",
-				Message: "You don't need to scan out.",
-			}.Save(w, r)
+			flash.NewDefault("You don't need to scan out.").
+				SetTitle("You're all set!").Save(w, r)
 			data["blocked"] = true
 		} else if team.MustScanOut != code {
-			flash.Message{
-				Style:   "warning",
-				Title:   "You are scanned in elsewhere.",
-				Message: fmt.Sprint("You need to scan out at ", team.BlockingLocation.Name, "."),
-			}.Save(w, r)
+			flash.NewWarning(fmt.Sprintf("You need to scan out at %s.", team.BlockingLocation.Name)).
+				SetTitle("You are scanned in elsewhere.").Save(w, r)
 			data["blocked"] = true
 		}
 	}
 
 	data["messages"] = flash.Get(w, r)
-	render(w, data, false, "scanout")
+	handlers.Render(w, data, false, "scanout")
 }
 
-func PublicScanOutPostHandler(w http.ResponseWriter, r *http.Request) {
+func (h *PlayerHandler) ScanOutPost(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
 	locationCode := chi.URLParam(r, "code")
 	locationCode = strings.ToUpper(locationCode)
@@ -274,11 +233,8 @@ func PublicScanOutPostHandler(w http.ResponseWriter, r *http.Request) {
 	// Get the location
 	location, err := models.FindLocationByCode(r.Context(), locationCode)
 	if err != nil {
-		flash.Message{
-			Style:   "warning",
-			Title:   "Location code not found.",
-			Message: "Please double check the code and try again.",
-		}.Save(w, r)
+		flash.NewWarning("Please double check the code and try again.").
+			SetTitle("Location code not found").Save(w, r)
 		http.Redirect(w, r, "/mylocations", http.StatusFound)
 		return
 	}
@@ -290,30 +246,21 @@ func PublicScanOutPostHandler(w http.ResponseWriter, r *http.Request) {
 
 	team, err := models.FindTeamByCode(r.Context(), teamCode)
 	if err != nil {
-		flash.Message{
-			Style:   "warning",
-			Title:   "Team code not found.",
-			Message: "Please double check the code and try again.",
-		}.Save(w, r)
+		flash.NewWarning("Please double check the code and try again.").
+			SetTitle("Team code not found").Save(w, r)
 		http.Redirect(w, r, "/mylocations", http.StatusFound)
 		return
 	}
 
 	// Check if the team must scan out
 	if team.MustScanOut == "" {
-		flash.Message{
-			Style:   "",
-			Title:   "You're all set!",
-			Message: "You don't need to scan out.",
-		}.Save(w, r)
+		flash.NewWarning("You don't need to scan out.").
+			SetTitle("You're all set!").Save(w, r)
 		http.Redirect(w, r, "/next", http.StatusFound)
 		return
 	} else if team.MustScanOut != locationCode {
-		flash.Message{
-			Style:   "warning",
-			Title:   "You are scanned in elsewhere.",
-			Message: fmt.Sprint("You need to scan out at ", team.BlockingLocation.Name, "."),
-		}.Save(w, r)
+		flash.NewWarning(fmt.Sprintf("You need to scan out at %s.", team.BlockingLocation.Name)).
+			SetTitle("You are scanned in elsewhere.").Save(w, r)
 		http.Redirect(w, r, "/mylocations", http.StatusFound)
 		return
 	}
@@ -321,11 +268,8 @@ func PublicScanOutPostHandler(w http.ResponseWriter, r *http.Request) {
 	// Log the scan
 	err = location.Marker.LogScanOut(r.Context(), teamCode)
 	if err != nil {
-		flash.Message{
-			Style:   "warning",
-			Title:   "Couldn't scan out.",
-			Message: "Please check the codes and try again.",
-		}.Save(w, r)
+		flash.NewWarning("Please double check the code and try again.").
+			SetTitle("Couldn't scan out.").Save(w, r)
 		log.Error(err)
 		http.Redirect(w, r, "/mylocations", http.StatusFound)
 		return
@@ -335,11 +279,7 @@ func PublicScanOutPostHandler(w http.ResponseWriter, r *http.Request) {
 	team.MustScanOut = ""
 	team.Update(r.Context())
 
-	flash.Message{
-		Style:   "success",
-		Title:   "Success!",
-		Message: "You have scanned out.",
-	}.Save(w, r)
+	flash.NewSuccess("You have scanned out.").Save(w, r)
 	http.Redirect(w, r, "/next", http.StatusFound)
 
 }
