@@ -8,13 +8,14 @@
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "tailwindcss build -o assets/css/tailwind.css",
-    "watch": "tailwindcss build -o assets/css/tailwind.css --watch"
+    "build": "tailwindcss build -o web/static/css/tailwind.css",
+    "watch": "tailwindcss build -o web/static/css/tailwind.css --watch"
   },
   "github": "nathanhollows/Rapua",
   "author": "Nathan Hollows",
   "license": "ISC",
   "dependencies": {
+    "@tailwindcss/container-queries": "^0.1.1",
     "commitizen": "^4.3.0",
     "tailwindcss": "^3.4.1"
   },
