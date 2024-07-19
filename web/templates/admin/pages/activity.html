@@ -1,6 +1,12 @@
 {{ define "content" }}
 <h1 class="text-2xl p-5 font-bold">Activity tracker</h1>
 
+<!-- Messages -->
+<div class="p-5">
+  {{ template "flash" .messages }}
+</div>
+
+
 <div class="relative flex flex-col md:flex-row p-5 md:space-x-5">
   <div class="w-full md:w-5/12">
     <div
@@ -178,10 +184,21 @@
   {{ if .Marker.Lat }}
   marker = new mapboxgl.Marker()
      .setLngLat([{{ .Marker.Lng }}, {{ .Marker.Lat }}]);
-  marker.addTo(map);
   markerArray.push(marker);
   {{ end }}
   {{ end }}
+
+  // Order the markers by their their latitudes and re-add them to the map
+  markerArray.sort(function(a, b) {
+    // If northern hemisphere, sort by descending latitude
+    if (a.getLngLat().lat < 0) {
+      return b.getLngLat().lat - a.getLngLat().lat;
+    }
+    return a.getLngLat().lat - b.getLngLat().lat;
+  });
+  for (let i = 0; i < markerArray.length; i++) {
+    markerArray[i].addTo(map);
+  }
 
   // Calculate the bounds
   let bounds = new mapboxgl.LngLatBounds();

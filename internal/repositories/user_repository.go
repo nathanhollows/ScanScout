@@ -31,6 +31,9 @@ func FindUserByID(ctx context.Context, userID string) (*models.User, error) {
 		Model(&user).
 		Where("user.id = ?", userID).
 		Relation("CurrentInstance").
+		Relation("CurrentInstance.Teams").
+		Relation("CurrentInstance.Locations").
+		Relation("CurrentInstance.Locations.Marker").
 		Relation("Instances").
 		Scan(ctx)
 	if err != nil {

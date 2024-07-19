@@ -22,7 +22,6 @@ type Marker struct {
 	Lat          float64   `bun:",type:float" json:"lat"`
 	Lng          float64   `bun:",type:float" json:"lng"`
 	Name         string    `bun:",type:varchar(255)" json:"name"`
-	Content      string    `bun:",type:text" json:"content"`
 	TotalVisits  int       `bun:",type:int" json:"total_visits"`
 	CurrentCount int       `bun:",type:int" json:"current_count"`
 	AvgDuration  float64   `bun:",type:float" json:"avg_duration"`

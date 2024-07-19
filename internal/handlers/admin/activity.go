@@ -3,7 +3,7 @@ package handlers
 import (
 	"net/http"
 
-	"github.com/charmbracelet/log"
+	"github.com/nathanhollows/Rapua/internal/flash"
 	"github.com/nathanhollows/Rapua/internal/handlers"
 )
 
@@ -17,26 +17,11 @@ func (h *AdminHandler) Activity(w http.ResponseWriter, r *http.Request) {
 		{"link": "/admin/dashboard", "text": "Dashboard"},
 	}
 
-	// Get the list of locations
-	locations, err := h.GameManagerService.GetAllLocations(r.Context())
-	if err != nil {
-		log.Error(err)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	data["locations"] = locations
+	user := h.UserFromContext(r.Context())
+	data["locations"] = user.CurrentInstance.Locations
+	data["teams"] = user.CurrentInstance.Teams
 
-	// Get the list of teams and their teams
-	teams, err := h.GameManagerService.GetAllTeams(r.Context())
-	if err != nil {
-		log.Error(err)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	data["teams"] = teams
-
+	data["messages"] = flash.Get(w, r)
 	// Render the template
-	if err := handlers.Render(w, data, true, "activity"); err != nil {
-		http.Error(w, "Error rendering template", http.StatusInternalServerError)
-	}
+	handlers.Render(w, data, true, "activity")
 }

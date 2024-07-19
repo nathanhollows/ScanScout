@@ -13,18 +13,21 @@ import (
 type Location struct {
 	baseModel
 
-	ID         int    `bun:",pk,type:integer" json:"id"`
-	Code       string `bun:",notnull" json:"code"`
-	Name       string `bun:",type:varchar(255)" json:"name"`
-	InstanceID string `bun:",notnull" json:"instance_id"`
-	MarkerID   string `bun:",notnull" json:"marker_id"`
-	CriteriaID string `bun:",notnull" json:"criteria_id"`
-	ContentID  string `bun:",notnull" json:"content_id"`
+	ID           string  `bun:",pk,type:integer,autoincrement" json:"id"`
+	Code         string  `bun:",notnull" json:"code"`
+	Name         string  `bun:",type:varchar(255)" json:"name"`
+	InstanceID   string  `bun:",notnull" json:"instance_id"`
+	MarkerID     string  `bun:",notnull" json:"marker_id"`
+	ContentID    string  `bun:",notnull" json:"content_id"`
+	Criteria     string  `bun:",type:varchar(255)" json:"criteria"`
+	Order        int     `bun:",type:int" json:"order"`
+	TotalVisits  int     `bun:",type:int" json:"total_visits"`
+	CurrentCount int     `bun:",type:int" json:"current_count"`
+	AvgDuration  float64 `bun:",type:float" json:"avg_duration"`
 
-	Instance Instance           `bun:"rel:has-one,join:instance_id=id" json:"instance"`
-	Marker   Marker             `bun:"rel:has-one,join:marker_id=code" json:"marker"`
-	Criteria CompletionCriteria `bun:"rel:has-one,join:criteria_id=id" json:"criteria"`
-	Content  LocationContent    `bun:"rel:has-one,join:content_id=id" json:"content"`
+	Instance Instance        `bun:"rel:has-one,join:instance_id=id" json:"instance"`
+	Marker   Marker          `bun:"rel:has-one,join:marker_id=code" json:"marker"`
+	Content  LocationContent `bun:"rel:has-one,join:content_id=id" json:"content"`
 }
 
 type Locations []Location
@@ -58,16 +61,15 @@ func (i *Location) Delete(ctx context.Context) error {
 	return err
 }
 
-// FindLocationByCode returns a location by code
-func FindLocationByCode(ctx context.Context, code string) (*Location, error) {
+// FindLocationByInstanceAndCode returns a location by code
+func FindLocationByInstanceAndCode(ctx context.Context, instance, code string) (*Location, error) {
 	code = strings.ToUpper(code)
 	var location Location
 	err := db.DB.NewSelect().
 		Model(&location).
 		Where("marker_id = ?", code).
-		Where("instance_id = ?", GetUserFromContext(ctx).CurrentInstanceID).
+		Where("instance_id = ?", instance).
 		Relation("Marker").
-		Relation("Criteria").
 		Relation("Content").
 		Scan(ctx)
 	if err != nil {
@@ -77,12 +79,12 @@ func FindLocationByCode(ctx context.Context, code string) (*Location, error) {
 }
 
 // FindLocationsByCodes returns a list of locations by code
-func FindLocationsByCodes(ctx context.Context, codes []string) Locations {
+func FindLocationsByCodes(ctx context.Context, instanceID string, codes []string) Locations {
 	var locations Locations
 	err := db.DB.NewSelect().
 		Model(&locations).
 		Where("marker_id in (?)", bun.In(codes)).
-		Where("instance_id = ?", GetUserFromContext(ctx).CurrentInstance.ID).
+		Where("instance_id = ?", instanceID).
 		Scan(ctx)
 	if err != nil {
 		log.Error(err)
@@ -91,38 +93,19 @@ func FindLocationsByCodes(ctx context.Context, codes []string) Locations {
 }
 
 // FindAll returns all locations
-func FindAllLocations(ctx context.Context) (Locations, error) {
-	user := GetUserFromContext(ctx)
-
+func FindAllLocations(ctx context.Context, instanceID string) (Locations, error) {
 	var instanceLocations Locations
 	err := db.DB.NewSelect().
 		Model(&instanceLocations).
-		Where("location.instance_id = ?", user.CurrentInstance.ID).
+		Where("location.instance_id = ?", instanceID).
 		Relation("Marker").
-		Relation("Criteria").
 		Relation("Content").
+		Order("location.order ASC").
 		Scan(ctx)
 	if err != nil {
 		log.Error(err)
 	}
 	return instanceLocations, err
-}
-
-// FindInstanceLocationById finds an instance location by InstanceLocationID
-func FindInstanceLocationById(ctx context.Context, code string) (*Location, error) {
-	user := GetUserFromContext(ctx)
-	var instanceLocation Location
-	err := db.DB.NewSelect().
-		Model(&instanceLocation).
-		Where("location.marker_id = ? AND location.instance_id = ?", code, user.CurrentInstance.ID).
-		Relation("Marker").
-		Relation("Criteria").
-		Relation("Content").
-		Scan(ctx)
-	if err != nil {
-		log.Error(err)
-	}
-	return &instanceLocation, err
 }
 
 // FindInstanceLocationByLocationAndInstance finds an instance location by location and instance
@@ -133,7 +116,6 @@ func FindInstanceLocationByLocationAndInstance(ctx context.Context, locationCode
 		Where("location.marker_id = ?", locationCode).
 		Where("location.instance_id = ?", instanceID).
 		Relation("Marker").
-		Relation("Criteria").
 		Relation("Content").
 		Scan(ctx)
 	if err != nil {

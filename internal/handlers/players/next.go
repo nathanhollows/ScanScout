@@ -35,7 +35,7 @@ func (h *PlayerHandler) Next(w http.ResponseWriter, r *http.Request) {
 		session.Save(r, w)
 	}
 
-	team, err := h.GameplayService.GetTeamStatus(r.Context(), teamCode)
+	team, err := h.GameplayService.GetTeamByCode(r.Context(), teamCode)
 	if err != nil {
 		log.Error(err)
 		flash.NewError("Team not found. Please enter your team code and try again.").Save(w, r)

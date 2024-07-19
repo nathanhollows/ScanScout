@@ -52,7 +52,9 @@
 <!-- Show checked in teams -->
 <div class="w-full p-5">
   {{ range .teams }}
+  {{ if not .HasStarted }}
   <span class="badge badge-outline badge-lg m-2 font-mono">{{ .Code }}</span>
+  {{ end }}
   {{ end }}
 </div>
 

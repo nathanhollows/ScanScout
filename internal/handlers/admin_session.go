@@ -12,16 +12,16 @@ import (
 	"github.com/nathanhollows/Rapua/internal/sessions"
 )
 
-// AdminLoginHandler is the handler for the admin login page
-func AdminLoginHandler(w http.ResponseWriter, r *http.Request) {
-	data := templateData(r)
+// LoginHandler is the handler for the admin login page
+func LoginHandler(w http.ResponseWriter, r *http.Request) {
+	data := TemplateData(r)
 	data["title"] = "Login"
 	data["messages"] = flash.Get(w, r)
-	render(w, data, false, "login")
+	Render(w, data, false, "login")
 }
 
 // LoginPost handles the login form submission
-func AdminLoginFormHandler(w http.ResponseWriter, r *http.Request) {
+func LoginPostHandler(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
 	email := r.Form.Get("email")
 	password := r.Form.Get("password")
@@ -29,7 +29,7 @@ func AdminLoginFormHandler(w http.ResponseWriter, r *http.Request) {
 	// Try to authenticate the user
 	user, err := services.AuthenticateUser(r.Context(), email, password)
 	if err != nil {
-		log.Error("Error authenticating user: ", err)
+		log.Error("Error authenticating user", "err", err)
 		flash.Message{
 			Style:   flash.Error,
 			Title:   "Invalid email or password",
@@ -42,7 +42,7 @@ func AdminLoginFormHandler(w http.ResponseWriter, r *http.Request) {
 	// Create a session
 	session, err := sessions.Get(r, "admin")
 	if err != nil {
-		log.Error("Error getting session: ", err)
+		log.Error("getting session for login: ", err)
 		flash.NewError("An error occurred while trying to log in. Please try again.").Save(w, r)
 		// Redirect to the login page
 		http.Redirect(w, r, helpers.URL("/login"), http.StatusSeeOther)
@@ -55,10 +55,10 @@ func AdminLoginFormHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 // Logout destroys the user session
-func AdminLogoutHandler(w http.ResponseWriter, r *http.Request) {
+func LogoutHandler(w http.ResponseWriter, r *http.Request) {
 	session, err := sessions.Get(r, "admin")
 	if err != nil {
-		log.Error("Error getting session: ", err)
+		log.Error("getting session for logout: ", err)
 		flash.NewError("An error occurred while trying to log out. Please try again.").Save(w, r)
 		// Redirect to the login page
 		http.Redirect(w, r, helpers.URL("/login"), http.StatusSeeOther)
@@ -69,19 +69,19 @@ func AdminLogoutHandler(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, helpers.URL("/login"), http.StatusSeeOther)
 }
 
-// AdminRegisterHandler is the handler for the admin register page
-func AdminRegisterHandler(w http.ResponseWriter, r *http.Request) {
-	setDefaultHeaders(w)
-	data := templateData(r)
+// RegisterHandler is the handler for the admin register page
+func RegisterHandler(w http.ResponseWriter, r *http.Request) {
+	SetDefaultHeaders(w)
+	data := TemplateData(r)
 	data["title"] = "New user"
 
-	render(w, data, false, "register")
+	Render(w, data, false, "register")
 }
 
-// AdminRegisterFormHandler handles the form submission for creating a new user
-func AdminRegisterFormHandler(w http.ResponseWriter, r *http.Request) {
-	setDefaultHeaders(w)
-	data := templateData(r)
+// RegisterPostHandler handles the form submission for creating a new user
+func RegisterPostHandler(w http.ResponseWriter, r *http.Request) {
+	SetDefaultHeaders(w)
+	data := TemplateData(r)
 	data["title"] = "New user"
 
 	r.ParseForm()

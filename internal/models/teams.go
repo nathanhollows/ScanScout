@@ -16,11 +16,14 @@ import (
 type Team struct {
 	baseModel
 
-	InstanceID       string   `bun:",notnull" json:"instance_id"`
+	Code        string `bun:",unique,pk" json:"code"`
+	Name        string `bun:"," json:"name"`
+	InstanceID  string `bun:",notnull" json:"instance_id"`
+	HasStarted  bool   `bun:",default:false" json:"has_started"`
+	MustScanOut string `bun:"" json:"must_scan_out"`
+
 	Instance         Instance `bun:"rel:has-one,join:instance_id=id" json:"instance"`
-	Code             string   `bun:",unique,pk" json:"code"`
 	Scans            Scans    `bun:"rel:has-many,join:code=team_id" json:"scans"`
-	MustScanOut      string   `bun:"" json:"must_scan_out"`
 	BlockingLocation Marker   `bun:"rel:has-one,join:must_scan_out=code" json:"blocking_location"`
 }
 
@@ -29,30 +32,46 @@ type Teams []Team
 // Delete removes the team from the database
 func (t *Team) Delete(ctx context.Context) error {
 	_, err := db.DB.NewDelete().Model(t).WherePK().Exec(ctx)
+	return fmt.Errorf("Delete: %v", err)
+}
+
+// Updates the team into the database
+func (t *Team) Update(ctx context.Context) error {
+	_, err := db.DB.NewUpdate().Model(t).WherePK().Exec(ctx)
 	return err
 }
 
 // FindAll returns all teams
-func FindAllTeams(ctx context.Context) (Teams, error) {
-	user := GetUserFromContext(ctx)
+func FindAllTeams(ctx context.Context, instanceID string) (Teams, error) {
 	var teams Teams
 	err := db.DB.NewSelect().
 		Model(&teams).
-		Where("team.instance_id = ?", user.CurrentInstanceID).
+		Where("team.instance_id = ?", instanceID).
+		// Add the scans in the relation order by location_id
+		Relation("Scans", func(q *bun.SelectQuery) *bun.SelectQuery {
+			return q.Order("location_id ASC")
+		}).
 		Scan(ctx)
-	return teams, err
+	if err != nil {
+		return teams, fmt.Errorf("FindAllTeams: %w", err)
+	}
+	return teams, nil
 }
 
 // FindTeamByCode returns a team by code
 func FindTeamByCode(ctx context.Context, code string) (*Team, error) {
 	code = strings.ToUpper(code)
 	var team Team
-	err := db.DB.NewSelect().Model(&team).Where("team.code = ? AND team.instance_id = ?", code).
+	err := db.DB.NewSelect().Model(&team).Where("team.code = ?", code).
 		Relation("Scans").
 		Relation("Scans.Location").
 		Relation("BlockingLocation").
+		Relation("Instance").
 		Limit(1).Scan(ctx)
-	return &team, err
+	if err != nil {
+		return &team, fmt.Errorf("FindTeamByCode: %v", err)
+	}
+	return &team, nil
 }
 
 // FindTeamByCodeAndInstance returns a team by code
@@ -65,7 +84,7 @@ func FindTeamByCodeAndInstance(ctx context.Context, code, instance string) (*Tea
 			return q.Where("instance_id = ?", instance).Order("name ASC")
 		}).
 		Limit(1).Scan(ctx)
-	return &team, err
+	return &team, fmt.Errorf("FindTeamByCodeAndInstance: %v", err)
 }
 
 // HasVisited returns true if the team has visited the given location
@@ -135,28 +154,22 @@ func (t *Team) SuggestNextLocations(ctx context.Context, limit int) *Markers {
 }
 
 // AddTeams adds the given number of teams
-func AddTeams(ctx context.Context, count int) error {
-	user := GetUserFromContext(ctx)
+func AddTeams(ctx context.Context, instanceID string, count int) error {
 	teams := make(Teams, count)
 	for i := 0; i < count; i++ {
 		teams[i] = Team{
 			Code:       helpers.NewCode(4),
-			InstanceID: user.CurrentInstanceID,
+			InstanceID: instanceID,
 		}
 	}
 	_, err := db.DB.NewInsert().Model(&teams).Exec(ctx)
 	return err
 }
 
-func (t *Team) Update(ctx context.Context) error {
-	_, err := db.DB.NewUpdate().Model(t).WherePK().Exec(ctx)
-	return err
-}
-
 // TeamActivityOverview returns a list of teams and their activity
-func TeamActivityOverview(ctx context.Context) ([]map[string]interface{}, error) {
+func TeamActivityOverview(ctx context.Context, instanceID string) ([]map[string]interface{}, error) {
 	// Get all instanceLocations
-	instanceLocations, err := FindAllLocations(ctx)
+	instanceLocations, err := FindAllLocations(ctx, instanceID)
 	if err != nil {
 		return nil, err
 	}
@@ -186,7 +199,7 @@ func TeamActivityOverview(ctx context.Context) ([]map[string]interface{}, error)
 	activity := make([]map[string]interface{}, count)
 	count = 0
 	for _, team := range teams {
-		if len(team.Scans) == 0 {
+		if !team.HasStarted {
 			continue
 		}
 		activity[count] = make(map[string]interface{})

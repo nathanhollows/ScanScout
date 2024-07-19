@@ -3,7 +3,6 @@ package models
 import (
 	"archive/zip"
 	"context"
-	"errors"
 	"io"
 	"os"
 	"strings"
@@ -11,7 +10,6 @@ import (
 	"github.com/charmbracelet/log"
 	"github.com/go-pdf/fpdf"
 	"github.com/google/uuid"
-	"github.com/nathanhollows/Rapua/internal/contextkeys"
 	"github.com/nathanhollows/Rapua/pkg/db"
 )
 
@@ -24,28 +22,15 @@ type Instance struct {
 	Name       string `bun:",type:varchar(255)" json:"name"`
 	UserID     string `bun:",type:varchar(36)" json:"user_id"`
 	CriteriaID string `bun:",type:varchar(36)" json:"criteria_id"`
+	Criteria   string `bun:",type:varchar(255)" json:"criteria"`
 
-	Criteria          CompletionCriteria `bun:"rel:has-one,join:criteria_id=id" json:"criteria"`
-	NavigationMode    NavigationMode     `bun:",type:varchar(255)" json:"navigation_mode"`
-	User              User               `bun:"rel:has-one,join:user_id=id" json:"user"`
-	Teams             Teams              `bun:"rel:has-many,join:id=instance_id" json:"teams"`
-	InstanceLocations Locations          `bun:"rel:has-many,join:id=instance_id" json:"instance_locations"`
-	Scans             Scans              `bun:"rel:has-many,join:id=instance_id" json:"scans"`
+	NavigationMode NavigationMode `bun:",type:int" json:"navigation_mode"`
+	Teams          Teams          `bun:"rel:has-many,join:id=instance_id" json:"teams"`
+	Locations      Locations      `bun:"rel:has-many,join:id=instance_id" json:"instance_locations"`
+	Scans          Scans          `bun:"rel:has-many,join:id=instance_id" json:"scans"`
 }
 
 type Instances []Instance
-
-// NavigationMode represents the mode of navigation for an instance
-type NavigationMode string
-
-const (
-	// FreeRoamMode is a navigation mode where users can scan in and out of locations in any order
-	FreeRoamMode NavigationMode = "free roam"
-	// OrderedMode is a navigation mode where users must scan in and out of locations in a specific order
-	OrderedMode NavigationMode = "ordered"
-	// PseudoRandomMode is a navigation mode where users must scan in and out of locations in a random orde
-	PseudoRandomMode NavigationMode = "pseudo-random"
-)
 
 func (i *Instance) Save(ctx context.Context) error {
 	if i.ID == "" {
@@ -77,7 +62,7 @@ func (i *Instance) Delete(ctx context.Context) error {
 	}
 
 	// Delete locations
-	for _, location := range i.InstanceLocations {
+	for _, location := range i.Locations {
 		err := location.Delete(ctx)
 		if err != nil {
 			return err
@@ -99,28 +84,10 @@ func (i *Instance) Delete(ctx context.Context) error {
 	return nil
 }
 
-// GetCurrentUserInstance gets the current instance from the context
-func GetCurrentUserInstance(ctx context.Context) (*Instance, error) {
-	user, ok := ctx.Value(contextkeys.UserIDKey).(*User)
-	if !ok {
-		return nil, errors.New("User not found in context")
-	}
-
-	if user.CurrentInstance == nil {
-		return nil, errors.New("Current instance not found")
-	}
-
-	return user.CurrentInstance, nil
-}
-
 // FindAllInstances finds all instances
-func FindAllInstances(ctx context.Context) (Instances, error) {
+func FindAllInstances(ctx context.Context, userID string) (Instances, error) {
 	instances := Instances{}
-	user, ok := ctx.Value(contextkeys.UserIDKey).(*User)
-	if !ok {
-		return nil, errors.New("User not found in context")
-	}
-	err := db.DB.NewSelect().Model(&instances).Where("user_id = ?", user.ID).Scan(ctx)
+	err := db.DB.NewSelect().Model(&instances).Where("user_id = ?", userID).Scan(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -133,7 +100,7 @@ func FindInstanceByID(ctx context.Context, id string) (*Instance, error) {
 	err := db.DB.NewSelect().
 		Model(instance).
 		Where("id = ?", id).
-		Relation("InstanceLocations").
+		Relation("Locations").
 		Scan(ctx)
 	if err != nil {
 		return nil, err
@@ -141,9 +108,8 @@ func FindInstanceByID(ctx context.Context, id string) (*Instance, error) {
 	return instance, nil
 }
 
-func GenerateQRCodeArchive(ctx context.Context) (string, error) {
-	instanceID := ctx.Value(contextkeys.UserIDKey).(*User).CurrentInstanceID
-	locations, err := FindAllLocations(ctx)
+func GenerateQRCodeArchive(ctx context.Context, instanceID string) (string, error) {
+	locations, err := FindAllLocations(ctx, instanceID)
 	if err != nil {
 		return "", err
 	}
@@ -230,7 +196,7 @@ func (i *Instance) ZipPosters(ctx context.Context) (string, error) {
 
 	// Collect the paths
 	var paths []string
-	instanceLocations, err := FindAllLocations(ctx)
+	instanceLocations, err := FindAllLocations(ctx, i.ID)
 	if err != nil {
 		return "", err
 	}
@@ -276,8 +242,7 @@ func (i *Instance) ZipPosters(ctx context.Context) (string, error) {
 	return path, nil
 }
 
-func GeneratePosters(ctx context.Context) (string, error) {
-	instanceID := ctx.Value(contextkeys.UserIDKey).(*User).CurrentInstanceID
+func GeneratePosters(ctx context.Context, instanceID string) (string, error) {
 	instance, err := FindInstanceByID(ctx, instanceID)
 
 	// Set up the document
@@ -285,7 +250,7 @@ func GeneratePosters(ctx context.Context) (string, error) {
 	pdf.AddUTF8Font("ArchivoBlack", "", "./assets/fonts/ArchivoBlack-Regular.ttf")
 	pdf.AddUTF8Font("OpenSans", "", "./assets/fonts/OpenSans.ttf")
 
-	for _, location := range instance.InstanceLocations {
+	for _, location := range instance.Locations {
 		location.Marker.GenerateQRCode()
 		generatePosterPage(pdf, &location.Marker, instance, true)
 		// if location.Coords.MustScanOut {

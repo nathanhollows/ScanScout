@@ -16,11 +16,7 @@ func AdminAuthMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		user, err := services.GetAuthenticatedUser(r)
 		if err != nil {
-			flash.Message{
-				Title:   "Error",
-				Message: "You must be logged in to access this page",
-				Style:   flash.Error,
-			}.Save(w, r)
+			flash.NewError("You must be logged in to access this page").Save(w, r)
 			http.Redirect(w, r, "/login", http.StatusSeeOther)
 			return
 		}
@@ -42,7 +38,7 @@ func AdminCheckInstanceMiddleware(next http.Handler) http.Handler {
 			return
 		}
 
-		if user.CurrentInstance == nil {
+		if user.CurrentInstanceID == "" {
 			flash.Message{
 				Title:   "Error",
 				Message: "Please select an instance to continue",

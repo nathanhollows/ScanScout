@@ -3,7 +3,6 @@ package handlers
 import (
 	"log/slog"
 	"net/http"
-	"strings"
 
 	"github.com/nathanhollows/Rapua/internal/flash"
 	"github.com/nathanhollows/Rapua/internal/handlers"
@@ -22,31 +21,32 @@ func (h *PlayerHandler) Home(w http.ResponseWriter, r *http.Request) {
 
 	// If the team is already playing, redirect to the next page
 	if teamCode != nil {
-		team, err = h.GameplayService.GetTeamStatus(r.Context(), strings.ToUpper(teamCode.(string)))
+		team, err = h.GameplayService.GetTeamByCode(r.Context(), teamCode.(string))
 		if err == nil {
 			data["team"] = team
 			http.Redirect(w, r, "/next", http.StatusFound)
 			return
 		} else {
-			slog.Error("Error getting team status", "err", err, "team", teamCode)
+			slog.Error("Home get team from session code", "err", err, "team", teamCode)
 		}
 	}
 
 	// Start the game if the form is submitted
 	if r.Method == http.MethodPost {
 		r.ParseForm()
-		teamCode := strings.ToUpper(r.FormValue("team"))
-		customTeamName := r.FormValue("customTeamName")
 
-		team, err := h.GameplayService.StartPlaying(r.Context(), teamCode, customTeamName)
-		if err != nil {
-			slog.Error("Error starting game", "err", err, "team", teamCode)
-			flash.NewError(err.Error()).Save(w, r)
+		response := h.GameplayService.StartPlaying(r.Context(), r.FormValue("team"), r.FormValue("customTeamName"))
+		for _, message := range response.FlashMessages {
+			message.Save(w, r)
+		}
+		if response.Error != nil {
+			slog.Error("Error starting game", "err", response.Error.Error(), "team", teamCode)
 		} else {
 			session.Values["team"] = team.Code
 			session.Save(r, w)
 			data["team"] = team
-			flash.NewSuccess("Game started!").Save(w, r)
+			http.Redirect(w, r, "/next", http.StatusFound)
+			return
 		}
 	}
 

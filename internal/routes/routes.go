@@ -60,7 +60,7 @@ func setupPlayerRoutes(router chi.Router, gameplayService *services.GameplayServ
 	// Check in to a location
 	router.Route("/s", func(r chi.Router) {
 		r.Use(middlewares.TeamMiddleware)
-		r.Get("/{code:[A-z]{5}}", playerHandler.Scan)
+		r.Get("/{code:[A-z]{5}}", playerHandler.CheckIn)
 		r.Post("/{code:[A-z]{5}}", playerHandler.ScanPost)
 	})
 
@@ -76,13 +76,13 @@ func setupPlayerRoutes(router chi.Router, gameplayService *services.GameplayServ
 func setupPublicRoutes(router chi.Router) {
 
 	router.Route("/login", func(r chi.Router) {
-		r.Get("/", handlers.AdminLoginHandler)
-		r.Post("/", handlers.AdminLoginFormHandler)
+		r.Get("/", handlers.LoginHandler)
+		r.Post("/", handlers.LoginPostHandler)
 	})
-	router.Get("/logout", handlers.AdminLogoutHandler)
+	router.Get("/logout", handlers.LogoutHandler)
 	router.Route("/register", func(r chi.Router) {
-		r.Get("/", handlers.AdminRegisterHandler)
-		r.Post("/", handlers.AdminRegisterFormHandler)
+		r.Get("/", handlers.RegisterHandler)
+		r.Post("/", handlers.RegisterPostHandler)
 	})
 
 	router.Route("/mylocations", func(r chi.Router) {
@@ -103,9 +103,9 @@ func setupAdminRoutes(router chi.Router, gameManagerService *services.GameManage
 		r.Get("/", adminHandler.Activity)
 
 		r.Route("/locations", func(r chi.Router) {
-			r.Get("/", handlers.AdminLocationsHandler)
-			r.Get("/new", handlers.AdminLocationNewHandler)
-			r.Post("/new", handlers.AdminLocationNewPostHandler)
+			r.Get("/", adminHandler.Locations)
+			r.Get("/new", adminHandler.LocationNew)
+			r.Post("/new", adminHandler.LocationNewPost)
 			r.Get("/{id}", handlers.AdminLocationEditHandler)
 			r.Post("/{id}", handlers.AdminLocationEditPostHandler)
 			// Disabled for now
@@ -115,17 +115,17 @@ func setupAdminRoutes(router chi.Router, gameManagerService *services.GameManage
 		})
 
 		r.Route("/teams", func(r chi.Router) {
-			r.Get("/", handlers.AdminTeamsHandler)
-			r.Post("/add", handlers.AdminTeamsAddHandler)
+			r.Get("/", adminHandler.Teams)
+			r.Post("/add", adminHandler.TeamsAdd)
 		})
 
 		r.Route("/instances", func(r chi.Router) {
-			r.Get("/", adminHandler.AdminInstancesHandler)
-			r.Post("/new", adminHandler.AdminInstanceCreateHandler)
-			r.Get("/{id}", adminHandler.AdminInstancesHandler)
-			r.Post("/{id}", adminHandler.AdminInstancesHandler)
-			r.Get("/{id}/switch", adminHandler.AdminInstanceSwitchHandler)
-			r.Post("/delete", adminHandler.AdminInstanceDeleteHandler)
+			r.Get("/", adminHandler.Instances)
+			r.Post("/new", adminHandler.InstancesCreate)
+			r.Get("/{id}", adminHandler.Instances)
+			r.Post("/{id}", adminHandler.Instances)
+			r.Get("/{id}/switch", adminHandler.InstanceSwitch)
+			r.Post("/delete", adminHandler.InstanceDelete)
 		})
 	})
 }

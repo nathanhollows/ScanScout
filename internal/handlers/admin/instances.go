@@ -6,7 +6,6 @@ import (
 	"github.com/go-chi/chi"
 	"github.com/nathanhollows/Rapua/internal/flash"
 	"github.com/nathanhollows/Rapua/internal/handlers"
-	"github.com/nathanhollows/Rapua/internal/models"
 )
 
 // Instances shows admin the instances
@@ -25,12 +24,7 @@ func (h *AdminHandler) InstancesCreate(w http.ResponseWriter, r *http.Request) {
 	data := handlers.TemplateData(r)
 	data["title"] = "New Instance"
 
-	user, ok := data["user"].(*models.User)
-	if !ok || user == nil {
-		flash.NewError("User not authenticated").Save(w, r)
-		http.Redirect(w, r, "/login", http.StatusSeeOther)
-		return
-	}
+	user := h.UserFromContext(r.Context())
 
 	if err := r.ParseForm(); err != nil {
 		flash.NewError("Error parsing form").Save(w, r)
@@ -56,12 +50,7 @@ func (h *AdminHandler) InstanceSwitch(w http.ResponseWriter, r *http.Request) {
 	data := handlers.TemplateData(r)
 	data["title"] = "Switch Instance"
 
-	user, ok := data["user"].(*models.User)
-	if !ok || user == nil {
-		flash.NewError("User not authenticated").Save(w, r)
-		http.Redirect(w, r, "/login", http.StatusSeeOther)
-		return
-	}
+	user := h.UserFromContext(r.Context())
 
 	id := chi.URLParam(r, "id")
 	if id == "" {
@@ -96,12 +85,7 @@ func (h *AdminHandler) InstanceDelete(w http.ResponseWriter, r *http.Request) {
 	id := r.Form.Get("id")
 	confirmName := r.Form.Get("name")
 
-	user, ok := data["user"].(*models.User)
-	if !ok || user == nil {
-		flash.NewError("User not authenticated").Save(w, r)
-		http.Redirect(w, r, "/login", http.StatusSeeOther)
-		return
-	}
+	user := h.UserFromContext(r.Context())
 
 	err := h.GameManagerService.DeleteInstance(r.Context(), user, id, confirmName)
 	if err != nil {

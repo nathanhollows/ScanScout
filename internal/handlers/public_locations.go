@@ -6,6 +6,7 @@ import (
 
 	"github.com/charmbracelet/log"
 	"github.com/go-chi/chi"
+	"github.com/nathanhollows/Rapua/internal/contextkeys"
 	"github.com/nathanhollows/Rapua/internal/flash"
 	"github.com/nathanhollows/Rapua/internal/models"
 	"github.com/nathanhollows/Rapua/internal/sessions"
@@ -13,7 +14,7 @@ import (
 
 // PublicMyLocationsHandler shows the found locations page
 func PublicMyLocationsHandler(w http.ResponseWriter, r *http.Request) {
-	data := templateData(r)
+	data := TemplateData(r)
 	data["title"] = "My Locations"
 
 	// Get the team code from the session
@@ -45,12 +46,12 @@ func PublicMyLocationsHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	data["messages"] = flash.Get(w, r)
-	render(w, data, false, "mylocations")
+	Render(w, data, false, "mylocations")
 }
 
 // PublicSpecificLocationsHandler shows the page for a specific location
 func PublicSpecificLocationsHandler(w http.ResponseWriter, r *http.Request) {
-	data := templateData(r)
+	data := TemplateData(r)
 	locationCode := chi.URLParam(r, "code")
 	locationCode = strings.ToUpper(locationCode)
 	data["code"] = locationCode
@@ -86,7 +87,8 @@ func PublicSpecificLocationsHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Get the location
-	location, err := models.FindLocationByCode(r.Context(), locationCode)
+	user := r.Context().Value(contextkeys.UserIDKey).(*models.User)
+	location, err := models.FindLocationByInstanceAndCode(r.Context(), user.CurrentInstanceID, locationCode)
 	if err != nil {
 		flash.Message{
 			Style:   "danger",
@@ -100,7 +102,7 @@ func PublicSpecificLocationsHandler(w http.ResponseWriter, r *http.Request) {
 	data["location"] = location
 	data["title"] = location.Marker.Name
 	data["messages"] = flash.Get(w, r)
-	render(w, data, false, "location")
+	Render(w, data, false, "location")
 }
 
 func GetLocationsFromSession(r *http.Request) []string {

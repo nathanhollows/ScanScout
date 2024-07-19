@@ -9,37 +9,24 @@ import (
 	"github.com/nathanhollows/Rapua/internal/contextkeys"
 	"github.com/nathanhollows/Rapua/internal/flash"
 	"github.com/nathanhollows/Rapua/internal/models"
+	"github.com/nathanhollows/Rapua/internal/services"
 )
 
-// Locations shows admin the geosites
-func AdminLocationsHandler(w http.ResponseWriter, r *http.Request) {
-	setDefaultHeaders(w)
-	data := templateData(r)
-	data["title"] = "Locations"
-
-	locations, err := models.FindAllLocations(r.Context())
-	if err != nil {
-		flash.NewError("Error finding locations").Save(w, r)
-		return
-	} else {
-		data["locations"] = locations
-	}
-
-	data["messages"] = flash.Get(w, r)
-	render(w, data, true, "locations_index")
-}
+var gameManagerService *services.GameManagerService
 
 // LocationEdit shows the form to edit a location
 func AdminLocationEditHandler(w http.ResponseWriter, r *http.Request) {
-	setDefaultHeaders(w)
-	data := templateData(r)
+	SetDefaultHeaders(w)
+	data := TemplateData(r)
 	data["title"] = "Edit Location"
 	data["messages"] = flash.Get(w, r)
 
 	// Get the location from the chi context
 	code := chi.URLParam(r, "id")
 
-	location, err := models.FindLocationByCode(r.Context(), code)
+	user := r.Context().Value(contextkeys.UserIDKey).(*models.User)
+
+	location, err := models.FindLocationByInstanceAndCode(r.Context(), user.CurrentInstanceID, code)
 	if err != nil {
 		flash.NewError("Location could not be found").Save(w, r)
 		http.Redirect(w, r, "/admin/locations", http.StatusSeeOther)
@@ -47,12 +34,12 @@ func AdminLocationEditHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	data["location"] = location
-	render(w, data, true, "locations_edit")
+	Render(w, data, true, "locations_edit")
 }
 
 // AdminLocationEditPostHandler handles saving a location
 func AdminLocationEditPostHandler(w http.ResponseWriter, r *http.Request) {
-	setDefaultHeaders(w)
+	SetDefaultHeaders(w)
 
 	if r.Method != http.MethodPost {
 		http.Error(w, "Invalid request method", http.StatusMethodNotAllowed)
@@ -68,7 +55,11 @@ func AdminLocationEditPostHandler(w http.ResponseWriter, r *http.Request) {
 
 	locationCode := chi.URLParam(r, "id")
 
-	location, err := models.FindInstanceLocationById(r.Context(), locationCode)
+	location, err := models.FindLocationByInstanceAndCode(
+		r.Context(),
+		r.Context().Value(contextkeys.UserIDKey).(*models.User).CurrentInstanceID,
+		locationCode,
+	)
 	if err != nil {
 		slog.Error("Error finding location", "err", err)
 		flash.NewError("Location not found").Save(w, r)
@@ -93,46 +84,12 @@ func AdminLocationEditPostHandler(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/admin/locations", http.StatusSeeOther)
 }
 
-// LocationNew shows the form to create a new location
-func AdminLocationNewHandler(w http.ResponseWriter, r *http.Request) {
-	setDefaultHeaders(w)
-	data := templateData(r)
-	data["title"] = "Add a Location"
-	data["messages"] = flash.Get(w, r)
-
-	// Render the template
-	render(w, data, true, "locations_new")
-}
-
-// AdminLocationNewPostHandler creates a new location
-func AdminLocationNewPostHandler(w http.ResponseWriter, r *http.Request) {
-	setDefaultHeaders(w)
-	r.ParseForm()
-
-	user := r.Context().Value(contextkeys.UserIDKey).(*models.User)
-
-	name := r.FormValue("name")
-	content := r.FormValue("content")
-	criteriaID := r.FormValue("criteria")
-	lat := r.FormValue("latitude")
-	lng := r.FormValue("longitude")
-
-	err := gameManagerService.CreateLocation(r.Context(), user, name, content, criteriaID, lat, lng)
-	if err != nil {
-		flash.NewError("Location could not be saved").Save(w, r)
-		log.Error(err, "ctx", r.Context())
-		http.Redirect(w, r, r.Header.Get("referer"), http.StatusSeeOther)
-		return
-	}
-
-	flash.NewSuccess("Location saved").Save(w, r)
-	http.Redirect(w, r, "/admin/locations", http.StatusSeeOther)
-}
-
 func adminGenerateQRHandler(w http.ResponseWriter, r *http.Request) {
 	code := chi.URLParam(r, "id")
 
-	location, err := models.FindLocationByCode(r.Context(), code)
+	user := r.Context().Value(contextkeys.UserIDKey).(*models.User)
+
+	location, err := models.FindLocationByInstanceAndCode(r.Context(), user.CurrentInstanceID, code)
 	if err != nil {
 		flash.NewError("Location could not be found").Save(w, r)
 		http.Redirect(w, r, "/admin/locations", http.StatusSeeOther)
@@ -148,7 +105,7 @@ func adminGenerateQRHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func AdminLocationQRZipHandler(w http.ResponseWriter, r *http.Request) {
-	archive, err := models.GenerateQRCodeArchive(r.Context())
+	archive, err := models.GenerateQRCodeArchive(r.Context(), r.Context().Value(contextkeys.UserIDKey).(*models.User).CurrentInstanceID)
 	if err != nil {
 		flash.NewError("QR codes could not be zipped").Save(w, r)
 		http.Redirect(w, r, "/admin/locations", http.StatusSeeOther)
@@ -164,7 +121,7 @@ func AdminLocationQRZipHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func AdminLocationPostersHandler(w http.ResponseWriter, r *http.Request) {
-	posters, err := models.GeneratePosters(r.Context())
+	posters, err := models.GeneratePosters(r.Context(), r.Context().Value(contextkeys.UserIDKey).(*models.User).CurrentInstanceID)
 	if err != nil {
 		log.Error(err)
 		flash.NewError("Posters could not be generated").Save(w, r)

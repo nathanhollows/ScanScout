@@ -3,6 +3,7 @@ package services
 import (
 	"context"
 	"errors"
+	"fmt"
 	"net/http"
 
 	"github.com/nathanhollows/Rapua/internal/models"
@@ -15,7 +16,8 @@ import (
 func AuthenticateUser(ctx context.Context, email, password string) (*models.User, error) {
 	user, err := repositories.GetUserByEmail(ctx, email)
 	if err != nil {
-		return nil, errors.New("invalid email or password")
+		// Wrap the error
+		return nil, fmt.Errorf("error getting user by email: %w", err)
 	}
 
 	if !security.CheckPasswordHash(password, user.Password) {

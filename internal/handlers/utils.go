@@ -15,14 +15,14 @@ import (
 	"github.com/nathanhollows/Rapua/internal/models"
 )
 
-func setDefaultHeaders(w http.ResponseWriter) {
+func SetDefaultHeaders(w http.ResponseWriter) {
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	w.Header().Set("Cache-Control", "no-cache, no-store, must-revalidate")
 	w.Header().Set("Pragma", "no-cache")
 	w.Header().Set("Expires", "0")
 }
 
-func templateData(r *http.Request) map[string]interface{} {
+func TemplateData(r *http.Request) map[string]interface{} {
 	user, ok := r.Context().Value(contextkeys.UserIDKey).(*models.User)
 	data := map[string]interface{}{
 		"hxrequest": r.Header.Get("HX-Request") == "true",
@@ -35,7 +35,7 @@ func templateData(r *http.Request) map[string]interface{} {
 	return data
 }
 
-func render(
+func Render(
 	w http.ResponseWriter,
 	data map[string]interface{},
 	admin bool,
