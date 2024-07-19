@@ -15,6 +15,14 @@ import (
 	"github.com/nathanhollows/Rapua/internal/models"
 )
 
+type TemplateDir string
+
+const (
+	AdminDir  TemplateDir = "admin"
+	PlayerDir TemplateDir = "players"
+	PublicDir TemplateDir = "public"
+)
+
 func SetDefaultHeaders(w http.ResponseWriter) {
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	w.Header().Set("Cache-Control", "no-cache, no-store, must-revalidate")
@@ -38,15 +46,12 @@ func TemplateData(r *http.Request) map[string]interface{} {
 func Render(
 	w http.ResponseWriter,
 	data map[string]interface{},
-	admin bool,
+	templateDir TemplateDir,
 	patterns ...string,
 ) error {
 	w.Header().Set("Content-Type", "text/html")
 
-	baseDir := "web/templates/public/"
-	if admin {
-		baseDir = "web/templates/admin/"
-	}
+	baseDir := "web/templates/" + string(templateDir) + "/"
 
 	err := parse(data, baseDir, patterns...).ExecuteTemplate(w, "base", data)
 	if err != nil {

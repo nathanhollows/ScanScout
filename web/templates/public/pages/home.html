@@ -1,111 +1,193 @@
 {{ define "content"}}
-<div class="flex min-h-full flex-col justify-center px-6 py-12 lg:px-8">
-  <div class="sm:mx-auto sm:w-full sm:max-w-sm">
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      stroke-width="2"
-      stroke-linecap="round"
-      stroke-linejoin="round"
-      class="lucide w-16 h-16 lucide-qr-code m-auto"
-    >
-      <rect
-        width="5"
-        height="5"
-        x="3"
-        y="3"
-        rx="1"
-      />
-      <rect
-        width="5"
-        height="5"
-        x="16"
-        y="3"
-        rx="1"
-      />
-      <rect
-        width="5"
-        height="5"
-        x="3"
-        y="16"
-        rx="1"
-      />
-      <path d="M21 16h-3a2 2 0 0 0-2 2v3" />
-      <path d="M21 21v.01" />
-      <path d="M12 7v3a2 2 0 0 1-2 2H7" />
-      <path d="M3 12h.01" />
-      <path d="M12 3h.01" />
-      <path d="M12 16v.01" />
-      <path d="M16 12h1" />
-      <path d="M21 12v.01" />
-      <path d="M12 21v-1" />
-    </svg>
-    <h2 class="text-center text-2xl font-bold leading-9 tracking-tight">
-      Start
-    </h2>
-  </div>
-  <div class="sm:mx-auto sm:w-full sm:max-w-sm">
-    <form
-      class="space-y-6"
-      method="post"
-      action="/"
-    >
-      <p class="text-center text-3xl pb-3">{{ .location.Name }}</p>
-      {{ template "flash" .messages }}
-      <div>
-        <label
-          class="form-control w-full"
-          for="team"
-          ><div class="label font-bold">
-            <span class="label-text">Team code</span>
-          </div>
-          <input
-            id="team"
-            name="team"
-            type="text"
-            {{
-            if
-            .blocked
-            }}disabled{{
-            end
-            }}
-            {{
-            if
-            .team
-            }}value="{{.team.Code }}"
-            {{
-            end
-            }}
-            class="input input-bordered input-lg w-full text-2xl font-mono text-center uppercase tracking-widest"
-        /></label>
-      </div>
-      <div>
-        <button
-          type="submit"
-          class="btn btn-neutral w-full"
-          {{
-          if
-          .blocked
-          }}disabled{{
-          end
-          }}
+
+<!-- Navbar -->
+<div class="bg-base-200">
+  <div class="navbar max-w-7xl font-bold m-auto">
+    <div class="navbar-start">
+      <div class="dropdown">
+        <div
+          tabindex="0"
+          role="button"
+          class="btn btn-ghost lg:hidden"
         >
-          Start
-        </button>
-        {{ if .team }}
-        <p class="mt-5 text-center">
-          <a
-            href="/mylocations"
-            class="link"
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="h-5 w-5"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
           >
-            See my scanned locations
-          </a>
-        </p>
-        {{ end }}
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M4 6h16M4 12h8m-8 6h16"
+            />
+          </svg>
+        </div>
+        <ul
+          tabindex="0"
+          class="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-52"
+        >
+          <li><a href="/admin/">Dashboard</a></li>
+          <li><a href="/admin/locations">Locations</a></li>
+          <li><a href="/admin/teams">Teams</a></li>
+        </ul>
       </div>
-    </form>
+      <a href="/admin" class="btn btn-ghost text-xl">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          class="lucide lucide-qr-code -mb-1"
+        >
+          <rect width="5" height="5" x="3" y="3" rx="1" />
+          <rect width="5" height="5" x="16" y="3" rx="1" />
+          <rect width="5" height="5" x="3" y="16" rx="1" />
+          <path d="M21 16h-3a2 2 0 0 0-2 2v3" />
+          <path d="M21 21v.01" />
+          <path d="M12 7v3a2 2 0 0 1-2 2H7" />
+          <path d="M3 12h.01" />
+          <path d="M12 3h.01" />
+          <path d="M12 16v.01" />
+          <path d="M16 12h1" />
+          <path d="M21 12v.01" />
+          <path d="M12 21v-1" />
+        </svg>
+        Rapua</a
+      >
+    </div>
+    <div class="navbar-end">
+      <a href="/register" class="btn btn-sm btn-neutral mr-3">Register</a>
+      <a href="/login" class="btn btn-sm btn-primary">Login</a>
+    </div>
   </div>
 </div>
+
+
+<!-- Main Content -->
+<main class="container mx-auto p-8">
+  <!-- Start Playing Section -->
+  <section class="text-center mb-12">
+    <h1 class="text-4xl font-bold mb-4">Welcome to Rapua</h1>
+    <p class="text-lg mb-6">Engage students with interactive, location-based learning games.</p>
+    <form class="max-w-md mx-auto space-y-6" method="post">
+      <p class="text-center text-3xl pb-3"></p>
+
+      <div>
+        <label class="form-control w-full" for="team"><div class="label font-bold">
+          <span class="label-text">Team code</span>
+        </div>
+          <input id="team" name="team" type="text" placeholder="RAPUA" class="input input-bordered input-lg w-full text-2xl font-mono text-center uppercase tracking-widest"></label>
+      </div>
+      <div>
+        <button type="submit" class="btn btn-primary w-full">
+          Start Playing
+        </button>
+      </div>
+    </form>
+    
+  </section>
+
+  <!-- Features Section -->
+  <section id="features" class="mb-12">
+    <h2 class="text-3xl font-bold text-center mb-8">Features for Educators</h2>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+      <div class="card bg-white shadow-md p-6">
+        <h3 class="text-xl font-bold mb-2">Create and Manage Games</h3>
+        <p>Define game settings, locations, teams, and events for a tailored learning experience.</p>
+      </div>
+      <div class="card bg-white shadow-md p-6">
+        <h3 class="text-xl font-bold mb-2">Team Management</h3>
+        <p>Add, edit, and delete teams. Manage team-specific settings and progress effortlessly.</p>
+      </div>
+      <div class="card bg-white shadow-md p-6">
+        <h3 class="text-xl font-bold mb-2">Event Management</h3>
+        <p>Create and manage events such as bonus activities and hunts with ease.</p>
+      </div>
+      <div class="card bg-white shadow-md p-6">
+        <h3 class="text-xl font-bold mb-2">Messaging</h3>
+        <p>Send messages to all teams or specific teams with important updates or instructions.</p>
+      </div>
+      <div class="card bg-white shadow-md p-6">
+        <h3 class="text-xl font-bold mb-2 flex">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              class="lucide lucide-activity d-inline-block w-6 h-6 mr-2"
+            >
+              <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
+            </svg>
+          Game Monitoring</h3>
+        <p>Track team progress, scan logs, and event completions. Administer penalties or bonuses as needed.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Map Section -->
+  <section id="map" class="mb-12">
+    <h2 class="text-3xl font-bold text-center mb-8">Rapua around the world</h2>
+<div class="skeleton h-96 w-full"></div>
+  </section>
+</main>
+
+<!-- Footer -->
+<div class="bg-base-200">
+<footer class="footer max-w-7xl mx-auto text-base-content p-10">
+    <aside class="grid-flow-col items-center">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        class="lucide lucide-qr-code w-8 h-8 mr-2"
+      >
+        <rect width="5" height="5" x="3" y="3" rx="1" />
+        <rect width="5" height="5" x="16" y="3" rx="1" />
+        <rect width="5" height="5" x="3" y="16" rx="1" />
+        <path d="M21 16h-3a2 2 0 0 0-2 2v3" />
+        <path d="M21 21v.01" />
+        <path d="M12 7v3a2 2 0 0 1-2 2H7" />
+        <path d="M3 12h.01" />
+        <path d="M12 3h.01" />
+        <path d="M12 16v.01" />
+        <path d="M16 12h1" />
+        <path d="M21 12v.01" />
+        <path d="M12 21v-1" />
+      </svg>
+      <p>Made with 
+        <svg class="w-4 h-4 inline fill-neutral" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-heart"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg> 
+        by <a href="https://nathanhollows.com" class="link">Nathan Hollows</a> — Copyright © {{ year }}</p>
+    </aside>
+    <nav class="grid-flow-col gap-4 md:place-self-center md:justify-self-end">
+      <a href="https://github.com/nathanhollows/Rapua">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-github"><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"/><path d="M9 18c-4.51 2-5-2-7-2"/></svg>
+      </a>
+  </nav>
+</footer>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/@mapbox/mapbox-gl@1.12.0/dist/mapbox-gl.js"></script>
+<script>
+mapboxgl.accessToken = 'your_mapbox_access_token';
+var map = new mapboxgl.Map({
+  container: 'mapbox',
+  style: 'mapbox://styles/mapbox/streets-v11',
+  center: [0, 0], // Set to your desired coordinates
+  zoom: 2
+});
+</script>
 {{ end }}

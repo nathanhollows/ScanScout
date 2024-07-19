@@ -11,6 +11,7 @@ import (
 	"github.com/nathanhollows/Rapua/internal/handlers"
 	admin "github.com/nathanhollows/Rapua/internal/handlers/admin"
 	players "github.com/nathanhollows/Rapua/internal/handlers/players"
+	public "github.com/nathanhollows/Rapua/internal/handlers/public"
 	"github.com/nathanhollows/Rapua/internal/middlewares"
 	"github.com/nathanhollows/Rapua/internal/services"
 )
@@ -75,14 +76,18 @@ func setupPlayerRoutes(router chi.Router, gameplayService *services.GameplayServ
 
 func setupPublicRoutes(router chi.Router) {
 
+	publicHandler := public.NewPublicHandler()
+
+	router.Get("/home", publicHandler.Index)
+
 	router.Route("/login", func(r chi.Router) {
-		r.Get("/", handlers.LoginHandler)
-		r.Post("/", handlers.LoginPostHandler)
+		r.Get("/", publicHandler.Login)
+		r.Post("/", publicHandler.LoginPost)
 	})
-	router.Get("/logout", handlers.LogoutHandler)
+	router.Get("/logout", publicHandler.Logout)
 	router.Route("/register", func(r chi.Router) {
-		r.Get("/", handlers.RegisterHandler)
-		r.Post("/", handlers.RegisterPostHandler)
+		r.Get("/", publicHandler.Register)
+		r.Post("/", publicHandler.RegisterPost)
 	})
 
 	router.Route("/mylocations", func(r chi.Router) {

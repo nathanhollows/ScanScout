@@ -18,7 +18,7 @@ func (h *AdminHandler) Locations(w http.ResponseWriter, r *http.Request) {
 	data["locations"] = user.CurrentInstance.Locations
 
 	data["messages"] = flash.Get(w, r)
-	handlers.Render(w, data, true, "locations_index")
+	handlers.Render(w, data, handlers.AdminDir, "locations_index")
 }
 
 // LocationNew shows the form to create a new location
@@ -27,7 +27,7 @@ func (h *AdminHandler) LocationNew(w http.ResponseWriter, r *http.Request) {
 	data := handlers.TemplateData(r)
 	data["title"] = "New Location"
 	data["messages"] = flash.Get(w, r)
-	handlers.Render(w, data, true, "locations_new")
+	handlers.Render(w, data, handlers.AdminDir, "locations_new")
 }
 
 // LocationNewPost handles creating a new location

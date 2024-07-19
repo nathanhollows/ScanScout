@@ -51,5 +51,5 @@ func (h *PlayerHandler) Home(w http.ResponseWriter, r *http.Request) {
 	}
 
 	data["messages"] = flash.Get(w, r)
-	handlers.Render(w, data, false, "home")
+	handlers.Render(w, data, handlers.PlayerDir, "home")
 }

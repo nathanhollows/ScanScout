@@ -34,7 +34,7 @@ func AdminLocationEditHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	data["location"] = location
-	Render(w, data, true, "locations_edit")
+	Render(w, data, AdminDir, "locations_edit")
 }
 
 // AdminLocationEditPostHandler handles saving a location

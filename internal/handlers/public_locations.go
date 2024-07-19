@@ -46,7 +46,7 @@ func PublicMyLocationsHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	data["messages"] = flash.Get(w, r)
-	Render(w, data, false, "mylocations")
+	Render(w, data, PlayerDir, "mylocations")
 }
 
 // PublicSpecificLocationsHandler shows the page for a specific location
@@ -102,7 +102,7 @@ func PublicSpecificLocationsHandler(w http.ResponseWriter, r *http.Request) {
 	data["location"] = location
 	data["title"] = location.Marker.Name
 	data["messages"] = flash.Get(w, r)
-	Render(w, data, false, "location")
+	Render(w, data, PlayerDir, "location")
 }
 
 func GetLocationsFromSession(r *http.Request) []string {

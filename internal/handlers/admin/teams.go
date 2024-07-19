@@ -17,7 +17,7 @@ func (h *AdminHandler) Teams(w http.ResponseWriter, r *http.Request) {
 	data["teams"] = user.CurrentInstance.Teams
 
 	data["messages"] = flash.Get(w, r)
-	handlers.Render(w, data, true, "teams_index")
+	handlers.Render(w, data, handlers.AdminDir, "teams_index")
 }
 
 func (h *AdminHandler) TeamsAdd(w http.ResponseWriter, r *http.Request) {

@@ -6,6 +6,7 @@ import (
 
 	"github.com/charmbracelet/log"
 	"github.com/nathanhollows/Rapua/internal/flash"
+	"github.com/nathanhollows/Rapua/internal/handlers"
 	"github.com/nathanhollows/Rapua/internal/helpers"
 	"github.com/nathanhollows/Rapua/internal/models"
 	"github.com/nathanhollows/Rapua/internal/services"
@@ -13,15 +14,15 @@ import (
 )
 
 // LoginHandler is the handler for the admin login page
-func LoginHandler(w http.ResponseWriter, r *http.Request) {
-	data := TemplateData(r)
+func (h *PublicHandler) Login(w http.ResponseWriter, r *http.Request) {
+	data := handlers.TemplateData(r)
 	data["title"] = "Login"
 	data["messages"] = flash.Get(w, r)
-	Render(w, data, false, "login")
+	handlers.Render(w, data, handlers.PublicDir, "login")
 }
 
 // LoginPost handles the login form submission
-func LoginPostHandler(w http.ResponseWriter, r *http.Request) {
+func (h *PublicHandler) LoginPost(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
 	email := r.Form.Get("email")
 	password := r.Form.Get("password")
@@ -55,7 +56,7 @@ func LoginPostHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 // Logout destroys the user session
-func LogoutHandler(w http.ResponseWriter, r *http.Request) {
+func (h *PublicHandler) Logout(w http.ResponseWriter, r *http.Request) {
 	session, err := sessions.Get(r, "admin")
 	if err != nil {
 		log.Error("getting session for logout: ", err)
@@ -70,18 +71,18 @@ func LogoutHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 // RegisterHandler is the handler for the admin register page
-func RegisterHandler(w http.ResponseWriter, r *http.Request) {
-	SetDefaultHeaders(w)
-	data := TemplateData(r)
+func (h *PublicHandler) Register(w http.ResponseWriter, r *http.Request) {
+	handlers.SetDefaultHeaders(w)
+	data := handlers.TemplateData(r)
 	data["title"] = "New user"
 
-	Render(w, data, false, "register")
+	handlers.Render(w, data, handlers.PublicDir, "register")
 }
 
 // RegisterPostHandler handles the form submission for creating a new user
-func RegisterPostHandler(w http.ResponseWriter, r *http.Request) {
-	SetDefaultHeaders(w)
-	data := TemplateData(r)
+func (h *PublicHandler) RegisterPost(w http.ResponseWriter, r *http.Request) {
+	handlers.SetDefaultHeaders(w)
+	data := handlers.TemplateData(r)
 	data["title"] = "New user"
 
 	r.ParseForm()

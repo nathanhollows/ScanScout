@@ -58,5 +58,5 @@ func (h *PlayerHandler) Next(w http.ResponseWriter, r *http.Request) {
 	data["team"] = team
 	data["locations"] = locations
 	data["messages"] = flash.Get(w, r)
-	handlers.Render(w, data, false, "next")
+	handlers.Render(w, data, handlers.PlayerDir, "next")
 }

@@ -23,5 +23,5 @@ func (h *AdminHandler) Activity(w http.ResponseWriter, r *http.Request) {
 
 	data["messages"] = flash.Get(w, r)
 	// Render the template
-	handlers.Render(w, data, true, "activity")
+	handlers.Render(w, data, handlers.AdminDir, "activity")
 }

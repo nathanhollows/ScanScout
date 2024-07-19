@@ -48,7 +48,7 @@ func (h *PlayerHandler) CheckIn(w http.ResponseWriter, r *http.Request) {
 	}
 
 	data["messages"] = flash.Get(w, r)
-	handlers.Render(w, data, false, "scan")
+	handlers.Render(w, data, handlers.PlayerDir, "scan")
 }
 
 // ScanPost handles the POST request for scanning in
@@ -121,7 +121,7 @@ func (h *PlayerHandler) ScanOut(w http.ResponseWriter, r *http.Request) {
 	}
 
 	data["messages"] = flash.Get(w, r)
-	handlers.Render(w, data, false, "scanout")
+	handlers.Render(w, data, handlers.PlayerDir, "scanout")
 }
 
 func (h *PlayerHandler) ScanOutPost(w http.ResponseWriter, r *http.Request) {

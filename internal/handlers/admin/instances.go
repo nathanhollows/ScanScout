@@ -15,7 +15,7 @@ func (h *AdminHandler) Instances(w http.ResponseWriter, r *http.Request) {
 	data["title"] = "Instances"
 
 	data["messages"] = flash.Get(w, r)
-	handlers.Render(w, data, true, "instances_index")
+	handlers.Render(w, data, handlers.AdminDir, "instances_index")
 }
 
 // InstancesCreate creates a new instance
