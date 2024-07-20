@@ -13,10 +13,6 @@ func (h *AdminHandler) Activity(w http.ResponseWriter, r *http.Request) {
 	data := handlers.TemplateData(r)
 	data["title"] = "Activity tracker"
 	data["page"] = "activity"
-	data["breadcrumbs"] = []map[string]string{
-		{"link": "/admin", "text": "Admin"},
-		{"link": "/admin/dashboard", "text": "Dashboard"},
-	}
 
 	user := h.UserFromContext(r.Context())
 	data["locations"] = user.CurrentInstance.Locations
