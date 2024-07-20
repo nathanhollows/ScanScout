@@ -64,7 +64,6 @@ func FindTeamByCode(ctx context.Context, code string) (*Team, error) {
 	var team Team
 	err := db.DB.NewSelect().Model(&team).Where("team.code = ?", code).
 		Relation("Scans").
-		Relation("Scans.Location").
 		Relation("BlockingLocation").
 		Relation("Instance").
 		Limit(1).Scan(ctx)
@@ -88,7 +87,7 @@ func FindTeamByCodeAndInstance(ctx context.Context, code, instance string) (*Tea
 }
 
 // HasVisited returns true if the team has visited the given location
-func (t *Team) HasVisited(location *Marker) bool {
+func (t *Team) HasVisited(location *Location) bool {
 	for _, s := range t.Scans {
 		if s.LocationID == location.Code {
 			return true
@@ -98,8 +97,8 @@ func (t *Team) HasVisited(location *Marker) bool {
 }
 
 // SuggestNextLocation returns the next location to scan in
-func (t *Team) SuggestNextLocations(ctx context.Context, limit int) *Markers {
-	var locations Markers
+func (t *Team) SuggestNextLocations(ctx context.Context, limit int) *Locations {
+	var locations Locations
 
 	// Get the list of locations the team has already visited
 	visited := make([]string, len(t.Scans))
@@ -245,4 +244,28 @@ func (t *Team) GetVisitedLocations(ctx context.Context) ([]*Location, error) {
 		return nil, err
 	}
 	return locations, nil
+}
+
+// LoadScans loads the scans for the team
+func (t *Team) LoadScans(ctx context.Context) error {
+	err := db.DB.NewSelect().Model(&t.Scans).
+		Where("team_id = ?", t.Code).
+		Relation("Location").
+		Relation("Location.Content").
+		Scan(ctx)
+	if err != nil {
+		return fmt.Errorf("LoadScans: %v", err)
+	}
+	return nil
+}
+
+// LoadBlockingLocation loads the blocking location for the team
+func (t *Team) LoadBlockingLocation(ctx context.Context) error {
+	err := db.DB.NewSelect().Model(&t.BlockingLocation).
+		Where("code = ?", t.MustScanOut).
+		Scan(ctx)
+	if err != nil {
+		return fmt.Errorf("LoadBlockingLocation: %v", err)
+	}
+	return nil
 }

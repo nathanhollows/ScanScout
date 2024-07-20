@@ -7,10 +7,8 @@ import (
 
 	"github.com/charmbracelet/log"
 	"github.com/go-chi/chi"
-	"github.com/nathanhollows/Rapua/internal/contextkeys"
 	"github.com/nathanhollows/Rapua/internal/flash"
 	"github.com/nathanhollows/Rapua/internal/handlers"
-	"github.com/nathanhollows/Rapua/internal/models"
 	"github.com/nathanhollows/Rapua/internal/sessions"
 	"golang.org/x/exp/slog"
 )
@@ -22,11 +20,16 @@ func (h *PlayerHandler) CheckIn(w http.ResponseWriter, r *http.Request) {
 	code = strings.ToUpper(code)
 	data["code"] = code
 
-	team, ok := r.Context().Value(contextkeys.TeamKey).(*models.Team)
-	if ok {
-		data["team"] = team
+	team := h.getTeamFromContext(r.Context())
+
+	location, err := h.GameplayService.GetLocationByCode(r.Context(), team, code)
+	if err != nil {
+		flash.NewWarning("Please double check the code and try again.").
+			SetTitle("Location not found").Save(w, r)
+		http.Redirect(w, r, "/", http.StatusFound)
+		return
 	}
-	data["team"] = team
+	data["location"] = location
 
 	if team.MustScanOut != "" {
 		if code == "" {
@@ -47,49 +50,36 @@ func (h *PlayerHandler) CheckIn(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	data["team"] = team
 	data["messages"] = flash.Get(w, r)
 	handlers.Render(w, data, handlers.PlayerDir, "scan")
 }
 
-// ScanPost handles the POST request for scanning in
-func (h *PlayerHandler) ScanPost(w http.ResponseWriter, r *http.Request) {
+// CheckInPost handles the POST request for scanning in
+func (h *PlayerHandler) CheckInPost(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
 	locationCode := chi.URLParam(r, "code")
 	locationCode = strings.ToUpper(locationCode)
 
-	team, ok := r.Context().Value(contextkeys.TeamKey).(*models.Team)
-	if !ok {
-		flash.NewWarning("Team not found. Please double check the code and try again.").
-			SetTitle("Team code not found").Save(w, r)
-		http.Redirect(w, r, "/", http.StatusFound)
-		return
-	}
+	team := h.getTeamFromContext(r.Context())
 
-	response := h.GameplayService.LogScan(r.Context(), team, locationCode)
+	response := h.GameplayService.CheckIn(r.Context(), team, locationCode)
 	for _, msg := range response.FlashMessages {
 		msg.Save(w, r)
 	}
 	if response.Error != nil {
-		slog.Debug("Error logging scan", "err", response.Error.Error(), "team", team.Code, "location", locationCode)
-		http.Redirect(w, r, "/", http.StatusFound)
+		slog.Error("Error checking in", "err", response.Error.Error(), "team", team.Code, "location", locationCode)
+		http.Redirect(w, r, r.Header.Get("referer"), http.StatusFound)
 		return
 	}
 
-	flash.NewSuccess("You have scanned in.").Save(w, r)
+	locationID := response.Data["locationID"].(string)
+	log.Info("CheckIn", "team", team.Code, "location", locationID)
 
-	session, _ := sessions.Get(r, "scanscout")
-	if session.Values["locations"] == nil {
-		session.Values["locations"] = []string{locationCode}
-	} else {
-		session.Values["locations"] = append(session.Values["locations"].([]string), locationCode)
-	}
-	session.Values["team"] = team.Code
-	session.Save(r, w)
-
-	http.Redirect(w, r, "/mylocations/"+locationCode, http.StatusFound)
+	http.Redirect(w, r, "/checkins/"+locationID, http.StatusFound)
 }
 
-func (h *PlayerHandler) ScanOut(w http.ResponseWriter, r *http.Request) {
+func (h *PlayerHandler) CheckOut(w http.ResponseWriter, r *http.Request) {
 	data := handlers.TemplateData(r)
 	code := chi.URLParam(r, "code")
 	code = strings.ToUpper(code)
@@ -124,7 +114,7 @@ func (h *PlayerHandler) ScanOut(w http.ResponseWriter, r *http.Request) {
 	handlers.Render(w, data, handlers.PlayerDir, "scanout")
 }
 
-func (h *PlayerHandler) ScanOutPost(w http.ResponseWriter, r *http.Request) {
+func (h *PlayerHandler) CheckOutPost(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
 	locationCode := chi.URLParam(r, "code")
 	locationCode = strings.ToUpper(locationCode)
@@ -132,12 +122,12 @@ func (h *PlayerHandler) ScanOutPost(w http.ResponseWriter, r *http.Request) {
 	teamCode := r.FormValue("team")
 	teamCode = strings.ToUpper(teamCode)
 
-	err := h.GameplayService.LogScanOut(r.Context(), teamCode, locationCode)
+	err := h.GameplayService.CheckOut(r.Context(), teamCode, locationCode)
 	if err != nil {
 		flash.NewWarning("Please double check the code and try again.").
 			SetTitle("Couldn't scan out.").Save(w, r)
 		log.Error(err)
-		http.Redirect(w, r, "/mylocations", http.StatusFound)
+		http.Redirect(w, r, "/checkins", http.StatusFound)
 		return
 	}
 

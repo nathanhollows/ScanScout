@@ -62,15 +62,21 @@ func setupPlayerRoutes(router chi.Router, gameplayService *services.GameplayServ
 	router.Route("/s", func(r chi.Router) {
 		r.Use(middlewares.TeamMiddleware)
 		r.Get("/{code:[A-z]{5}}", playerHandler.CheckIn)
-		r.Post("/{code:[A-z]{5}}", playerHandler.ScanPost)
+		r.Post("/{code:[A-z]{5}}", playerHandler.CheckInPost)
 	})
 
 	// Check out of a location
 	router.Route("/o", func(r chi.Router) {
 		r.Use(middlewares.TeamMiddleware)
-		r.Get("/", playerHandler.ScanOut)
-		r.Get("/{code:[A-z]{5}}", playerHandler.ScanOut)
-		r.Post("/{code:[A-z]{5}}", playerHandler.ScanOutPost)
+		r.Get("/", playerHandler.CheckOut)
+		r.Get("/{code:[A-z]{5}}", playerHandler.CheckOut)
+		r.Post("/{code:[A-z]{5}}", playerHandler.CheckOutPost)
+	})
+
+	router.Route("/checkins", func(r chi.Router) {
+		r.Use(middlewares.TeamMiddleware)
+		r.Get("/", playerHandler.CheckInList)
+		r.Get("/{id}", playerHandler.CheckInView)
 	})
 }
 
@@ -90,12 +96,6 @@ func setupPublicRoutes(router chi.Router) {
 		r.Post("/", publicHandler.RegisterPost)
 	})
 
-	router.Route("/mylocations", func(r chi.Router) {
-		r.Use(middlewares.TeamMiddleware)
-		r.Get("/", handlers.PublicMyLocationsHandler)
-		r.Get("/{code:[A-z]{5}}", handlers.PublicSpecificLocationsHandler)
-		r.Post("/{code:[A-z]{5}}", handlers.PublicSpecificLocationsHandler)
-	})
 }
 
 func setupAdminRoutes(router chi.Router, gameManagerService *services.GameManagerService) {

@@ -2,11 +2,8 @@ package models
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"os"
-	"strings"
-	"time"
 
 	"github.com/charmbracelet/log"
 	"github.com/nathanhollows/Rapua/internal/helpers"
@@ -48,64 +45,6 @@ func (l *Marker) Save(ctx context.Context) error {
 		log.Error(err)
 	}
 	return err
-}
-
-// LogScan creates a new scan entry for the location if it's valid
-func (l *Marker) LogScan(ctx context.Context, teamCode string) error {
-	teamCode = strings.ToUpper(teamCode)
-	// Check if a team exists with the code
-	team, err := FindTeamByCode(ctx, teamCode)
-	if err != nil || team == nil {
-		return err
-	}
-
-	// Check if the team must scan out
-	if team.MustScanOut != "" {
-		if l.Code != team.MustScanOut {
-			return errors.New("team must scan out")
-		}
-
-		if l.Code == team.MustScanOut {
-			// Redirect to the scan out page
-		}
-	}
-
-	// Update the location stats
-	l.CurrentCount++
-	l.TotalVisits++
-	l.Save(ctx)
-
-	scan := Scan{
-		TeamID:     team.Code,
-		LocationID: l.Code,
-		TimeIn:     time.Now().UTC(),
-	}
-	scan.Save(ctx)
-
-	return nil
-}
-
-func (l *Marker) LogScanOut(ctx context.Context, teamCode string) error {
-	// Find the open scan
-	teamCode = strings.ToUpper(teamCode)
-	scan, err := FindScan(ctx, teamCode, l.Code)
-	if err != nil {
-		return err
-	}
-
-	// Check if the team must scan out
-	scan.TimeOut = time.Now().UTC()
-	scan.Save(ctx)
-
-	// Update the location stats
-	l.AvgDuration =
-		(l.AvgDuration*float64(l.TotalVisits) +
-			scan.TimeOut.Sub(scan.TimeIn).Seconds()) /
-			float64(l.TotalVisits+1)
-	l.CurrentCount--
-	l.Save(ctx)
-
-	return nil
 }
 
 func (l *Marker) GenerateQRCode() error {

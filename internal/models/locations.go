@@ -2,7 +2,9 @@ package models
 
 import (
 	"context"
+	"errors"
 	"strings"
+	"time"
 
 	"github.com/charmbracelet/log"
 	"github.com/google/uuid"
@@ -13,8 +15,7 @@ import (
 type Location struct {
 	baseModel
 
-	ID           string  `bun:",pk,type:integer,autoincrement" json:"id"`
-	Code         string  `bun:",notnull" json:"code"`
+	Code         string  `bun:",pk,notnull" json:"code"`
 	Name         string  `bun:",type:varchar(255)" json:"name"`
 	InstanceID   string  `bun:",notnull" json:"instance_id"`
 	MarkerID     string  `bun:",notnull" json:"marker_id"`
@@ -134,4 +135,62 @@ func FindOrderedLocations(ctx context.Context, team *Team) (*Locations, error) {
 func FindPseudoRandomLocations(ctx context.Context, team *Team) (*Locations, error) {
 	// Implement logic to return a set of locations in pseudo-random order
 	return nil, nil
+}
+
+// LogScan creates a new scan entry for the location if it's valid
+func (l *Location) LogScan(ctx context.Context, teamCode string) (scan *Scan, err error) {
+	teamCode = strings.ToUpper(teamCode)
+	// Check if a team exists with the code
+	team, err := FindTeamByCode(ctx, teamCode)
+	if err != nil || team == nil {
+		return nil, err
+	}
+
+	// Check if the team must scan out
+	if team.MustScanOut != "" {
+		if l.Code != team.MustScanOut {
+			return nil, errors.New("team must scan out")
+		}
+
+		if l.Code == team.MustScanOut {
+			// Redirect to the scan out page
+		}
+	}
+
+	// Update the location stats
+	l.CurrentCount++
+	l.TotalVisits++
+	l.Save(ctx)
+
+	scan = &Scan{
+		TeamID:     team.Code,
+		LocationID: l.Code,
+		TimeIn:     time.Now().UTC(),
+	}
+	scan.Save(ctx)
+
+	return scan, nil
+}
+
+func (l *Location) LogScanOut(ctx context.Context, teamCode string) error {
+	// Find the open scan
+	teamCode = strings.ToUpper(teamCode)
+	scan, err := FindScan(ctx, teamCode, l.Code)
+	if err != nil {
+		return err
+	}
+
+	// Check if the team must scan out
+	scan.TimeOut = time.Now().UTC()
+	scan.Save(ctx)
+
+	// Update the location stats
+	l.AvgDuration =
+		(l.AvgDuration*float64(l.TotalVisits) +
+			scan.TimeOut.Sub(scan.TimeIn).Seconds()) /
+			float64(l.TotalVisits+1)
+	l.CurrentCount--
+	l.Save(ctx)
+
+	return nil
 }

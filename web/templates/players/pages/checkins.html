@@ -1,35 +1,39 @@
-{{ define "content"}}
+{{ define "content" }}
 <div class="flex min-h-full flex-col justify-center px-6 py-12 lg:px-8">
   <div class="sm:mx-auto sm:w-full sm:max-w-sm">
     <h2 class="mt-5 text-center text-2xl font-bold leading-9 tracking-tight">
-      My locations
+      My Check Ins
     </h2>
   </div>
   <div class="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
-    {{ template "flash" .messages }} {{ if .team.BlockingLocation.Code }}
+    {{ template "flash" .messages }} 
+    {{ if .team.BlockingLocation.Code }}
     <p class="text-center mb-5">
-      You are currently scanned into
+      You are currently checked in to
       <a
-        href="/mylocations/{{ .team.BlockingLocation.Code }}"
+        href="/checkins/{{ .team.BlockingLocation.Code }}"
         class="link"
-        >{{ .team.BlockingLocation.Name }}</a
-      >.
+      >
+        {{ .team.BlockingLocation.Name }}
+      </a>.
     </p>
-    {{ end }} {{ if .team }}
+    {{ end }} 
+    {{ if .team }}
     <ul class="list-none text-center mb-5">
-      {{ range .team.Scans }} {{ if ne .Location.Code
-      $.team.BlockingLocation.Code }}
+      {{ range .team.Scans }}
+      {{ if ne .Location.Code $.team.BlockingLocation.Code }}
       <li class="">
         <a
-          href="/mylocations/{{ .Location.Code }}"
+          href="/checkins/{{ .Location.Code }}"
           class="link"
         >
           {{ .Location.Name }}
         </a>
       </li>
-      {{ end }} {{ end }}
+      {{ end }}
+      {{ end }}
     </ul>
     {{ end }}
   </div>
-  {{ end }}
 </div>
+{{ end }}
