@@ -33,6 +33,15 @@
             class="btn btn-sm"
           >Edit</a>
 
+          <button
+            class="btn btn-sm"
+            data-id="{{ .ID }}"
+            data-name="{{ .Name }}"
+            onclick="confirmDuplicate()"
+          >
+            Duplicate
+          </button>
+
           <button 
             class="btn btn-sm btn-error" 
             data-id="{{ .ID }}"
@@ -50,10 +59,35 @@
 <p class="py-4">No instances to show.</p>
 {{ end }} 
 
-<dialog id="confirm_delete_modal" class="modal">
+<dialog id="confirm_duplicate_modal" class="modal">
   <div class="modal-box prose">
+    <h3 class="text-lg font-bold">Duplicate an instance</h3>
+    <p class="pt-4">You are about to duplicate an instance including:</p>
+    <ul class="mt-0">
+      <li>all associated locations</li>
+      <li>all associated events</li>
+    </ul>
+    This will <strong>not</strong> duplicate any teams or activities/check-ins.
+    <form method="post" action="/admin/instances/duplicate">
+      <label class="form-control w-full">
+        <div class="label">
+          <span class="label-text">New instance name</span>
+        </div>
+        <input type="text" class="input input-bordered w-full" name="name" required/>
+        <input type="hidden" name="id" value=""/>
+      </label>
+      <div class="modal-action">
+        <button type="button" class="btn" onclick="confirm_duplicate_modal.close()">Nevermind</button>
+        <button type="submit" class="btn btn-primary">Duplicate</button>
+      </div>
+    </form>
+  </div>
+</dialog>
+
+<dialog id="confirm_delete_modal" class="modal">
+  <div class="modal-box prose outline outline-1 outline-offset-1 outline-error">
     <h3 class="text-lg font-bold">Delete an instance</h3>
-    <p class="py-4">You are about to delete an instance. Doing this will delete:</p>
+    <p class="pt-4">You are about to delete an instance. Doing this will delete:</p>
     <ul>
       <li>all associated teams</li>
       <li>all associated locations</li>
@@ -117,6 +151,19 @@ function confirmDelete() {
   hidden.value = id;
 
   confirm_delete_modal.showModal();
+}
+
+function confirmDuplicate() {
+  const id = event.target.dataset.id;
+  const name = event.target.dataset.name;
+  const form = document.getElementById('confirm_duplicate_modal').querySelector('form');
+  const input = form.querySelector('input[name="name"]');
+  const hidden = form.querySelector('input[name="id"]');
+
+  input.value = name + ' (copy)';
+  hidden.value = id;
+
+  confirm_duplicate_modal.showModal();
 }
 
 </script>

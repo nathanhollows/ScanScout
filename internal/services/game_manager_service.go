@@ -53,6 +53,56 @@ func (s *GameManagerService) SwitchInstance(ctx context.Context, user *models.Us
 	return instance, nil
 }
 
+// Duplicate an instance
+// This will create a new instance with the same name and locations
+// The teams will not be duplicated
+func (s *GameManagerService) DuplicateInstance(ctx context.Context, user *models.User, id, name string) (response ServiceResponse) {
+	response = ServiceResponse{}
+	instance, err := models.FindInstanceByID(ctx, id)
+	if err != nil {
+		response.AddFlashMessage(*flash.NewError("Instance not found"))
+		response.Error = err
+		return response
+	}
+
+	locations, err := models.FindAllLocations(ctx, instance.ID)
+	if err != nil {
+		response.AddFlashMessage(*flash.NewError("Error finding locations"))
+		response.Error = err
+		return response
+	}
+
+	newInstance := &models.Instance{
+		Name:   name,
+		UserID: user.ID,
+	}
+
+	if err := newInstance.Save(ctx); err != nil {
+		response.AddFlashMessage(*flash.NewError("Error saving new instance"))
+		response.Error = err
+		return response
+	}
+
+	for _, location := range locations {
+		newLocation := &models.Location{
+			Name:       location.Name,
+			ContentID:  location.ContentID,
+			InstanceID: newInstance.ID,
+			MarkerID:   location.MarkerID,
+		}
+		if err := newLocation.Save(ctx); err != nil {
+			response.AddFlashMessage(*flash.NewError("Error saving location: " + location.Name))
+			response.Error = err
+			return response
+		}
+	}
+
+	response.Data = make(map[string]interface{})
+	response.Data["instanceID"] = newInstance.ID
+	response.AddFlashMessage(*flash.NewSuccess("Instance duplicated!"))
+	return response
+}
+
 func (s *GameManagerService) DeleteInstance(ctx context.Context, user *models.User, instanceID, confirmName string) error {
 	instance, err := models.FindInstanceByID(ctx, instanceID)
 	if err != nil {

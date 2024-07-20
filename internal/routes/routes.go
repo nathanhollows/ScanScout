@@ -131,6 +131,7 @@ func setupAdminRoutes(router chi.Router, gameManagerService *services.GameManage
 			r.Post("/{id}", adminHandler.Instances)
 			r.Get("/{id}/switch", adminHandler.InstanceSwitch)
 			r.Post("/delete", adminHandler.InstanceDelete)
+			r.Post("/duplicate", adminHandler.InstanceDuplicate)
 		})
 	})
 }

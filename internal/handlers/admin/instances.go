@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"log/slog"
 	"net/http"
 
 	"github.com/go-chi/chi"
@@ -43,6 +44,36 @@ func (h *AdminHandler) InstancesCreate(w http.ResponseWriter, r *http.Request) {
 
 	flash.NewSuccess("Instance created successfully").Save(w, r)
 	http.Redirect(w, r, "/admin/instances/", http.StatusSeeOther)
+}
+
+// InstanceDuplicate duplicates an instance
+func (h *AdminHandler) InstanceDuplicate(w http.ResponseWriter, r *http.Request) {
+	user := h.UserFromContext(r.Context())
+
+	r.ParseForm()
+
+	id := r.Form.Get("id")
+	name := r.Form.Get("name")
+
+	response := h.GameManagerService.DuplicateInstance(r.Context(), user, id, name)
+	for _, message := range response.FlashMessages {
+		message.Save(w, r)
+	}
+	if response.Error != nil {
+		slog.Error("duplicating instance", "error", response.Error.Error())
+		http.Redirect(w, r, r.Header.Get("referer"), http.StatusSeeOther)
+		return
+	}
+
+	newInstanceID := response.Data["instanceID"].(string)
+	_, err := h.GameManagerService.SwitchInstance(r.Context(), user, newInstanceID)
+	if err != nil {
+		flash.NewError("Error switching instance: "+err.Error()).Save(w, r)
+		http.Redirect(w, r, "/admin/instances", http.StatusSeeOther)
+		return
+	}
+
+	http.Redirect(w, r, "/admin/instances", http.StatusSeeOther)
 }
 
 // InstanceSwitch switches the current instance

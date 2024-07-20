@@ -7,7 +7,7 @@ import (
 type ServiceResponse struct {
 	FlashMessages []flash.Message
 	Error         error
-	Data          interface{}
+	Data          map[string]interface{}
 }
 
 // Add a flash message to the response
