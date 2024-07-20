@@ -13,6 +13,7 @@ func (h *AdminHandler) Instances(w http.ResponseWriter, r *http.Request) {
 	handlers.SetDefaultHeaders(w)
 	data := handlers.TemplateData(r)
 	data["title"] = "Instances"
+	data["page"] = "instances"
 
 	data["messages"] = flash.Get(w, r)
 	handlers.Render(w, data, handlers.AdminDir, "instances_index")

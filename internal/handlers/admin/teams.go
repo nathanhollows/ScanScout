@@ -12,6 +12,7 @@ func (h *AdminHandler) Teams(w http.ResponseWriter, r *http.Request) {
 	handlers.SetDefaultHeaders(w)
 	data := handlers.TemplateData(r)
 	data["title"] = "Teams"
+	data["page"] = "teams"
 
 	user := h.UserFromContext(r.Context())
 	data["teams"] = user.CurrentInstance.Teams
@@ -24,6 +25,7 @@ func (h *AdminHandler) TeamsAdd(w http.ResponseWriter, r *http.Request) {
 	handlers.SetDefaultHeaders(w)
 	data := handlers.TemplateData(r)
 	data["title"] = "New Team"
+	data["page"] = "teams"
 
 	user := h.UserFromContext(r.Context())
 

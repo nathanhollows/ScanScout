@@ -50,9 +50,24 @@
                 tabindex="0"
                 class="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-52"
               >
-                <li><a href="/admin/">Dashboard</a></li>
-                <li><a href="/admin/locations">Locations</a></li>
-                <li><a href="/admin/teams">Teams</a></li>
+                <li>
+                  <a href="/admin/" 
+                    class="{{ if eq .page "activity" }}active{{ end }}">
+                    Activity
+                  </a>
+                </li>
+                <li>
+                  <a href="/admin/locations" 
+                    class="{{ if eq .page "locations" }}active{{ end }}">
+                    Locations
+                  </a>
+                </li>
+                <li>
+                  <a href="/admin/teams" 
+                    class="{{ if eq .page "teams" }}active{{ end }}">
+                    Teams
+                  </a>
+                </li>
               </ul>
             </div>
             <a href="/admin" class="btn btn-ghost text-xl">
@@ -105,7 +120,7 @@
           <div class="navbar-center hidden lg:flex">
             <ul class="menu menu-horizontal px-1">
               <li>
-                <a href="/admin/">
+                <a href="/admin/" class="{{ if eq .page "activity" }}active{{ end }}">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     width="24"
@@ -124,7 +139,7 @@
                 </a>
               </li>
               <li>
-                <a href="/admin/locations">
+                <a href="/admin/locations" class="{{ if eq .page "locations" }}active{{ end }}">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     width="24"
@@ -148,7 +163,7 @@
                 >
               </li>
               <li>
-                <a href="/admin/teams">
+                <a href="/admin/teams" class="{{ if eq .page "teams" }}active{{ end }}">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     width="24"
@@ -176,10 +191,10 @@
             </ul>
           </div>
           <div class="navbar-end">
-            <div class="dropdown dropdown-end">
+            <div class="dropdown dropdown-end mr-2">
               <button
                 tabindex="0"
-                class="btn btn-ghost btn-sm tooltip tooltip-bottom flex"
+                class="btn btn-ghost tooltip tooltip-bottom flex {{ if eq .page "instances" }}btn-active{{ end }}"
                 data-tip="Change instance"
               >
                 <svg
@@ -254,7 +269,7 @@
             </div>
           </div>
           <button
-            class="btn btn-ghost btn-circle tooltip tooltip-bottom"
+            class="btn btn-ghost btn-circle tooltip tooltip-bottom {{ if eq .page "preferences" }}active{{ end }}"
             data-tip="Preferences"
             onclick="my_modal_4.showModal()"
           >

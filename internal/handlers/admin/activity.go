@@ -12,6 +12,7 @@ func (h *AdminHandler) Activity(w http.ResponseWriter, r *http.Request) {
 	handlers.SetDefaultHeaders(w)
 	data := handlers.TemplateData(r)
 	data["title"] = "Activity tracker"
+	data["page"] = "activity"
 	data["breadcrumbs"] = []map[string]string{
 		{"link": "/admin", "text": "Admin"},
 		{"link": "/admin/dashboard", "text": "Dashboard"},

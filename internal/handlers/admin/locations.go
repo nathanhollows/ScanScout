@@ -13,6 +13,7 @@ func (h *AdminHandler) Locations(w http.ResponseWriter, r *http.Request) {
 	handlers.SetDefaultHeaders(w)
 	data := handlers.TemplateData(r)
 	data["title"] = "Locations"
+	data["page"] = "locations"
 
 	user := h.UserFromContext(r.Context())
 	data["locations"] = user.CurrentInstance.Locations
@@ -26,6 +27,7 @@ func (h *AdminHandler) LocationNew(w http.ResponseWriter, r *http.Request) {
 	handlers.SetDefaultHeaders(w)
 	data := handlers.TemplateData(r)
 	data["title"] = "New Location"
+	data["page"] = "locations"
 	data["messages"] = flash.Get(w, r)
 	handlers.Render(w, data, handlers.AdminDir, "locations_new")
 }
