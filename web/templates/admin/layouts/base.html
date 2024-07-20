@@ -83,27 +83,9 @@
                 stroke-linejoin="round"
                 class="lucide lucide-qr-code -mb-1"
               >
-                <rect
-                  width="5"
-                  height="5"
-                  x="3"
-                  y="3"
-                  rx="1"
-                />
-                <rect
-                  width="5"
-                  height="5"
-                  x="16"
-                  y="3"
-                  rx="1"
-                />
-                <rect
-                  width="5"
-                  height="5"
-                  x="3"
-                  y="16"
-                  rx="1"
-                />
+                <rect width="5" height="5" x="3" y="3" rx="1" />
+                <rect width="5" height="5" x="16" y="3" rx="1" />
+                <rect width="5" height="5" x="3" y="16" rx="1" />
                 <path d="M21 16h-3a2 2 0 0 0-2 2v3" />
                 <path d="M21 21v.01" />
                 <path d="M12 7v3a2 2 0 0 1-2 2H7" />
@@ -118,7 +100,7 @@
             >
           </div>
           <div class="navbar-center hidden lg:flex">
-            <ul class="menu menu-horizontal px-1">
+            <ul class="menu menu-horizontal px-1 gap-x-1">
               <li>
                 <a href="/admin/" class="{{ if eq .page "activity" }}active{{ end }}">
                   <svg
@@ -153,11 +135,7 @@
                     class="lucide lucide-map-pin"
                   >
                     <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" />
-                    <circle
-                      cx="12"
-                      cy="10"
-                      r="3"
-                    />
+                    <circle cx="12" cy="10" r="3" />
                   </svg>
                   Locations</a
                 >
@@ -177,11 +155,7 @@
                     class="lucide lucide-users"
                   >
                     <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
-                    <circle
-                      cx="9"
-                      cy="7"
-                      r="4"
-                    />
+                    <circle cx="9" cy="7" r="4" />
                     <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
                     <path d="M16 3.13a4 4 0 0 1 0 7.75" />
                   </svg>
@@ -209,14 +183,8 @@
                   stroke-linejoin="round"
                   class="lucide lucide-compass"
                 >
-                  <circle
-                    cx="12"
-                    cy="12"
-                    r="10"
-                  />
-                  <polygon
-                    points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"
-                  />
+                  <circle cx="12" cy="12" r="10" />
+                  <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76" />
                 </svg>
                 {{ if .user.CurrentInstance }}
                 {{ .user.CurrentInstance.Name }}
@@ -287,16 +255,8 @@
               style="margin-left: 0.9em;"
             >
               <path d="M2 21a8 8 0 0 1 10.434-7.62" />
-              <circle
-                cx="10"
-                cy="8"
-                r="5"
-              />
-              <circle
-                cx="18"
-                cy="18"
-                r="3"
-              />
+              <circle cx="10" cy="8" r="5" />
+              <circle cx="18" cy="18" r="3" />
               <path d="m19.5 14.3-.4.9" />
               <path d="m16.9 20.8-.4.9" />
               <path d="m21.7 19.5-.9-.4" />
