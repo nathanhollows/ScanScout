@@ -50,15 +50,15 @@ func (m Message) Save(w http.ResponseWriter, r *http.Request) {
 }
 
 // Set the title of the message.
-func (m Message) SetTitle(title string) Message {
+func (m *Message) SetTitle(title string) Message {
 	m.Title = title
-	return m
+	return *m
 }
 
 // Set the message of the message.
-func (m Message) SetMessage(message string) Message {
+func (m *Message) SetMessage(message string) Message {
 	m.Message = message
-	return m
+	return *m
 }
 
 // Get flash messages from the cookie storage.
@@ -75,23 +75,23 @@ func Get(w http.ResponseWriter, r *http.Request) []interface{} {
 }
 
 // NewDefault adds a new default message into the cookie storage.
-func NewDefault(message string) Message {
-	return Message{Title: "Notice", Message: message, Style: Default}
+func NewDefault(message string) *Message {
+	return &Message{Title: "Notice", Message: message, Style: Default}
 }
 
 // NewSuccess adds a new success message into the cookie storage.
-func NewSuccess(message string) Message {
-	return Message{Title: "Success", Message: message, Style: Success}
+func NewSuccess(message string) *Message {
+	return &Message{Title: "Success", Message: message, Style: Success}
 }
 
 // NewError adds a new error message into the cookie storage.
-func NewError(message string) Message {
-	return Message{Title: "Error", Message: message, Style: Error}
+func NewError(message string) *Message {
+	return &Message{Title: "Error", Message: message, Style: Error}
 }
 
 // NewWarning adds a new warning message into the cookie storage.
-func NewWarning(message string) Message {
-	return Message{Title: "Warning", Message: message, Style: Warning}
+func NewWarning(message string) *Message {
+	return &Message{Title: "Warning", Message: message, Style: Warning}
 }
 
 // NewInfo adds a new info message into the cookie storage.

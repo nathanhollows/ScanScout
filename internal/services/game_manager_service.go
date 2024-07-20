@@ -183,7 +183,7 @@ func (s *GameManagerService) CreateLocation(ctx context.Context, user *models.Us
 	}
 
 	if err := locationContent.Save(ctx); err != nil {
-		response.AddFlashMessage(flash.NewError("Error saving location content: " + err.Error()))
+		response.AddFlashMessage(*flash.NewError("Error saving location content: " + err.Error()))
 		response.Error = err
 		return response
 	}
@@ -194,13 +194,13 @@ func (s *GameManagerService) CreateLocation(ctx context.Context, user *models.Us
 	if lat != "" && lng != "" {
 		latFloat, err = strconv.ParseFloat(lat, 64)
 		if err != nil {
-			response.AddFlashMessage(flash.NewError("Something went wrong parsing coordinates. Please try again."))
+			response.AddFlashMessage(*flash.NewError("Something went wrong parsing coordinates. Please try again."))
 			response.Error = err
 			return response
 		}
 		lngFloat, err = strconv.ParseFloat(lng, 64)
 		if err != nil {
-			response.AddFlashMessage(flash.NewError("Something went wrong parsing coordinates. Please try again."))
+			response.AddFlashMessage(*flash.NewError("Something went wrong parsing coordinates. Please try again."))
 			response.Error = err
 			return response
 		}
@@ -213,15 +213,16 @@ func (s *GameManagerService) CreateLocation(ctx context.Context, user *models.Us
 	}
 
 	if err := marker.Save(ctx); err != nil {
-		response.AddFlashMessage(flash.NewError("Error saving marker. Please try editing the location again."))
+		response.AddFlashMessage(*flash.NewError("Error saving marker. Please try editing the location again."))
 		response.Error = err
 		return response
 	}
 	location.MarkerID = marker.Code
 	location.Save(ctx)
 
-	response.AddFlashMessage(flash.NewSuccess("Location added!"))
-	response.Data = location
+	response.AddFlashMessage(*flash.NewSuccess("Location added!"))
+	response.Data = make(map[string]interface{})
+	response.Data["location"] = location
 	return response
 }
 
