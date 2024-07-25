@@ -95,6 +95,6 @@ func NewWarning(message string) *Message {
 }
 
 // NewInfo adds a new info message into the cookie storage.
-func NewInfo(message string) Message {
-	return Message{Title: "Info", Message: message, Style: Info}
+func NewInfo(message string) *Message {
+	return &Message{Title: "Info", Message: message, Style: Info}
 }
