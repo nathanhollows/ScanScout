@@ -10,6 +10,7 @@ import (
 
 func CreateTables() {
 	var models = []interface{}{
+		(*InstanceSettings)(nil),
 		(*Location)(nil),
 		(*LocationContent)(nil),
 		(*Team)(nil),

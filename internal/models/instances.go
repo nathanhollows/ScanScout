@@ -18,16 +18,14 @@ import (
 type Instance struct {
 	baseModel
 
-	ID         string `bun:",pk,type:varchar(36)" json:"id"`
-	Name       string `bun:",type:varchar(255)" json:"name"`
-	UserID     string `bun:",type:varchar(36)" json:"user_id"`
-	CriteriaID string `bun:",type:varchar(36)" json:"criteria_id"`
-	Criteria   string `bun:",type:varchar(255)" json:"criteria"`
+	ID     string `bun:",pk,type:varchar(36)" json:"id"`
+	Name   string `bun:",type:varchar(255)" json:"name"`
+	UserID string `bun:",type:varchar(36)" json:"user_id"`
 
-	NavigationMode NavigationMode `bun:",type:int" json:"navigation_mode"`
-	Teams          Teams          `bun:"rel:has-many,join:id=instance_id" json:"teams"`
-	Locations      Locations      `bun:"rel:has-many,join:id=instance_id" json:"instance_locations"`
-	Scans          Scans          `bun:"rel:has-many,join:id=instance_id" json:"scans"`
+	Teams     Teams            `bun:"rel:has-many,join:id=instance_id" json:"teams"`
+	Locations Locations        `bun:"rel:has-many,join:id=instance_id" json:"instance_locations"`
+	Scans     Scans            `bun:"rel:has-many,join:id=instance_id" json:"scans"`
+	Settings  InstanceSettings `bun:"rel:has-one,join:id=instance_id" json:"settings"`
 }
 
 type Instances []Instance
@@ -101,11 +99,39 @@ func FindInstanceByID(ctx context.Context, id string) (*Instance, error) {
 		Model(instance).
 		Where("id = ?", id).
 		Relation("Locations").
+		Relation("Settings").
 		Scan(ctx)
 	if err != nil {
 		return nil, err
 	}
 	return instance, nil
+}
+
+// LoadSettings loads the settings for an instance
+func (i *Instance) LoadSettings(ctx context.Context) error {
+	if i.Settings.InstanceID == "" {
+		i.Settings = InstanceSettings{}
+		err := db.DB.NewSelect().Model(&i.Settings).Where("instance_id = ?", i.ID).Scan(ctx)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// LoadLocations loads the locations for an instance
+func (i *Instance) LoadLocations(ctx context.Context) error {
+	if len(i.Locations) > 0 {
+		return nil
+	}
+
+	var err error
+	i.Locations, err = FindAllLocations(ctx, i.ID)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func GenerateQRCodeArchive(ctx context.Context, instanceID string) (string, error) {

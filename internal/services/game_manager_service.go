@@ -3,6 +3,8 @@ package services
 import (
 	"context"
 	"errors"
+	"fmt"
+	"net/url"
 	"strconv"
 
 	"github.com/nathanhollows/Rapua/internal/flash"
@@ -17,9 +19,13 @@ func NewGameManagerService() *GameManagerService {
 	return &GameManagerService{}
 }
 
-func (s *GameManagerService) CreateInstance(ctx context.Context, name string, user *models.User) (*models.Instance, error) {
+func (s *GameManagerService) CreateInstance(ctx context.Context, name string, user *models.User) (response ServiceResponse) {
+	response = ServiceResponse{}
+	response.Data = make(map[string]interface{})
+
 	if name == "" {
-		return nil, errors.New("name is required")
+		response.AddFlashMessage(*flash.NewError("Name is required"))
+		response.Error = errors.New("name is required")
 	}
 
 	instance := &models.Instance{
@@ -28,15 +34,30 @@ func (s *GameManagerService) CreateInstance(ctx context.Context, name string, us
 	}
 
 	if err := instance.Save(ctx); err != nil {
-		return nil, err
+		response.AddFlashMessage(*flash.NewError("Error saving instance"))
+		response.Error = fmt.Errorf("saving instance: %w", err)
+		return response
 	}
 
 	user.CurrentInstanceID = instance.ID
 	if err := user.Update(ctx); err != nil {
-		return nil, err
+		response.AddFlashMessage(*flash.NewError("Error updating user"))
+		response.Error = fmt.Errorf("updating user: %w", err)
+		return response
 	}
 
-	return instance, nil
+	settings := &models.InstanceSettings{
+		InstanceID: instance.ID,
+	}
+	err := settings.Save(ctx)
+	if err != nil {
+		response.AddFlashMessage(*flash.NewError("Error saving settings"))
+		response.Error = fmt.Errorf("saving settings: %w", err)
+		return response
+	}
+
+	response.Data["instanceID"] = instance.ID
+	return response
 }
 
 func (s *GameManagerService) SwitchInstance(ctx context.Context, user *models.User, instanceID string) (*models.Instance, error) {
@@ -58,17 +79,17 @@ func (s *GameManagerService) SwitchInstance(ctx context.Context, user *models.Us
 // The teams will not be duplicated
 func (s *GameManagerService) DuplicateInstance(ctx context.Context, user *models.User, id, name string) (response ServiceResponse) {
 	response = ServiceResponse{}
-	instance, err := models.FindInstanceByID(ctx, id)
+	oldInstance, err := models.FindInstanceByID(ctx, id)
 	if err != nil {
 		response.AddFlashMessage(*flash.NewError("Instance not found"))
-		response.Error = err
+		response.Error = fmt.Errorf("finding instance: %w", err)
 		return response
 	}
 
-	locations, err := models.FindAllLocations(ctx, instance.ID)
+	locations, err := models.FindAllLocations(ctx, oldInstance.ID)
 	if err != nil {
 		response.AddFlashMessage(*flash.NewError("Error finding locations"))
-		response.Error = err
+		response.Error = fmt.Errorf("finding locations: %w", err)
 		return response
 	}
 
@@ -79,61 +100,93 @@ func (s *GameManagerService) DuplicateInstance(ctx context.Context, user *models
 
 	if err := newInstance.Save(ctx); err != nil {
 		response.AddFlashMessage(*flash.NewError("Error saving new instance"))
-		response.Error = err
+		response.Error = fmt.Errorf("saving new instance: %w", err)
 		return response
 	}
 
+	// Copy locations
 	for _, location := range locations {
+		newContent := &models.LocationContent{
+			Content: location.Content.Content,
+		}
+		if err := newContent.Save(ctx); err != nil {
+			response.AddFlashMessage(*flash.NewError("Error saving location content: " + location.Name))
+			response.Error = fmt.Errorf("saving location content: %w", err)
+			return response
+		}
+
 		newLocation := &models.Location{
 			Name:       location.Name,
-			ContentID:  location.ContentID,
+			ContentID:  newContent.ID,
 			InstanceID: newInstance.ID,
 			MarkerID:   location.MarkerID,
 		}
 		if err := newLocation.Save(ctx); err != nil {
 			response.AddFlashMessage(*flash.NewError("Error saving location: " + location.Name))
-			response.Error = err
+			response.Error = fmt.Errorf("saving location: %w", err)
 			return response
 		}
 	}
 
+	// Copy settings
+	settings := oldInstance.Settings
+	settings.InstanceID = newInstance.ID
+	if err := settings.Save(ctx); err != nil {
+		response.AddFlashMessage(*flash.NewError("Error saving settings"))
+		response.Error = fmt.Errorf("saving settings: %w", err)
+		return response
+	}
+
 	response.Data = make(map[string]interface{})
 	response.Data["instanceID"] = newInstance.ID
-	response.AddFlashMessage(*flash.NewSuccess("Instance duplicated!"))
 	return response
 }
 
-func (s *GameManagerService) DeleteInstance(ctx context.Context, user *models.User, instanceID, confirmName string) error {
+func (s *GameManagerService) DeleteInstance(ctx context.Context, user *models.User, instanceID, confirmName string) (response ServiceResponse) {
+	response = ServiceResponse{}
 	instance, err := models.FindInstanceByID(ctx, instanceID)
 	if err != nil {
-		return errors.New("instance not found")
+		response.AddFlashMessage(*flash.NewError("Instance not found"))
+		response.Error = fmt.Errorf("finding instance: %w", err)
+		return response
 	}
 
 	if user.ID != instance.UserID {
-		return errors.New("you do not have permission to delete this instance")
+		response.AddFlashMessage(*flash.NewError("You do not have permission to delete this instance"))
+		response.Error = errors.New("you do not have permission to delete this instance")
+		return response
 	}
 
 	if confirmName != instance.Name {
-		return errors.New("instance name does not match confirmation")
+		response.AddFlashMessage(*flash.NewError("Instance name does not match confirmation"))
+		response.Error = errors.New("instance name does not match confirmation")
+		return response
 	}
 
 	if user.CurrentInstanceID == instance.ID {
 		user.CurrentInstanceID = ""
 		if err := user.Update(ctx); err != nil {
-			return err
+			response.AddFlashMessage(*flash.NewError("Error updating user"))
+			response.Error = fmt.Errorf("updating user: %w", err)
+			return response
 		}
 	}
 
 	if err := instance.Delete(ctx); err != nil {
-		return err
+		response.AddFlashMessage(*flash.NewError("Error deleting instance"))
+		response.Error = fmt.Errorf("deleting instance: %w", err)
+		return response
 	}
 
-	return nil
+	response.AddFlashMessage(*flash.NewSuccess("Instance deleted!"))
+	return response
 }
 
-func (s *GameManagerService) AddTeams(ctx context.Context, instanceID string, count int) error {
+func (s *GameManagerService) AddTeams(ctx context.Context, instanceID string, count int) (response ServiceResponse) {
+	response = ServiceResponse{}
 	if count < 1 {
-		return errors.New("invalid number of teams")
+		response.AddFlashMessage(*flash.NewError("Please enter a valid number of teams (1 or more)"))
+		return response
 	}
 
 	teams := make(models.Teams, count)
@@ -144,7 +197,13 @@ func (s *GameManagerService) AddTeams(ctx context.Context, instanceID string, co
 		}
 	}
 	_, err := db.DB.NewInsert().Model(&teams).Exec(ctx)
-	return err
+	if err != nil {
+		response.AddFlashMessage(*flash.NewError("Error adding teams"))
+		response.Error = fmt.Errorf("AddTeams save teams: %w", err)
+		return response
+	}
+	response.AddFlashMessage(*flash.NewSuccess("Teams added!"))
+	return response
 }
 
 func (s *GameManagerService) GetAllLocations(ctx context.Context, instanceID string) (models.Locations, error) {
@@ -286,4 +345,55 @@ func (s *GameManagerService) isMarkerShared(ctx context.Context, markerID, insta
 		return false, err
 	}
 	return count > 0, nil
+}
+
+func (s *GameManagerService) UpdateSettings(ctx context.Context, settings *models.InstanceSettings, form url.Values) (response ServiceResponse) {
+	response = ServiceResponse{}
+	response.Data = make(map[string]interface{})
+
+	// Update the settings
+	navMode, err := models.ParseNavigationMode(form.Get("navigationMode"))
+	if err != nil {
+		response.AddFlashMessage(*flash.NewError("Something went wrong parsing navigation mode. Please try again."))
+		response.Error = fmt.Errorf("parsing navigation mode: %w", err)
+		return response
+	}
+	settings.NavigationMode = navMode
+
+	completionMethod, err := models.ParseCompletionMethod(form.Get("completionMethod"))
+	if err != nil {
+		response.AddFlashMessage(*flash.NewError("Something went wrong parsing completion method. Please try again."))
+		response.Error = fmt.Errorf("parsing completion method: %w", err)
+		return response
+	}
+	settings.CompletionMethod = completionMethod
+
+	navMethod, err := models.ParseNavigationMethod(form.Get("navigationMethod"))
+	if err != nil {
+		response.AddFlashMessage(*flash.NewError("Something went wrong parsing navigation method. Please try again."))
+		response.Error = fmt.Errorf("parsing navigation method: %w", err)
+		return response
+	}
+	settings.NavigationMethod = navMethod
+
+	maxLoc := form.Get("max_locations")
+	if maxLoc != "" {
+		maxLocInt, err := strconv.Atoi(form.Get("maxLocations"))
+		if err != nil {
+			response.AddFlashMessage(*flash.NewError("Something went wrong parsing max locations. Please try again."))
+			response.Error = fmt.Errorf("parsing max locations: %w", err)
+			return response
+		}
+		settings.MaxNextLocations = maxLocInt
+	}
+
+	err = settings.Save(ctx)
+	if err != nil {
+		response.AddFlashMessage(*flash.NewError("Error saving settings. Please try again."))
+		response.Error = err
+		return
+	}
+
+	response.AddFlashMessage(*flash.NewSuccess("Settings updated!"))
+	return response
 }

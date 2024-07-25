@@ -24,7 +24,7 @@ type Team struct {
 
 	Instance         Instance `bun:"rel:has-one,join:instance_id=id" json:"instance"`
 	Scans            Scans    `bun:"rel:has-many,join:code=team_id" json:"scans"`
-	BlockingLocation Marker   `bun:"rel:has-one,join:must_scan_out=code" json:"blocking_location"`
+	BlockingLocation Location `bun:"rel:has-one,join:must_scan_out=marker_id,join:instance_id=instance_id" json:"blocking_location"`
 }
 
 type Teams []Team
@@ -66,6 +66,7 @@ func FindTeamByCode(ctx context.Context, code string) (*Team, error) {
 		Relation("Scans").
 		Relation("BlockingLocation").
 		Relation("Instance").
+		Relation("Instance.Settings").
 		Limit(1).Scan(ctx)
 	if err != nil {
 		return &team, fmt.Errorf("FindTeamByCode: %v", err)
@@ -89,7 +90,7 @@ func FindTeamByCodeAndInstance(ctx context.Context, code, instance string) (*Tea
 // HasVisited returns true if the team has visited the given location
 func (t *Team) HasVisited(location *Location) bool {
 	for _, s := range t.Scans {
-		if s.LocationID == location.Code {
+		if s.LocationID == location.ID {
 			return true
 		}
 	}
@@ -246,21 +247,41 @@ func (t *Team) GetVisitedLocations(ctx context.Context) ([]*Location, error) {
 	return locations, nil
 }
 
-// LoadScans loads the scans for the team
-func (t *Team) LoadScans(ctx context.Context) error {
-	err := db.DB.NewSelect().Model(&t.Scans).
-		Where("team_id = ?", t.Code).
-		Relation("Location").
-		Relation("Location.Content").
+// LoadInstance loads the instance for the team
+func (t *Team) LoadInstance(ctx context.Context) error {
+	if t.InstanceID == "" || t.Instance.ID != "" {
+		return nil
+	}
+	err := db.DB.NewSelect().Model(&t.Instance).
+		Where("id = ?", t.InstanceID).
 		Scan(ctx)
 	if err != nil {
-		return fmt.Errorf("LoadScans: %v", err)
+		return fmt.Errorf("LoadInstance: %v", err)
+	}
+	return nil
+}
+
+// LoadScans loads the scans for the team
+func (t *Team) LoadScans(ctx context.Context) error {
+	// Only load the scans if they are not already loaded
+	if len(t.Scans) == 0 {
+		err := db.DB.NewSelect().Model(&t.Scans).
+			Where("team_id = ?", t.Code).
+			Relation("Location").
+			Relation("Location.Content").
+			Scan(ctx)
+		if err != nil {
+			return fmt.Errorf("LoadScans: %v", err)
+		}
 	}
 	return nil
 }
 
 // LoadBlockingLocation loads the blocking location for the team
 func (t *Team) LoadBlockingLocation(ctx context.Context) error {
+	if t.MustScanOut == "" || t.BlockingLocation.ID != "" {
+		return nil
+	}
 	err := db.DB.NewSelect().Model(&t.BlockingLocation).
 		Where("code = ?", t.MustScanOut).
 		Scan(ctx)
