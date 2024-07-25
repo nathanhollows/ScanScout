@@ -347,11 +347,12 @@ func (s *GameManagerService) isMarkerShared(ctx context.Context, markerID, insta
 	return count > 0, nil
 }
 
+// UpdateSettings parses the form values and updates the instance settings
 func (s *GameManagerService) UpdateSettings(ctx context.Context, settings *models.InstanceSettings, form url.Values) (response ServiceResponse) {
 	response = ServiceResponse{}
 	response.Data = make(map[string]interface{})
 
-	// Update the settings
+	// Navigation mode
 	navMode, err := models.ParseNavigationMode(form.Get("navigationMode"))
 	if err != nil {
 		response.AddFlashMessage(*flash.NewError("Something went wrong parsing navigation mode. Please try again."))
@@ -360,6 +361,7 @@ func (s *GameManagerService) UpdateSettings(ctx context.Context, settings *model
 	}
 	settings.NavigationMode = navMode
 
+	// Completion method
 	completionMethod, err := models.ParseCompletionMethod(form.Get("completionMethod"))
 	if err != nil {
 		response.AddFlashMessage(*flash.NewError("Something went wrong parsing completion method. Please try again."))
@@ -368,6 +370,7 @@ func (s *GameManagerService) UpdateSettings(ctx context.Context, settings *model
 	}
 	settings.CompletionMethod = completionMethod
 
+	// Navigation method
 	navMethod, err := models.ParseNavigationMethod(form.Get("navigationMethod"))
 	if err != nil {
 		response.AddFlashMessage(*flash.NewError("Something went wrong parsing navigation method. Please try again."))
@@ -376,6 +379,13 @@ func (s *GameManagerService) UpdateSettings(ctx context.Context, settings *model
 	}
 	settings.NavigationMethod = navMethod
 
+	// Show team count
+	showTeamCount := form.Has("showTeamCount")
+	fmt.Println("showTeamCount", showTeamCount)
+	settings.ShowTeamCount = showTeamCount
+	fmt.Println("settings.ShowTeamCount", settings.ShowTeamCount)
+
+	// Max locations
 	maxLoc := form.Get("max_locations")
 	if maxLoc != "" {
 		maxLocInt, err := strconv.Atoi(form.Get("maxLocations"))
@@ -387,13 +397,38 @@ func (s *GameManagerService) UpdateSettings(ctx context.Context, settings *model
 		settings.MaxNextLocations = maxLocInt
 	}
 
+	// Save settings
 	err = settings.Save(ctx)
 	if err != nil {
 		response.AddFlashMessage(*flash.NewError("Error saving settings. Please try again."))
-		response.Error = err
+		response.Error = fmt.Errorf("saving settings: %w", err)
 		return
 	}
 
 	response.AddFlashMessage(*flash.NewSuccess("Settings updated!"))
+	return response
+}
+
+// ReorderLocations takes a list of location IDs and updates the order
+func (s *GameManagerService) ReorderLocations(ctx context.Context, user *models.User, codes []string) (response ServiceResponse) {
+	response = ServiceResponse{}
+
+	// Loop through the locations and update the order
+	for i, locationID := range codes {
+		location, err := models.FindLocationByInstanceAndCode(ctx, user.CurrentInstanceID, locationID)
+		if err != nil {
+			response.AddFlashMessage(*flash.NewError("Error finding location: " + locationID))
+			response.Error = fmt.Errorf("finding location: %w", err)
+			return response
+		}
+		location.Order = i
+		if err := location.Save(ctx); err != nil {
+			response.AddFlashMessage(*flash.NewError("Error saving location: " + locationID))
+			response.Error = fmt.Errorf("saving location: %w", err)
+			return response
+		}
+	}
+
+	response.AddFlashMessage(*flash.NewSuccess("Locations reordered!"))
 	return response
 }

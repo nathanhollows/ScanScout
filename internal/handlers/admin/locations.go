@@ -61,3 +61,34 @@ func (h *AdminHandler) LocationNewPost(w http.ResponseWriter, r *http.Request) {
 
 	http.Redirect(w, r, "/admin/locations", http.StatusSeeOther)
 }
+
+// ReorderLocations handles reordering locations
+// Returns a 200 status code if successful
+// Otherwise, returns a 500 status code
+func (h *AdminHandler) ReorderLocations(w http.ResponseWriter, r *http.Request) {
+	// Check HTMX headers
+	if r.Header.Get("HX-Request") != "true" {
+		http.Error(w, "Invalid request", http.StatusBadRequest)
+		return
+	}
+
+	err := r.ParseForm()
+	if err != nil {
+		slog.Error("reordering locations", "error", err.Error())
+		http.Error(w, "Error parsing form", http.StatusInternalServerError)
+		return
+	}
+
+	user := h.UserFromContext(r.Context())
+
+	locations := r.Form["location"]
+	response := h.GameManagerService.ReorderLocations(r.Context(), user, locations)
+	// Discard the flash messages since this is invoked via HTMX
+	if response.Error != nil {
+		slog.Error("reordering locations", "error", response.Error.Error())
+		http.Error(w, response.Error.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	http.Error(w, "Reordered locations", http.StatusOK)
+}

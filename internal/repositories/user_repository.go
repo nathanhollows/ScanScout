@@ -5,6 +5,7 @@ import (
 
 	"github.com/nathanhollows/Rapua/internal/models"
 	"github.com/nathanhollows/Rapua/pkg/db"
+	"github.com/uptrace/bun"
 )
 
 func CreateUser(ctx context.Context, user *models.User) error {
@@ -31,8 +32,12 @@ func FindUserByID(ctx context.Context, userID string) (*models.User, error) {
 		Model(&user).
 		Where("user.id = ?", userID).
 		Relation("CurrentInstance").
+		Relation("CurrentInstance.Settings").
 		Relation("CurrentInstance.Teams").
-		Relation("CurrentInstance.Locations").
+		// Locations ordered by Order
+		Relation("CurrentInstance.Locations", func(q *bun.SelectQuery) *bun.SelectQuery {
+			return q.Order("order ASC")
+		}).
 		Relation("CurrentInstance.Locations.Marker").
 		Relation("Instances").
 		Scan(ctx)

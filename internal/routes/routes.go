@@ -117,11 +117,17 @@ func setupAdminRoutes(router chi.Router, gameManagerService *services.GameManage
 			// r.Get("/qr/{id}.png", handlers.AdminLocationQRHandler)
 			r.Get("/qr-codes.zip", handlers.AdminLocationQRZipHandler)
 			r.Get("/posters.pdf", handlers.AdminLocationPostersHandler)
+			r.Post("/reorder", adminHandler.ReorderLocations)
 		})
 
 		r.Route("/teams", func(r chi.Router) {
 			r.Get("/", adminHandler.Teams)
 			r.Post("/add", adminHandler.TeamsAdd)
+		})
+
+		r.Route("/experience", func(r chi.Router) {
+			r.Get("/", adminHandler.Experience)
+			r.Post("/", adminHandler.ExperiencePost)
 		})
 
 		r.Route("/instances", func(r chi.Router) {

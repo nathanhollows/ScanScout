@@ -1,8 +1,8 @@
 {{ define "content" }}
 
 <!-- Header -->
-<div class="flex flex-col md:flex-row justify-between items-center w-full">
-  <h1 class="text-2xl p-5 font-bold">Locations 
+<div class="flex flex-col md:flex-row justify-between items-center w-full p-5">
+  <h1 class="text-2xl font-bold">Locations 
     <span class="badge badge-ghost">{{ len .locations }}</span>
   </h1>
   <span class="flex md:flex-row flex-wrap justify-center space-x-3">
@@ -29,11 +29,7 @@
           />
           <path d="m14 19 3 3v-5.5" />
           <path d="m17 22 3-3" />
-          <circle
-            cx="9"
-            cy="9"
-            r="2"
-          />
+          <circle cx="9" cy="9" r="2" />
         </svg>
         Download QR codes
       </a>
@@ -88,54 +84,47 @@
 
 <!-- Messages -->
 <div class="p-5">
-{{ template "flash" .messages }}
-  <strong>Navigation mode:</strong> {{ .user.CurrentInstance.NavigationMode }}
-{{ if not .locations }}
-<div class="alert">
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width="24"
-    height="24"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    stroke-width="2"
-    stroke-linecap="round"
-    stroke-linejoin="round"
-    class="lucide lucide-alert-circle text-neutral"
-  >
-    <circle
-      cx="12"
-      cy="12"
-      r="10"
-    />
-    <line
-      x1="12"
-      x2="12"
-      y1="8"
-      y2="12"
-    />
-    <line
-      x1="12"
-      x2="12.01"
-      y1="16"
-      y2="16"
-    />
-  </svg>
-  <span> <strong>Nothing to see!</strong> The are no locations to display. </span>
+  {{ template "flash" .messages }}
+  {{ if not .locations }}
+  <div class="alert">
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      class="lucide lucide-alert-circle text-neutral"
+    >
+      <circle cx="12" cy="12" r="10" />
+      <line x1="12" x2="12" y1="8" y2="12" />
+      <line x1="12" x2="12.01" y1="16" y2="16" />
+    </svg>
+    <span> <strong>Nothing to see!</strong> The are no locations to display. </span>
+  </div>
+  {{ end }}
 </div>
-{{ end }}
-</div>
+
 <!-- Locations -->
 <div class="px-5">
-<div class="join join-vertical w-full shadow">
-  {{ range .locations }}
-
-  <div
-    class="flex flex-row justify-between items-center space-x-3 bg-white rounded-lg p-4 border join-item"
-  >
-    <div class="flex flex-row items-center space-x-3 grow">
-      {{ if .Marker.Lat }}
+  <form class="sortable join join-vertical w-full shadow" hx-post="/admin/locations/reorder" hx-trigger="end" hx-swap="none">
+    {{ range .locations }}
+    <div
+      class="flex flex-row justify-between items-center space-x-3 bg-base-200 rounded-lg p-4 join-item" data-order="{{ .Order }}"
+    >
+      <div class="flex flex-row items-center space-x-3 grow">
+        {{ if eq $.user.CurrentInstance.Settings.NavigationMode.String "Ordered" }}
+        <div
+          class="tooltip tooltip-right flex gap-3 cursor-move"
+          data-tip="Drag to reorder">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-grip-vertical"><circle cx="9" cy="12" r="1"/><circle cx="9" cy="5" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="15" cy="19" r="1"/></svg>
+        </div>
+        <input type="hidden" name="location" value="{{ .MarkerID }}">
+        {{ end }}
+        {{ if .Marker.Lat }}
         <span
           class="tooltip"
           data-tip="Has coordinates"
@@ -153,14 +142,10 @@
             class="lucide lucide-map-pin"
           >
             <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" />
-            <circle
-              cx="12"
-              cy="10"
-              r="3"
-            />
+            <circle cx="12" cy="10" r="3" />
           </svg>
         </span>
-      {{ else }}
+        {{ else }}
         <span
           class="tooltip"
           data-tip="No coordinates set"
@@ -178,36 +163,25 @@
             class="lucide lucide-map-pin-off tooltip"
             data-tip="Location has no coordinates set"
           >
-            <path
-              d="M5.43 5.43A8.06 8.06 0 0 0 4 10c0 6 8 12 8 12a29.94 29.94 0 0 0 5-5"
-            />
-            <path
-              d="M19.18 13.52A8.66 8.66 0 0 0 20 10a8 8 0 0 0-8-8 7.88 7.88 0 0 0-3.52.82"
-            />
-            <path
-              d="M9.13 9.13A2.78 2.78 0 0 0 9 10a3 3 0 0 0 3 3 2.78 2.78 0 0 0 .87-.13"
-            />
+            <path d="M5.43 5.43A8.06 8.06 0 0 0 4 10c0 6 8 12 8 12a29.94 29.94 0 0 0 5-5" />
+            <path d="M19.18 13.52A8.66 8.66 0 0 0 20 10a8 8 0 0 0-8-8 7.88 7.88 0 0 0-3.52.82" />
+            <path d="M9.13 9.13A2.78 2.78 0 0 0 9 10a3 3 0 0 0 3 3 2.78 2.78 0 0 0 .87-.13" />
             <path d="M14.9 9.25a3 3 0 0 0-2.15-2.16" />
-            <line
-              x1="2"
-              x2="22"
-              y1="2"
-              y2="22"
-            />
+            <line x1="2" x2="22" y1="2" y2="22" />
           </svg>
         </span>
-      {{ end }}
-      <div
-        class="badge badge-ghost basis-20 tooltip"
-        data-tip="Unique location code"
-      >
-        {{ .Marker.Code }}
-      </div>
-      <a
-        href="/admin/locations/{{ .Marker.Code }}"
-        class="link flex-grow"
-      >{{ .Marker.Name }}</a
-      >
+        {{ end }}
+        <div
+          class="badge badge-ghost basis-20 tooltip"
+          data-tip="Unique location code"
+        >
+          {{ .Marker.Code }}
+        </div>
+        <a
+          href="/admin/locations/{{ .Marker.Code }}"
+          class="link flex-grow"
+        >{{ .Marker.Name }}</a
+        >
 
       <span
         class="tooltip flex space-x-2"
@@ -215,15 +189,13 @@
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
-          width="24"
-          height="24"
           viewBox="0 0 24 24"
           fill="none"
           stroke="currentColor"
           stroke-width="2"
           stroke-linecap="round"
           stroke-linejoin="round"
-          class="lucide lucide-scan-face"
+          class="lucide lucide-scan-face w-6 h-6"
         >
           <path d="M3 7V5a2 2 0 0 1 2-2h2" />
           <path d="M17 3h2a2 2 0 0 1 2 2v2" />
@@ -249,23 +221,9 @@
             stroke-linejoin="round"
             class="lucide lucide-timer"
           >
-            <line
-              x1="10"
-              x2="14"
-              y1="2"
-              y2="2"
-            />
-            <line
-              x1="12"
-              x2="15"
-              y1="14"
-              y2="11"
-            />
-            <circle
-              cx="12"
-              cy="14"
-              r="8"
-            />
+            <line x1="10" x2="14" y1="2" y2="2" />
+            <line x1="12" x2="15" y1="14" y2="11" />
+            <circle cx="12" cy="14" r="8" />
           </svg>
           <span> {{ toDuration .Marker.AvgDuration }} </span>
         </p>
@@ -274,6 +232,78 @@
     </div>
   </div>
   {{ end }}
+</form>
 </div>
-</div>
+
+<script src="/assets/js/Sortable.min.js"></script>
+<script src="/assets/js/htmx.min.js"></script>
+<script>
+htmx.onLoad(function(content) {
+    var sortables = content.querySelectorAll(".sortable");
+    for (var i = 0; i < sortables.length; i++) {
+      var sortable = sortables[i];
+      var sortableInstance = new Sortable(sortable, {
+          animation: 150,
+          ghostClass: 'blue-background-class',
+
+          // Make the `.htmx-indicator` unsortable
+          filter: ".htmx-indicator",
+          onMove: function (evt) {
+            return evt.related.className.indexOf('htmx-indicator') === -1;
+          },
+
+          // Disable sorting on the `end` event
+          onEnd: function (evt) {
+            this.option("disabled", true);
+          }
+      });
+
+      // Re-enable sorting on the `htmx:afterSwap` event
+      sortable.addEventListener("htmx:afterSwap", function() {
+        sortableInstance.option("disabled", false);
+      });
+    }
+})
+
+htmx.on('htmx:beforeRequest', function(evt) {
+  const toastContainer = document.getElementById('toast-container');
+  if (!toastContainer) {
+    const container = document.createElement('div');
+    container.id = 'toast-container';
+    container.className = 'toast toast-end';
+    document.body.appendChild(container);
+  }
+
+  const updatingToast = document.createElement('div');
+  updatingToast.className = 'alert alert-info';
+  updatingToast.innerHTML = '<span><span class="loading loading-dots loading-md"></span> Updating...</span>';
+  toastContainer.appendChild(updatingToast);
+
+  evt.detail.target.setAttribute('data-updating-toast', updatingToast);
+});
+
+htmx.on('htmx:afterRequest', function(evt) {
+  const toastContainer = document.getElementById('toast-container');
+  const updatingToast = evt.detail.target.getAttribute('data-updating-toast');
+
+  if (updatingToast) {
+    updatingToast.remove();
+    evt.detail.target.removeAttribute('data-updating-toast');
+  }
+
+  const showToast = (message, type) => {
+    const toast = document.createElement('div');
+    toast.className = `alert alert-${type}`;
+    toast.innerHTML = `<span>${message}</span>`;
+    toastContainer.appendChild(toast);
+    setTimeout(() => toast.remove(), 5000);
+  };
+
+  if (evt.detail.successful) {
+    showToast('Locations reordered successfully!', 'success');
+  } else {
+    showToast('Failed to reorder locations.', 'error');
+  }
+});
+</script>
 {{end}}
