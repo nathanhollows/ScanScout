@@ -15,16 +15,17 @@ import (
 type Location struct {
 	baseModel
 
-	Code         string  `bun:",pk,notnull" json:"code"`
-	Name         string  `bun:",type:varchar(255)" json:"name"`
-	InstanceID   string  `bun:",notnull" json:"instance_id"`
-	MarkerID     string  `bun:",notnull" json:"marker_id"`
-	ContentID    string  `bun:",notnull" json:"content_id"`
-	Criteria     string  `bun:",type:varchar(255)" json:"criteria"`
-	Order        int     `bun:",type:int" json:"order"`
-	TotalVisits  int     `bun:",type:int" json:"total_visits"`
-	CurrentCount int     `bun:",type:int" json:"current_count"`
-	AvgDuration  float64 `bun:",type:float" json:"avg_duration"`
+	ID           string           `bun:",pk,notnull" json:"id"`
+	Name         string           `bun:",type:varchar(255)" json:"name"`
+	InstanceID   string           `bun:",notnull" json:"instance_id"`
+	MarkerID     string           `bun:",notnull" json:"marker_id"`
+	ContentID    string           `bun:",notnull" json:"content_id"`
+	Criteria     string           `bun:",type:varchar(255)" json:"criteria"`
+	Order        int              `bun:",type:int" json:"order"`
+	TotalVisits  int              `bun:",type:int" json:"total_visits"`
+	CurrentCount int              `bun:",type:int" json:"current_count"`
+	AvgDuration  float64          `bun:",type:float" json:"avg_duration"`
+	Completion   CompletionMethod `bun:",type:int" json:"completion"`
 
 	Instance Instance        `bun:"rel:has-one,join:instance_id=id" json:"instance"`
 	Marker   Marker          `bun:"rel:has-one,join:marker_id=code" json:"marker"`
@@ -36,8 +37,8 @@ type Locations []Location
 // Save saves or updates an instance location
 func (i *Location) Save(ctx context.Context) error {
 	var err error
-	if i.Code == "" {
-		i.Code = uuid.New().String()
+	if i.ID == "" {
+		i.ID = uuid.New().String()
 		_, err = db.DB.NewInsert().Model(i).Exec(ctx)
 	} else {
 		_, err = db.DB.NewUpdate().Model(i).WherePK().Exec(ctx)
@@ -148,11 +149,11 @@ func (l *Location) LogScan(ctx context.Context, teamCode string) (scan *Scan, er
 
 	// Check if the team must scan out
 	if team.MustScanOut != "" {
-		if l.Code != team.MustScanOut {
+		if l.ID != team.MustScanOut {
 			return nil, errors.New("team must scan out")
 		}
 
-		if l.Code == team.MustScanOut {
+		if l.ID == team.MustScanOut {
 			// Redirect to the scan out page
 		}
 	}
@@ -164,7 +165,7 @@ func (l *Location) LogScan(ctx context.Context, teamCode string) (scan *Scan, er
 
 	scan = &Scan{
 		TeamID:     team.Code,
-		LocationID: l.Code,
+		LocationID: l.ID,
 		TimeIn:     time.Now().UTC(),
 	}
 	scan.Save(ctx)
@@ -175,7 +176,7 @@ func (l *Location) LogScan(ctx context.Context, teamCode string) (scan *Scan, er
 func (l *Location) LogScanOut(ctx context.Context, teamCode string) error {
 	// Find the open scan
 	teamCode = strings.ToUpper(teamCode)
-	scan, err := FindScan(ctx, teamCode, l.Code)
+	scan, err := FindScan(ctx, teamCode, l.ID)
 	if err != nil {
 		return err
 	}

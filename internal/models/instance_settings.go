@@ -12,6 +12,7 @@ type InstanceSettings struct {
 	NavigationMethod NavigationMethod `bun:",type:int" json:"navigation_method"`
 	MaxNextLocations int              `bun:",type:int,default:3" json:"max_next_locations"`
 	CompletionMethod CompletionMethod `bun:",type:int" json:"completion_method"`
+	ShowTeamCount    bool             `bun:",type:bool" json:"show_team_count"`
 }
 
 // Save saves the instance settings to the database

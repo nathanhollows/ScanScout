@@ -25,17 +25,23 @@ func (s *GameplayService) GetTeamByCode(ctx context.Context, teamCode string) (*
 	return team, nil
 }
 
-func (s *GameplayService) GetLocationByCode(ctx context.Context, team *models.Team, locationCode string) (*models.Location, error) {
+func (s *GameplayService) GetMarkerByCode(ctx context.Context, locationCode string) (response *ServiceResponse) {
+	response = &ServiceResponse{}
+	response.Data = make(map[string]interface{})
+
 	locationCode = strings.TrimSpace(strings.ToUpper(locationCode))
-	location, err := models.FindLocationByInstanceAndCode(ctx, team.InstanceID, locationCode)
+	marker, err := models.FindMarkerByCode(ctx, locationCode)
 	if err != nil {
-		return nil, fmt.Errorf("GetLocationByCode: %w", err)
+		response.Error = fmt.Errorf("GetLocationByCode finding marker: %w", err)
+		return response
 	}
-	return location, nil
+	response.Data["marker"] = marker
+	return response
 }
 
 func (s *GameplayService) StartPlaying(ctx context.Context, teamCode, customTeamName string) (response *ServiceResponse) {
 	response = &ServiceResponse{}
+	response.Data = make(map[string]interface{})
 
 	team, err := models.FindTeamByCode(ctx, teamCode)
 	if err != nil {
@@ -55,6 +61,7 @@ func (s *GameplayService) StartPlaying(ctx context.Context, teamCode, customTeam
 		}
 	}
 
+	response.Data["team"] = team
 	response.AddFlashMessage(*flash.NewSuccess("You have started the game!"))
 	return response
 }
@@ -135,7 +142,7 @@ func (s *GameplayService) CheckIn(ctx context.Context, team *models.Team, locati
 	// Check if the team has already scanned in
 	scanned := false
 	for _, s := range team.Scans {
-		if s.LocationID == location.Code {
+		if s.LocationID == location.ID {
 			scanned = true
 			break
 		}
@@ -150,7 +157,7 @@ func (s *GameplayService) CheckIn(ctx context.Context, team *models.Team, locati
 	// Check if the location is valid for the team to check in
 	valid := s.CheckValidLocation(ctx, team, locationCode)
 	if valid.Error != nil {
-		response.Error = fmt.Errorf("CheckIn: %w", valid.Error)
+		response.Error = fmt.Errorf("check valid location: %w", valid.Error)
 		return response
 	}
 
@@ -165,7 +172,7 @@ func (s *GameplayService) CheckIn(ctx context.Context, team *models.Team, locati
 	}
 
 	response.Data = make(map[string]interface{})
-	response.Data["locationID"] = location.Code
+	response.Data["locationID"] = location.ID
 
 	msg := flash.NewSuccess("You have scanned in.")
 	response.AddFlashMessage(*msg)
@@ -209,13 +216,23 @@ func (s *GameplayService) CheckOut(ctx context.Context, teamCode, locationCode s
 // CheckLocation checks if the location is valid for the team to check in
 func (s *GameplayService) CheckValidLocation(ctx context.Context, team *models.Team, locationCode string) (response *ServiceResponse) {
 	response = &ServiceResponse{}
+	NavigationService := NewNavigationService()
 
-	switch team.Instance.NavigationMode {
-	// All locations are valid in FreeRoamShowAllNavigation mode
-	case models.FreeRoamShowAllNavigation:
+	err := team.LoadInstance(ctx)
+	if err != nil {
+		response.Error = fmt.Errorf("loading instance on team: %w", err)
 		return response
-	default:
-		response.Error = fmt.Errorf("CheckValidLocation: unknown navigation mode")
+	}
+	err = team.Instance.LoadSettings(ctx)
+	if err != nil {
+		response.Error = fmt.Errorf("loading settings on instance: %w", err)
+		return response
+	}
+
+	resp := NavigationService.CheckValidLocation(ctx, team, &team.Instance.Settings, locationCode)
+	if resp.Error != nil {
+		response.Error = fmt.Errorf("checking if code matches valid locations: %w", resp.Error)
+		return response
 	}
 
 	return response

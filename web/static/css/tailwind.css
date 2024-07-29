@@ -4410,6 +4410,14 @@ html {
   margin: 0.25rem;
 }
 
+.m-3 {
+  margin: 0.75rem;
+}
+
+.m-5 {
+  margin: 1.25rem;
+}
+
 .mx-auto {
   margin-left: auto;
   margin-right: auto;

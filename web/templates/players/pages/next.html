@@ -7,68 +7,31 @@
 />
 <div class="flex min-h-full flex-col justify-center px-6 py-12 lg:px-8">
   <div class="sm:mx-auto sm:w-full sm:max-w-sm">
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      stroke-width="2"
-      stroke-linecap="round"
-      stroke-linejoin="round"
-      class="lucide w-16 h-16 lucide-qr-code m-auto"
-    >
-      <rect
-        width="5"
-        height="5"
-        x="3"
-        y="3"
-        rx="1"
-      />
-      <rect
-        width="5"
-        height="5"
-        x="16"
-        y="3"
-        rx="1"
-      />
-      <rect
-        width="5"
-        height="5"
-        x="3"
-        y="16"
-        rx="1"
-      />
-      <path d="M21 16h-3a2 2 0 0 0-2 2v3" />
-      <path d="M21 21v.01" />
-      <path d="M12 7v3a2 2 0 0 1-2 2H7" />
-      <path d="M3 12h.01" />
-      <path d="M12 3h.01" />
-      <path d="M12 16v.01" />
-      <path d="M16 12h1" />
-      <path d="M21 12v.01" />
-      <path d="M12 21v-1" />
-    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-compass w-16 h-16 m-auto"><path d="m16.24 7.76-1.804 5.411a2 2 0 0 1-1.265 1.265L7.76 16.24l1.804-5.411a2 2 0 0 1 1.265-1.265z"/><circle cx="12" cy="12" r="10"/></svg>
     <h2
       class="mt-5 mb-3 text-center text-2xl font-bold leading-9 tracking-tight"
     >
       Next location
     </h2>
     {{ template "flash" .messages }}
-    <p class="text-center pb-5">
-      You may choose any of the following locations. Use the map below to help
-      find where you want to go.
-    </p>
-    {{ range .locations }}
-    <p class="text-center pb-3">
-      <em> {{ .Name }}</em> <br /><span class="badge badge-ghost">
-        {{ .CurrentCount }} Teams Visiting
-      </span>
-    </p>
+
+    {{ if eq .team.Instance.Settings.NavigationMethod 0 }}
+      {{ template "show_map" . }}
     {{ end }}
-    <div
-      id="map"
-      class="w-full h-96 rounded-lg shadow-lg mt-5"
-    ></div>
+
+    {{ if eq .team.Instance.Settings.NavigationMethod 1 }}
+      {{ template "show_map_and_names" . }}
+    {{ end }}
+
+    {{ if eq .team.Instance.Settings.NavigationMethod 2 }}
+      {{ template "show_names" . }}
+    {{ end }}
+
+    {{ if eq .team.Instance.Settings.NavigationMethod 3 }}
+      {{ template "show_clues" . }}
+    {{ end }}
+
+
   </div>
 </div>
 <script>
@@ -79,12 +42,17 @@
   zoom = 18
   {{ end }}
 
+  if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+    style = 'mapbox://styles/nathanhollows/cl9w3nxff002m14sy9fco4vnr'
+  } else {
+    style = 'mapbox://styles/nathanhollows/clszboe2y005i01oid8ca37jm'
+  }
   mapboxgl.accessToken = '{{ getEnv "MAPBOX_KEY" }}';
   var map = new mapboxgl.Map({
-       container: 'map',
-       style: 'mapbox://styles/nathanhollows/clszboe2y005i01oid8ca37jm',
-       center: coords,
-       zoom: zoom
+    container: 'map',
+    style: style,
+    center: coords,
+    zoom: zoom
   });
 
   let markerArray = []

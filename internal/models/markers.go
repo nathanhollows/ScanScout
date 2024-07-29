@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/charmbracelet/log"
 	"github.com/nathanhollows/Rapua/internal/helpers"
@@ -76,6 +77,14 @@ func (l *Marker) GenerateQRCode() error {
 	// }
 
 	return nil
+}
+
+// FindMarkerByCode returns a marker by code
+func FindMarkerByCode(ctx context.Context, code string) (*Marker, error) {
+	code = strings.ToUpper(strings.TrimSpace(code))
+	var marker Marker
+	err := db.DB.NewSelect().Model(&marker).Where("code = ?", code).Scan(ctx)
+	return &marker, err
 }
 
 func (l *Marker) getScanURL(scanningIn bool) string {

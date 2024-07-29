@@ -1,0 +1,20 @@
+{{ define "show_names" }} 
+<p class="text-center pb-5">
+  You may choose any of the following locations. Use the map below to help
+  find where you want to go.
+</p>
+
+{{ range .locations }}
+<p class="text-center pb-3">
+  <em> {{ .Name }}</em>
+
+  <!-- Show the number of teams visiting this location -->
+  {{ if $.team.Instance.Settings.ShowTeamCount }}
+  <br /><span class="badge badge-ghost">
+    {{ .CurrentCount }} Teams Visiting
+  </span>
+  {{ end }}
+
+</p>
+{{ end }}
+{{ end }}
