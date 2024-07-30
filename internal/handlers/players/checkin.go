@@ -9,6 +9,7 @@ import (
 	"github.com/go-chi/chi"
 	"github.com/nathanhollows/Rapua/internal/flash"
 	"github.com/nathanhollows/Rapua/internal/handlers"
+	"github.com/nathanhollows/Rapua/internal/models"
 	"github.com/nathanhollows/Rapua/internal/sessions"
 	"golang.org/x/exp/slog"
 )
@@ -20,35 +21,36 @@ func (h *PlayerHandler) CheckIn(w http.ResponseWriter, r *http.Request) {
 	code = strings.ToUpper(code)
 	data["code"] = code
 
-	team := h.getTeamFromContext(r.Context())
+	team, err := h.getTeamFromContext(r.Context())
+	if err == nil {
+		if team.MustScanOut != "" {
+			if code == "" {
+				flash.NewWarning("Please scan out at the location you scanned in at.").
+					SetTitle("You are already scanned in.").Save(w, r)
+				data["blocked"] = true
+			} else if code == team.MustScanOut {
+				message := fmt.Sprintf("Do you want to <a href=\"/o/%s\" class=\"link\">scan out</a> instead?", code)
+				flash.NewDefault(message).
+					SetTitle("You are already scanned in.").
+					Save(w, r)
+				data["blocked"] = true
+			} else {
+				flash.NewWarning(fmt.Sprintf("You need to scan out at %s.", team.BlockingLocation.Name)).
+					SetTitle("You are already scanned in.").
+					Save(w, r)
+				data["blocked"] = true
+			}
+		}
+	}
 
-	location, err := h.GameplayService.GetLocationByCode(r.Context(), team, code)
-	if err != nil {
+	response := h.GameplayService.GetMarkerByCode(r.Context(), code)
+	if response.Error != nil {
 		flash.NewWarning("Please double check the code and try again.").
 			SetTitle("Location not found").Save(w, r)
 		http.Redirect(w, r, "/", http.StatusFound)
 		return
 	}
-	data["location"] = location
-
-	if team.MustScanOut != "" {
-		if code == "" {
-			flash.NewWarning("Please scan out at the location you scanned in at.").
-				SetTitle("You are already scanned in.").Save(w, r)
-			data["blocked"] = true
-		} else if code == team.MustScanOut {
-			message := fmt.Sprintf("Do you want to <a href=\"/o/%s\" class=\"link\">scan out</a> instead?", code)
-			flash.NewDefault(message).
-				SetTitle("You are already scanned in.").
-				Save(w, r)
-			data["blocked"] = true
-		} else {
-			flash.NewWarning(fmt.Sprintf("You need to scan out at %s.", team.BlockingLocation.Name)).
-				SetTitle("You are already scanned in.").
-				Save(w, r)
-			data["blocked"] = true
-		}
-	}
+	data["marker"] = response.Data["marker"].(*models.Marker)
 
 	data["team"] = team
 	data["messages"] = flash.Get(w, r)
@@ -61,14 +63,24 @@ func (h *PlayerHandler) CheckInPost(w http.ResponseWriter, r *http.Request) {
 	locationCode := chi.URLParam(r, "code")
 	locationCode = strings.ToUpper(locationCode)
 
-	team := h.getTeamFromContext(r.Context())
+	team, err := h.getTeamFromContext(r.Context())
+	if err != nil {
+		team, err = h.GameplayService.GetTeamByCode(r.Context(), r.FormValue("team"))
+		if err != nil {
+			flash.NewWarning("Please double check the team code and try again.").
+				Save(w, r)
+			slog.Error(`CheckInPost: getting team by code (post)`, "err", err)
+			http.Redirect(w, r, r.Header.Get("referer"), http.StatusFound)
+			return
+		}
+	}
 
 	response := h.GameplayService.CheckIn(r.Context(), team, locationCode)
 	for _, msg := range response.FlashMessages {
 		msg.Save(w, r)
 	}
 	if response.Error != nil {
-		slog.Error("Error checking in", "err", response.Error.Error(), "team", team.Code, "location", locationCode)
+		slog.Error("checking in team", "err", response.Error.Error(), "team", team.Code, "location", locationCode)
 		http.Redirect(w, r, r.Header.Get("referer"), http.StatusFound)
 		return
 	}

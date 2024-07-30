@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"context"
+	"errors"
 
 	"github.com/nathanhollows/Rapua/internal/contextkeys"
 	"github.com/nathanhollows/Rapua/internal/models"
@@ -20,6 +21,15 @@ func NewPlayerHandler(gs *services.GameplayService) *PlayerHandler {
 
 // GetTeamFromContext retrieves the team from the context
 // Team will always be in the context because the middleware
-func (h PlayerHandler) getTeamFromContext(ctx context.Context) *models.Team {
-	return ctx.Value(contextkeys.TeamKey).(*models.Team)
+// However the Team could be nil if the team was not found
+func (h PlayerHandler) getTeamFromContext(ctx context.Context) (*models.Team, error) {
+	val := ctx.Value(contextkeys.TeamKey)
+	if val == nil {
+		return nil, errors.New("team not found")
+	}
+	team := val.(*models.Team)
+	if team == nil {
+		return nil, errors.New("team not found")
+	}
+	return team, nil
 }

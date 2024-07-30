@@ -35,14 +35,26 @@ func (h *AdminHandler) InstancesCreate(w http.ResponseWriter, r *http.Request) {
 	}
 
 	name := r.FormValue("name")
-	_, err := h.GameManagerService.CreateInstance(r.Context(), name, user)
-	if err != nil {
-		flash.NewError("Error creating instance: "+err.Error()).Save(w, r)
+	response := h.GameManagerService.CreateInstance(r.Context(), name, user)
+	for _, message := range response.FlashMessages {
+		message.Save(w, r)
+	}
+	if response.Error != nil {
+		slog.Error("creating instance", "error", response.Error.Error())
 		http.Redirect(w, r, "/admin/instances", http.StatusSeeOther)
 		return
 	}
 
-	flash.NewSuccess("Instance created successfully").Save(w, r)
+	// Switch to the new instance
+	_, err := h.GameManagerService.SwitchInstance(r.Context(), user, response.Data["instanceID"].(string))
+	if err != nil {
+		flash.NewSuccess("Instance created successfully").Save(w, r)
+		flash.NewError("Error switching instance to "+name+": "+err.Error()).Save(w, r)
+		http.Redirect(w, r, "/admin/instances", http.StatusSeeOther)
+		return
+	}
+
+	flash.NewSuccess("Now using "+name+" as your current instance").Save(w, r)
 	http.Redirect(w, r, "/admin/instances/", http.StatusSeeOther)
 }
 
@@ -72,8 +84,9 @@ func (h *AdminHandler) InstanceDuplicate(w http.ResponseWriter, r *http.Request)
 		http.Redirect(w, r, "/admin/instances", http.StatusSeeOther)
 		return
 	}
+	flash.NewSuccess("Now using "+name+" as your current instance").Save(w, r)
 
-	http.Redirect(w, r, "/admin/instances", http.StatusSeeOther)
+	http.Redirect(w, r, "/admin/experience", http.StatusSeeOther)
 }
 
 // InstanceSwitch switches the current instance
@@ -119,13 +132,15 @@ func (h *AdminHandler) InstanceDelete(w http.ResponseWriter, r *http.Request) {
 
 	user := h.UserFromContext(r.Context())
 
-	err := h.GameManagerService.DeleteInstance(r.Context(), user, id, confirmName)
-	if err != nil {
-		flash.NewError("Error deleting instance: "+err.Error()).Save(w, r)
+	response := h.GameManagerService.DeleteInstance(r.Context(), user, id, confirmName)
+	for _, message := range response.FlashMessages {
+		message.Save(w, r)
+	}
+	if response.Error != nil {
+		slog.Error("deleting instance", "error", response.Error.Error())
 		http.Redirect(w, r, "/admin/instances", http.StatusSeeOther)
 		return
 	}
 
-	flash.NewSuccess("Instance deleted successfully").Save(w, r)
 	http.Redirect(w, r, "/admin/instances", http.StatusSeeOther)
 }

@@ -13,7 +13,12 @@ func (h *PlayerHandler) CheckInList(w http.ResponseWriter, r *http.Request) {
 	data := handlers.TemplateData(r)
 	data["title"] = "My Check-ins"
 
-	team := h.getTeamFromContext(r.Context())
+	team, err := h.getTeamFromContext(r.Context())
+	if err != nil {
+		flash.NewError("Error loading team.").Save(w, r)
+		http.Redirect(w, r, "/", http.StatusFound)
+		return
+	}
 
 	if team == nil || len(team.Scans) == 0 {
 		flash.Message{
@@ -25,7 +30,7 @@ func (h *PlayerHandler) CheckInList(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err := team.LoadScans(r.Context())
+	err = team.LoadScans(r.Context())
 	if err != nil {
 		flash.NewError("Error loading locations.").Save(w, r)
 		http.Redirect(w, r, r.Header.Get("referer"), http.StatusFound)
@@ -42,8 +47,14 @@ func (h *PlayerHandler) CheckInView(w http.ResponseWriter, r *http.Request) {
 	data := handlers.TemplateData(r)
 	locationCode := chi.URLParam(r, "id")
 
-	team := h.getTeamFromContext(r.Context())
-	err := team.LoadScans(r.Context())
+	team, err := h.getTeamFromContext(r.Context())
+	if err != nil {
+		flash.NewError("Error loading team.").Save(w, r)
+		http.Redirect(w, r, "/", http.StatusFound)
+		return
+	}
+
+	err = team.LoadScans(r.Context())
 	if err != nil {
 		flash.NewError("Error loading locations.").Save(w, r)
 		http.Redirect(w, r, r.Header.Get("referer"), http.StatusFound)

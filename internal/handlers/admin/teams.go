@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"log/slog"
 	"net/http"
 	"strconv"
 
@@ -30,27 +31,29 @@ func (h *AdminHandler) TeamsAdd(w http.ResponseWriter, r *http.Request) {
 	user := h.UserFromContext(r.Context())
 
 	if err := r.ParseForm(); err != nil {
-		flash.NewError("Error parsing form").Save(w, r)
+		flash.NewError("Something went wrong behind the scenes, please try again.").Save(w, r)
+		slog.Error("TeamsAdd parsing form", "error", err.Error(), "instance_id", user.CurrentInstanceID)
 		http.Redirect(w, r, "/admin/teams", http.StatusSeeOther)
 		return
 	}
 
 	countStr := r.FormValue("count")
 	count, err := strconv.Atoi(countStr)
-	if err != nil || count < 1 {
-		flash.NewError("Invalid number of teams").Save(w, r)
+	if err != nil {
+		flash.NewError("Something went wrong behind the scenes, please try again.").Save(w, r)
+		slog.Error("TeamsAdd converting string to int", "error", err.Error(), "instance_id", user.CurrentInstanceID, "count", countStr)
 		http.Redirect(w, r, "/admin/teams", http.StatusSeeOther)
 		return
 	}
 
 	// Add the teams
-	err = h.GameManagerService.AddTeams(r.Context(), user.CurrentInstanceID, count)
-	if err != nil {
-		flash.NewError("Error adding teams: "+err.Error()).Save(w, r)
-	} else {
-		flash.NewSuccess("Teams added").Save(w, r)
+	response := h.GameManagerService.AddTeams(r.Context(), user.CurrentInstanceID, count)
+	for _, message := range response.FlashMessages {
+		message.Save(w, r)
+	}
+	if response.Error != nil {
+		slog.Error("TeamsAdd", "error", response.Error.Error(), "instance_id", user.CurrentInstanceID, "count", count)
 	}
 
-	flash.NewSuccess("Team created successfully").Save(w, r)
 	http.Redirect(w, r, "/admin/teams/", http.StatusSeeOther)
 }

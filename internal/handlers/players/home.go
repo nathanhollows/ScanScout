@@ -41,7 +41,10 @@ func (h *PlayerHandler) Home(w http.ResponseWriter, r *http.Request) {
 		}
 		if response.Error != nil {
 			slog.Error("Error starting game", "err", response.Error.Error(), "team", teamCode)
+			http.Redirect(w, r, "/", http.StatusFound)
+			return
 		} else {
+			team = response.Data["team"].(*models.Team)
 			session.Values["team"] = team.Code
 			session.Save(r, w)
 			data["team"] = team
