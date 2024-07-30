@@ -381,12 +381,10 @@ func (s *GameManagerService) UpdateSettings(ctx context.Context, settings *model
 
 	// Show team count
 	showTeamCount := form.Has("showTeamCount")
-	fmt.Println("showTeamCount", showTeamCount)
 	settings.ShowTeamCount = showTeamCount
-	fmt.Println("settings.ShowTeamCount", settings.ShowTeamCount)
 
 	// Max locations
-	maxLoc := form.Get("max_locations")
+	maxLoc := form.Get("maxLocations")
 	if maxLoc != "" {
 		maxLocInt, err := strconv.Atoi(form.Get("maxLocations"))
 		if err != nil {

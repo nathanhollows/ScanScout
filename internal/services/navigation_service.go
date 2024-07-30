@@ -23,7 +23,7 @@ func (s *NavigationService) CheckValidLocation(ctx context.Context, team *models
 	response = ServiceResponse{}
 
 	// Find valid locations
-	resp := s.DetermineNextLocations(ctx, team, settings)
+	resp := s.DetermineNextLocations(ctx, team)
 	if resp.Error != nil {
 		response.Error = fmt.Errorf("determine next valid locations: %w", resp.Error)
 		return response
@@ -41,7 +41,7 @@ func (s *NavigationService) CheckValidLocation(ctx context.Context, team *models
 	return response
 }
 
-func (s *NavigationService) DetermineNextLocations(ctx context.Context, team *models.Team, settings *models.InstanceSettings) ServiceResponse {
+func (s *NavigationService) DetermineNextLocations(ctx context.Context, team *models.Team) ServiceResponse {
 	response := ServiceResponse{}
 
 	err := team.LoadScans(ctx)
@@ -76,11 +76,13 @@ func (s *NavigationService) DetermineNextLocations(ctx context.Context, team *mo
 		response.AddFlashMessage(*flash.NewInfo("You have visited all locations!"))
 		return response
 	}
-	switch settings.NavigationMode {
+
+	// Determine the next locations based on the navigation mode
+	switch team.Instance.Settings.NavigationMode {
 	case models.OrderedNav:
 		return s.getOrderedLocations(ctx, team)
 	case models.RandomNav:
-		return s.getRandomLocations(ctx, team, settings)
+		return s.getRandomLocations(ctx, team)
 	case models.FreeRoamNav:
 		return s.getFreeRoamLocations(ctx, team)
 	}
@@ -124,9 +126,8 @@ func (s *NavigationService) getOrderedLocations(ctx context.Context, team *model
 		return response
 	}
 
-	var nextLocations models.Locations
-	nextLocations = append(nextLocations, unvisited[0])
-	response.Data["nextLocations"] = nextLocations
+	response.Data["nextLocations"] = unvisited[:1]
+	fmt.Println(response.Data["nextLocations"])
 
 	return response
 }
@@ -137,7 +138,7 @@ func (s *NavigationService) getOrderedLocations(ctx context.Context, team *model
 // 1. Shuffle the list of all locations deterministically based on team code
 // 2. Select the first n unvisited locations from the shuffled list
 // 3. Return these locations ensuring the order is consistent across refreshes
-func (s *NavigationService) getRandomLocations(ctx context.Context, team *models.Team, settings *models.InstanceSettings) (response ServiceResponse) {
+func (s *NavigationService) getRandomLocations(ctx context.Context, team *models.Team) (response ServiceResponse) {
 	response = ServiceResponse{}
 	response.Data = make(map[string]interface{})
 
@@ -170,8 +171,8 @@ func (s *NavigationService) getRandomLocations(ctx context.Context, team *models
 	})
 
 	// Select the first n unvisited locations from the shuffled list
-	n := settings.MaxNextLocations
-	var selectedLocations []models.Location
+	n := team.Instance.Settings.MaxNextLocations
+	var selectedLocations models.Locations
 	for _, loc := range shuffledLocations {
 		if !team.HasVisited(&loc) {
 			selectedLocations = append(selectedLocations, loc)
@@ -187,7 +188,7 @@ func (s *NavigationService) getRandomLocations(ctx context.Context, team *models
 		return response
 	}
 
-	response.Data["locations"] = selectedLocations
+	response.Data["nextLocations"] = selectedLocations
 	return response
 }
 

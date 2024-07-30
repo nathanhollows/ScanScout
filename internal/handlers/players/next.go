@@ -1,11 +1,12 @@
 package handlers
 
 import (
+	"log/slog"
 	"net/http"
 
-	"github.com/charmbracelet/log"
 	"github.com/nathanhollows/Rapua/internal/flash"
 	"github.com/nathanhollows/Rapua/internal/handlers"
+	"github.com/nathanhollows/Rapua/internal/models"
 )
 
 func (h *PlayerHandler) Next(w http.ResponseWriter, r *http.Request) {
@@ -22,16 +23,17 @@ func (h *PlayerHandler) Next(w http.ResponseWriter, r *http.Request) {
 		flash.NewInfo("You are already scanned in. You must scan out of "+team.BlockingLocation.Name+" before you can scan in to your next location.").Save(w, r)
 	}
 
-	locations, err := h.GameplayService.SuggestNextLocations(r.Context(), team, 3)
-	if err != nil {
-		log.Error(err)
-		flash.NewError("Error suggesting next locations. Please try again later.").Save(w, r)
+	response := h.GameplayService.SuggestNextLocations(r.Context(), team, 3)
+	for _, message := range response.FlashMessages {
+		message.Save(w, r)
+	}
+	if response.Error != nil {
+		slog.Error("suggesting next locations", "error", response.Error.Error())
 		http.Redirect(w, r, "/", http.StatusFound)
-		return
 	}
 
 	data["team"] = team
-	data["locations"] = locations
+	data["locations"] = response.Data["nextLocations"].(models.Locations)
 	data["title"] = "Next Stop"
 	data["messages"] = flash.Get(w, r)
 	handlers.Render(w, data, handlers.PlayerDir, "next")
