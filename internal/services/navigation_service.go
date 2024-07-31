@@ -194,11 +194,11 @@ func (s *NavigationService) getRandomLocations(ctx context.Context, team *models
 
 // getFreeRoamLocations returns a list of locations for free roam mode
 // This function returns all locations in the instance for the team to visit
-func (s *NavigationService) getFreeRoamLocations(_ context.Context, team *models.Team) (response ServiceResponse) {
+func (s *NavigationService) getFreeRoamLocations(ctx context.Context, team *models.Team) (response ServiceResponse) {
 	response = ServiceResponse{}
 	response.Data = make(map[string]interface{})
 
-	unvisited := s.getUnvisitedLocations(context.Background(), team)
+	unvisited := s.getUnvisitedLocations(ctx, team)
 
 	if len(unvisited) == 0 {
 		response.Error = errors.New("all locations visited")
