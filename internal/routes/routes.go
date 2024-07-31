@@ -139,5 +139,9 @@ func setupAdminRoutes(router chi.Router, gameManagerService *services.GameManage
 			r.Post("/delete", adminHandler.InstanceDelete)
 			r.Post("/duplicate", adminHandler.InstanceDuplicate)
 		})
+
+		r.Route("/markdown", func(r chi.Router) {
+			r.Get("/", adminHandler.MarkdownGuide)
+		})
 	})
 }
