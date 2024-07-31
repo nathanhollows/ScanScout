@@ -9,7 +9,7 @@
   <em> {{ .Name }}</em>
 
   <!-- Show the number of teams visiting this location -->
-  {{ if and $.team.Instance.Settings.ShowTeamCount (ne $.team.Instance.Settings.NavigationMode ) }}
+  {{ if $.team.Instance.Settings.ShowTeamCount }}
   <br /><span class="badge badge-ghost">
     {{ .CurrentCount }} Teams Visiting
   </span>
