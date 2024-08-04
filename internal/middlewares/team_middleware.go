@@ -2,9 +2,9 @@ package middlewares
 
 import (
 	"context"
+	"log/slog"
 	"net/http"
 
-	"github.com/charmbracelet/log"
 	"github.com/nathanhollows/Rapua/internal/contextkeys"
 	"github.com/nathanhollows/Rapua/internal/models"
 	"github.com/nathanhollows/Rapua/internal/sessions"
@@ -16,7 +16,7 @@ func TeamMiddleware(next http.Handler) http.Handler {
 		// Extract the session
 		session, err := sessions.Get(r, "scanscout")
 		if err != nil {
-			log.Error("Error getting session: ", err)
+			slog.Error("getting session: ", "err", err, "ctx", r.Context())
 			next.ServeHTTP(w, r)
 			return
 		}
@@ -31,7 +31,7 @@ func TeamMiddleware(next http.Handler) http.Handler {
 		// Find the matching team instance
 		team, err := models.FindTeamByCode(r.Context(), teamCode)
 		if err != nil {
-			log.Error("Error finding team by code: ", err)
+			slog.Error("finding team by code: ", "err", err, "teamCode", teamCode)
 			next.ServeHTTP(w, r)
 			return
 		}
