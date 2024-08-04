@@ -8,6 +8,45 @@
   <!-- Header -->
   <div class="p-5">
     <h1 class="text-2xl font-bold">Add a location</h1>
+    Hover for settings
+    <div class="dropdown dropdown-hover">
+      <div tabindex="0" role="button" class="btn btn-circle btn-ghost btn-xs text-info">
+        <svg
+          tabindex="0"
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          class="h-4 w-4 stroke-current">
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+        </svg>
+      </div>
+      <div
+        tabindex="0"
+        class="card compact dropdown-content bg-base-200 rounded-box z-[1] w-64 shadow-lg">
+        <div tabindex="0" class="card-body">
+          <h2 class="card-title">Settings</h2>
+          <p>
+            <strong> {{ .user.CurrentInstance.Settings.NavigationMethod }} </strong> 
+            <br>
+            {{ .user.CurrentInstance.Settings.NavigationMethod.Description }}
+          </p>
+          <p>
+            <strong> {{ .user.CurrentInstance.Settings.NavigationMode }} </strong> 
+            <br>
+            {{ .user.CurrentInstance.Settings.NavigationMode.Description }}
+          </p>
+          <p>
+            <strong> {{ .user.CurrentInstance.Settings.CompletionMethod }} </strong> 
+            <br>
+            {{ .user.CurrentInstance.Settings.CompletionMethod.Description }}
+          </p>
+        </div>
+      </div>
+    </div>
   </div>
 
   <!-- Messages -->
@@ -94,10 +133,15 @@
   {{ end }}
 
   mapboxgl.accessToken = '{{ getEnv "MAPBOX_KEY" }}';
+  if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+    style = 'mapbox://styles/nathanhollows/cl9w3nxff002m14sy9fco4vnr'
+  } else {
+    style = 'mapbox://styles/nathanhollows/clszboe2y005i01oid8ca37jm'
+  }
   var coordinates = document.getElementById('coordinates');
   var map = new mapboxgl.Map({
       container: 'map',
-      style: 'mapbox://styles/nathanhollows/clszboe2y005i01oid8ca37jm',
+      style: style,
       center: coords,
       zoom: zoom
   });

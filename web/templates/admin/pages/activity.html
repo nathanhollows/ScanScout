@@ -1,13 +1,15 @@
 {{ define "content" }}
-<h1 class="text-2xl p-5 font-bold">Activity tracker</h1>
+
+<div class="flex flex-row justify-between items-center w-full p-5">
+  <h1 class="text-2xl font-bold">Activity tracker</h1>
+</div>
 
 <!-- Messages -->
-<div class="p-5">
+<div class="my-5">
   {{ template "flash" .messages }}
 </div>
 
-
-<div class="relative flex flex-col md:flex-row p-5 md:space-x-5">
+<div class="relative flex flex-col md:flex-row px-5 md:space-x-5">
   <div class="w-full md:w-5/12">
     <div
       id="map"
@@ -36,7 +38,7 @@
       {{ if (len .locations) }}
       {{ range $index, $location := .locations }}
       <div
-        class="flex flex-row justify-between items-center space-x-3 bg-white rounded-lg p-4 border join-item"
+        class="flex flex-row justify-between items-center space-x-3 bg-base-200 border-base-300 rounded-lg p-4 join-item"
       >
         <div class="flex flex-row items-center space-x-3 grow">
           <strong> {{ add $index 1 }} </strong>
@@ -163,16 +165,20 @@
 <script src="https://api.mapbox.com/mapbox-gl-js/v2.10.0/mapbox-gl.js"></script>
 <script defer>
   coords = [170.5111643, -45.8650509]
-  zoom = 14
-  {{ if .location.Longitude }}
-  coords = [{{ .location.Longitude }}, {{ .location.Latitude }}]
-  zoom = 18
+  zoom = 17
+  {{ if .locations }}
+  coords = [{{ (index .locations 0).Marker.Lng }}, {{ (index .locations 0).Marker.Lat }}]
   {{ end }}
 
   mapboxgl.accessToken = '{{ getEnv "MAPBOX_KEY" }}';
+  if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+    style = 'mapbox://styles/nathanhollows/cl9w3nxff002m14sy9fco4vnr'
+  } else {
+    style = 'mapbox://styles/nathanhollows/clszboe2y005i01oid8ca37jm'
+  }
   var map = new mapboxgl.Map({
        container: 'map',
-       style: 'mapbox://styles/nathanhollows/clszboe2y005i01oid8ca37jm',
+       style: style,
        center: coords,
        zoom: zoom
   });

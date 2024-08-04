@@ -63,7 +63,6 @@ func FindTeamByCode(ctx context.Context, code string) (*Team, error) {
 	code = strings.ToUpper(code)
 	var team Team
 	err := db.DB.NewSelect().Model(&team).Where("team.code = ?", code).
-		Relation("Scans").
 		Relation("BlockingLocation").
 		Relation("Instance").
 		Relation("Instance.Settings").
@@ -254,6 +253,7 @@ func (t *Team) LoadInstance(ctx context.Context) error {
 	}
 	err := db.DB.NewSelect().Model(&t.Instance).
 		Where("id = ?", t.InstanceID).
+		Relation("Settings").
 		Scan(ctx)
 	if err != nil {
 		return fmt.Errorf("LoadInstance: %v", err)

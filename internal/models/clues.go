@@ -2,9 +2,10 @@ package models
 
 import (
 	"context"
-	"github.com/charmbracelet/log"
+
 	"github.com/google/uuid"
 	"github.com/nathanhollows/Rapua/pkg/db"
+	"golang.org/x/exp/slog"
 )
 
 type Clue struct {
@@ -14,10 +15,6 @@ type Clue struct {
 	InstanceID string `bun:",notnull" json:"instance_id"`
 	LocationID string `bun:",notnull" json:"location_id"`
 	Content    string `bun:",type:text" json:"content"`
-	Type       string `bun:",type:varchar(255)" json:"type"` // content, clue, map
-
-	Instance Instance `bun:"rel:has-one,join:instance_id=id" json:"instance"`
-	Location Location `bun:"rel:has-one,join:location_id=id" json:"location"`
 }
 
 type Clues []Clue
@@ -32,7 +29,7 @@ func (c *Clue) Save(ctx context.Context) error {
 		_, err = db.DB.NewUpdate().Model(c).WherePK().Exec(ctx)
 	}
 	if err != nil {
-		log.Error(err)
+		slog.Error("saving clue", "err", err, "clue", c)
 	}
 	return err
 }
@@ -44,11 +41,11 @@ func (c *Clue) Delete(ctx context.Context) error {
 }
 
 // FindCluesByLocation returns all clues for a given location
-func FindCluesByLocation(ctx context.Context, locationID string) ([]*Clue, error) {
-	var clues []*Clue
+func FindCluesByLocation(ctx context.Context, locationID string) (Clues, error) {
+	var clues Clues
 	err := db.DB.NewSelect().Model(&clues).Where("location_id = ?", locationID).Scan(ctx)
 	if err != nil {
-		log.Error(err)
+		slog.Error("finding clues by location", "err", err, "locationID", locationID)
 		return nil, err
 	}
 	return clues, nil

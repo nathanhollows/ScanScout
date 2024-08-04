@@ -27,6 +27,7 @@ type Location struct {
 	AvgDuration  float64          `bun:",type:float" json:"avg_duration"`
 	Completion   CompletionMethod `bun:",type:int" json:"completion"`
 
+	Clues    Clues           `bun:"rel:has-many,join:id=location_id" json:"clues"`
 	Instance Instance        `bun:"rel:has-one,join:instance_id=id" json:"instance"`
 	Marker   Marker          `bun:"rel:has-one,join:marker_id=code" json:"marker"`
 	Content  LocationContent `bun:"rel:has-one,join:content_id=id" json:"content"`
@@ -193,5 +194,28 @@ func (l *Location) LogScanOut(ctx context.Context, teamCode string) error {
 	l.CurrentCount--
 	l.Save(ctx)
 
+	return nil
+}
+
+// LoadClues loads the clues for the location if they are not already loaded
+func (l *Location) LoadClues(ctx context.Context) error {
+	if len(l.Clues) == 0 {
+		clues, err := FindCluesByLocation(ctx, l.ID)
+		if err != nil {
+			return err
+		}
+		l.Clues = clues
+	}
+	return nil
+}
+
+// LoadClues loads the clues for all locations if they are not already loaded
+func (l *Locations) LoadClues(ctx context.Context) error {
+	for i := range *l {
+		err := (*l)[i].LoadClues(ctx)
+		if err != nil {
+			return err
+		}
+	}
 	return nil
 }

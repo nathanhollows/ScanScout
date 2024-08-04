@@ -1,8 +1,10 @@
 package handlers
 
 import (
+	"bytes"
 	"fmt"
 	"html/template"
+	"log/slog"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -10,9 +12,13 @@ import (
 	"time"
 
 	"github.com/charmbracelet/log"
-	"github.com/gomarkdown/markdown"
 	"github.com/nathanhollows/Rapua/internal/contextkeys"
+	"github.com/nathanhollows/Rapua/internal/helpers"
 	"github.com/nathanhollows/Rapua/internal/models"
+	enclave "github.com/quail-ink/goldmark-enclave"
+	"github.com/yuin/goldmark"
+	"github.com/yuin/goldmark/extension"
+	"github.com/yuin/goldmark/renderer/html"
 )
 
 type TemplateDir string
@@ -56,7 +62,25 @@ func Render(
 	err := parse(data, baseDir, patterns...).ExecuteTemplate(w, "base", data)
 	if err != nil {
 		http.Error(w, "Template execution error: "+err.Error(), http.StatusInternalServerError)
-		log.Print("Template executing error: ", err)
+		slog.Error("executing template", "err", err)
+	}
+	return err
+}
+
+func RenderHTMX(
+	w http.ResponseWriter,
+	data map[string]interface{},
+	templateDir TemplateDir,
+	patterns ...string,
+) error {
+	w.Header().Set("Content-Type", "text/html")
+
+	baseDir := "web/templates/" + string(templateDir) + "/"
+	tmpl := parse(data, baseDir, patterns...)
+	err := tmpl.ExecuteTemplate(w, "content", data)
+	if err != nil {
+		slog.Error("executing template", "err", err)
+		http.Error(w, "Template execution error: "+err.Error(), http.StatusInternalServerError)
 	}
 	return err
 }
@@ -161,8 +185,28 @@ var funcs = template.FuncMap{
 	},
 	// Convert markdown (string) to HTML
 	"md": func(s string) template.HTML {
-		// Convert markdown to HTML
-		content := []byte(s)
-		return template.HTML(markdown.ToHTML(content, nil, nil))
+		md := goldmark.New(
+			goldmark.WithExtensions(
+				extension.Strikethrough,
+				extension.Linkify,
+				extension.TaskList,
+				extension.Typographer,
+				enclave.New(
+					&enclave.Config{},
+				),
+			),
+			goldmark.WithParserOptions(),
+			goldmark.WithRendererOptions(
+				html.WithHardWraps(),
+			),
+		)
+
+		var buf bytes.Buffer
+		if err := md.Convert([]byte(s), &buf); err != nil {
+			slog.Error("converting markdown to HTML", "err", err)
+			return template.HTML("Error rendering markdown to HTML")
+		}
+
+		return template.HTML(helpers.SanitizeHTML(buf.Bytes()))
 	},
 }

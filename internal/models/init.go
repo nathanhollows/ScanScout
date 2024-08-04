@@ -12,6 +12,7 @@ func CreateTables() {
 	var models = []interface{}{
 		(*InstanceSettings)(nil),
 		(*Location)(nil),
+		(*Clue)(nil),
 		(*LocationContent)(nil),
 		(*Team)(nil),
 		(*Marker)(nil),

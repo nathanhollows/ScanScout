@@ -55,3 +55,8 @@ func FindScan(ctx context.Context, teamCode, locationCode string) (*Scan, error)
 	}
 	return &scan, err
 }
+
+// String returns a string representation of a scan
+func (s *Scan) String() string {
+	return s.TeamID + " " + s.LocationID
+}

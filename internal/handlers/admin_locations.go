@@ -19,6 +19,7 @@ func AdminLocationEditHandler(w http.ResponseWriter, r *http.Request) {
 	SetDefaultHeaders(w)
 	data := TemplateData(r)
 	data["title"] = "Edit Location"
+	data["page"] = "locations"
 	data["messages"] = flash.Get(w, r)
 
 	// Get the location from the chi context
@@ -33,6 +34,7 @@ func AdminLocationEditHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	location.LoadClues(r.Context())
 	data["location"] = location
 	Render(w, data, AdminDir, "locations_edit")
 }
@@ -80,8 +82,16 @@ func AdminLocationEditPostHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	err = gameManagerService.UpdateClues(r.Context(), location, r.Form["clues[]"], r.Form["clue_ids[]"])
+	if err != nil {
+		log.Error(err)
+		flash.NewError("Could not save clues. Please try again.").Save(w, r)
+		http.Redirect(w, r, "/admin/locations", http.StatusSeeOther)
+		return
+	}
+
 	flash.NewSuccess("Location saved successfully").Save(w, r)
-	http.Redirect(w, r, "/admin/locations", http.StatusSeeOther)
+	http.Redirect(w, r, r.Header.Get("referer"), http.StatusSeeOther)
 }
 
 func adminGenerateQRHandler(w http.ResponseWriter, r *http.Request) {

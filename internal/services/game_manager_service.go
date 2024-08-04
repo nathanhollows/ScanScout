@@ -430,3 +430,54 @@ func (s *GameManagerService) ReorderLocations(ctx context.Context, user *models.
 	response.AddFlashMessage(*flash.NewSuccess("Locations reordered!"))
 	return response
 }
+
+// UpdateClues updates the clues for a location
+// The clues are passed as a slice of strings and the IDs are passed as a slice of strings
+// There may be new clues, updated clues, or deleted clues
+func (s *GameManagerService) UpdateClues(ctx context.Context, location *models.Location, clues []string, ids []string) error {
+	location.LoadClues(ctx)
+
+	// Loop through the clues and update them
+	for i, clue := range clues {
+		if i < len(ids) {
+			// Delete any empty clues
+			if clue == "" {
+				if err := location.Clues[i].Delete(ctx); err != nil {
+					return err
+				}
+				continue
+			}
+
+			// Update existing clue
+			location.Clues[i].Content = clue
+			if err := location.Clues[i].Save(ctx); err != nil {
+				return err
+			}
+			continue
+		}
+
+		// Skip empty clues
+		if clue == "" {
+			continue
+		}
+
+		// Create new clue
+		newClue := &models.Clue{
+			InstanceID: location.InstanceID,
+			LocationID: location.ID,
+			Content:    clue,
+		}
+		if err := newClue.Save(ctx); err != nil {
+			return err
+		}
+	}
+
+	// Delete any remaining clues
+	for i := len(clues); i < len(location.Clues); i++ {
+		if err := location.Clues[i].Delete(ctx); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}

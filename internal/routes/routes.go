@@ -142,6 +142,7 @@ func setupAdminRoutes(router chi.Router, gameManagerService *services.GameManage
 
 		r.Route("/markdown", func(r chi.Router) {
 			r.Get("/", adminHandler.MarkdownGuide)
+			r.Post("/preview", adminHandler.PreviewMarkdown)
 		})
 	})
 }
