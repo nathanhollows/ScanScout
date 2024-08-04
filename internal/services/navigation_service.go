@@ -99,14 +99,14 @@ func (s *NavigationService) getUnvisitedLocations(_ context.Context, team *model
 	for _, location := range team.Instance.Locations {
 		found := false
 		for _, scan := range team.Scans {
-			if scan.LocationID == location.Marker.Code {
+			if scan.LocationID == location.ID {
 				found = true
-				break
+				continue
 			}
 		}
 		if !found {
 			unvisited = append(unvisited, location)
-			break
+			continue
 		}
 	}
 
@@ -127,7 +127,6 @@ func (s *NavigationService) getOrderedLocations(ctx context.Context, team *model
 	}
 
 	response.Data["nextLocations"] = unvisited[:1]
-	fmt.Println(response.Data["nextLocations"])
 
 	return response
 }
