@@ -32,8 +32,10 @@ func (h *PlayerHandler) Next(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/", http.StatusFound)
 	}
 
+	locations := response.Data["nextLocations"].(models.Locations)
+
 	data["team"] = team
-	data["locations"] = response.Data["nextLocations"].(models.Locations)
+	data["locations"] = locations
 	data["title"] = "Next Stop"
 	data["messages"] = flash.Get(w, r)
 	handlers.Render(w, data, handlers.PlayerDir, "next")
