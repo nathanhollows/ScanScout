@@ -7,7 +7,7 @@
   </div>
   <div class="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
     {{ template "flash" .messages }} 
-    {{ if .team.BlockingLocation.Code }}
+    {{ if .team.MustScanOut }}
     <p class="text-center mb-5">
       You are currently checked in to
       <a
@@ -21,10 +21,10 @@
     {{ if .team }}
     <ul class="list-none text-center mb-5">
       {{ range .team.Scans }}
-      {{ if ne .Location.Code $.team.BlockingLocation.Code }}
+      {{ if ne .Location.MarkerID $.team.BlockingLocation.MarkerID }}
       <li class="">
         <a
-          href="/checkins/{{ .Location.Code }}"
+          href="/checkins/{{ .Location.MarkerID }}"
           class="link"
         >
           {{ .Location.Name }}
@@ -34,6 +34,12 @@
       {{ end }}
     </ul>
     {{ end }}
+    <div class="flex flex-row justify-center mt-12">
+      <a href="/next" class="btn btn-ghost btn-outline">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-compass"><path d="m16.24 7.76-1.804 5.411a2 2 0 0 1-1.265 1.265L7.76 16.24l1.804-5.411a2 2 0 0 1 1.265-1.265z"/><circle cx="12" cy="12" r="10"/></svg>
+        Next Location
+      </a>
+    </div>
   </div>
 </div>
 {{ end }}

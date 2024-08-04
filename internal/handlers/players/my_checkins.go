@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"log/slog"
 	"net/http"
 
 	"github.com/go-chi/chi"
@@ -20,20 +21,26 @@ func (h *PlayerHandler) CheckInList(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if team == nil || len(team.Scans) == 0 {
-		flash.Message{
-			Style:   "danger",
-			Title:   "No locations found.",
-			Message: "You haven't checked in anywhere yet.",
-		}.Save(w, r)
+	if team == nil {
+		flash.NewError("You haven't started a game yet. Please enter your team code to start.").Save(w, r)
 		http.Redirect(w, r, "/", http.StatusFound)
 		return
 	}
 
 	err = team.LoadScans(r.Context())
 	if err != nil {
-		flash.NewError("Error loading locations.").Save(w, r)
+		flash.NewError("Error loading check ins.").Save(w, r)
+		slog.Error("loading check ins", "error", err.Error())
 		http.Redirect(w, r, r.Header.Get("referer"), http.StatusFound)
+		return
+	}
+
+	if len(team.Scans) == 0 {
+		flash.Message{
+			Style:   flash.Default,
+			Message: "You haven't checked in anywhere yet.",
+		}.Save(w, r)
+		http.Redirect(w, r, "/next", http.StatusFound)
 		return
 	}
 
@@ -64,7 +71,7 @@ func (h *PlayerHandler) CheckInView(w http.ResponseWriter, r *http.Request) {
 	// Get the index of the location in the team's scans
 	index := -1
 	for i, scan := range team.Scans {
-		if scan.LocationID == locationCode {
+		if scan.Location.MarkerID == locationCode {
 			index = i
 			break
 		}
