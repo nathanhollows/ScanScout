@@ -16,6 +16,12 @@ func (h *AdminHandler) Activity(w http.ResponseWriter, r *http.Request) {
 
 	user := h.UserFromContext(r.Context())
 	data["locations"] = user.CurrentInstance.Locations
+	for i := range user.CurrentInstance.Teams {
+		if !user.CurrentInstance.Teams[i].HasStarted {
+			continue
+		}
+		user.CurrentInstance.Teams[i].LoadScans(r.Context())
+	}
 	data["teams"] = user.CurrentInstance.Teams
 
 	data["messages"] = flash.Get(w, r)

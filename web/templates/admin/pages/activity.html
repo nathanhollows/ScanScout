@@ -117,7 +117,7 @@
     </div>
   </div>
   <table
-    class="table table-sm table-zebra-zebra w-full mt-5 md:mt-0 md:w-7/12 h-auto self-start"
+    class="table table-sm w-full mt-5 md:mt-0 md:w-7/12 h-auto self-start"
   >
     <thead>
       <tr class="text-center">
@@ -135,16 +135,28 @@
     <tbody>
       {{ $count := 0 }}
       {{ range .teams }}
-      {{ if not .HasStarted }}{{ continue }}{{ end }}
-      {{ $count = add $count 1 }}
-      <tr>
-        <th scope="row">{{ .Code }}</th>
-        {{ range .Scans}}
-        <td class="text-center">
-          {{ if .visiting }}●{{ else if .visited }}✔{{ end }}
-        </td>
-        {{ end }}
-      </tr>
+        {{ if not .HasStarted }}{{ continue }}{{ end }}
+        {{ $count = add $count 1 }}
+        <tr class="hover">
+          <th scope="row">{{ .Code }}</th>
+          {{ $team := . }}
+          {{ range $.locations }}
+            {{ $found := false }}
+            {{ $location := . }}
+            {{ range $team.Scans }}
+              {{ if eq .LocationID $location.ID }}
+                <td class="text-center">
+                  {{ if .MustScanOut }}●{{ else }}✔{{ end }}
+                </td>
+                {{ $found = true }}
+                {{ continue }}
+              {{ end }}
+            {{ end }}
+            {{ if not $found }}
+              <td class="text-center"></td>
+            {{ end }}
+          {{ end }}
+        </tr>
       {{ end }} 
 
       {{ if not $count }}
