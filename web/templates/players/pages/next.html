@@ -31,49 +31,14 @@
       {{ template "show_clues" . }}
     {{ end }}
 
+    <div class="flex flex-row justify-center mt-12">
+      <a href="/checkins" class="btn btn-ghost btn-outline">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-map-pin" > <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" /> <circle cx="12" cy="10" r="3" /></svg>
+        My Check-ins
+      </a>
+    </div>
+
 
   </div>
 </div>
-<script>
-  coords = [170.5111643, -45.8650509]
-  zoom = 14
-  {{ if .location.Marker.Lng }}
-  coords = [{{ .location.Marker.Lng }}, {{ .location.Marker.Lat }}]
-  zoom = 18
-  {{ end }}
-
-  if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-    style = 'mapbox://styles/nathanhollows/cl9w3nxff002m14sy9fco4vnr'
-  } else {
-    style = 'mapbox://styles/nathanhollows/clszboe2y005i01oid8ca37jm'
-  }
-  mapboxgl.accessToken = '{{ getEnv "MAPBOX_KEY" }}';
-  var map = new mapboxgl.Map({
-    container: 'map',
-    style: style,
-    center: coords,
-    zoom: zoom
-  });
-
-  let markerArray = []
-  let marker; // Declare marker variable outside the loop
-
-  {{ range .locations }}
-  {{ if .Marker.Lng }}
-  marker = new mapboxgl.Marker()
-     .setLngLat([{{ .Marker.Lng }},{{ .Marker.Lat }}]);
-  marker.addTo(map);
-  markerArray.push(marker);
-  {{ end }}
-  {{ end }}
-
-  // Calculate the bounds
-  let bounds = new mapboxgl.LngLatBounds();
-  markerArray.forEach(function(marker) {
-     bounds.extend(marker.getLngLat());
-  });
-
-  // Fit the map to the bounds
-  map.fitBounds(bounds, { padding: 50 });
-</script>
 {{ end }}
