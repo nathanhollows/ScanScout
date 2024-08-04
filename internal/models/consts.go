@@ -101,7 +101,7 @@ func ParseNavigationMode(s string) (NavigationMode, error) {
 	case "Ordered":
 		return OrderedNav, nil
 	default:
-		return RandomNav, errors.New("invalid NavigationMode")
+		return 0, errors.New("invalid NavigationMode")
 	}
 }
 
