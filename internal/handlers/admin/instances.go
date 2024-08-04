@@ -86,7 +86,7 @@ func (h *AdminHandler) InstanceDuplicate(w http.ResponseWriter, r *http.Request)
 	}
 	flash.NewSuccess("Now using "+name+" as your current instance").Save(w, r)
 
-	http.Redirect(w, r, "/admin/experience", http.StatusSeeOther)
+	http.Redirect(w, r, "/admin/navigation", http.StatusSeeOther)
 }
 
 // InstanceSwitch switches the current instance
