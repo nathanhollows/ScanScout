@@ -3,10 +3,12 @@ package services
 import (
 	"context"
 	"fmt"
+	"hash/fnv"
 	"strings"
 
 	"github.com/nathanhollows/Rapua/internal/flash"
 	"github.com/nathanhollows/Rapua/internal/models"
+	"golang.org/x/exp/rand"
 )
 
 type GameplayService struct{}
@@ -62,9 +64,22 @@ func (s *GameplayService) StartPlaying(ctx context.Context, teamCode, customTeam
 }
 
 func (s *GameplayService) SuggestNextLocations(ctx context.Context, team *models.Team, limit int) ServiceResponse {
+	// Suggest the next locations for the team
 	navigationService := NewNavigationService()
+	response := navigationService.DetermineNextLocations(ctx, team)
+	if response.Error != nil {
+		response.Error = fmt.Errorf("suggesting next locations: %w", response.Error)
+	}
 
-	return navigationService.DetermineNextLocations(ctx, team)
+	// Load clues for each location if necessary
+	if team.Instance.Settings.NavigationMethod == models.ShowClues {
+		response = s.loadClues(ctx, team, response.Data["nextLocations"].(models.Locations))
+		if response.Error != nil {
+			response.Error = fmt.Errorf("loading clues: %w", response.Error)
+		}
+	}
+
+	return response
 }
 
 func (s *GameplayService) CheckIn(ctx context.Context, team *models.Team, locationCode string) (response *ServiceResponse) {
@@ -183,5 +198,42 @@ func (s *GameplayService) CheckValidLocation(ctx context.Context, team *models.T
 		return response
 	}
 
+	return response
+}
+
+// loadClues loads the clues for the current location
+// By default, it will only show one clue per location
+func (s *GameplayService) loadClues(ctx context.Context, team *models.Team, locations models.Locations) (response ServiceResponse) {
+	response = ServiceResponse{}
+	response.Data = make(map[string]interface{})
+
+	for i := range locations {
+		(locations)[i].LoadClues(ctx)
+	}
+
+	// Create a seed for the random clue
+	seed := team.Code
+	h := fnv.New64a()
+	_, err := h.Write([]byte(seed))
+	if err != nil {
+		response.Error = fmt.Errorf("creating seed for random clue: %w", err)
+		return response
+	}
+	r := rand.New(rand.NewSource(uint64(h.Sum64())))
+
+	// Randomly select a clue for each location
+	// If the location has no clues, it will be skipped
+	for i, location := range locations {
+		if len(location.Clues) == 0 {
+			continue
+		} else if len(location.Clues) == 1 {
+			continue
+		}
+
+		n := r.Intn(len(location.Clues))
+		(locations)[i].Clues = location.Clues[n : n+1]
+	}
+
+	response.Data["nextLocations"] = locations
 	return response
 }

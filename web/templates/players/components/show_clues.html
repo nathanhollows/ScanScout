@@ -1,12 +1,16 @@
 {{ define "show_clues" }} 
 <p class="text-center pb-5">
-  Solve a clue to find the next location. Each clue is for a different location.
+  Solve a clue to find the next location. <br>Each clue is for a different location.
 </p>
 
 {{ range .locations }}
-<div class="pb-3 prose">
-  <blockquote class="m-1">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aliquam bibendum tellus justo, ac. </blockquote>
+{{ range .Clues }}
+<div class="prose">
+  <blockquote class="m-1">
+    <p>{{ .Content }}</p>
+  </blockquote>
 </div>
+{{ end }}
 {{ end }}
 
 {{ end }}
