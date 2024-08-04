@@ -4,6 +4,7 @@ import (
 	"log/slog"
 	"net/http"
 
+	"github.com/go-chi/chi"
 	"github.com/nathanhollows/Rapua/internal/flash"
 	"github.com/nathanhollows/Rapua/internal/handlers"
 	"github.com/nathanhollows/Rapua/internal/models"
@@ -99,4 +100,83 @@ func (h *AdminHandler) ReorderLocations(w http.ResponseWriter, r *http.Request) 
 	}
 
 	http.Error(w, "Reordered locations", http.StatusOK)
+}
+
+// LocationEdit shows the form to edit a location
+func (h *AdminHandler) LocationEdit(w http.ResponseWriter, r *http.Request) {
+	data := handlers.TemplateData(r)
+	data["messages"] = flash.Get(w, r)
+
+	// Get the location from the chi context
+	code := chi.URLParam(r, "id")
+
+	user := h.UserFromContext(r.Context())
+
+	location, err := models.FindLocationByInstanceAndCode(r.Context(), user.CurrentInstanceID, code)
+	if err != nil {
+		slog.Error("LocationsEdit: finding locations by instance and code", "error", err)
+		flash.NewError("Location could not be found").Save(w, r)
+		http.Redirect(w, r, "/admin/locations", http.StatusSeeOther)
+		return
+	}
+
+	location.LoadClues(r.Context())
+	data["location"] = location
+	handlers.Render(w, data, handlers.AdminDir, "locations_edit")
+}
+
+// LocationEditPost handles updating a location
+func (h *AdminHandler) LocationEditPost(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "Invalid request method", http.StatusMethodNotAllowed)
+		return
+	}
+
+	err := r.ParseForm()
+	if err != nil {
+		flash.NewError("Error parsing form").Save(w, r)
+		http.Redirect(w, r, "/admin/locations", http.StatusSeeOther)
+		return
+	}
+
+	locationCode := chi.URLParam(r, "id")
+
+	user := h.UserFromContext(r.Context())
+
+	location, err := models.FindLocationByInstanceAndCode(
+		r.Context(),
+		user.CurrentInstanceID,
+		locationCode,
+	)
+	if err != nil {
+		slog.Error("Error finding location", "err", err)
+		flash.NewError("Location not found").Save(w, r)
+		http.Redirect(w, r, "/admin/locations", http.StatusSeeOther)
+		return
+	}
+
+	newName := r.FormValue("name")
+	newContent := r.FormValue("content")
+	lat := r.FormValue("latitude")
+	lng := r.FormValue("longitude")
+
+	err = h.GameManagerService.UpdateLocation(r.Context(), location, newName, newContent, lat, lng)
+	if err != nil {
+		slog.Error("LocationEditPost: updating location", "error", err)
+		flash.NewError("Error saving location: "+err.Error()).Save(w, r)
+		http.Redirect(w, r, "/admin/locations", http.StatusSeeOther)
+		return
+	}
+
+	err = h.GameManagerService.UpdateClues(r.Context(), location, r.Form["clues[]"], r.Form["clue_ids[]"])
+	if err != nil {
+		slog.Error("LocationEditPost: updating clues", "error", err)
+		flash.NewError("Could not save clues. Please try again.").Save(w, r)
+		http.Redirect(w, r, "/admin/locations", http.StatusSeeOther)
+		return
+	}
+
+	flash.NewSuccess("Location saved successfully").Save(w, r)
+	http.Redirect(w, r, r.Header.Get("referer"), http.StatusSeeOther)
+
 }

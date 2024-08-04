@@ -111,8 +111,8 @@ func setupAdminRoutes(router chi.Router, gameManagerService *services.GameManage
 			r.Get("/", adminHandler.Locations)
 			r.Get("/new", adminHandler.LocationNew)
 			r.Post("/new", adminHandler.LocationNewPost)
-			r.Get("/{id}", handlers.AdminLocationEditHandler)
-			r.Post("/{id}", handlers.AdminLocationEditPostHandler)
+			r.Get("/{id}", adminHandler.LocationEdit)
+			r.Post("/{id}", adminHandler.LocationEditPost)
 			// Disabled for now
 			// r.Get("/qr/{id}.png", handlers.AdminLocationQRHandler)
 			r.Get("/qr-codes.zip", handlers.AdminLocationQRZipHandler)
