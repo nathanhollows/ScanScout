@@ -12,48 +12,14 @@
         class="btn btn-base btn-outline join-item mb-3 md:mb-0"
         href="/admin/locations/qr-codes.zip"
       >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="24"
-          height="24"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          class="lucide lucide-image-down"
-        >
-          <path
-            d="M10.3 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v10l-3.1-3.1a2 2 0 0 0-2.814.014L6 21"
-          />
-          <path d="m14 19 3 3v-5.5" />
-          <path d="m17 22 3-3" />
-          <circle cx="9" cy="9" r="2" />
-        </svg>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-image-down" > <path d="M10.3 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v10l-3.1-3.1a2 2 0 0 0-2.814.014L6 21" /> <path d="m14 19 3 3v-5.5" /> <path d="m17 22 3-3" /> <circle cx="9" cy="9" r="2" /></svg>
         Download QR codes
       </a>
       <a
         class="btn btn-base btn-outline join-item"
         href="/admin/locations/posters.pdf"
       >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="24"
-          height="24"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          class="lucide lucide-file-down"
-        >
-          <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z" />
-          <path d="M14 2v4a2 2 0 0 0 2 2h4" />
-          <path d="M12 18v-6" />
-          <path d="m9 15 3 3 3-3" />
-        </svg>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-file-down" > <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z" /> <path d="M14 2v4a2 2 0 0 0 2 2h4" /> <path d="M12 18v-6" /> <path d="m9 15 3 3 3-3" /></svg>
         Download Posters
       </a>
     </div>
@@ -62,21 +28,7 @@
       href="/admin/locations/new"
       class="btn btn-primary"
     >
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        width="24"
-        height="24"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        stroke-width="2"
-        stroke-linecap="round"
-        stroke-linejoin="round"
-        class="lucide lucide-plus"
-      >
-        <path d="M5 12h14" />
-        <path d="M12 5v14" />
-      </svg>
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-plus" > <path d="M5 12h14" /> <path d="M12 5v14" /> </svg>
       Add Location
     </a>
   </span>
@@ -87,28 +39,13 @@
   {{ template "flash" .messages }}
   {{ if not .locations }}
   <div class="alert">
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      stroke-width="2"
-      stroke-linecap="round"
-      stroke-linejoin="round"
-      class="lucide lucide-alert-circle text-neutral"
-    >
-      <circle cx="12" cy="12" r="10" />
-      <line x1="12" x2="12" y1="8" y2="12" />
-      <line x1="12" x2="12.01" y1="16" y2="16" />
-    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-alert-circle text-neutral" > <circle cx="12" cy="12" r="10" /> <line x1="12" x2="12" y1="8" y2="12" /> <line x1="12" x2="12.01" y1="16" y2="16" /> </svg>
     <span> <strong>Nothing to see!</strong> The are no locations to display. </span>
   </div>
   {{ end }}
 </div>
 
-<!-- Locations -->
+<!-- Locations list -->
 <div class="px-5">
   <form class="join join-vertical w-full shadow
     {{ if eq $.user.CurrentInstance.Settings.NavigationMode.String "Ordered" }}sortable{{ end }}
@@ -119,6 +56,7 @@
       class="flex flex-row justify-between items-center space-x-3 bg-base-200 rounded-lg p-4 join-item" data-order="{{ .Order }}"
     >
       <div class="flex flex-row items-center space-x-3 grow">
+        <!-- Drag handle -->
         {{ if eq $.user.CurrentInstance.Settings.NavigationMode.String "Ordered" }}
         <div
           class="tooltip tooltip-right flex gap-3 cursor-move"
@@ -127,19 +65,39 @@
         </div>
         <input type="hidden" name="location" value="{{ .MarkerID }}">
         {{ end }}
+
+        <!-- Marker icon -->
         {{ if .Marker.Lat }}
-        <span class="tooltip cursor-help" data-tip="Has coordinates" > <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-map-pin" > <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" /> <circle cx="12" cy="10" r="3" /> </svg>
+        <span 
+          class="tooltip cursor-help"
+          data-tip="Has coordinates"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-map-pin" > <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" /> <circle cx="12" cy="10" r="3" /> </svg>
         </span>
         {{ else }}
         <span
-          class="tooltip"
+          class="tooltip cursor-help"
           data-tip="No coordinates set"
         >
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-map-pin-off tooltip" data-tip="Location has no coordinates set" > <path d="M5.43 5.43A8.06 8.06 0 0 0 4 10c0 6 8 12 8 12a29.94 29.94 0 0 0 5-5" /> <path d="M19.18 13.52A8.66 8.66 0 0 0 20 10a8 8 0 0 0-8-8 7.88 7.88 0 0 0-3.52.82" /> <path d="M9.13 9.13A2.78 2.78 0 0 0 9 10a3 3 0 0 0 3 3 2.78 2.78 0 0 0 .87-.13" /> <path d="M14.9 9.25a3 3 0 0 0-2.15-2.16" /> <line x1="2" x2="22" y1="2" y2="22" /> </svg>
         </span>
         {{ end }}
+
+        <!-- Clue indicator -->
+        {{ if eq $.user.CurrentInstance.Settings.NavigationMethod.String "Show Clues" }}
+          {{ if eq (len .Clues) 0 }}
+          <span class="tooltip text-neutral cursor-help" data-tip="No clues">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-search-x"><path d="m13.5 8.5-5 5"/><path d="m8.5 8.5 5 5"/><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+          </span>
+          {{ else }}
+          <span class="tooltip cursor-help" data-tip="Has clues">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-search"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+          </span>
+          {{ end }}
+        {{ end }}
+
         <div
-          class="badge badge-ghost basis-20 tooltip"
+          class="badge badge-ghost basis-16 tooltip"
           data-tip="Unique location code"
         >
           <code>

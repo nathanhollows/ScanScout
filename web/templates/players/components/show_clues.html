@@ -4,6 +4,16 @@
 </p>
 
 {{ range .locations }}
+{{ if eq (len .Clues) 0 }}
+<div>
+  <div class="alert alert-secondary">
+    <span>
+    <strong>Freebie!</strong>
+    There are no clues for: <em>“{{ .Name }}”</em>
+    </span>
+  </div>
+</div>
+{{ end }}
 {{ range .Clues }}
 <div class="prose">
   <blockquote class="m-1">

@@ -18,6 +18,7 @@ func (h *AdminHandler) Locations(w http.ResponseWriter, r *http.Request) {
 	data["page"] = "locations"
 
 	user := h.UserFromContext(r.Context())
+	user.CurrentInstance.Locations.LoadClues(r.Context())
 	data["locations"] = user.CurrentInstance.Locations
 
 	data["messages"] = flash.Get(w, r)
