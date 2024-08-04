@@ -43,6 +43,7 @@ func (s *NavigationService) CheckValidLocation(ctx context.Context, team *models
 
 func (s *NavigationService) DetermineNextLocations(ctx context.Context, team *models.Team) ServiceResponse {
 	response := ServiceResponse{}
+	response.Data = make(map[string]interface{})
 
 	err := team.LoadScans(ctx)
 	if err != nil {
@@ -64,9 +65,15 @@ func (s *NavigationService) DetermineNextLocations(ctx context.Context, team *mo
 
 	// Check if the team has a blocking location
 	if team.MustScanOut != "" {
-		team.LoadBlockingLocation(ctx)
+		err := team.LoadBlockingLocation(ctx)
+		if err != nil {
+			msg := flash.NewError("Something went wrong. Please try again.")
+			response.AddFlashMessage(*msg)
+			response.Error = fmt.Errorf("load blocking location: %w", err)
+			return response
+		}
 		response.Data["blockingLocation"] = team.BlockingLocation
-		response.AddFlashMessage(*flash.NewInfo("You must scan out of " + team.BlockingLocation.Name + " before you can scan in to your next location."))
+		response.AddFlashMessage(*flash.NewWarning("You must scan out of " + team.BlockingLocation.Name + " first."))
 		return response
 	}
 

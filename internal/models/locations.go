@@ -2,7 +2,7 @@ package models
 
 import (
 	"context"
-	"errors"
+	"fmt"
 	"strings"
 	"time"
 
@@ -139,51 +139,51 @@ func FindPseudoRandomLocations(ctx context.Context, team *Team) (*Locations, err
 	return nil, nil
 }
 
-// LogScan creates a new scan entry for the location if it's valid
-func (l *Location) LogScan(ctx context.Context, teamCode string) (scan *Scan, err error) {
-	teamCode = strings.ToUpper(teamCode)
-	// Check if a team exists with the code
-	team, err := FindTeamByCode(ctx, teamCode)
-	if err != nil || team == nil {
-		return nil, err
-	}
-
-	// Check if the team must scan out
-	if team.MustScanOut != "" {
-		if l.ID != team.MustScanOut {
-			return nil, errors.New("team must scan out")
-		}
-
-		if l.ID == team.MustScanOut {
-			// Redirect to the scan out page
-		}
-	}
-
-	// Update the location stats
+// LogCheckIn creates a new scan entry for the location
+// This function does not check if the team is allowed to scan in
+func (l *Location) LogCheckIn(ctx context.Context, team Team, mustCheckOut bool) (scan *Scan, err error) {
 	l.CurrentCount++
 	l.TotalVisits++
 	l.Save(ctx)
 
 	scan = &Scan{
-		TeamID:     team.Code,
-		LocationID: l.ID,
-		TimeIn:     time.Now().UTC(),
+		TeamID:      team.Code,
+		LocationID:  l.ID,
+		TimeIn:      time.Now().UTC(),
+		MustScanOut: mustCheckOut,
 	}
 	scan.Save(ctx)
+
+	if mustCheckOut {
+		team.MustScanOut = l.ID
+		team.Update(ctx)
+	}
 
 	return scan, nil
 }
 
-func (l *Location) LogScanOut(ctx context.Context, teamCode string) error {
-	// Find the open scan
-	teamCode = strings.ToUpper(teamCode)
-	scan, err := FindScan(ctx, teamCode, l.ID)
+func (l *Location) LogScanOut(ctx context.Context, team *Team) error {
+	// Find the scan
+	err := team.LoadScans(ctx)
 	if err != nil {
-		return err
+		return fmt.Errorf("loading scans: %w", err)
+	}
+
+	var scan *Scan
+	for i := range team.Scans {
+		if team.Scans[i].LocationID == l.ID {
+			scan = &team.Scans[i]
+			break
+		}
+	}
+
+	if scan == nil {
+		return fmt.Errorf("scan not found")
 	}
 
 	// Check if the team must scan out
 	scan.TimeOut = time.Now().UTC()
+	scan.MustScanOut = false
 	scan.Save(ctx)
 
 	// Update the location stats
@@ -193,6 +193,9 @@ func (l *Location) LogScanOut(ctx context.Context, teamCode string) error {
 			float64(l.TotalVisits+1)
 	l.CurrentCount--
 	l.Save(ctx)
+
+	team.MustScanOut = ""
+	team.Update(ctx)
 
 	return nil
 }

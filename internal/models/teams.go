@@ -283,7 +283,7 @@ func (t *Team) LoadBlockingLocation(ctx context.Context) error {
 		return nil
 	}
 	err := db.DB.NewSelect().Model(&t.BlockingLocation).
-		Where("code = ?", t.MustScanOut).
+		Where("ID = ?", t.MustScanOut).
 		Scan(ctx)
 	if err != nil {
 		return fmt.Errorf("LoadBlockingLocation: %v", err)

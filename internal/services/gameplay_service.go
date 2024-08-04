@@ -82,8 +82,8 @@ func (s *GameplayService) SuggestNextLocations(ctx context.Context, team *models
 	return response
 }
 
-func (s *GameplayService) CheckIn(ctx context.Context, team *models.Team, locationCode string) (response *ServiceResponse) {
-	response = &ServiceResponse{}
+func (s *GameplayService) CheckIn(ctx context.Context, team *models.Team, locationCode string) (response ServiceResponse) {
+	response = ServiceResponse{}
 
 	location, err := models.FindLocationByInstanceAndCode(ctx, team.InstanceID, locationCode)
 	if err != nil {
@@ -95,6 +95,11 @@ func (s *GameplayService) CheckIn(ctx context.Context, team *models.Team, locati
 
 	if team.MustScanOut != "" {
 		if locationCode != team.MustScanOut {
+			err := team.LoadBlockingLocation(ctx)
+			if err != nil {
+				response.Error = fmt.Errorf("loading blocking location: %w", err)
+				return response
+			}
 			msg := flash.NewWarning(fmt.Sprintf("You need to scan out at %s.", team.BlockingLocation.Name)).SetTitle("You are already scanned in.")
 			response.AddFlashMessage(msg)
 			response.Error = fmt.Errorf("player must scan out first")
@@ -104,6 +109,7 @@ func (s *GameplayService) CheckIn(ctx context.Context, team *models.Team, locati
 
 	// Check if the team has already scanned in
 	scanned := false
+	team.LoadScans(ctx)
 	for _, s := range team.Scans {
 		if s.LocationID == location.ID {
 			scanned = true
@@ -111,7 +117,7 @@ func (s *GameplayService) CheckIn(ctx context.Context, team *models.Team, locati
 		}
 	}
 	if scanned {
-		msg := flash.NewWarning("If you want to revisit this site, please click \"See my scanned locations\" below").SetTitle("You have already visited here.")
+		msg := flash.NewWarning("Try checking in somewhere else.").SetTitle("Repeat check-in")
 		response.AddFlashMessage(msg)
 		response.Error = fmt.Errorf("player has already scanned in")
 		return response
@@ -125,7 +131,8 @@ func (s *GameplayService) CheckIn(ctx context.Context, team *models.Team, locati
 	}
 
 	// Log the CheckIn
-	_, err = location.LogScan(ctx, team.Code)
+	mustCheckOut := team.Instance.Settings.CompletionMethod == models.CheckInAndOut
+	_, err = location.LogCheckIn(ctx, *team, mustCheckOut)
 	if err != nil {
 		msg := flash.NewWarning("Please double check the code and try again.").SetTitle("Couldn't scan in.")
 		response.AddFlashMessage(msg)
@@ -135,45 +142,63 @@ func (s *GameplayService) CheckIn(ctx context.Context, team *models.Team, locati
 	}
 
 	response.Data = make(map[string]interface{})
-	response.Data["locationID"] = location.ID
+	response.Data["location"] = location
 
 	msg := flash.NewSuccess("You have scanned in.")
 	response.AddFlashMessage(*msg)
 	return response
 }
 
-func (s *GameplayService) CheckOut(ctx context.Context, teamCode, locationCode string) error {
-	team, err := models.FindTeamByCode(ctx, teamCode)
-	if err != nil {
-		return fmt.Errorf("LogScanOut: %v", err)
-	}
+func (s *GameplayService) CheckOut(ctx context.Context, team *models.Team, locationCode string) (response ServiceResponse) {
+	response = ServiceResponse{}
 
 	location, err := models.FindLocationByInstanceAndCode(ctx, team.InstanceID, locationCode)
 	if err != nil {
-		return fmt.Errorf("LogScanOut: %v", err)
+		msg := flash.NewWarning("Please double check the code and try again.").SetTitle("Location code not found")
+		response.AddFlashMessage(msg)
+		response.Error = fmt.Errorf("finding location: %w", err)
+		return response
+	}
+
+	err = team.LoadBlockingLocation(ctx)
+	if err != nil {
+		msg := flash.NewError("Something went wrong. Please try again.")
+		response.AddFlashMessage(*msg)
+		response.Error = fmt.Errorf("loading blocking location: %w", err)
+		return response
 	}
 
 	// Check if the team must scan out
 	if team.MustScanOut == "" {
-		return fmt.Errorf("You don't need to scan out.")
-	} else if team.MustScanOut != locationCode {
-		return fmt.Errorf("You need to scan out at %s", team.BlockingLocation.Name)
+		msg := flash.NewDefault("You don't need to scan out.")
+		response.AddFlashMessage(*msg)
+		return response
+	} else if team.MustScanOut != location.ID {
+		msg := flash.NewWarning("You need to scan out at " + team.BlockingLocation.Name + ".")
+		response.AddFlashMessage(*msg)
+		return response
 	}
 
 	// Log the scan out
-	err = location.LogScanOut(ctx, teamCode)
+	err = location.LogScanOut(ctx, team)
 	if err != nil {
-		return fmt.Errorf("LogScanOut: %v", err)
+		msg := flash.NewWarning("Please double check the code and try again.").SetTitle("Couldn't scan out.")
+		response.AddFlashMessage(msg)
+		response.Error = fmt.Errorf("logging scan out: %w", err)
+		return response
 	}
 
 	// Clear the mustScanOut field
 	team.MustScanOut = ""
 	err = team.Update(ctx)
 	if err != nil {
-		return fmt.Errorf("LogScanOut: %v", err)
+		msg := flash.NewError("Something went wrong. Please try again.")
+		response.AddFlashMessage(*msg)
+		response.Error = fmt.Errorf("updating team: %w", err)
+		return response
 	}
 
-	return nil
+	return response
 }
 
 // CheckLocation checks if the location is valid for the team to check in

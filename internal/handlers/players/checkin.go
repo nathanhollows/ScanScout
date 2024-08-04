@@ -5,7 +5,6 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/charmbracelet/log"
 	"github.com/go-chi/chi"
 	"github.com/nathanhollows/Rapua/internal/flash"
 	"github.com/nathanhollows/Rapua/internal/handlers"
@@ -24,22 +23,25 @@ func (h *PlayerHandler) CheckIn(w http.ResponseWriter, r *http.Request) {
 	team, err := h.getTeamFromContext(r.Context())
 	if err == nil {
 		if team.MustScanOut != "" {
-			if code == "" {
-				flash.NewWarning("Please scan out at the location you scanned in at.").
-					SetTitle("You are already scanned in.").Save(w, r)
+			err := team.LoadBlockingLocation(r.Context())
+			if err != nil {
+				slog.Error("CheckIn: loading blocking location", "err", err)
+				flash.NewError("Something went wrong. Please try again.").Save(w, r)
 				data["blocked"] = true
-			} else if code == team.MustScanOut {
-				message := fmt.Sprintf("Do you want to <a href=\"/o/%s\" class=\"link\">scan out</a> instead?", code)
-				flash.NewDefault(message).
-					SetTitle("You are already scanned in.").
-					Save(w, r)
-				data["blocked"] = true
-			} else {
-				flash.NewWarning(fmt.Sprintf("You need to scan out at %s.", team.BlockingLocation.Name)).
-					SetTitle("You are already scanned in.").
-					Save(w, r)
-				data["blocked"] = true
+				http.Redirect(w, r, r.Header.Get("/next"), http.StatusFound)
+				return
 			}
+
+			if team.BlockingLocation.MarkerID == code {
+				flash.NewDefault("Would you like to scan out instead?").Save(w, r)
+				http.Redirect(w, r, "/o/"+code, http.StatusFound)
+				return
+			}
+
+			flash.NewWarning(fmt.Sprintf("You need to scan out at %s.", team.BlockingLocation.Name)).
+				SetTitle("You are already scanned in.").
+				Save(w, r)
+			data["blocked"] = true
 		}
 	}
 
@@ -85,10 +87,9 @@ func (h *PlayerHandler) CheckInPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	locationID := response.Data["locationID"].(string)
-	log.Info("CheckIn", "team", team.Code, "location", locationID)
+	location := response.Data["location"].(*models.Location)
 
-	http.Redirect(w, r, "/checkins/"+locationID, http.StatusFound)
+	http.Redirect(w, r, "/checkins/"+location.MarkerID, http.StatusFound)
 }
 
 func (h *PlayerHandler) CheckOut(w http.ResponseWriter, r *http.Request) {
@@ -110,13 +111,15 @@ func (h *PlayerHandler) CheckOut(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/", http.StatusFound)
 		return
 	}
+	team.LoadBlockingLocation(r.Context())
+
 	data["team"] = team
 
 	if team.MustScanOut == "" {
 		flash.NewDefault("You don't need to scan out.").
 			SetTitle("You're all set!").Save(w, r)
 		data["blocked"] = true
-	} else if team.MustScanOut != code {
+	} else if team.BlockingLocation.MarkerID != code {
 		flash.NewWarning(fmt.Sprintf("You need to scan out at %s.", team.BlockingLocation.Name)).
 			SetTitle("You are scanned in elsewhere.").Save(w, r)
 		data["blocked"] = true
@@ -134,15 +137,24 @@ func (h *PlayerHandler) CheckOutPost(w http.ResponseWriter, r *http.Request) {
 	teamCode := r.FormValue("team")
 	teamCode = strings.ToUpper(teamCode)
 
-	err := h.GameplayService.CheckOut(r.Context(), teamCode, locationCode)
+	team, err := h.GameplayService.GetTeamByCode(r.Context(), teamCode)
 	if err != nil {
-		flash.NewWarning("Please double check the code and try again.").
-			SetTitle("Couldn't scan out.").Save(w, r)
-		log.Error(err)
-		http.Redirect(w, r, "/checkins", http.StatusFound)
+		flash.NewWarning("Please double check the team code and try again.").
+			SetTitle("Team code not found").Save(w, r)
+		http.Redirect(w, r, "/checkouts/"+locationCode, http.StatusFound)
 		return
 	}
 
-	flash.NewSuccess("You have scanned out.").Save(w, r)
+	response := h.GameplayService.CheckOut(r.Context(), team, locationCode)
+	for _, msg := range response.FlashMessages {
+		msg.Save(w, r)
+	}
+	if response.Error != nil {
+		slog.Error("checking out team", "err", response.Error.Error(), "team", team.Code, "location", locationCode)
+		http.Redirect(w, r, r.Header.Get("referer"), http.StatusFound)
+		return
+	}
+
+	flash.NewSuccess("You have checked out.").Save(w, r)
 	http.Redirect(w, r, "/next", http.StatusFound)
 }

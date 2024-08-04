@@ -19,10 +19,6 @@ func (h *PlayerHandler) Next(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if team.MustScanOut != "" {
-		flash.NewInfo("You are already scanned in. You must scan out of "+team.BlockingLocation.Name+" before you can scan in to your next location.").Save(w, r)
-	}
-
 	response := h.GameplayService.SuggestNextLocations(r.Context(), team, 3)
 	for _, message := range response.FlashMessages {
 		message.Save(w, r)
@@ -32,10 +28,15 @@ func (h *PlayerHandler) Next(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/", http.StatusFound)
 	}
 
-	locations := response.Data["nextLocations"].(models.Locations)
+	if response.Data["blockingLocation"] != nil {
+		data["blocked"] = true
+	} else {
+		locations := response.Data["nextLocations"].(models.Locations)
 
-	data["team"] = team
-	data["locations"] = locations
+		data["team"] = team
+		data["locations"] = locations
+	}
+
 	data["title"] = "Next Stop"
 	data["messages"] = flash.Get(w, r)
 	handlers.Render(w, data, handlers.PlayerDir, "next")

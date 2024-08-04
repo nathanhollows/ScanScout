@@ -35,6 +35,18 @@ func (h *PlayerHandler) CheckInList(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	err = team.LoadBlockingLocation(r.Context())
+	if err != nil {
+		flash.NewError("Error loading blocking location.").Save(w, r)
+		slog.Error("loading blocking location", "error", err.Error())
+		http.Redirect(w, r, r.Header.Get("referer"), http.StatusFound)
+		return
+	}
+
+	if team.MustScanOut != "" {
+		flash.NewWarning("You need to scan out at "+team.BlockingLocation.Name).Save(w, r)
+	}
+
 	if len(team.Scans) == 0 {
 		flash.Message{
 			Style:   flash.Default,
@@ -59,6 +71,20 @@ func (h *PlayerHandler) CheckInView(w http.ResponseWriter, r *http.Request) {
 		flash.NewError("Error loading team.").Save(w, r)
 		http.Redirect(w, r, "/", http.StatusFound)
 		return
+	}
+
+	err = team.LoadBlockingLocation(r.Context())
+	if err != nil {
+		flash.NewError("Error loading blocking location.").Save(w, r)
+		slog.Error("loading blocking location", "error", err.Error())
+		http.Redirect(w, r, r.Header.Get("referer"), http.StatusFound)
+		return
+	}
+
+	if team.MustScanOut != "" {
+		if team.BlockingLocation.MarkerID != locationCode {
+			flash.NewDefault("You are currently checked into "+team.BlockingLocation.Name).Save(w, r)
+		}
 	}
 
 	err = team.LoadScans(r.Context())
