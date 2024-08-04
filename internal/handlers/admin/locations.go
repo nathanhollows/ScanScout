@@ -6,6 +6,7 @@ import (
 
 	"github.com/nathanhollows/Rapua/internal/flash"
 	"github.com/nathanhollows/Rapua/internal/handlers"
+	"github.com/nathanhollows/Rapua/internal/models"
 )
 
 // Locations shows admin the locations
@@ -59,7 +60,14 @@ func (h *AdminHandler) LocationNewPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	http.Redirect(w, r, "/admin/locations", http.StatusSeeOther)
+	location, ok := response.Data["location"].(*models.Location)
+	if !ok {
+		slog.Error("creating location", "error", "location not returned")
+		http.Redirect(w, r, r.Header.Get("referer"), http.StatusSeeOther)
+		return
+	}
+
+	http.Redirect(w, r, "/admin/locations/"+location.ID, http.StatusSeeOther)
 }
 
 // ReorderLocations handles reordering locations
