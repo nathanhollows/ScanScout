@@ -1362,6 +1362,10 @@ html {
 }
 
 @media (hover:hover) {
+  .link-hover:hover {
+    text-decoration-line: underline;
+  }
+
   .label a:hover {
     --tw-text-opacity: 1;
     color: var(--fallback-bc,oklch(var(--bc)/var(--tw-text-opacity)));
@@ -1853,6 +1857,15 @@ html {
   gap: 0.5rem;
 }
 
+.footer-center {
+  place-items: center;
+  text-align: center;
+}
+
+.footer-center > * {
+  place-items: center;
+}
+
 @media (min-width: 48rem) {
   .footer {
     grid-auto-flow: column;
@@ -1998,6 +2011,10 @@ html {
 .link {
   cursor: pointer;
   text-decoration-line: underline;
+}
+
+.link-hover {
+  text-decoration-line: none;
 }
 
 .menu {
@@ -4709,6 +4726,14 @@ html {
   margin-bottom: 0px;
 }
 
+.mt-4 {
+  margin-top: 1rem;
+}
+
+.mt-8 {
+  margin-top: 2rem;
+}
+
 .block {
   display: block;
 }
@@ -5100,6 +5125,10 @@ html {
   border-bottom-width: 1px;
 }
 
+.border-t {
+  border-top-width: 1px;
+}
+
 .border-base-300 {
   --tw-border-opacity: 1;
   border-color: var(--fallback-b3,oklch(var(--b3)/var(--tw-border-opacity)));
@@ -5149,12 +5178,21 @@ html {
   background-color: var(--fallback-in,oklch(var(--in)/var(--tw-bg-opacity)));
 }
 
+.bg-base-300 {
+  --tw-bg-opacity: 1;
+  background-color: var(--fallback-b3,oklch(var(--b3)/var(--tw-bg-opacity)));
+}
+
 .bg-none {
   background-image: none;
 }
 
 .fill-neutral {
   fill: var(--fallback-n,oklch(var(--n)/1));
+}
+
+.fill-current {
+  fill: currentColor;
 }
 
 .stroke-current {

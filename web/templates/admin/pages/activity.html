@@ -48,68 +48,22 @@
             >{{ .Marker.Name }}</a
           >
 
+          {{ if eq $.user.CurrentInstance.Settings.CompletionMethod.String "Check In and Out" }}
           <span
             class="tooltip flex space-x-2"
-            data-tip="{{ .Marker.CurrentCount }} currently visiting, {{ .Marker.TotalVisits }} scans total"
+            data-tip="{{ .CurrentCount }} currently visiting, {{ .TotalVisits }} scans total"
           >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              class="lucide lucide-scan-face"
-            >
-              <path d="M3 7V5a2 2 0 0 1 2-2h2" />
-              <path d="M17 3h2a2 2 0 0 1 2 2v2" />
-              <path d="M21 17v2a2 2 0 0 1-2 2h-2" />
-              <path d="M7 21H5a2 2 0 0 1-2-2v-2" />
-              <path d="M8 14s1.5 2 4 2 4-2 4-2" />
-              <path d="M9 9h.01" />
-              <path d="M15 9h.01" />
-            </svg>
-            <strong> {{ .Marker.CurrentCount }} </strong> /
-            <strong>{{ .Marker.TotalVisits }} </strong>
-            {{ if .Marker.AvgDuration }}
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-scan-face" > <path d="M3 7V5a2 2 0 0 1 2-2h2" /> <path d="M17 3h2a2 2 0 0 1 2 2v2" /> <path d="M21 17v2a2 2 0 0 1-2 2h-2" /> <path d="M7 21H5a2 2 0 0 1-2-2v-2" /> <path d="M8 14s1.5 2 4 2 4-2 4-2" /> <path d="M9 9h.01" /> <path d="M15 9h.01" /> </svg>
+            <strong> {{ .CurrentCount }} </strong> /
+            <strong>{{ .TotalVisits }} </strong>
+            {{ if .AvgDuration }}
             <p class="flex flex-row space-x-3 text-center">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                class="lucide lucide-timer"
-              >
-                <line
-                  x1="10"
-                  x2="14"
-                  y1="2"
-                  y2="2"
-                />
-                <line
-                  x1="12"
-                  x2="15"
-                  y1="14"
-                  y2="11"
-                />
-                <circle
-                  cx="12"
-                  cy="14"
-                  r="8"
-                />
-              </svg>
-              <span> {{ toDuration .Marker.AvgDuration }} </span>
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-timer" > <line x1="10" x2="14" y1="2" y2="2" /> <line x1="12" x2="15" y1="14" y2="11" /> <circle cx="12" cy="14" r="8" /> </svg>
+              <span> {{ toDuration .AvgDuration }} </span>
             </p>
             {{ end }}
           </span>
+          {{ end }}
         </div>
       </div>
       {{ end }}

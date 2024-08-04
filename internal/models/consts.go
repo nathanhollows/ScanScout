@@ -58,7 +58,7 @@ func (n NavigationMethod) String() string {
 
 // String returns the string representation of the CompletionMethod
 func (c CompletionMethod) String() string {
-	return [...]string{"Check In Only", "Check In And Out", "Submit Content", "Password", "Click Button"}[c]
+	return [...]string{"Check In Only", "Check In and Out", "Submit Content", "Password", "Click Button"}[c]
 }
 
 // Description returns the description of the NavigationMode
@@ -126,7 +126,7 @@ func ParseCompletionMethod(s string) (CompletionMethod, error) {
 	switch s {
 	case "Check In Only":
 		return CheckInOnly, nil
-	case "Check In And Out":
+	case "Check In and Out":
 		return CheckInAndOut, nil
 	case "Submit Content":
 		return SubmitContent, nil
