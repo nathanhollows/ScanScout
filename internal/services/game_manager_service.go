@@ -6,11 +6,13 @@ import (
 	"fmt"
 	"net/url"
 	"strconv"
+	"time"
 
 	"github.com/nathanhollows/Rapua/internal/flash"
 	"github.com/nathanhollows/Rapua/internal/helpers"
 	"github.com/nathanhollows/Rapua/internal/models"
 	"github.com/nathanhollows/Rapua/pkg/db"
+	"github.com/uptrace/bun"
 )
 
 type GameManagerService struct{}
@@ -404,6 +406,119 @@ func (s *GameManagerService) UpdateSettings(ctx context.Context, settings *model
 	}
 
 	response.AddFlashMessage(*flash.NewSuccess("Settings updated!"))
+	return response
+}
+
+// StartGame starts the game immediately
+func (s *GameManagerService) StartGame(ctx context.Context, user *models.User) (response ServiceResponse) {
+	response = ServiceResponse{}
+
+	instance := user.CurrentInstance
+
+	// Check if the game is already active
+	if instance.GetStatus() == models.Active {
+		response.AddFlashMessage(*flash.NewError("Game is already active"))
+		response.Error = errors.New("game is already active")
+		return response
+	}
+
+	// Start the game
+	instance.StartTime = bun.NullTime{Time: time.Now()}
+	instance.EndTime = bun.NullTime{}
+	err := instance.Update(ctx)
+	if err != nil {
+		response.AddFlashMessage(*flash.NewError("Error updating instance"))
+		response.Error = fmt.Errorf("updating instance with new time: %w", err)
+		return response
+	}
+
+	msg := flash.NewSuccess("Game started!")
+	response.AddFlashMessage(*msg)
+	return response
+}
+
+// StopGame stops the game immediately
+func (s *GameManagerService) StopGame(ctx context.Context, user *models.User) (response ServiceResponse) {
+	response = ServiceResponse{}
+
+	instance := user.CurrentInstance
+
+	// Check if the game is already closed
+	if instance.GetStatus() == models.Closed {
+		response.AddFlashMessage(*flash.NewError("Game is already over"))
+		response.Error = errors.New("game is already closed")
+		return response
+	}
+
+	instance.EndTime = bun.NullTime{Time: time.Now()}
+	err := instance.Update(ctx)
+	if err != nil {
+		response.AddFlashMessage(*flash.NewError("Error updating instance"))
+		response.Error = fmt.Errorf("updating instance with new time: %w", err)
+		return response
+	}
+
+	msg := flash.NewSuccess("Game stopped!")
+	response.AddFlashMessage(*msg)
+	return response
+}
+
+// ScheduleGame schedules the game to start and/or end at a specific time
+// Expects a form with set_start, start_date, start_time, set_end, end_date, and end_time
+func (s *GameManagerService) ScheduleGame(ctx context.Context, user *models.User, form url.Values) (response ServiceResponse) {
+	response = ServiceResponse{}
+
+	instance := user.CurrentInstance
+	instance.LoadSettings(ctx)
+
+	// Parse start time
+	setStart := form.Get("set_start")
+	startDate := form.Get("start_date")
+	startTime := form.Get("start_time")
+	if setStart == "on" && startDate != "" && startTime != "" {
+		startDateTime, err := helpers.ParseDateTime(startDate, startTime)
+		if err != nil {
+			response.AddFlashMessage(*flash.NewError("Error parsing start date and time"))
+			response.Error = fmt.Errorf("parsing start date and time: %w", err)
+			return response
+		}
+		instance.StartTime = bun.NullTime{Time: startDateTime}
+	} else {
+		instance.StartTime = bun.NullTime{}
+	}
+
+	// Parse end time
+	setEnd := form.Get("set_end")
+	endDate := form.Get("end_date")
+	endTime := form.Get("end_time")
+	if setEnd == "on" && endDate != "" && endTime != "" {
+		endDateTime, err := helpers.ParseDateTime(endDate, endTime)
+		if err != nil {
+			response.AddFlashMessage(*flash.NewError("Error parsing end date and time"))
+			response.Error = fmt.Errorf("parsing end date and time: %w", err)
+			return response
+		}
+		instance.EndTime = bun.NullTime{Time: endDateTime}
+	} else {
+		instance.EndTime = bun.NullTime{}
+	}
+
+	// Check if the end time is before the start time
+	if !instance.StartTime.Time.IsZero() && !instance.EndTime.Time.IsZero() && instance.StartTime.Time.After(instance.EndTime.Time) {
+		response.AddFlashMessage(*flash.NewError("End time must be after start time"))
+		response.Error = errors.New("end time must be after start time")
+		return response
+	}
+
+	// Save instance
+	err := instance.Update(ctx)
+	if err != nil {
+		response.AddFlashMessage(*flash.NewError("Error saving instance"))
+		response.Error = fmt.Errorf("saving instance: %w", err)
+		return response
+	}
+
+	response.AddFlashMessage(*flash.NewSuccess("Game scheduled!"))
 	return response
 }
 

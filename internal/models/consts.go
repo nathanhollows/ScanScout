@@ -5,10 +5,12 @@ import "errors"
 type NavigationMode int
 type NavigationMethod int
 type CompletionMethod int
+type GameStatus int
 
 type NavigationModes []NavigationMode
 type NavigationMethods []NavigationMethod
 type CompletionMethods []CompletionMethod
+type GameStatuses []GameStatus
 
 const (
 	RandomNav NavigationMode = iota
@@ -31,6 +33,12 @@ const (
 	ClickButton
 )
 
+const (
+	Scheduled GameStatus = iota
+	Active
+	Closed
+)
+
 // GetNavigationModes returns a list of navigation modes
 func GetNavigationModes() NavigationModes {
 	return []NavigationMode{RandomNav, FreeRoamNav, OrderedNav}
@@ -46,6 +54,11 @@ func GetCompletionMethods() CompletionMethods {
 	return []CompletionMethod{CheckInOnly, CheckInAndOut, SubmitContent, Password, ClickButton}
 }
 
+// GetGameStatuses returns a list of game statuses
+func GetGameStatuses() GameStatuses {
+	return []GameStatus{Scheduled, Active, Closed}
+}
+
 // String returns the string representation of the NavigationMode
 func (n NavigationMode) String() string {
 	return [...]string{"Random", "Free Roam", "Ordered"}[n]
@@ -59,6 +72,11 @@ func (n NavigationMethod) String() string {
 // String returns the string representation of the CompletionMethod
 func (c CompletionMethod) String() string {
 	return [...]string{"Check In Only", "Check In and Out", "Submit Content", "Password", "Click Button"}[c]
+}
+
+// String returns the string representation of the GameStatus
+func (g GameStatus) String() string {
+	return [...]string{"Scheduled", "Active", "Closed"}[g]
 }
 
 // Description returns the description of the NavigationMode
@@ -89,6 +107,15 @@ func (c CompletionMethod) Description() string {
 		"Players must enter a password to a location, i.e., a code or phrase.",
 		"Players must click the correct button for the location, i.e., a quick quiz.",
 	}[c]
+}
+
+// Description returns the description of the GameStatus
+func (g GameStatus) Description() string {
+	return [...]string{
+		"The game is scheduled but not yet active.",
+		"The game is active and players can participate.",
+		"The game is closed and players cannot participate.",
+	}[g]
 }
 
 // Parse NavigationMode
@@ -136,5 +163,19 @@ func ParseCompletionMethod(s string) (CompletionMethod, error) {
 		return ClickButton, nil
 	default:
 		return CheckInOnly, errors.New("invalid CompletionMethod")
+	}
+}
+
+// Parse GameStatus
+func ParseGameStatus(s string) (GameStatus, error) {
+	switch s {
+	case "Scheduled":
+		return Scheduled, nil
+	case "Active":
+		return Active, nil
+	case "Closed":
+		return Closed, nil
+	default:
+		return 0, errors.New("invalid GameStatus")
 	}
 }

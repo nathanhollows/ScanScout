@@ -2,6 +2,23 @@
 
 <div class="flex flex-row justify-between items-center w-full p-5">
   <h1 class="text-2xl font-bold">Activity tracker</h1>
+  <div class="join">
+    {{ if ne .user.CurrentInstance.GetStatus.String "Active" }}
+    <a href="/admin/schedule/start" class="btn btn-outline flex join-item tooltip"data-tip="Start the game">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-play w-5 h-5"><polygon points="6 3 20 12 6 21 6 3"/></svg>
+    </a>
+    {{ end }}
+    {{ if ne .user.CurrentInstance.GetStatus.String "Active" }}
+      <button class="btn btn-outline flex join-item tooltip" onclick="schedule_modal.showModal()" data-tip="Sechedule">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-calendar-clock w-5 h-5"><path d="M21 7.5V6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h3.5"/><path d="M16 2v4"/><path d="M8 2v4"/><path d="M3 10h5"/><path d="M17.5 17.5 16 16.3V14"/><circle cx="16" cy="16" r="6"/></svg>
+    </button>
+    {{ end }}
+    {{ if eq .user.CurrentInstance.GetStatus.String "Active" }}
+    <a href="/admin/schedule/stop" class="btn btn-outline flex join-item tooltip" data-tip="Stop the game">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-octagon-x w-5 h-5"><path d="m15 9-6 6"/><path d="M2.586 16.726A2 2 0 0 1 2 15.312V8.688a2 2 0 0 1 .586-1.414l4.688-4.688A2 2 0 0 1 8.688 2h6.624a2 2 0 0 1 1.414.586l4.688 4.688A2 2 0 0 1 22 8.688v6.624a2 2 0 0 1-.586 1.414l-4.688 4.688a2 2 0 0 1-1.414.586H8.688a2 2 0 0 1-1.414-.586z"/><path d="m9 9 6 6"/></svg>
+    </a>
+    {{ end }}
+  </div>
 </div>
 
 <!-- Messages -->
@@ -31,7 +48,7 @@
         </svg>
         <span>No locations available</span>
         <div>
-          <a href="/admin/locations/new" class="btn btn-sm btn-primary">Add a location</a>
+          <a href="/admin/locations/new" class="btn btn-sm btn-secondary">Add a location</a>
         </div>
       </div>
     {{ end }}
@@ -127,6 +144,56 @@
     </tbody>
   </table>
 </div>
+
+<dialog id="schedule_modal" class="modal modal-bottom sm:modal-middle">
+  <form method="post" action="/admin/schedule/" class="modal-box">
+    <h3 class="text-lg font-bold">Schedule a Game</h3>
+
+    <p class="py-3">
+      Schedule a game to start and/or end at a specific time. 
+    </p>
+
+    <div class="divider">
+      <div class="form-control">
+        <label class="label cursor-pointer flex gap-3">
+          Scheduled Start
+          <input type="checkbox" name="set_start" class="checkbox" />
+        </label>
+      </div>
+    </div>
+
+    {{ .user.CurrentInstance.StartTime }}
+
+    <div class="join flex justify-center mb-5">
+      <input type="date" name="start_date" class="input input-bordered join-item" />
+      <input type="time" name="start_time" class="input input-bordered join-item" />
+    </div>
+
+    <div class="divider">
+      <div class="form-control">
+        <label class="label cursor-pointer flex gap-3">
+          Scheduled End
+          <input type="checkbox" name="set_end" class="checkbox" />
+        </label>
+      </div>
+    </div>
+
+    {{ .user.CurrentInstance.EndTime }}
+
+    <div class="join flex justify-center">
+      <input type="date" name="end_date" class="input input-bordered join-item" />
+      <input type="time" name="end_time" class="input input-bordered join-item" />
+    </div>
+
+
+    <div class="modal-action">
+        <!-- if there is a button in form, it will close the modal -->
+        <button class="btn" onclick="event.preventDefault(); schedule_modal.close()">Nevermind</button>
+        <button class="btn btn-primary">Save</button>
+    </div>
+  </form>
+</dialog>
+
 <link href="https://api.mapbox.com/mapbox-gl-js/v2.10.0/mapbox-gl.css" rel="stylesheet" />
 <script src="https://api.mapbox.com/mapbox-gl-js/v2.10.0/mapbox-gl.js"></script>
 <script defer>

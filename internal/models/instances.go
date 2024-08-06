@@ -6,11 +6,13 @@ import (
 	"io"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/charmbracelet/log"
 	"github.com/go-pdf/fpdf"
 	"github.com/google/uuid"
 	"github.com/nathanhollows/Rapua/pkg/db"
+	"github.com/uptrace/bun"
 )
 
 // Instance represents a single planned activity belonging to a user
@@ -18,9 +20,12 @@ import (
 type Instance struct {
 	baseModel
 
-	ID     string `bun:",pk,type:varchar(36)" json:"id"`
-	Name   string `bun:",type:varchar(255)" json:"name"`
-	UserID string `bun:",type:varchar(36)" json:"user_id"`
+	ID        string       `bun:",pk,type:varchar(36)" json:"id"`
+	Name      string       `bun:",type:varchar(255)" json:"name"`
+	UserID    string       `bun:",type:varchar(36)" json:"user_id"`
+	StartTime bun.NullTime `bun:",nullzero" json:"start_time"`
+	EndTime   bun.NullTime `bun:",nullzero" json:"end_time"`
+	Status    GameStatus   `bun:"-" json:"status"`
 
 	Teams     Teams            `bun:"rel:has-many,join:id=instance_id" json:"teams"`
 	Locations Locations        `bun:"rel:has-many,join:id=instance_id" json:"instance_locations"`
@@ -105,6 +110,28 @@ func FindInstanceByID(ctx context.Context, id string) (*Instance, error) {
 		return nil, err
 	}
 	return instance, nil
+}
+
+// GetStatus returns the status of the instance
+func (i *Instance) GetStatus() GameStatus {
+	// If the start time is null, the game is closed
+	if i.StartTime.Time.IsZero() {
+		return Closed
+	}
+
+	// If the start time is in the future, the game is scheduled
+	if i.StartTime.Time.After(time.Now()) {
+		return Scheduled
+	}
+
+	// If the end time is in the past, the game is closed
+	if !i.EndTime.Time.IsZero() && i.EndTime.Time.Before(time.Now()) {
+		return Closed
+	}
+
+	// If the start time is in the past, the game is active
+	return Active
+
 }
 
 // LoadSettings loads the settings for an instance

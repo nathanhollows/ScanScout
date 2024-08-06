@@ -144,5 +144,11 @@ func setupAdminRoutes(router chi.Router, gameManagerService *services.GameManage
 			r.Get("/", adminHandler.MarkdownGuide)
 			r.Post("/preview", adminHandler.PreviewMarkdown)
 		})
+
+		r.Route("/schedule", func(r chi.Router) {
+			r.Get("/start", adminHandler.StartGame)
+			r.Get("/stop", adminHandler.StopGame)
+			r.Post("/", adminHandler.ScheduleGame)
+		})
 	})
 }
