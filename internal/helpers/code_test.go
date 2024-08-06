@@ -2,7 +2,7 @@ package helpers
 
 import "testing"
 
-func TestHelpers_NewCode(t *testing.T) {
+func TestNewCode(t *testing.T) {
 	tests := []struct {
 		name   string
 		length int

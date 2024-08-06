@@ -2,7 +2,7 @@ package helpers
 
 import "testing"
 
-func TestHelpers_SanitizeHTML(t *testing.T) {
+func TestSanitizeHTML(t *testing.T) {
 	tests := []struct {
 		name  string
 		input []byte

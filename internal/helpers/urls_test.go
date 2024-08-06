@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-func TestHelpers_URL(t *testing.T) {
+func TestURL(t *testing.T) {
 	tests := []struct {
 		name     string
 		patterns []string

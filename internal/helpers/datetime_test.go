@@ -5,7 +5,7 @@ import (
 	"time"
 )
 
-func TestHelpers_ParseDate(t *testing.T) {
+func TestParseDate(t *testing.T) {
 	tests := []struct {
 		name string
 		date string
@@ -41,7 +41,7 @@ func TestHelpers_ParseDate(t *testing.T) {
 }
 
 // TestHelpers_ParseTime tests the ParseTime function
-func TestHelpers_ParseTime(t *testing.T) {
+func TestParseTime(t *testing.T) {
 	tests := []struct {
 		name string
 		time string
@@ -87,7 +87,7 @@ func TestHelpers_ParseTime(t *testing.T) {
 }
 
 // TestHelpers_ParseDateTime tests the ParseDateTime function
-func TestHelpers_ParseDateTime(t *testing.T) {
+func TestParseDateTime(t *testing.T) {
 	tests := []struct {
 		name string
 		date string
