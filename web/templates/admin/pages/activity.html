@@ -1,6 +1,6 @@
 {{ define "content" }}
 
-<div class="flex flex-row justify-between items-center w-full p-5">
+<div class="flex flex-col sm:flex-row gap-3 justify-between items-center w-full p-5">
   <h1 class="text-2xl font-bold">Activity tracker</h1>
   <div class="flex gap-3">
     <div class="join">
@@ -28,7 +28,7 @@
 </div>
 
 <!-- Messages -->
-<div class="my-5">
+<div class="p-5">
   {{ template "flash" .messages }}
 </div>
 
@@ -115,7 +115,12 @@
         {{ if not .HasStarted }}{{ continue }}{{ end }}
         {{ $count = add $count 1 }}
         <tr class="hover">
-          <th scope="row">{{ .Code }}</th>
+          <th scope="row">
+          <button class="btn btn-xs btn-outline" hx-get="/admin/activity/team/{{ .Code }}" hx-target="#team_modal .modal-box" hx-trigger="click" hx-indicator=".loading">
+            {{ .Code }}
+            <span class="loading loading-spinner loading-lg" style="display:none;"></span>
+          </button>
+        </th>
           {{ $team := . }}
           {{ range $.locations }}
             {{ $found := false }}
@@ -199,7 +204,7 @@
   </form>
 </dialog>
 
-<dialog id="announcement_modal" class="modal">
+<dialog id="announcement_modal" class="modal modal-bottom sm:modal-middle">
   <form method="post" action="/admin/notify/all" class="modal-box">
     <h3 class="text-lg font-bold">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-megaphone inline-block w-5 h-5 mb-1 mr-2"><path d="m3 11 18-5v12L3 14v-3z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/></svg>
@@ -217,9 +222,29 @@
   </form>
 </dialog>
 
+<dialog id="team_modal" class="modal modal-bottom sm:modal-middle">
+  <div class="modal-box">
+    <!-- Contents will be replaced by the fetched content -->
+  </div>
+</dialog>
+
 <link href="https://api.mapbox.com/mapbox-gl-js/v2.10.0/mapbox-gl.css" rel="stylesheet" />
 <script src="https://api.mapbox.com/mapbox-gl-js/v2.10.0/mapbox-gl.js"></script>
 <script defer>
+  // Function to open the modal once content is loaded
+  document.body.addEventListener('htmx:afterSwap', (evt) => {
+    console.log(evt); // Inspect the whole event
+    console.log(evt.detail); // Log detailed event information
+
+    // Check if the event's target is the modal content box
+    let target = evt.detail.target;
+    console.log("Target ID:", target.id);
+    
+    if (target.closest && target.closest("#team_modal")) {
+      document.getElementById("team_modal").showModal();
+    }
+  });
+
   coords = [170.5111643, -45.8650509]
   zoom = 17
   {{ if .locations }}

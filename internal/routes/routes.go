@@ -118,6 +118,10 @@ func setupAdminRoutes(router chi.Router, gameManagerService *services.GameManage
 		r.Use(middlewares.AdminCheckInstanceMiddleware)
 
 		r.Get("/", adminHandler.Activity)
+		r.Route("/activity", func(r chi.Router) {
+			r.Get("/", adminHandler.Activity)
+			r.Get("/team/{teamCode}", adminHandler.TeamActivity)
+		})
 
 		r.Route("/locations", func(r chi.Router) {
 			r.Get("/", adminHandler.Locations)
@@ -165,6 +169,7 @@ func setupAdminRoutes(router chi.Router, gameManagerService *services.GameManage
 
 		r.Route("/notify", func(r chi.Router) {
 			r.Post("/all", adminHandler.NotifyAllPost)
+			r.Post("/team", adminHandler.NotifyTeamPost)
 		})
 	})
 }

@@ -1,0 +1,86 @@
+{{ define "content" }}
+<h3 class="text-lg font-bold">{{ .team.Code }}
+  {{ if .team.Name }} | {{ .team.Name }}{{ end }}
+</h3>
+
+<div class="flex gap-3 flex-col sm:flex-row justify-evenly">
+
+  <!-- Next Locations -->
+  <div class="w-full">
+    <p class="py-3 font-bold">Next Locations</p>
+    {{ if .locations }}
+    <div class="prose">
+    <ul>
+      {{ range .locations }}
+        <li>{{ .Name }}
+        {{ if eq $.settings.NavigationMethod.String "Show Clues" }}
+            {{ range .Clues }}
+              <blockquote class="text-sm"><p>{{ .Content }}</p></blockquote>
+            {{ end }}
+        {{ end }}
+        </li>
+      {{ end }}
+    </ul>
+  </div>
+    {{ else }}
+      <p>No activity</p>
+    {{ end }}
+  </div>
+
+  <!-- Check-ins -->
+  <div class="w-full">
+    <p class="py-3 font-bold">Check-ins</p>
+    {{ if .team.Scans }}
+    <div class="prose">
+    <ul>
+      {{ range .team.Scans }}
+        <li>{{ .Location.Name }} @ {{ time .CreatedAt }}</li>
+      {{ end }}
+    </ul>
+  </div>
+    {{ else }}
+      <p>No activity</p>
+    {{ end }}
+  </div>
+
+</div>
+
+{{ if len .notifications }}
+<p class="py-3 font-bold">Unread Notifications</p>
+{{ range .notifications }}
+<div role="alert" class="alert mb-3" id="alert-{{ .ID }}">
+  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-megaphone"><path d="m3 11 18-5v12L3 14v-3z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/></svg>
+  <div>
+    <div class="">{{ .Content }}</div>
+  </div>
+  <div class="badge">Sent {{ time .CreatedAt }}</div>
+</div>
+{{ end }}
+{{ end }}
+
+<p class="py-3 font-bold">Send an alert</p>
+<!-- Send an alert -->
+<label class="form-control w-full">
+  <form method="post" action="/admin/notify/team/">
+    <input type="hidden" name="teamCode" value="{{ .team.Code }}"/>
+    <div class="join w-full">
+      <input class="input input-bordered join-item w-full" name="content" placeholder="Message" autocomplete="off" required/>
+      <button type="submit" class="btn btn-primary join-item rounded-r-full">
+        Send
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-send-horizontal w-5 h-5"><path d="m3 3 3 9-3 9 19-9Z"/><path d="M6 12h16"/></svg>
+      </button>
+    </div>
+  </form>
+  <div class="label">
+    <span class="label-text-alt">This is a read-only message. Teams cannot reply.</span>
+  </div>
+</label>
+
+
+<div class="modal-action">
+  <form method="dialog">
+    <!-- if there is a button in form, it will close the modal -->
+    <button class="btn">Close</button>
+  </form>
+</div>
+{{ end }}

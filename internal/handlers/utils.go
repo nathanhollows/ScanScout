@@ -67,6 +67,8 @@ func Render(
 	return err
 }
 
+// RenderHTMX renders a template with HTMX headers
+// It renders the content block of the template instead of the base layout
 func RenderHTMX(
 	w http.ResponseWriter,
 	data map[string]interface{},
