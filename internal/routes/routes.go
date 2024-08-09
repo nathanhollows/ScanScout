@@ -90,6 +90,9 @@ func setupPlayerRoutes(router chi.Router, gameplayService *services.GameplayServ
 	})
 
 	router.Post("/dismiss/{ID}", playerHandler.DismissNotificationPost)
+
+	router.NotFound(playerHandler.NotFound)
+
 }
 
 func setupPublicRoutes(router chi.Router) {
@@ -171,5 +174,7 @@ func setupAdminRoutes(router chi.Router, gameManagerService *services.GameManage
 			r.Post("/all", adminHandler.NotifyAllPost)
 			r.Post("/team", adminHandler.NotifyTeamPost)
 		})
+
+		r.NotFound(adminHandler.NotFound)
 	})
 }
