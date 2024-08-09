@@ -10,12 +10,14 @@ import (
 )
 
 type PlayerHandler struct {
-	GameplayService *services.GameplayService
+	GameplayService     *services.GameplayService
+	NotificationService services.NotificationService
 }
 
-func NewPlayerHandler(gs *services.GameplayService) *PlayerHandler {
+func NewPlayerHandler(gs *services.GameplayService, ns services.NotificationService) *PlayerHandler {
 	return &PlayerHandler{
-		GameplayService: gs,
+		GameplayService:     gs,
+		NotificationService: ns,
 	}
 }
 

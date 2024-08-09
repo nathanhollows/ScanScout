@@ -36,7 +36,10 @@
       class="space-y-6"
       method="post"
     >
-      {{ template "flash" .messages }} {{ if not .blocked }}
+      {{ template "flash" .messages }} 
+      {{ template "notifications" .notifications }}
+
+      {{ if not .blocked }}
       <div>
         <label
           class="form-control w-full"

@@ -39,5 +39,6 @@ func (h *PlayerHandler) Next(w http.ResponseWriter, r *http.Request) {
 
 	data["title"] = "Next Stop"
 	data["messages"] = flash.Get(w, r)
+	data["notifications"], _ = h.NotificationService.GetNotifications(r.Context(), team.Code)
 	handlers.Render(w, data, handlers.PlayerDir, "next")
 }

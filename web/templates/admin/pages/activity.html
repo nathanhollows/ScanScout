@@ -2,22 +2,28 @@
 
 <div class="flex flex-row justify-between items-center w-full p-5">
   <h1 class="text-2xl font-bold">Activity tracker</h1>
-  <div class="join">
-    {{ if ne .user.CurrentInstance.GetStatus.String "Active" }}
-    <a href="/admin/schedule/start" class="btn btn-outline flex join-item tooltip"data-tip="Start the game">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-play w-5 h-5"><polygon points="6 3 20 12 6 21 6 3"/></svg>
-    </a>
-    {{ end }}
-    {{ if ne .user.CurrentInstance.GetStatus.String "Active" }}
+  <div class="flex gap-3">
+    <div class="join">
+      {{ if ne .user.CurrentInstance.GetStatus.String "Active" }}
+      <a href="/admin/schedule/start" class="btn btn-outline flex join-item tooltip"data-tip="Start the game">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-play w-5 h-5"><polygon points="6 3 20 12 6 21 6 3"/></svg>
+      </a>
+      {{ end }}
+      {{ if ne .user.CurrentInstance.GetStatus.String "Active" }}
       <button class="btn btn-outline flex join-item tooltip" onclick="schedule_modal.showModal()" data-tip="Sechedule">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-calendar-clock w-5 h-5"><path d="M21 7.5V6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h3.5"/><path d="M16 2v4"/><path d="M8 2v4"/><path d="M3 10h5"/><path d="M17.5 17.5 16 16.3V14"/><circle cx="16" cy="16" r="6"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-calendar-clock w-5 h-5"><path d="M21 7.5V6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h3.5"/><path d="M16 2v4"/><path d="M8 2v4"/><path d="M3 10h5"/><path d="M17.5 17.5 16 16.3V14"/><circle cx="16" cy="16" r="6"/></svg>
+      </button>
+      {{ end }}
+      {{ if eq .user.CurrentInstance.GetStatus.String "Active" }}
+      <a href="/admin/schedule/stop" class="btn btn-outline flex join-item tooltip" data-tip="Stop the game">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-octagon-x w-5 h-5"><path d="m15 9-6 6"/><path d="M2.586 16.726A2 2 0 0 1 2 15.312V8.688a2 2 0 0 1 .586-1.414l4.688-4.688A2 2 0 0 1 8.688 2h6.624a2 2 0 0 1 1.414.586l4.688 4.688A2 2 0 0 1 22 8.688v6.624a2 2 0 0 1-.586 1.414l-4.688 4.688a2 2 0 0 1-1.414.586H8.688a2 2 0 0 1-1.414-.586z"/><path d="m9 9 6 6"/></svg>
+      </a>
+      {{ end }}
+    </div>
+    <button class="btn btn-secondary" onclick="announcement_modal.showModal()">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-megaphone"><path d="m3 11 18-5v12L3 14v-3z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/></svg>
+      Announcement
     </button>
-    {{ end }}
-    {{ if eq .user.CurrentInstance.GetStatus.String "Active" }}
-    <a href="/admin/schedule/stop" class="btn btn-outline flex join-item tooltip" data-tip="Stop the game">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-octagon-x w-5 h-5"><path d="m15 9-6 6"/><path d="M2.586 16.726A2 2 0 0 1 2 15.312V8.688a2 2 0 0 1 .586-1.414l4.688-4.688A2 2 0 0 1 8.688 2h6.624a2 2 0 0 1 1.414.586l4.688 4.688A2 2 0 0 1 22 8.688v6.624a2 2 0 0 1-.586 1.414l-4.688 4.688a2 2 0 0 1-1.414.586H8.688a2 2 0 0 1-1.414-.586z"/><path d="m9 9 6 6"/></svg>
-    </a>
-    {{ end }}
   </div>
 </div>
 
@@ -187,9 +193,26 @@
 
 
     <div class="modal-action">
-        <!-- if there is a button in form, it will close the modal -->
         <button class="btn" onclick="event.preventDefault(); schedule_modal.close()">Nevermind</button>
         <button class="btn btn-primary">Save</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="announcement_modal" class="modal">
+  <form method="post" action="/admin/notify/all" class="modal-box">
+    <h3 class="text-lg font-bold">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-megaphone inline-block w-5 h-5 mb-1 mr-2"><path d="m3 11 18-5v12L3 14v-3z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/></svg>
+      Announcement
+    </h3>
+    <p class="py-3">Send an announcement to all teams.</p>
+
+    <textarea class="textarea textarea-bordered w-full" name="content" placeholder="Announcement"></textarea>
+
+    <p class="text-sm py-3"><em>Note:</em> This will only be sent to teams that have already started playing.</p>
+    <div class="modal-action">
+        <button class="btn" onclick="event.preventDefault(); announcement_modal.close()">Nevermind</button>
+        <button class="btn btn-primary">Send</button>
     </div>
   </form>
 </dialog>

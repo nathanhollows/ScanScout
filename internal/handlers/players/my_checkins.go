@@ -56,6 +56,7 @@ func (h *PlayerHandler) CheckInList(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	data["notifications"], _ = h.NotificationService.GetNotifications(r.Context(), team.Code)
 	data["team"] = team
 	data["messages"] = flash.Get(w, r)
 	handlers.Render(w, data, handlers.PlayerDir, "checkins")
@@ -111,6 +112,7 @@ func (h *PlayerHandler) CheckInView(w http.ResponseWriter, r *http.Request) {
 
 	data["title"] = team.Scans[index].Location.Name
 	data["scan"] = team.Scans[index]
+	data["notifications"], _ = h.NotificationService.GetNotifications(r.Context(), team.Code)
 	data["messages"] = flash.Get(w, r)
 	handlers.Render(w, data, handlers.PlayerDir, "checkin_view")
 }

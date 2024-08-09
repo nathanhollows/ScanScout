@@ -14,6 +14,7 @@
       Next location
     </h2>
     {{ template "flash" .messages }}
+    {{ template "notifications" .notifications }}
 
     {{ if eq .team.Instance.Settings.NavigationMethod 0 }}
       {{ template "show_map" . }}

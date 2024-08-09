@@ -209,4 +209,20 @@ var funcs = template.FuncMap{
 
 		return template.HTML(helpers.SanitizeHTML(buf.Bytes()))
 	},
+	// Sequence returns a slice of integers
+	// Accepts 1, 2, or 3 int arguments
+	"sequence": func(args ...int) []int {
+		switch len(args) {
+		case 1:
+			return make([]int, args[0])
+		case 2:
+			return make([]int, args[1]-args[0])
+		case 3:
+			s := make([]int, args[2]-args[0])
+			for i := range s {
+				s[i] = args[0] + i
+			}
+		}
+		return []int{}
+	},
 }

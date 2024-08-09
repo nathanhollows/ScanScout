@@ -16,7 +16,7 @@ import (
 	"github.com/nathanhollows/Rapua/internal/services"
 )
 
-func SetupRouter(gameplayService *services.GameplayService, gameManagerService *services.GameManagerService) *chi.Mux {
+func SetupRouter(gameplayService *services.GameplayService, gameManagerService *services.GameManagerService, notificationService services.NotificationService) *chi.Mux {
 	router := chi.NewRouter()
 
 	router.Use(middleware.Compress(5))
@@ -28,10 +28,10 @@ func SetupRouter(gameplayService *services.GameplayService, gameManagerService *
 	setupPublicRoutes(router)
 
 	// Player routes
-	setupPlayerRoutes(router, gameplayService)
+	setupPlayerRoutes(router, gameplayService, notificationService)
 
 	// Admin routes
-	setupAdminRoutes(router, gameManagerService)
+	setupAdminRoutes(router, gameManagerService, notificationService)
 
 	// Static files
 	workDir, _ := os.Getwd()
@@ -42,8 +42,8 @@ func SetupRouter(gameplayService *services.GameplayService, gameManagerService *
 }
 
 // Setup the player routes
-func setupPlayerRoutes(router chi.Router, gameplayService *services.GameplayService) {
-	var playerHandler = players.NewPlayerHandler(gameplayService)
+func setupPlayerRoutes(router chi.Router, gameplayService *services.GameplayService, notificationService services.NotificationService) {
+	var playerHandler = players.NewPlayerHandler(gameplayService, notificationService)
 
 	// Home route
 	// Takes a GET request to show the home page
@@ -54,13 +54,21 @@ func setupPlayerRoutes(router chi.Router, gameplayService *services.GameplayServ
 	// Show the next available locations
 	router.Route("/next", func(r chi.Router) {
 		r.Use(middlewares.TeamMiddleware)
+		r.Use(middlewares.LobbyMiddleware)
 		r.Get("/", playerHandler.Next)
 		r.Post("/", playerHandler.Next)
+	})
+
+	// Show the lobby page
+	router.Route("/lobby", func(r chi.Router) {
+		r.Use(middlewares.TeamMiddleware)
+		r.Get("/", playerHandler.Lobby)
 	})
 
 	// Check in to a location
 	router.Route("/s", func(r chi.Router) {
 		r.Use(middlewares.TeamMiddleware)
+		r.Use(middlewares.LobbyMiddleware)
 		r.Get("/{code:[A-z]{5}}", playerHandler.CheckIn)
 		r.Post("/{code:[A-z]{5}}", playerHandler.CheckInPost)
 	})
@@ -68,6 +76,7 @@ func setupPlayerRoutes(router chi.Router, gameplayService *services.GameplayServ
 	// Check out of a location
 	router.Route("/o", func(r chi.Router) {
 		r.Use(middlewares.TeamMiddleware)
+		r.Use(middlewares.LobbyMiddleware)
 		r.Get("/", playerHandler.CheckOut)
 		r.Get("/{code:[A-z]{5}}", playerHandler.CheckOut)
 		r.Post("/{code:[A-z]{5}}", playerHandler.CheckOutPost)
@@ -75,9 +84,12 @@ func setupPlayerRoutes(router chi.Router, gameplayService *services.GameplayServ
 
 	router.Route("/checkins", func(r chi.Router) {
 		r.Use(middlewares.TeamMiddleware)
+		r.Use(middlewares.LobbyMiddleware)
 		r.Get("/", playerHandler.CheckInList)
 		r.Get("/{id}", playerHandler.CheckInView)
 	})
+
+	router.Post("/dismiss/{ID}", playerHandler.DismissNotificationPost)
 }
 
 func setupPublicRoutes(router chi.Router) {
@@ -98,8 +110,8 @@ func setupPublicRoutes(router chi.Router) {
 
 }
 
-func setupAdminRoutes(router chi.Router, gameManagerService *services.GameManagerService) {
-	var adminHandler = admin.NewAdminHandler(gameManagerService)
+func setupAdminRoutes(router chi.Router, gameManagerService *services.GameManagerService, notificationService services.NotificationService) {
+	var adminHandler = admin.NewAdminHandler(gameManagerService, notificationService)
 
 	router.Route("/admin", func(r chi.Router) {
 		r.Use(middlewares.AdminAuthMiddleware)
@@ -149,6 +161,10 @@ func setupAdminRoutes(router chi.Router, gameManagerService *services.GameManage
 			r.Get("/start", adminHandler.StartGame)
 			r.Get("/stop", adminHandler.StopGame)
 			r.Post("/", adminHandler.ScheduleGame)
+		})
+
+		r.Route("/notify", func(r chi.Router) {
+			r.Post("/all", adminHandler.NotifyAllPost)
 		})
 	})
 }

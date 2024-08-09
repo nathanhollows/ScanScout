@@ -9,12 +9,14 @@ import (
 )
 
 type AdminHandler struct {
-	GameManagerService *services.GameManagerService
+	GameManagerService  *services.GameManagerService
+	NotificationService services.NotificationService
 }
 
-func NewAdminHandler(gs *services.GameManagerService) *AdminHandler {
+func NewAdminHandler(gs *services.GameManagerService, ns services.NotificationService) *AdminHandler {
 	return &AdminHandler{
-		GameManagerService: gs,
+		GameManagerService:  gs,
+		NotificationService: ns,
 	}
 }
 

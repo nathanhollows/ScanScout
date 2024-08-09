@@ -161,6 +161,21 @@ func (i *Instance) LoadLocations(ctx context.Context) error {
 	return nil
 }
 
+// LoadTeams loads the teams for an instance
+func (i *Instance) LoadTeams(ctx context.Context) error {
+	if len(i.Teams) > 0 {
+		return nil
+	}
+
+	var err error
+	i.Teams, err = FindAllTeams(ctx, i.ID)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func GenerateQRCodeArchive(ctx context.Context, instanceID string) (string, error) {
 	locations, err := FindAllLocations(ctx, instanceID)
 	if err != nil {

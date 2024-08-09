@@ -54,6 +54,7 @@
       <div>
         <p class="text-center text-3xl pb-3">{{ .location.Name }}</p>
         {{ template "flash" .messages }}
+        {{ template "notifications" .notifications }}
       </div>
       <div>
         <label

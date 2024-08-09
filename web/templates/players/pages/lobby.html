@@ -1,0 +1,122 @@
+{{ define "content"}}
+<div class="flex min-h-full flex-col justify-center px-6 py-12 lg:px-8">
+
+  <!-- Header -->
+  <div class="sm:mx-auto sm:w-full sm:max-w-sm">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide w-16 h-16 lucide-qr-code m-auto" > <rect width="5" height="5" x="3" y="3" rx="1" /> <rect width="5" height="5" x="16" y="3" rx="1" /> <rect width="5" height="5" x="3" y="16" rx="1" /> <path d="M21 16h-3a2 2 0 0 0-2 2v3" /> <path d="M21 21v.01" /> <path d="M12 7v3a2 2 0 0 1-2 2H7" /> <path d="M3 12h.01" /> <path d="M12 3h.01" /> <path d="M12 16v.01" /> <path d="M16 12h1" /> <path d="M21 12v.01" /> <path d="M12 21v-1" /> </svg>
+    <h2 class="text-center text-2xl font-bold leading-9 tracking-tight">
+      Lobby
+    </h2>
+    <p class="text-center font-bold text-lg my-3">
+      {{ .team.Instance.Name }}
+    </p>
+  </div>
+
+  <!-- Content -->
+  <div class="sm:mx-auto sm:w-full sm:max-w-sm">
+    {{ template "flash" .messages }}
+    {{ template "notifications" .notifications }}
+
+    <div class="alert">
+      The game will start in
+      <div id="start-time" data-start="{{ .team.Instance.StartTime.Format "02-Jan-2006 15:04:05" }}" class="flex gap-1 justify-center">
+        <div id="days-container">
+          <span class="countdown font-mono font-bold" id="days">
+            <span></span>
+          </span>
+          days
+        </div>
+        <div id="hours-container">
+          <span class="countdown font-mono font-bold" id="hours">
+            <span></span>
+          </span>
+          hours
+        </div>
+        <div>
+          <span class="countdown font-mono font-bold" id="minutes">
+            <span></span>
+          </span>
+          min
+        </div>
+        <div>
+          <span class="countdown font-mono font-bold" id="seconds">
+            <span></span>
+          </span>
+          sec
+        </div>
+      </div>
+    </div>
+
+    <div class="prose">
+      <div class="divider mt-12">Instructions</div>
+      {{ template "instructions" . }}
+      <div class="divider mb-5"></div>
+    </div>
+
+    <div class="flex gap-3 justify-center">
+      <p>Team code: <span class="font-mono font-bold">{{ .team.Code }}</span></p>
+      <p>Team name: <span class="font-mono font-bold">{{ .team.Name }}</span></p>
+    </div>
+
+    <div class="text-center mt-12">
+      <a href="/next" class="btn btn-neutral" disabled>Start!</a>
+    </div>
+
+  </div>
+</div>
+
+<style>
+{{ range $i, $_ := sequence 60 }}
+[data-value="{{ $i }}"] {
+  --value:{{ $i }};
+}
+{{ end }}
+</style>
+
+<script>
+  // JavaScript for countdown
+  function startCountdown(startTime) {
+    function updateCountdown() {
+      const now = new Date();
+      const remainingTime = new Date(startTime) - now;
+
+      if (remainingTime <= 0) {
+        document.getElementById("days-container").style.display = "none";
+        document.getElementById("hours-container").style.display = "none";
+        document.getElementById("minutes").style.setProperty('--value', 0);
+        document.getElementById("seconds").style.setProperty('--value', 0);
+        return;
+      }
+
+      const seconds = Math.floor((remainingTime / 1000) % 60);
+      const minutes = Math.floor((remainingTime / 1000 / 60) % 60);
+      const hours = Math.floor((remainingTime / 1000 / 60 / 60) % 24);
+      const days = Math.floor(remainingTime / 1000 / 60 / 60 / 24);
+
+      document.getElementById("seconds").style.setProperty('--value', seconds);
+      document.getElementById("minutes").style.setProperty('--value', minutes);
+
+      if (hours > 0) {
+        document.getElementById("hours-container").style.display = "block";
+        document.getElementById("hours").style.setProperty('--value', hours);
+      } else {
+        document.getElementById("hours-container").style.display = "none";
+      }
+
+      if (days > 0) {
+        document.getElementById("days-container").style.display = "block";
+        document.getElementById("days").style.setProperty('--value', days);
+      } else {
+        document.getElementById("days-container").style.display = "none";
+      }
+    }
+
+    updateCountdown();
+    setInterval(updateCountdown, 1000);
+  }
+
+  const startTimeElement = document.getElementById('start-time');
+  const startTime = startTimeElement.dataset.start;
+  startCountdown(startTime);
+</script>
+{{ end }}

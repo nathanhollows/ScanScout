@@ -2,10 +2,10 @@ package models
 
 import (
 	"context"
+	"log/slog"
 
 	"github.com/google/uuid"
 	"github.com/nathanhollows/Rapua/pkg/db"
-	"golang.org/x/exp/slog"
 )
 
 type Clue struct {

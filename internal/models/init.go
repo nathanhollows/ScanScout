@@ -10,6 +10,7 @@ import (
 
 func CreateTables() {
 	var models = []interface{}{
+		(*Notification)(nil),
 		(*InstanceSettings)(nil),
 		(*Location)(nil),
 		(*Clue)(nil),

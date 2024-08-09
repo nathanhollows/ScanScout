@@ -53,6 +53,7 @@ func (h *PlayerHandler) Home(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	data["notifications"], _ = h.NotificationService.GetNotifications(r.Context(), team.Code)
 	data["messages"] = flash.Get(w, r)
 	handlers.Render(w, data, handlers.PlayerDir, "home")
 }

@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"fmt"
+	"log/slog"
 	"net/http"
 	"strings"
 
@@ -10,7 +11,6 @@ import (
 	"github.com/nathanhollows/Rapua/internal/handlers"
 	"github.com/nathanhollows/Rapua/internal/models"
 	"github.com/nathanhollows/Rapua/internal/sessions"
-	"golang.org/x/exp/slog"
 )
 
 // CheckIn handles the GET request for scanning a location
@@ -55,6 +55,7 @@ func (h *PlayerHandler) CheckIn(w http.ResponseWriter, r *http.Request) {
 	data["marker"] = response.Data["marker"].(*models.Marker)
 
 	data["team"] = team
+	data["notifications"], _ = h.NotificationService.GetNotifications(r.Context(), team.Code)
 	data["messages"] = flash.Get(w, r)
 	handlers.Render(w, data, handlers.PlayerDir, "scan")
 }

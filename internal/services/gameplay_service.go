@@ -13,6 +13,23 @@ import (
 
 type GameplayService struct{}
 
+// GetGameStatus returns the current status of the game
+func (s *GameplayService) CheckGameStatus(ctx context.Context, team *models.Team) (response *ServiceResponse) {
+	response = &ServiceResponse{}
+	response.Data = make(map[string]interface{})
+
+	// Load the instance
+	err := team.LoadInstance(ctx)
+	if err != nil {
+		response.Error = fmt.Errorf("loading instance: %w", err)
+		return response
+	}
+
+	status := team.Instance.GetStatus()
+	response.Data["status"] = status
+	return response
+}
+
 func (s *GameplayService) GetTeamByCode(ctx context.Context, teamCode string) (*models.Team, error) {
 	teamCode = strings.TrimSpace(strings.ToUpper(teamCode))
 	team, err := models.FindTeamByCode(ctx, teamCode)
