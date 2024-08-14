@@ -33,3 +33,4 @@ go.work
 # Generated files
 assets/posters/*
 assets/codes/*
+tmp/*
