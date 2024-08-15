@@ -3,12 +3,13 @@ package models
 import (
 	"context"
 	"log"
+	"log/slog"
 	"time"
 
 	"github.com/nathanhollows/Rapua/pkg/db"
 )
 
-func CreateTables() {
+func CreateTables(logger *slog.Logger) {
 	var models = []interface{}{
 		(*Notification)(nil),
 		(*InstanceSettings)(nil),
@@ -23,7 +24,10 @@ func CreateTables() {
 	}
 
 	for _, model := range models {
-		_, err := db.DB.NewCreateTable().Model(model).IfNotExists().Exec(context.Background())
+		res, err := db.DB.NewCreateTable().Model(model).IfNotExists().Exec(context.Background())
+		if res != nil {
+			logger.Info("Table created", "table", res.Table)
+		}
 		if err != nil {
 			log.Fatal(err)
 		}

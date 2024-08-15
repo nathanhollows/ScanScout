@@ -14,7 +14,7 @@ import (
 
 var DB *bun.DB
 
-func Connect() {
+func MustOpen() {
 	var sqldb *sql.DB
 	var err error
 
@@ -32,11 +32,11 @@ func Connect() {
 		sqldb, err = sql.Open(sqliteshim.ShimName, dataSourceName)
 		DB = bun.NewDB(sqldb, sqlitedialect.New())
 	default:
-		log.Fatalf("unsupported DB_TYPE: %s", driverName)
+		panic("unsupported DB_TYPE: " + driverName)
 	}
 
 	if err != nil {
-		log.Fatal(err)
+		panic(err)
 	}
 
 	DB.AddQueryHook(bundebug.NewQueryHook(

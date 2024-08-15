@@ -12,7 +12,7 @@ func SetupTestDB(t *testing.T) (cleanup func()) {
 
 	os.Setenv("DB_CONNECTION", "file::memory:?cache=shared")
 	os.Setenv("DB_TYPE", "sqlite3")
-	db.Connect()
+	db.MustOpen()
 
 	// Create tables
 	CreateTables()

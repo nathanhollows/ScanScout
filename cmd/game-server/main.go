@@ -3,6 +3,9 @@
 package main
 
 import (
+	"log/slog"
+	"os"
+
 	"github.com/joho/godotenv"
 	"github.com/nathanhollows/Rapua/internal/models"
 	"github.com/nathanhollows/Rapua/internal/server"
@@ -11,9 +14,11 @@ import (
 )
 
 func main() {
+	logger := slog.New(slog.NewTextHandler(os.Stderr, nil))
+
 	godotenv.Load(".env")
-	db.Connect()
-	models.CreateTables()
+	db.MustOpen()
+	models.CreateTables(logger)
 	sessions.Start()
-	server.Start()
+	server.Start(logger)
 }
