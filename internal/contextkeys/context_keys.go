@@ -3,6 +3,6 @@ package contextkeys
 type contextKey string
 
 const (
-	UserIDKey contextKey = "userID"
-	TeamKey   contextKey = "team"
+	UserKey contextKey = "user"
+	TeamKey contextKey = "team"
 )

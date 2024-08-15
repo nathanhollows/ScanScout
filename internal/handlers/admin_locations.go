@@ -13,7 +13,7 @@ import (
 func adminGenerateQRHandler(w http.ResponseWriter, r *http.Request) {
 	code := chi.URLParam(r, "id")
 
-	user := r.Context().Value(contextkeys.UserIDKey).(*models.User)
+	user := r.Context().Value(contextkeys.UserKey).(*models.User)
 
 	location, err := models.FindLocationByInstanceAndCode(r.Context(), user.CurrentInstanceID, code)
 	if err != nil {
@@ -31,7 +31,7 @@ func adminGenerateQRHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func AdminLocationQRZipHandler(w http.ResponseWriter, r *http.Request) {
-	archive, err := models.GenerateQRCodeArchive(r.Context(), r.Context().Value(contextkeys.UserIDKey).(*models.User).CurrentInstanceID)
+	archive, err := models.GenerateQRCodeArchive(r.Context(), r.Context().Value(contextkeys.UserKey).(*models.User).CurrentInstanceID)
 	if err != nil {
 		flash.NewError("QR codes could not be zipped").Save(w, r)
 		http.Redirect(w, r, "/admin/locations", http.StatusSeeOther)
@@ -39,7 +39,7 @@ func AdminLocationQRZipHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Overwrite the file download header
-	instance := r.Context().Value(contextkeys.UserIDKey).(*models.User).CurrentInstance
+	instance := r.Context().Value(contextkeys.UserKey).(*models.User).CurrentInstance
 	w.Header().Set("Content-Disposition", "attachment; filename="+instance.Name+" QR codes .zip")
 	// Serve the file
 	http.ServeFile(w, r, archive)
@@ -47,7 +47,7 @@ func AdminLocationQRZipHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func AdminLocationPostersHandler(w http.ResponseWriter, r *http.Request) {
-	posters, err := models.GeneratePosters(r.Context(), r.Context().Value(contextkeys.UserIDKey).(*models.User).CurrentInstanceID)
+	posters, err := models.GeneratePosters(r.Context(), r.Context().Value(contextkeys.UserKey).(*models.User).CurrentInstanceID)
 	if err != nil {
 		log.Error(err)
 		flash.NewError("Posters could not be generated").Save(w, r)
@@ -56,7 +56,7 @@ func AdminLocationPostersHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Overwrite the file download header
-	instance := r.Context().Value(contextkeys.UserIDKey).(*models.User).CurrentInstance
+	instance := r.Context().Value(contextkeys.UserKey).(*models.User).CurrentInstance
 	w.Header().Set("Content-Disposition", "attachment; filename="+instance.Name+" posters.pdf")
 	// Serve the file
 	http.ServeFile(w, r, posters)

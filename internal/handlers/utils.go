@@ -37,7 +37,7 @@ func SetDefaultHeaders(w http.ResponseWriter) {
 }
 
 func TemplateData(r *http.Request) map[string]interface{} {
-	user, ok := r.Context().Value(contextkeys.UserIDKey).(*models.User)
+	user, ok := r.Context().Value(contextkeys.UserKey).(*models.User)
 	data := map[string]interface{}{
 		"hxrequest": r.Header.Get("HX-Request") == "true",
 		"layout":    "base",

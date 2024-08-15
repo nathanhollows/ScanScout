@@ -23,5 +23,5 @@ func NewAdminHandler(gs *services.GameManagerService, ns services.NotificationSe
 // GetUserFromContext retrieves the user from the context
 // User will always be in the context because the middleware
 func (h AdminHandler) UserFromContext(ctx context.Context) *models.User {
-	return ctx.Value(contextkeys.UserIDKey).(*models.User)
+	return ctx.Value(contextkeys.UserKey).(*models.User)
 }

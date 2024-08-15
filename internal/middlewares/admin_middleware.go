@@ -21,7 +21,7 @@ func AdminAuthMiddleware(next http.Handler) http.Handler {
 			return
 		}
 
-		ctx := context.WithValue(r.Context(), contextkeys.UserIDKey, user)
+		ctx := context.WithValue(r.Context(), contextkeys.UserKey, user)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
@@ -29,7 +29,7 @@ func AdminAuthMiddleware(next http.Handler) http.Handler {
 // AdminCheckInstanceMiddleware ensures the user has an instance selected.
 func AdminCheckInstanceMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		user := r.Context().Value(contextkeys.UserIDKey).(*models.User)
+		user := r.Context().Value(contextkeys.UserKey).(*models.User)
 
 		// Check if the route contains /admin/instances
 		reg := regexp.MustCompile(`/admin/instances/?`)
