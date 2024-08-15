@@ -1,7 +1,15 @@
 package handlers
 
-type PublicHandler struct{}
+import (
+	"log/slog"
+)
 
-func NewPublicHandler() *PublicHandler {
-	return &PublicHandler{}
+type PublicHandler struct {
+	Logger *slog.Logger
+}
+
+func NewPublicHandler(logger *slog.Logger) *PublicHandler {
+	return &PublicHandler{
+		Logger: logger,
+	}
 }

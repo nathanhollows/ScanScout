@@ -24,7 +24,7 @@ func Start(logger *slog.Logger) {
 	gameManagerService := &services.GameManagerService{}
 	notificationService := services.NewNotificationService()
 
-	router = routes.SetupRouter(gameplayService, gameManagerService, notificationService)
+	router = routes.SetupRouter(logger, gameplayService, gameManagerService, notificationService)
 
 	killSig := make(chan os.Signal, 1)
 

@@ -1,6 +1,7 @@
 package routes
 
 import (
+	"log/slog"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -16,7 +17,13 @@ import (
 	"github.com/nathanhollows/Rapua/internal/services"
 )
 
-func SetupRouter(gameplayService *services.GameplayService, gameManagerService *services.GameManagerService, notificationService services.NotificationService) *chi.Mux {
+func SetupRouter(
+	logger *slog.Logger,
+	gameplayService *services.GameplayService,
+	gameManagerService *services.GameManagerService,
+	notificationService services.NotificationService,
+) *chi.Mux {
+
 	router := chi.NewRouter()
 
 	router.Use(middleware.Compress(5))
@@ -25,7 +32,7 @@ func SetupRouter(gameplayService *services.GameplayService, gameManagerService *
 	router.Use(middleware.RedirectSlashes)
 
 	// Public routes
-	setupPublicRoutes(router)
+	setupPublicRoutes(logger, router)
 
 	// Player routes
 	setupPlayerRoutes(router, gameplayService, notificationService)
@@ -95,9 +102,9 @@ func setupPlayerRoutes(router chi.Router, gameplayService *services.GameplayServ
 
 }
 
-func setupPublicRoutes(router chi.Router) {
+func setupPublicRoutes(logger *slog.Logger, router chi.Router) {
 
-	publicHandler := public.NewPublicHandler()
+	publicHandler := public.NewPublicHandler(logger)
 
 	router.Get("/home", publicHandler.Index)
 

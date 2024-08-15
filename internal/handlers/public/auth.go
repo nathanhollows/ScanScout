@@ -1,24 +1,25 @@
 package handlers
 
 import (
-	"log/slog"
+	"errors"
 	"net/http"
 
-	"github.com/charmbracelet/log"
 	"github.com/nathanhollows/Rapua/internal/flash"
-	"github.com/nathanhollows/Rapua/internal/handlers"
 	"github.com/nathanhollows/Rapua/internal/helpers"
 	"github.com/nathanhollows/Rapua/internal/models"
 	"github.com/nathanhollows/Rapua/internal/services"
 	"github.com/nathanhollows/Rapua/internal/sessions"
+	"github.com/nathanhollows/Rapua/internal/templates"
 )
 
 // LoginHandler is the handler for the admin login page
 func (h *PublicHandler) Login(w http.ResponseWriter, r *http.Request) {
-	data := handlers.TemplateData(r)
-	data["title"] = "Login"
-	data["messages"] = flash.Get(w, r)
-	handlers.Render(w, data, handlers.PublicDir, "login")
+	c := templates.Login()
+	err := templates.AuthLayout(c, "Login").Render(r.Context(), w)
+
+	if err != nil {
+		h.Logger.Error("Error rendering login page", "err", err)
+	}
 }
 
 // LoginPost handles the login form submission
@@ -28,38 +29,40 @@ func (h *PublicHandler) LoginPost(w http.ResponseWriter, r *http.Request) {
 	password := r.Form.Get("password")
 
 	// Try to authenticate the user
-	user, err := services.AuthenticateUser(r.Context(), email, password)
+	authService := services.NewAuthService()
+	user, err := authService.AuthenticateUser(r.Context(), email, password)
+
 	if err != nil {
-		log.Error("Error authenticating user", "err", err)
-		flash.Message{
-			Style:   flash.Error,
-			Title:   "Invalid email or password",
-			Message: "Please check your email and password and try again.",
-		}.Save(w, r)
-		http.Redirect(w, r, helpers.URL("/login"), http.StatusSeeOther)
+		h.Logger.Error("authenticating user", "err", err)
+		w.WriteHeader(http.StatusUnauthorized)
+		c := templates.LoginError("Invalid email or password.")
+		c.Render(r.Context(), w)
 		return
 	}
 
 	// Create a session
 	session, err := sessions.Get(r, "admin")
 	if err != nil {
-		log.Error("getting session for login: ", err)
-		flash.NewError("An error occurred while trying to log in. Please try again.").Save(w, r)
-		// Redirect to the login page
-		http.Redirect(w, r, helpers.URL("/login"), http.StatusSeeOther)
+		h.Logger.Error("getting session for login", "err", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		c := templates.LoginError("An error occurred while trying to log in. Please try again.")
+		c.Render(r.Context(), w)
 		return
 	}
+
 	session.Values["user_id"] = user.ID
+	session.Options.Secure = true
+	session.Options.SameSite = http.SameSiteStrictMode
 	session.Save(r, w)
 
-	http.Redirect(w, r, helpers.URL("/admin"), http.StatusSeeOther)
+	w.Header().Add("hx-redirect", "/admin")
 }
 
 // Logout destroys the user session
 func (h *PublicHandler) Logout(w http.ResponseWriter, r *http.Request) {
 	session, err := sessions.Get(r, "admin")
 	if err != nil {
-		log.Error("getting session for logout: ", err)
+		h.Logger.Error("getting session for logout", "err", err)
 		flash.NewError("An error occurred while trying to log out. Please try again.").Save(w, r)
 		// Redirect to the login page
 		http.Redirect(w, r, helpers.URL("/login"), http.StatusSeeOther)
@@ -72,19 +75,16 @@ func (h *PublicHandler) Logout(w http.ResponseWriter, r *http.Request) {
 
 // RegisterHandler is the handler for the admin register page
 func (h *PublicHandler) Register(w http.ResponseWriter, r *http.Request) {
-	handlers.SetDefaultHeaders(w)
-	data := handlers.TemplateData(r)
-	data["title"] = "New user"
+	c := templates.Register()
+	err := templates.AuthLayout(c, "Register").Render(r.Context(), w)
 
-	handlers.Render(w, data, handlers.PublicDir, "register")
+	if err != nil {
+		h.Logger.Error("rendering register page", "err", err)
+	}
 }
 
 // RegisterPostHandler handles the form submission for creating a new user
 func (h *PublicHandler) RegisterPost(w http.ResponseWriter, r *http.Request) {
-	handlers.SetDefaultHeaders(w)
-	data := handlers.TemplateData(r)
-	data["title"] = "New user"
-
 	r.ParseForm()
 	var user models.User
 	user.Name = r.Form.Get("name")
@@ -95,12 +95,19 @@ func (h *PublicHandler) RegisterPost(w http.ResponseWriter, r *http.Request) {
 
 	err := services.CreateUser(r.Context(), &user, confirmPassword)
 	if err != nil {
-		slog.Error("Error creating user ", "err", err.Error())
-		flash.NewError("Error creating user. Please try again.").Save(w, r)
-		http.Redirect(w, r, "/register", http.StatusSeeOther)
+		h.Logger.Error("creating user", "err", err)
+		w.WriteHeader(http.StatusUnauthorized)
+		if errors.Is(err, services.ErrPasswordsDoNotMatch) {
+			c := templates.RegisterError("Passwords do not match.")
+			c.Render(r.Context(), w)
+			return
+		}
+		c := templates.RegisterError("Something went wrong! Please try again.")
+		c.Render(r.Context(), w)
 		return
 	}
 
-	flash.NewSuccess("User created successfully. Please log in to continue.").Save(w, r)
-	http.Redirect(w, r, "/login", http.StatusSeeOther)
+	c := templates.RegisterSuccess()
+	c.Render(r.Context(), w)
+
 }

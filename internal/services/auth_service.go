@@ -12,8 +12,14 @@ import (
 	"github.com/nathanhollows/Rapua/pkg/security"
 )
 
+type AuthService struct{}
+
+func NewAuthService() *AuthService {
+	return &AuthService{}
+}
+
 // AuthenticateUser authenticates the user with the given email and password.
-func AuthenticateUser(ctx context.Context, email, password string) (*models.User, error) {
+func (s *AuthService) AuthenticateUser(ctx context.Context, email, password string) (*models.User, error) {
 	user, err := repositories.GetUserByEmail(ctx, email)
 	if err != nil {
 		// Wrap the error
@@ -28,7 +34,7 @@ func AuthenticateUser(ctx context.Context, email, password string) (*models.User
 }
 
 // GetAuthenticatedUser retrieves the authenticated user from the session.
-func GetAuthenticatedUser(r *http.Request) (*models.User, error) {
+func (s *AuthService) GetAuthenticatedUser(r *http.Request) (*models.User, error) {
 	session, err := sessions.Get(r, "admin")
 	if err != nil {
 		return nil, err

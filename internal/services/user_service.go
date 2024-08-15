@@ -10,10 +10,13 @@ import (
 	"github.com/nathanhollows/Rapua/pkg/security"
 )
 
+// ErrPasswordsDoNotMatch is returned when the passwords do not match
+var ErrPasswordsDoNotMatch = errors.New("passwords do not match")
+
 func CreateUser(ctx context.Context, user *models.User, passwordConfirm string) error {
 	// Confirm passwords match
 	if user.Password != passwordConfirm {
-		return errors.New("passwords do not match")
+		return ErrPasswordsDoNotMatch
 	}
 
 	// Hash the password

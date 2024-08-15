@@ -2359,15 +2359,6 @@ html {
   --alert-bg-mix: var(--fallback-b1,oklch(var(--b1)/1));
 }
 
-.badge-neutral {
-  --tw-border-opacity: 1;
-  border-color: var(--fallback-n,oklch(var(--n)/var(--tw-border-opacity)));
-  --tw-bg-opacity: 1;
-  background-color: var(--fallback-n,oklch(var(--n)/var(--tw-bg-opacity)));
-  --tw-text-opacity: 1;
-  color: var(--fallback-nc,oklch(var(--nc)/var(--tw-text-opacity)));
-}
-
 .badge-primary {
   --tw-border-opacity: 1;
   border-color: var(--fallback-p,oklch(var(--p)/var(--tw-border-opacity)));
@@ -2375,15 +2366,6 @@ html {
   background-color: var(--fallback-p,oklch(var(--p)/var(--tw-bg-opacity)));
   --tw-text-opacity: 1;
   color: var(--fallback-pc,oklch(var(--pc)/var(--tw-text-opacity)));
-}
-
-.badge-secondary {
-  --tw-border-opacity: 1;
-  border-color: var(--fallback-s,oklch(var(--s)/var(--tw-border-opacity)));
-  --tw-bg-opacity: 1;
-  background-color: var(--fallback-s,oklch(var(--s)/var(--tw-bg-opacity)));
-  --tw-text-opacity: 1;
-  color: var(--fallback-sc,oklch(var(--sc)/var(--tw-text-opacity)));
 }
 
 .badge-ghost {
@@ -4603,6 +4585,10 @@ html {
   margin-bottom: 0px;
 }
 
+.mb-1 {
+  margin-bottom: 0.25rem;
+}
+
 .mb-12 {
   margin-bottom: 3rem;
 }
@@ -4665,10 +4651,6 @@ html {
 
 .mt-5 {
   margin-top: 1.25rem;
-}
-
-.mb-1 {
-  margin-bottom: 0.25rem;
 }
 
 .block {
@@ -4757,6 +4739,10 @@ html {
   min-height: 100%;
 }
 
+.w-1\/2 {
+  width: 50%;
+}
+
 .w-16 {
   width: 4rem;
 }
@@ -4812,10 +4798,6 @@ html {
 .w-min {
   width: -moz-min-content;
   width: min-content;
-}
-
-.w-1\/2 {
-  width: 50%;
 }
 
 .max-w-7xl {
@@ -4924,10 +4906,6 @@ html {
 
 .justify-evenly {
   justify-content: space-evenly;
-}
-
-.justify-stretch {
-  justify-content: stretch;
 }
 
 .gap-1 {
@@ -5191,19 +5169,14 @@ html {
   line-height: 1.75rem;
 }
 
-.text-xl {
-  font-size: 1.25rem;
-  line-height: 1.75rem;
-}
-
-.text-xs {
-  font-size: 0.75rem;
-  line-height: 1rem;
-}
-
 .text-sm {
   font-size: 0.875rem;
   line-height: 1.25rem;
+}
+
+.text-xl {
+  font-size: 1.25rem;
+  line-height: 1.75rem;
 }
 
 .font-bold {
@@ -5392,10 +5365,6 @@ html {
   .sm\:flex-row {
     flex-direction: row;
   }
-
-  .sm\:flex-col {
-    flex-direction: column;
-  }
 }
 
 @media (min-width: 768px) {
@@ -5421,10 +5390,6 @@ html {
 
   .md\:flex-row {
     flex-direction: row;
-  }
-
-  .md\:flex-col {
-    flex-direction: column;
   }
 
   .md\:space-x-24 > :not([hidden]) ~ :not([hidden]) {

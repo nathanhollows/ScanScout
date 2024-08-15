@@ -34,3 +34,4 @@ go.work
 assets/posters/*
 assets/codes/*
 tmp/*
+internal/templates/*.txt

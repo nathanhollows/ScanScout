@@ -14,7 +14,8 @@ import (
 // AdminAuthMiddleware ensures the user is authenticated.
 func AdminAuthMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		user, err := services.GetAuthenticatedUser(r)
+		authService := services.NewAuthService()
+		user, err := authService.GetAuthenticatedUser(r)
 		if err != nil {
 			flash.NewError("You must be logged in to access this page").Save(w, r)
 			http.Redirect(w, r, "/login", http.StatusSeeOther)

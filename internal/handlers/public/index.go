@@ -3,12 +3,14 @@ package handlers
 import (
 	"net/http"
 
-	"github.com/nathanhollows/Rapua/internal/handlers"
+	"github.com/nathanhollows/Rapua/internal/templates"
 )
 
 func (h *PublicHandler) Index(w http.ResponseWriter, r *http.Request) {
-	handlers.SetDefaultHeaders(w)
-	data := handlers.TemplateData(r)
-	data["title"] = "Home"
-	handlers.Render(w, data, handlers.PublicDir, "home")
+	c := templates.Index()
+	err := templates.PublicLayout(c, "Home").Render(r.Context(), w)
+	if err != nil {
+		h.Logger.Error("Error rendering index", "err", err)
+		return
+	}
 }
