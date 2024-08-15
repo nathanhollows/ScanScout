@@ -1,6 +1,7 @@
 package models
 
 import (
+	"log/slog"
 	"os"
 	"testing"
 
@@ -13,9 +14,10 @@ func SetupTestDB(t *testing.T) (cleanup func()) {
 	os.Setenv("DB_CONNECTION", "file::memory:?cache=shared")
 	os.Setenv("DB_TYPE", "sqlite3")
 	db.MustOpen()
+	logger := slog.New(slog.NewTextHandler(os.Stderr, nil))
 
 	// Create tables
-	CreateTables()
+	CreateTables(logger)
 
 	return func() {
 		db.DB.Close()

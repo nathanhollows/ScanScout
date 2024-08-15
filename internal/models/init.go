@@ -24,10 +24,7 @@ func CreateTables(logger *slog.Logger) {
 	}
 
 	for _, model := range models {
-		res, err := db.DB.NewCreateTable().Model(model).IfNotExists().Exec(context.Background())
-		if res != nil {
-			logger.Info("Table created", "table", res.Table)
-		}
+		_, err := db.DB.NewCreateTable().Model(model).IfNotExists().Exec(context.Background())
 		if err != nil {
 			log.Fatal(err)
 		}
