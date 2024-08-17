@@ -43,6 +43,19 @@
             Duplicate
           </button>
 
+          {{ if eq .ID $.user.CurrentInstanceID }}
+          <span class="tooltip cursor-not-allowed" data-tip="Cannot delete current instance">
+          <button
+            class="btn btn-sm btn-error tooltip"
+            data-tip="Cannot delete current instance"
+            aria-disabled="true"
+            aria-label="Cannot delete current instance"
+            disabled
+          >
+          </span>
+            Delete
+          </button>
+          {{ else }}
           <button 
             class="btn btn-sm btn-error" 
             data-id="{{ .ID }}"
@@ -50,6 +63,7 @@
             onclick="confirmDelete()">
               Delete
           </button>
+          {{ end }}
         </td>
       </tr>
       {{ end }}

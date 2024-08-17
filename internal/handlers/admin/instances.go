@@ -132,6 +132,12 @@ func (h *AdminHandler) InstanceDelete(w http.ResponseWriter, r *http.Request) {
 
 	user := h.UserFromContext(r.Context())
 
+	if user.CurrentInstanceID == id {
+		flash.NewError("You cannot delete the instance you are currently using").Save(w, r)
+		http.Redirect(w, r, "/admin/instances", http.StatusSeeOther)
+		return
+	}
+
 	response := h.GameManagerService.DeleteInstance(r.Context(), user, id, confirmName)
 	for _, message := range response.FlashMessages {
 		message.Save(w, r)
