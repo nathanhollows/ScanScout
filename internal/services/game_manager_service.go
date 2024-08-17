@@ -186,6 +186,7 @@ func (s *GameManagerService) DeleteInstance(ctx context.Context, user *models.Us
 
 func (s *GameManagerService) AddTeams(ctx context.Context, instanceID string, count int) (response ServiceResponse) {
 	response = ServiceResponse{}
+	response.Data = make(map[string]interface{})
 	if count < 1 {
 		response.AddFlashMessage(*flash.NewError("Please enter a valid number of teams (1 or more)"))
 		return response
@@ -204,7 +205,7 @@ func (s *GameManagerService) AddTeams(ctx context.Context, instanceID string, co
 		response.Error = fmt.Errorf("AddTeams save teams: %w", err)
 		return response
 	}
-	response.AddFlashMessage(*flash.NewSuccess("Teams added!"))
+	response.Data["teams"] = teams
 	return response
 }
 
