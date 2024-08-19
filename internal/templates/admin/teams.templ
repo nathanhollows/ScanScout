@@ -66,7 +66,7 @@ templ Teams(teams models.Teams) {
 			<form
 				hx-post="/admin/teams/add"
 				hx-target="#teams-list"
-				hx-swap="beforeend"
+				hx-swap="beforeend swap:0.5s"
 				class="join flex flex-row w-full"
 			>
 				<input

@@ -38,9 +38,9 @@ func (h *AdminHandler) TeamsAdd(w http.ResponseWriter, r *http.Request) {
 	countStr := r.FormValue("count")
 	count, err := strconv.Atoi(countStr)
 	if err != nil {
+		w.WriteHeader(http.StatusExpectationFailed)
 		slog.Error("TeamsAdd parsing count", "error", err.Error(), "instance_id", user.CurrentInstanceID)
-		message := flash.NewError("Could not add teams, please try again.")
-		err := admin.Toast(*message).Render(r.Context(), w)
+		err := admin.Toast(*flash.NewError("Could not add teams, please try again.")).Render(r.Context(), w)
 		if err != nil {
 			slog.Error("TeamsAdd rendering toast", "error", err.Error(), "instance_id", user.CurrentInstanceID)
 		}
@@ -50,6 +50,7 @@ func (h *AdminHandler) TeamsAdd(w http.ResponseWriter, r *http.Request) {
 	// Add the teams
 	response := h.GameManagerService.AddTeams(r.Context(), user.CurrentInstanceID, count)
 	if response.Error != nil {
+		w.WriteHeader(http.StatusInternalServerError)
 		slog.Error("TeamsAdd", "error", response.Error.Error(), "instance_id", user.CurrentInstanceID, "count", count)
 		err := admin.Toast(response.FlashMessages...).Render(r.Context(), w)
 		if err != nil {
