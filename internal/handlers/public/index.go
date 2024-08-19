@@ -3,7 +3,7 @@ package handlers
 import (
 	"net/http"
 
-	"github.com/nathanhollows/Rapua/internal/templates"
+	templates "github.com/nathanhollows/Rapua/internal/templates/public"
 )
 
 func (h *PublicHandler) Index(w http.ResponseWriter, r *http.Request) {
