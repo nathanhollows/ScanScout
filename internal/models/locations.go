@@ -6,7 +6,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/charmbracelet/log"
 	"github.com/google/uuid"
 	"github.com/nathanhollows/Rapua/pkg/db"
 	"github.com/uptrace/bun"
@@ -45,9 +44,6 @@ func (i *Location) Save(ctx context.Context) error {
 	} else {
 		_, err = db.DB.NewUpdate().Model(i).WherePK().Exec(ctx)
 	}
-	if err != nil {
-		log.Error(err)
-	}
 
 	return err
 }
@@ -76,24 +72,18 @@ func FindLocationByInstanceAndCode(ctx context.Context, instance, code string) (
 		Relation("Marker").
 		Relation("Content").
 		Scan(ctx)
-	if err != nil {
-		log.Error(err)
-	}
 	return &location, err
 }
 
 // FindLocationsByCodes returns a list of locations by code
-func FindLocationsByCodes(ctx context.Context, instanceID string, codes []string) Locations {
+func FindLocationsByCodes(ctx context.Context, instanceID string, codes []string) (Locations, error) {
 	var locations Locations
 	err := db.DB.NewSelect().
 		Model(&locations).
 		Where("marker_id in (?)", bun.In(codes)).
 		Where("instance_id = ?", instanceID).
 		Scan(ctx)
-	if err != nil {
-		log.Error(err)
-	}
-	return locations
+	return locations, err
 }
 
 // FindAll returns all locations
@@ -106,9 +96,6 @@ func FindAllLocations(ctx context.Context, instanceID string) (Locations, error)
 		Relation("Content").
 		Order("location.order ASC").
 		Scan(ctx)
-	if err != nil {
-		log.Error(err)
-	}
 	return instanceLocations, err
 }
 
@@ -122,9 +109,6 @@ func FindInstanceLocationByLocationAndInstance(ctx context.Context, locationCode
 		Relation("Marker").
 		Relation("Content").
 		Scan(ctx)
-	if err != nil {
-		log.Error(err)
-	}
 	return &instanceLocation, err
 }
 

@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"fmt"
-	"log/slog"
 	"net/http"
 	"strings"
 
@@ -25,7 +24,7 @@ func (h *PlayerHandler) CheckIn(w http.ResponseWriter, r *http.Request) {
 		if team.MustScanOut != "" {
 			err := team.LoadBlockingLocation(r.Context())
 			if err != nil {
-				slog.Error("CheckIn: loading blocking location", "err", err)
+				h.Logger.Error("CheckIn: loading blocking location", "err", err)
 				flash.NewError("Something went wrong. Please try again.").Save(w, r)
 				data["blocked"] = true
 				http.Redirect(w, r, r.Header.Get("/next"), http.StatusFound)
@@ -72,7 +71,7 @@ func (h *PlayerHandler) CheckInPost(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			flash.NewWarning("Please double check the team code and try again.").
 				Save(w, r)
-			slog.Error(`CheckInPost: getting team by code (post)`, "err", err)
+			h.Logger.Error(`CheckInPost: getting team by code (post)`, "err", err)
 			http.Redirect(w, r, r.Header.Get("referer"), http.StatusFound)
 			return
 		}
@@ -83,7 +82,7 @@ func (h *PlayerHandler) CheckInPost(w http.ResponseWriter, r *http.Request) {
 		msg.Save(w, r)
 	}
 	if response.Error != nil {
-		slog.Error("checking in team", "err", response.Error.Error(), "team", team.Code, "location", locationCode)
+		h.Logger.Error("checking in team", "err", response.Error.Error(), "team", team.Code, "location", locationCode)
 		http.Redirect(w, r, r.Header.Get("referer"), http.StatusFound)
 		return
 	}
@@ -151,7 +150,7 @@ func (h *PlayerHandler) CheckOutPost(w http.ResponseWriter, r *http.Request) {
 		msg.Save(w, r)
 	}
 	if response.Error != nil {
-		slog.Error("checking out team", "err", response.Error.Error(), "team", team.Code, "location", locationCode)
+		h.Logger.Error("checking out team", "err", response.Error.Error(), "team", team.Code, "location", locationCode)
 		http.Redirect(w, r, r.Header.Get("referer"), http.StatusFound)
 		return
 	}

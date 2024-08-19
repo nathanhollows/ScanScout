@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"log/slog"
 	"net/http"
 
 	"github.com/nathanhollows/Rapua/internal/flash"
@@ -26,13 +25,13 @@ func (h *PlayerHandler) Lobby(w http.ResponseWriter, r *http.Request) {
 		message.Save(w, r)
 	}
 	if response.Error != nil {
-		slog.Error("Lobby: checking game status", "error", response.Error.Error())
+		h.Logger.Error("Lobby: checking game status", "error", response.Error.Error())
 		http.Redirect(w, r, "/", http.StatusFound)
 	}
 
 	status, ok := response.Data["status"].(models.GameStatus)
 	if !ok {
-		slog.Error("Lobby: checking game status", "error", "status not found")
+		h.Logger.Error("Lobby: checking game status", "error", "status not found")
 		flash.NewError("Error checking game status.").Save(w, r)
 		http.Redirect(w, r, "/", http.StatusFound)
 	}

@@ -5,7 +5,6 @@ import (
 	"errors"
 	"net/http"
 
-	"github.com/charmbracelet/log"
 	"github.com/nathanhollows/Rapua/internal/sessions"
 	"github.com/nathanhollows/Rapua/pkg/db"
 	"golang.org/x/crypto/bcrypt"
@@ -88,7 +87,6 @@ func FindUserByID(ctx context.Context, userID string) (*User, error) {
 func (u *User) checkPassword(password string) bool {
 	err := bcrypt.CompareHashAndPassword([]byte(u.Password), []byte(password))
 	if err != nil {
-		log.Error("Error comparing password: ", err)
 		return false
 	}
 	return true
@@ -98,7 +96,7 @@ func (u *User) checkPassword(password string) bool {
 func hashAndSalt(password string) string {
 	hash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
-		log.Error("Error hashing password: ", err)
+		return ""
 	}
 
 	return string(hash)

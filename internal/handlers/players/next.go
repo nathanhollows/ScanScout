@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"log/slog"
 	"net/http"
 
 	"github.com/nathanhollows/Rapua/internal/flash"
@@ -24,7 +23,7 @@ func (h *PlayerHandler) Next(w http.ResponseWriter, r *http.Request) {
 		message.Save(w, r)
 	}
 	if response.Error != nil {
-		slog.Error("suggesting next locations", "error", response.Error.Error())
+		h.Logger.Error("suggesting next locations", "error", response.Error.Error())
 		http.Redirect(w, r, "/", http.StatusFound)
 	}
 

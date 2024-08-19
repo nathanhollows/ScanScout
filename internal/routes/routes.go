@@ -32,13 +32,16 @@ func SetupRouter(
 	router.Use(middleware.RedirectSlashes)
 
 	// Public routes
-	setupPublicRoutes(logger, router)
+	publicHandler := public.NewPublicHandler(logger)
+	setupPublicRoutes(router, publicHandler)
 
 	// Player routes
-	setupPlayerRoutes(router, gameplayService, notificationService)
+	playerHandler := players.NewPlayerHandler(logger, gameplayService, notificationService)
+	setupPlayerRoutes(router, playerHandler)
 
 	// Admin routes
-	setupAdminRoutes(router, gameManagerService, notificationService)
+	adminHandler := admin.NewAdminHandler(logger, gameManagerService, notificationService)
+	setupAdminRoutes(router, adminHandler)
 
 	// Static files
 	workDir, _ := os.Getwd()
@@ -49,9 +52,7 @@ func SetupRouter(
 }
 
 // Setup the player routes
-func setupPlayerRoutes(router chi.Router, gameplayService *services.GameplayService, notificationService services.NotificationService) {
-	var playerHandler = players.NewPlayerHandler(gameplayService, notificationService)
-
+func setupPlayerRoutes(router chi.Router, playerHandler *players.PlayerHandler) {
 	// Home route
 	// Takes a GET request to show the home page
 	// Takes a POST request to submit the home page form
@@ -100,11 +101,11 @@ func setupPlayerRoutes(router chi.Router, gameplayService *services.GameplayServ
 
 }
 
-func setupPublicRoutes(logger *slog.Logger, router chi.Router) {
-
-	publicHandler := public.NewPublicHandler(logger)
+func setupPublicRoutes(router chi.Router, publicHandler *public.PublicHandler) {
 
 	router.Get("/home", publicHandler.Index)
+	router.Get("/pricing", publicHandler.Pricing)
+	router.Get("/about", publicHandler.About)
 
 	router.Route("/login", func(r chi.Router) {
 		r.Get("/", publicHandler.Login)
@@ -122,9 +123,7 @@ func setupPublicRoutes(logger *slog.Logger, router chi.Router) {
 
 }
 
-func setupAdminRoutes(router chi.Router, gameManagerService *services.GameManagerService, notificationService services.NotificationService) {
-	var adminHandler = admin.NewAdminHandler(gameManagerService, notificationService)
-
+func setupAdminRoutes(router chi.Router, adminHandler *admin.AdminHandler) {
 	router.Route("/admin", func(r chi.Router) {
 		r.Use(middlewares.AdminAuthMiddleware)
 		r.Use(middlewares.AdminCheckInstanceMiddleware)

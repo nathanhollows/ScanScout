@@ -7,7 +7,6 @@ import (
 	"math/rand"
 	"strings"
 
-	"github.com/charmbracelet/log"
 	"github.com/nathanhollows/Rapua/internal/helpers"
 	"github.com/nathanhollows/Rapua/pkg/db"
 	"github.com/uptrace/bun"
@@ -121,7 +120,6 @@ func (t *Team) SuggestNextLocations(ctx context.Context, limit int) *Locations {
 			Scan(ctx)
 	}
 	if err != nil {
-		log.Error(err)
 		return nil
 	}
 
@@ -129,7 +127,6 @@ func (t *Team) SuggestNextLocations(ctx context.Context, limit int) *Locations {
 	h := fnv.New64a()
 	_, err = h.Write([]byte(seed))
 	if err != nil {
-		log.Error(err)
 		return nil
 	}
 
@@ -242,7 +239,6 @@ func (t *Team) GetVisitedLocations(ctx context.Context) ([]*Location, error) {
 		Where("marker_id in (SELECT location_id FROM scans WHERE team_id = ?)", t.Code).
 		Scan(ctx)
 	if err != nil {
-		log.Error(err)
 		return nil, err
 	}
 	return locations, nil

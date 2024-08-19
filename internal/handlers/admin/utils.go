@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"context"
+	"log/slog"
 
 	"github.com/nathanhollows/Rapua/internal/contextkeys"
 	"github.com/nathanhollows/Rapua/internal/models"
@@ -9,12 +10,14 @@ import (
 )
 
 type AdminHandler struct {
+	Logger              *slog.Logger
 	GameManagerService  *services.GameManagerService
 	NotificationService services.NotificationService
 }
 
-func NewAdminHandler(gs *services.GameManagerService, ns services.NotificationService) *AdminHandler {
+func NewAdminHandler(logger *slog.Logger, gs *services.GameManagerService, ns services.NotificationService) *AdminHandler {
 	return &AdminHandler{
+		Logger:              logger,
 		GameManagerService:  gs,
 		NotificationService: ns,
 	}

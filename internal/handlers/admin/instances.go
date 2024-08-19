@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"log/slog"
 	"net/http"
 
 	"github.com/go-chi/chi"
@@ -40,7 +39,7 @@ func (h *AdminHandler) InstancesCreate(w http.ResponseWriter, r *http.Request) {
 		message.Save(w, r)
 	}
 	if response.Error != nil {
-		slog.Error("creating instance", "error", response.Error.Error())
+		h.Logger.Error("creating instance", "error", response.Error.Error())
 		http.Redirect(w, r, "/admin/instances", http.StatusSeeOther)
 		return
 	}
@@ -72,7 +71,7 @@ func (h *AdminHandler) InstanceDuplicate(w http.ResponseWriter, r *http.Request)
 		message.Save(w, r)
 	}
 	if response.Error != nil {
-		slog.Error("duplicating instance", "error", response.Error.Error())
+		h.Logger.Error("duplicating instance", "error", response.Error.Error())
 		http.Redirect(w, r, r.Header.Get("referer"), http.StatusSeeOther)
 		return
 	}
@@ -143,7 +142,7 @@ func (h *AdminHandler) InstanceDelete(w http.ResponseWriter, r *http.Request) {
 		message.Save(w, r)
 	}
 	if response.Error != nil {
-		slog.Error("deleting instance", "error", response.Error.Error())
+		h.Logger.Error("deleting instance", "error", response.Error.Error())
 		http.Redirect(w, r, "/admin/instances", http.StatusSeeOther)
 		return
 	}

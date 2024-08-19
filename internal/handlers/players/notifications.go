@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"log/slog"
 	"net/http"
 
 	"github.com/go-chi/chi"
@@ -19,8 +18,7 @@ func (h *PlayerHandler) DismissNotificationPost(w http.ResponseWriter, r *http.R
 	// Handle HTMX request
 	if r.Header.Get("HX-Request") == "true" {
 		if err != nil {
-			slog.Error("dismissing notification", "error", err.Error(), "notificationID", notificationID)
-			slog.Error("dismissing notification", "error", err.Error())
+			h.Logger.Error("dismissing notification", "error", err.Error(), "notificationID", notificationID)
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
@@ -29,7 +27,7 @@ func (h *PlayerHandler) DismissNotificationPost(w http.ResponseWriter, r *http.R
 	}
 
 	if err != nil {
-		slog.Error("dismissing notification", "error", err.Error(), "notificationID", notificationID)
+		h.Logger.Error("dismissing notification", "error", err.Error(), "notificationID", notificationID)
 		flash.NewError("Error dismissing notification").Save(w, r)
 		http.Redirect(w, r, r.Header.Get("referer"), http.StatusSeeOther)
 

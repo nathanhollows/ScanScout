@@ -6,7 +6,6 @@ import (
 	"os"
 	"strings"
 
-	"github.com/charmbracelet/log"
 	"github.com/nathanhollows/Rapua/internal/helpers"
 	"github.com/nathanhollows/Rapua/pkg/db"
 	qrcode "github.com/yeqown/go-qrcode/v2"
@@ -41,9 +40,6 @@ func (l *Marker) Save(ctx context.Context) error {
 		_, err = db.DB.NewInsert().Model(l).Exec(ctx)
 	} else {
 		_, err = db.DB.NewUpdate().Model(l).WherePK("code").Exec(ctx)
-	}
-	if err != nil {
-		log.Error(err)
 	}
 	return err
 }

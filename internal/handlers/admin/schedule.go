@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"log/slog"
 	"net/http"
 
 	"github.com/nathanhollows/Rapua/internal/handlers"
@@ -18,7 +17,7 @@ func (h *AdminHandler) StartGame(w http.ResponseWriter, r *http.Request) {
 		msg.Save(w, r)
 	}
 	if response.Error != nil {
-		slog.Error("Failed to start game", "err", response.Error)
+		h.Logger.Error("starting game", "err", response.Error)
 	}
 
 	http.Redirect(w, r, "/admin", http.StatusSeeOther)
@@ -35,7 +34,7 @@ func (h *AdminHandler) StopGame(w http.ResponseWriter, r *http.Request) {
 		msg.Save(w, r)
 	}
 	if response.Error != nil {
-		slog.Error("Failed to stop game", "err", response.Error)
+		h.Logger.Error("stopping game", "err", response.Error)
 	}
 
 	http.Redirect(w, r, "/admin", http.StatusSeeOther)
@@ -54,7 +53,7 @@ func (h *AdminHandler) ScheduleGame(w http.ResponseWriter, r *http.Request) {
 		msg.Save(w, r)
 	}
 	if response.Error != nil {
-		slog.Error("Failed to schedule game", "err", response.Error)
+		h.Logger.Error("scheduling game", "err", response.Error)
 	}
 
 	http.Redirect(w, r, "/admin", http.StatusSeeOther)

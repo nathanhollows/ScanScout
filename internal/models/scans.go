@@ -5,7 +5,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/charmbracelet/log"
 	"github.com/nathanhollows/Rapua/pkg/db"
 )
 
@@ -33,9 +32,6 @@ func (s *Scan) Save(ctx context.Context) error {
 	} else {
 		_, err = db.DB.NewUpdate().Model(s).WherePK().Exec(ctx)
 	}
-	if err != nil {
-		log.Error(err)
-	}
 	return err
 }
 
@@ -51,9 +47,6 @@ func FindScan(ctx context.Context, teamCode, locationCode string) (*Scan, error)
 	locationCode = strings.ToUpper(locationCode)
 	var scan Scan
 	err := db.DB.NewSelect().Model(&scan).Where("team_id = ?", teamCode).Where("location_id = ?", locationCode).Scan(ctx)
-	if err != nil {
-		log.Error(err)
-	}
 	return &scan, err
 }
 

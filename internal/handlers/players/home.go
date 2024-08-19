@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"log/slog"
 	"net/http"
 
 	"github.com/nathanhollows/Rapua/internal/flash"
@@ -27,7 +26,7 @@ func (h *PlayerHandler) Home(w http.ResponseWriter, r *http.Request) {
 			http.Redirect(w, r, "/next", http.StatusFound)
 			return
 		} else {
-			slog.Error("Home get team from session code", "err", err, "team", teamCode)
+			h.Logger.Error("Home get team from session code", "err", err, "team", teamCode)
 		}
 	}
 
@@ -40,7 +39,7 @@ func (h *PlayerHandler) Home(w http.ResponseWriter, r *http.Request) {
 			message.Save(w, r)
 		}
 		if response.Error != nil {
-			slog.Error("Error starting game", "err", response.Error.Error(), "team", teamCode)
+			h.Logger.Error("Error starting game", "err", response.Error.Error(), "team", teamCode)
 			http.Redirect(w, r, "/", http.StatusFound)
 			return
 		} else {

@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"log/slog"
 	"net/http"
 
 	"github.com/nathanhollows/Rapua/internal/flash"
@@ -25,7 +24,7 @@ func (h *AdminHandler) NotifyAllPost(w http.ResponseWriter, r *http.Request) {
 	// Send the notification
 	err := h.NotificationService.SendNotificationToAll(r.Context(), user.CurrentInstance.Teams, content)
 	if err != nil {
-		slog.Error("sending notification", "err", err.Error())
+		h.Logger.Error("sending notification to all ", "err", err.Error())
 		flash.NewError("Error sending announcement").Save(w, r)
 		http.Redirect(w, r, "/admin/", http.StatusSeeOther)
 		return
@@ -51,7 +50,7 @@ func (h *AdminHandler) NotifyTeamPost(w http.ResponseWriter, r *http.Request) {
 	// Send the notification
 	_, err := h.NotificationService.SendNotification(r.Context(), teamCode, content)
 	if err != nil {
-		slog.Error("sending notification", "err", err.Error())
+		h.Logger.Error("sending notification to team", "err", err.Error())
 		flash.NewError("Error sending announcement").Save(w, r)
 		http.Redirect(w, r, "/admin/", http.StatusSeeOther)
 		return

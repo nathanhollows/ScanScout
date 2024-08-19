@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"log/slog"
 	"net/http"
 
 	"github.com/go-chi/chi"
@@ -57,14 +56,14 @@ func (h *AdminHandler) LocationNewPost(w http.ResponseWriter, r *http.Request) {
 		message.Save(w, r)
 	}
 	if response.Error != nil {
-		slog.Error("creating location", "error", response.Error.Error())
+		h.Logger.Error("creating location", "error", response.Error.Error())
 		http.Redirect(w, r, r.Header.Get("referer"), http.StatusSeeOther)
 		return
 	}
 
 	location, ok := response.Data["location"].(*models.Location)
 	if !ok {
-		slog.Error("creating location", "error", "location not returned")
+		h.Logger.Error("creating location", "error", "location not returned")
 		http.Redirect(w, r, r.Header.Get("referer"), http.StatusSeeOther)
 		return
 	}
@@ -84,7 +83,7 @@ func (h *AdminHandler) ReorderLocations(w http.ResponseWriter, r *http.Request) 
 
 	err := r.ParseForm()
 	if err != nil {
-		slog.Error("reordering locations", "error", err.Error())
+		h.Logger.Error("reordering locations", "error", err.Error())
 		http.Error(w, "Error parsing form", http.StatusInternalServerError)
 		return
 	}
@@ -95,7 +94,7 @@ func (h *AdminHandler) ReorderLocations(w http.ResponseWriter, r *http.Request) 
 	response := h.GameManagerService.ReorderLocations(r.Context(), user, locations)
 	// Discard the flash messages since this is invoked via HTMX
 	if response.Error != nil {
-		slog.Error("reordering locations", "error", response.Error.Error())
+		h.Logger.Error("reordering locations", "error", response.Error.Error())
 		http.Error(w, response.Error.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -115,7 +114,7 @@ func (h *AdminHandler) LocationEdit(w http.ResponseWriter, r *http.Request) {
 
 	location, err := models.FindLocationByInstanceAndCode(r.Context(), user.CurrentInstanceID, code)
 	if err != nil {
-		slog.Error("LocationsEdit: finding locations by instance and code", "error", err)
+		h.Logger.Error("finding location", "error", err.Error())
 		flash.NewError("Location could not be found").Save(w, r)
 		http.Redirect(w, r, "/admin/locations", http.StatusSeeOther)
 		return
@@ -135,7 +134,7 @@ func (h *AdminHandler) LocationEditPost(w http.ResponseWriter, r *http.Request) 
 
 	err := r.ParseForm()
 	if err != nil {
-		flash.NewError("Error parsing form").Save(w, r)
+		flash.NewError("location/edit: parsing form").Save(w, r)
 		http.Redirect(w, r, "/admin/locations", http.StatusSeeOther)
 		return
 	}
@@ -150,7 +149,7 @@ func (h *AdminHandler) LocationEditPost(w http.ResponseWriter, r *http.Request) 
 		locationCode,
 	)
 	if err != nil {
-		slog.Error("Error finding location", "err", err)
+		h.Logger.Error("location/edit: finding location", "err", err)
 		flash.NewError("Location not found").Save(w, r)
 		http.Redirect(w, r, "/admin/locations", http.StatusSeeOther)
 		return
@@ -163,7 +162,7 @@ func (h *AdminHandler) LocationEditPost(w http.ResponseWriter, r *http.Request) 
 
 	err = h.GameManagerService.UpdateLocation(r.Context(), location, newName, newContent, lat, lng)
 	if err != nil {
-		slog.Error("LocationEditPost: updating location", "error", err)
+		h.Logger.Error("LocationEditPost: updating location", "error", err)
 		flash.NewError("Error saving location: "+err.Error()).Save(w, r)
 		http.Redirect(w, r, "/admin/locations", http.StatusSeeOther)
 		return
@@ -171,7 +170,7 @@ func (h *AdminHandler) LocationEditPost(w http.ResponseWriter, r *http.Request) 
 
 	err = h.GameManagerService.UpdateClues(r.Context(), location, r.Form["clues[]"], r.Form["clue_ids[]"])
 	if err != nil {
-		slog.Error("LocationEditPost: updating clues", "error", err)
+		h.Logger.Error("LocationEditPost: updating clues", "error", err)
 		flash.NewError("Could not save clues. Please try again.").Save(w, r)
 		http.Redirect(w, r, "/admin/locations", http.StatusSeeOther)
 		return

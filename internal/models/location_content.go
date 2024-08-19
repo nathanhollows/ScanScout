@@ -3,7 +3,6 @@ package models
 import (
 	"context"
 
-	"github.com/charmbracelet/log"
 	"github.com/google/uuid"
 	"github.com/nathanhollows/Rapua/pkg/db"
 )
@@ -25,9 +24,6 @@ func (i *LocationContent) Save(ctx context.Context) error {
 		_, err = db.DB.NewInsert().Model(i).Exec(ctx)
 	} else {
 		_, err = db.DB.NewUpdate().Model(i).WherePK().Exec(ctx)
-	}
-	if err != nil {
-		log.Error(err)
 	}
 	return err
 }

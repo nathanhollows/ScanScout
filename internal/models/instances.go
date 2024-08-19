@@ -8,7 +8,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/charmbracelet/log"
 	"github.com/go-pdf/fpdf"
 	"github.com/google/uuid"
 	"github.com/nathanhollows/Rapua/pkg/db"
@@ -192,7 +191,6 @@ func GenerateQRCodeArchive(ctx context.Context, instanceID string) (string, erro
 	path := "./assets/codes/" + instanceID + ".zip"
 	archive, err := os.Create(path)
 	if err != nil {
-		log.Error(err)
 		return "", err
 	}
 	defer archive.Close()
@@ -254,7 +252,6 @@ func (i *Instance) ZipPosters(ctx context.Context) (string, error) {
 	path := "./assets/posters/" + i.ID + ".zip"
 	archive, err := os.Create(path)
 	if err != nil {
-		log.Error(err)
 		return "", err
 	}
 	defer archive.Close()

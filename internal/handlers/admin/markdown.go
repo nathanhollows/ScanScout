@@ -32,6 +32,7 @@ func (h *AdminHandler) PreviewMarkdown(w http.ResponseWriter, r *http.Request) {
 	var m map[string]string
 	err := decoder.Decode(&m)
 	if err != nil {
+		h.Logger.Error("markdown preview: decoding JSON", "error", err)
 		http.Error(w, "Error decoding JSON", http.StatusBadRequest)
 		return
 	}
