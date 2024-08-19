@@ -1,16 +1,20 @@
 package handlers
 
 import (
+	"log/slog"
 	"net/http"
 
-	"github.com/nathanhollows/Rapua/internal/handlers"
+	templates "github.com/nathanhollows/Rapua/internal/templates/admin"
 )
 
 // NotFound shows the not found page
 func (h *AdminHandler) NotFound(w http.ResponseWriter, r *http.Request) {
-	handlers.SetDefaultHeaders(w)
-	data := handlers.TemplateData(r)
-	data["title"] = "Not Found"
+	user := h.UserFromContext(r.Context())
 
-	handlers.Render(w, data, handlers.AdminDir, "not_found")
+	c := templates.NotFound()
+	err := templates.Layout(c, *user, "Not Found").Render(r.Context(), w)
+
+	if err != nil {
+		slog.Error("rendering NotFound page", "err", err)
+	}
 }

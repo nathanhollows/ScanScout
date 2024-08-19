@@ -98,8 +98,6 @@ func setupPlayerRoutes(router chi.Router, gameplayService *services.GameplayServ
 
 	router.Post("/dismiss/{ID}", playerHandler.DismissNotificationPost)
 
-	router.NotFound(playerHandler.NotFound)
-
 }
 
 func setupPublicRoutes(logger *slog.Logger, router chi.Router) {
@@ -117,6 +115,8 @@ func setupPublicRoutes(logger *slog.Logger, router chi.Router) {
 		r.Get("/", publicHandler.Register)
 		r.Post("/", publicHandler.RegisterPost)
 	})
+
+	router.NotFound(publicHandler.NotFound)
 
 }
 
