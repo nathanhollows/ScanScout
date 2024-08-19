@@ -151,9 +151,9 @@ func setupAdminRoutes(router chi.Router, gameManagerService *services.GameManage
 			r.Post("/add", adminHandler.TeamsAdd)
 		})
 
-		r.Route("/navigation", func(r chi.Router) {
-			r.Get("/", adminHandler.Navigation)
-			r.Post("/", adminHandler.NavigationPost)
+		r.Route("/experience", func(r chi.Router) {
+			r.Get("/", adminHandler.Experience)
+			r.Post("/", adminHandler.ExperiencePost)
 		})
 
 		r.Route("/instances", func(r chi.Router) {

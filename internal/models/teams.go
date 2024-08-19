@@ -21,6 +21,7 @@ type Team struct {
 	InstanceID  string `bun:",notnull" json:"instance_id"`
 	HasStarted  bool   `bun:",default:false" json:"has_started"`
 	MustScanOut string `bun:"" json:"must_scan_out"`
+	Points      int    `bun:"," json:"points"`
 
 	Instance         Instance      `bun:"rel:has-one,join:instance_id=id" json:"instance"`
 	Scans            Scans         `bun:"rel:has-many,join:code=team_id" json:"scans"`

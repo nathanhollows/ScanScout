@@ -398,6 +398,14 @@ func (s *GameManagerService) UpdateSettings(ctx context.Context, settings *model
 		settings.MaxNextLocations = maxLocInt
 	}
 
+	// Enable points
+	enablePoints := form.Has("enablePoints")
+	settings.EnablePoints = enablePoints
+
+	// Enable Bonus Points
+	enableBonusPoints := form.Has("enableBonusPoints")
+	settings.EnableBonusPoints = enableBonusPoints
+
 	// Save settings
 	err = settings.Save(ctx)
 	if err != nil {

@@ -26,6 +26,7 @@ type Location struct {
 	CurrentCount int              `bun:",type:int" json:"current_count"`
 	AvgDuration  float64          `bun:",type:float" json:"avg_duration"`
 	Completion   CompletionMethod `bun:",type:int" json:"completion"`
+	Points       int              `bun:"," json:"points"`
 
 	Clues    Clues           `bun:"rel:has-many,join:id=location_id" json:"clues"`
 	Instance Instance        `bun:"rel:has-one,join:instance_id=id" json:"instance"`

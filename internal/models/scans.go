@@ -18,6 +18,7 @@ type Scan struct {
 	TimeIn      time.Time `bun:",type:datetime" json:"time_in"`
 	TimeOut     time.Time `bun:",type:datetime" json:"time_out"`
 	MustScanOut bool      `bun:"" json:"must_scan_out"`
+	Points      int       `bun:"," json:"points"`
 
 	Location Location `bun:"rel:has-one,join:location_id=id" json:"location"`
 }
