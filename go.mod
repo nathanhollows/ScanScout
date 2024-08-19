@@ -21,7 +21,6 @@ require (
 	github.com/aymanbagabas/go-osc52/v2 v2.0.1 // indirect
 	github.com/aymerick/douceur v0.2.0 // indirect
 	github.com/charmbracelet/lipgloss v0.9.1 // indirect
-	github.com/cpuguy83/go-md2man/v2 v2.0.4 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/dustin/go-humanize v1.0.1 // indirect
 	github.com/fatih/color v1.16.0 // indirect
@@ -44,8 +43,6 @@ require (
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/remyoudompheng/bigfft v0.0.0-20230129092748-24d4a6f8daec // indirect
 	github.com/rivo/uniseg v0.2.0 // indirect
-	github.com/russross/blackfriday/v2 v2.1.0 // indirect
-	github.com/xrash/smetrics v0.0.0-20240521201337-686a1a2994c1 // indirect
 	github.com/yeqown/reedsolomon v1.0.0 // indirect
 	golang.org/x/image v0.12.0 // indirect
 	golang.org/x/mod v0.17.0 // indirect
@@ -72,7 +69,6 @@ require (
 	github.com/uptrace/bun/dialect/sqlitedialect v1.2.1
 	github.com/uptrace/bun/driver/sqliteshim v1.2.1
 	github.com/uptrace/bun/extra/bundebug v1.2.1
-	github.com/urfave/cli/v2 v2.27.4
 	github.com/vmihailenco/msgpack/v5 v5.4.1 // indirect
 	github.com/vmihailenco/tagparser/v2 v2.0.0 // indirect
 	github.com/yeqown/go-qrcode/writer/standard v1.2.2
