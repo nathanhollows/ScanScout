@@ -9,7 +9,7 @@ import (
 	"github.com/nathanhollows/Rapua/internal/models"
 	"github.com/nathanhollows/Rapua/internal/services"
 	"github.com/nathanhollows/Rapua/internal/sessions"
-	"github.com/nathanhollows/Rapua/internal/templates"
+	templates "github.com/nathanhollows/Rapua/internal/templates/public"
 )
 
 // LoginHandler is the handler for the admin login page
@@ -109,5 +109,24 @@ func (h *PublicHandler) RegisterPost(w http.ResponseWriter, r *http.Request) {
 
 	c := templates.RegisterSuccess()
 	c.Render(r.Context(), w)
+}
 
+// ForgotPasswordHandler is the handler for the forgot password page
+func (h *PublicHandler) ForgotPassword(w http.ResponseWriter, r *http.Request) {
+	c := templates.ForgotPassword()
+	err := templates.AuthLayout(c, "Forgot Password").Render(r.Context(), w)
+
+	if err != nil {
+		h.Logger.Error("rendering forgot password page", "err", err)
+	}
+}
+
+// ForgotPasswordPostHandler handles the form submission for the forgot password page
+func (h *PublicHandler) ForgotPasswordPost(w http.ResponseWriter, r *http.Request) {
+	// TODO: Implement
+
+	c := templates.ForgotMessage(
+		*flash.NewInfo("If an account with that email exists, an email will be sent with instructions on how to reset your password."),
+	)
+	c.Render(r.Context(), w)
 }

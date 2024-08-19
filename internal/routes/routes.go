@@ -115,6 +115,8 @@ func setupPublicRoutes(logger *slog.Logger, router chi.Router) {
 		r.Get("/", publicHandler.Register)
 		r.Post("/", publicHandler.RegisterPost)
 	})
+	router.Get("/forgot", publicHandler.ForgotPassword)
+	router.Post("/forgot", publicHandler.ForgotPasswordPost)
 
 	router.NotFound(publicHandler.NotFound)
 

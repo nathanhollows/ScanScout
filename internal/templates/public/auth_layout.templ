@@ -1,0 +1,29 @@
+package templates
+
+templ AuthLayout(contents templ.Component, title string) {
+	<!DOCTYPE html>
+	<html lang="en" class="h-full">
+		@publicHeader(title)
+		<body class="h-screen flex flex-col">
+			@authNav(title)
+			@contents
+		</body>
+	</html>
+}
+
+templ authNav(title string) {
+	<div class="bg-base-100" hx-boost="true">
+		<div class="navbar max-w-7xl font-bold m-auto">
+			<div class="navbar-start">
+				<a href="/home" class="btn btn-ghost text-xl">← Back to Rapua</a>
+			</div>
+			<div class="navbar-end">
+				if title == "Login" {
+					<a href="/register" class="btn btn-sm btn-neutral">Register</a>
+				} else {
+					<a href="/login" class="btn btn-sm btn-secondary">Login</a>
+				}
+			</div>
+		</div>
+	</div>
+}
