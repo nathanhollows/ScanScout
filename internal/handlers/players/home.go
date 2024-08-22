@@ -28,6 +28,7 @@ func (h *PlayerHandler) Home(w http.ResponseWriter, r *http.Request) {
 		} else {
 			h.Logger.Error("Home get team from session code", "err", err, "team", teamCode)
 		}
+		data["notifications"], _ = h.NotificationService.GetNotifications(r.Context(), team.Code)
 	}
 
 	// Start the game if the form is submitted
@@ -52,7 +53,6 @@ func (h *PlayerHandler) Home(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	data["notifications"], _ = h.NotificationService.GetNotifications(r.Context(), team.Code)
 	data["messages"] = flash.Get(w, r)
 	handlers.Render(w, data, handlers.PlayerDir, "home")
 }

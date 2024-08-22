@@ -2,19 +2,59 @@ package repositories
 
 import (
 	"context"
+	"errors"
 
+	"github.com/google/uuid"
 	"github.com/nathanhollows/Rapua/internal/models"
 	"github.com/nathanhollows/Rapua/pkg/db"
 	"github.com/uptrace/bun"
 )
 
-func CreateUser(ctx context.Context, user *models.User) error {
+var (
+	ErrUserNotFound = errors.New("user not found")
+)
+
+type UserRepository interface {
+	// CreateUser creates a new user in the database
+	CreateUser(ctx context.Context, user *models.User) error
+	// UpdateUser updates a user in the database
+	UpdateUser(ctx context.Context, user *models.User) error
+	// GetUserByEmail retrieves a user by their email address
+	GetUserByEmail(ctx context.Context, email string) (*models.User, error)
+	// FindUserByID fetches a user by their ID from the database.
+	FindUserByID(ctx context.Context, userID string) (*models.User, error)
+	// GetUserByEmailAndProvider retrieves a user by their email address and provider
+	GetUserByEmailAndProvider(ctx context.Context, email, provider string) (*models.User, error)
+}
+
+type userRepository struct{}
+
+func NewUserRepository() UserRepository {
+	return &userRepository{}
+}
+
+// Update the user in the database
+func (r *userRepository) UpdateUser(ctx context.Context, user *models.User) error {
+	_, err := db.DB.NewUpdate().
+		Model(user).
+		WherePK().
+		Exec(ctx)
+	return err
+}
+
+// CreateUser creates a new user in the database
+func (r *userRepository) CreateUser(ctx context.Context, user *models.User) error {
+	if user.ID == "" {
+		uuid := uuid.New()
+		user.ID = uuid.String()
+	}
+
 	_, err := db.DB.NewInsert().Model(user).Exec(ctx)
 	return err
 }
 
 // GetUserByEmail retrieves a user by their email address
-func GetUserByEmail(ctx context.Context, email string) (*models.User, error) {
+func (r *userRepository) GetUserByEmail(ctx context.Context, email string) (*models.User, error) {
 	user := &models.User{}
 	err := db.DB.NewSelect().
 		Model(user).
@@ -26,7 +66,7 @@ func GetUserByEmail(ctx context.Context, email string) (*models.User, error) {
 }
 
 // FindUserByID fetches a user by their ID from the database.
-func FindUserByID(ctx context.Context, userID string) (*models.User, error) {
+func (r *userRepository) FindUserByID(ctx context.Context, userID string) (*models.User, error) {
 	var user models.User
 	err := db.DB.NewSelect().
 		Model(&user).
@@ -42,7 +82,20 @@ func FindUserByID(ctx context.Context, userID string) (*models.User, error) {
 		Relation("Instances").
 		Scan(ctx)
 	if err != nil {
-		return nil, err
+		return nil, ErrUserNotFound
 	}
 	return &user, nil
+}
+
+// GetUserByEmailAndProvider retrieves a user by their email address and provider
+func (r *userRepository) GetUserByEmailAndProvider(ctx context.Context, email, provider string) (*models.User, error) {
+	user := &models.User{}
+	err := db.DB.NewSelect().
+		Model(user).
+		Where("email = ?", email).
+		Where("provider = ? OR provider = ''", provider).
+		Relation("CurrentInstance").
+		Relation("Instances").
+		Scan(ctx)
+	return user, err
 }

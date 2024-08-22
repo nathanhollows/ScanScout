@@ -3,9 +3,7 @@ package models
 import (
 	"context"
 	"errors"
-	"net/http"
 
-	"github.com/nathanhollows/Rapua/internal/sessions"
 	"github.com/nathanhollows/Rapua/pkg/db"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -13,10 +11,12 @@ import (
 type User struct {
 	baseModel
 
-	ID                string    `bun:",unique,pk,type:varchar(36)" json:"id"`
-	Name              string    `bun:",type:varchar(255)" json:"name"`
-	Email             string    `bun:",unique,pk" json:"email"`
-	Password          string    `bun:",type:varchar(255)" json:"password"`
+	ID       string `bun:",unique,pk,type:varchar(36)" json:"id"`
+	Name     string `bun:",type:varchar(255)" json:"name"`
+	Email    string `bun:",unique,pk" json:"email"`
+	Password string `bun:",type:varchar(255)" json:"password"`
+	Provider string `bun:",type:varchar(255)" json:"provider"`
+
 	Instances         Instances `bun:"rel:has-many,join:id=user_id" json:"instances"`
 	CurrentInstanceID string    `bun:",type:varchar(36)" json:"current_instance_id"`
 	CurrentInstance   Instance  `bun:"rel:has-one,join:current_instance_id=id" json:"current_instance"`
@@ -100,27 +100,4 @@ func hashAndSalt(password string) string {
 	}
 
 	return string(hash)
-}
-
-// FindUserBySession finds the user by the session
-func FindUserBySession(r *http.Request) (*User, error) {
-	// Get the session
-	session, err := sessions.Get(r, "admin")
-	if err != nil {
-		return nil, err
-	}
-
-	// Get the user id from the session
-	userID, ok := session.Values["user_id"].(string)
-	if !ok {
-		return nil, errors.New("User not found")
-	}
-
-	// Find the user by the user id
-	user, err := FindUserByID(r.Context(), userID)
-	if err != nil {
-		return nil, err
-	}
-
-	return user, nil
 }

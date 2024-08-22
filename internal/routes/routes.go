@@ -14,6 +14,7 @@ import (
 	players "github.com/nathanhollows/Rapua/internal/handlers/players"
 	public "github.com/nathanhollows/Rapua/internal/handlers/public"
 	"github.com/nathanhollows/Rapua/internal/middlewares"
+	"github.com/nathanhollows/Rapua/internal/repositories"
 	"github.com/nathanhollows/Rapua/internal/services"
 )
 
@@ -31,8 +32,11 @@ func SetupRouter(
 	router.Use(middleware.StripSlashes)
 	router.Use(middleware.RedirectSlashes)
 
+	// Create userServices for authentication
+	userServices := services.NewUserServices(repositories.NewUserRepository())
+
 	// Public routes
-	publicHandler := public.NewPublicHandler(logger)
+	publicHandler := public.NewPublicHandler(logger, *userServices)
 	setupPublicRoutes(router, publicHandler)
 
 	// Player routes
@@ -40,7 +44,7 @@ func SetupRouter(
 	setupPlayerRoutes(router, playerHandler)
 
 	// Admin routes
-	adminHandler := admin.NewAdminHandler(logger, gameManagerService, notificationService)
+	adminHandler := admin.NewAdminHandler(logger, gameManagerService, notificationService, *userServices)
 	setupAdminRoutes(router, adminHandler)
 
 	// Static files
@@ -102,7 +106,6 @@ func setupPlayerRoutes(router chi.Router, playerHandler *players.PlayerHandler) 
 }
 
 func setupPublicRoutes(router chi.Router, publicHandler *public.PublicHandler) {
-
 	router.Get("/home", publicHandler.Index)
 	router.Get("/pricing", publicHandler.Pricing)
 	router.Get("/about", publicHandler.About)
@@ -119,13 +122,20 @@ func setupPublicRoutes(router chi.Router, publicHandler *public.PublicHandler) {
 	router.Get("/forgot", publicHandler.ForgotPassword)
 	router.Post("/forgot", publicHandler.ForgotPasswordPost)
 
+	router.Route("/auth", func(r chi.Router) {
+		r.Get("/{provider}", publicHandler.Auth)
+		r.Get("/{provider}/callback", publicHandler.AuthCallback)
+	})
+
 	router.NotFound(publicHandler.NotFound)
 
 }
 
 func setupAdminRoutes(router chi.Router, adminHandler *admin.AdminHandler) {
 	router.Route("/admin", func(r chi.Router) {
-		r.Use(middlewares.AdminAuthMiddleware)
+		r.Use(func(next http.Handler) http.Handler {
+			return middlewares.AdminAuthMiddleware(adminHandler.UserServices.AuthService, next)
+		})
 		r.Use(middlewares.AdminCheckInstanceMiddleware)
 
 		r.Get("/", adminHandler.Activity)

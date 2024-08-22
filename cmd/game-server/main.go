@@ -14,11 +14,11 @@ import (
 )
 
 func main() {
-	logger := slog.New(slog.NewTextHandler(os.Stderr, nil))
-
 	godotenv.Load(".env")
+	logger := slog.New(slog.NewTextHandler(os.Stderr, nil))
 	db.MustOpen()
 	models.CreateTables(logger)
 	sessions.Start()
+
 	server.Start(logger)
 }

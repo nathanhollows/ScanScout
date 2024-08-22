@@ -1,6 +1,6 @@
 module github.com/nathanhollows/Rapua
 
-go 1.21
+go 1.22.5
 
 toolchain go1.22.4
 
@@ -9,6 +9,7 @@ require (
 	github.com/go-pdf/fpdf v0.9.0
 	github.com/google/uuid v1.6.0
 	github.com/joho/godotenv v1.5.1
+	github.com/markbates/goth v1.80.0
 	github.com/microcosm-cc/bluemonday v1.0.27
 	github.com/uptrace/bun v1.2.1
 	github.com/yeqown/go-qrcode/v2 v2.2.2
@@ -18,6 +19,8 @@ require (
 )
 
 require (
+	cloud.google.com/go/compute v1.20.1 // indirect
+	cloud.google.com/go/compute/metadata v0.2.3 // indirect
 	github.com/aymanbagabas/go-osc52/v2 v2.0.1 // indirect
 	github.com/aymerick/douceur v0.2.0 // indirect
 	github.com/charmbracelet/lipgloss v0.9.1 // indirect
@@ -27,7 +30,10 @@ require (
 	github.com/fogleman/gg v1.3.0 // indirect
 	github.com/go-logfmt/logfmt v0.6.0 // indirect
 	github.com/golang/freetype v0.0.0-20170609003504-e2365dfdc4a0 // indirect
+	github.com/golang/protobuf v1.5.3 // indirect
+	github.com/gorilla/context v1.1.1 // indirect
 	github.com/gorilla/css v1.0.1 // indirect
+	github.com/gorilla/mux v1.6.2 // indirect
 	github.com/gorilla/securecookie v1.1.2 // indirect
 	github.com/hashicorp/golang-lru/v2 v2.0.7 // indirect
 	github.com/kr/text v0.2.0 // indirect
@@ -47,6 +53,9 @@ require (
 	golang.org/x/image v0.12.0 // indirect
 	golang.org/x/mod v0.17.0 // indirect
 	golang.org/x/net v0.26.0 // indirect
+	golang.org/x/oauth2 v0.17.0 // indirect
+	google.golang.org/appengine v1.6.8 // indirect
+	google.golang.org/protobuf v1.32.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 	modernc.org/gc/v3 v3.0.0-20240304020402-f0dba7c97c2b // indirect
 	modernc.org/libc v1.49.0 // indirect
@@ -60,7 +69,7 @@ require (
 require (
 	github.com/charmbracelet/log v0.3.1
 	github.com/go-chi/chi v1.5.5
-	github.com/gorilla/sessions v1.2.2
+	github.com/gorilla/sessions v1.3.0
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/quail-ink/goldmark-enclave v0.1.2
 	github.com/stretchr/testify v1.9.0

@@ -2,8 +2,11 @@ package handlers
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
 
+	"github.com/go-chi/chi"
+	"github.com/markbates/goth/gothic"
 	"github.com/nathanhollows/Rapua/internal/flash"
 	"github.com/nathanhollows/Rapua/internal/helpers"
 	"github.com/nathanhollows/Rapua/internal/models"
@@ -14,8 +17,15 @@ import (
 
 // LoginHandler is the handler for the admin login page
 func (h *PublicHandler) Login(w http.ResponseWriter, r *http.Request) {
+	user, err := h.UserServices.AuthService.GetAuthenticatedUser(r)
+	if err == nil || user != nil {
+		// User is already authenticated, redirect to the admin page
+		http.Redirect(w, r, "/admin", http.StatusSeeOther)
+		return
+	}
+
 	c := templates.Login()
-	err := templates.AuthLayout(c, "Login").Render(r.Context(), w)
+	err = templates.AuthLayout(c, "Login").Render(r.Context(), w)
 
 	if err != nil {
 		h.Logger.Error("Error rendering login page", "err", err)
@@ -29,8 +39,7 @@ func (h *PublicHandler) LoginPost(w http.ResponseWriter, r *http.Request) {
 	password := r.Form.Get("password")
 
 	// Try to authenticate the user
-	authService := services.NewAuthService()
-	user, err := authService.AuthenticateUser(r.Context(), email, password)
+	user, err := h.UserServices.AuthService.AuthenticateUser(r.Context(), email, password)
 
 	if err != nil {
 		h.Logger.Error("authenticating user", "err", err)
@@ -40,21 +49,15 @@ func (h *PublicHandler) LoginPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Create a session
-	session, err := sessions.Get(r, "admin")
+	session, err := sessions.New(r, *user)
 	if err != nil {
-		h.Logger.Error("getting session for login", "err", err)
+		h.Logger.Error("creating session", "err", err)
 		w.WriteHeader(http.StatusInternalServerError)
 		c := templates.LoginError("An error occurred while trying to log in. Please try again.")
 		c.Render(r.Context(), w)
 		return
 	}
-
-	session.Values["user_id"] = user.ID
-	session.Options.Secure = true
-	session.Options.SameSite = http.SameSiteStrictMode
 	session.Save(r, w)
-
 	w.Header().Add("hx-redirect", "/admin")
 }
 
@@ -93,7 +96,7 @@ func (h *PublicHandler) RegisterPost(w http.ResponseWriter, r *http.Request) {
 
 	confirmPassword := r.Form.Get("password-confirm")
 
-	err := services.CreateUser(r.Context(), &user, confirmPassword)
+	err := h.UserServices.UserService.CreateUser(r.Context(), &user, confirmPassword)
 	if err != nil {
 		h.Logger.Error("creating user", "err", err)
 		w.WriteHeader(http.StatusUnauthorized)
@@ -129,4 +132,75 @@ func (h *PublicHandler) ForgotPasswordPost(w http.ResponseWriter, r *http.Reques
 		*flash.NewInfo("If an account with that email exists, an email will be sent with instructions on how to reset your password."),
 	)
 	c.Render(r.Context(), w)
+}
+
+var userTemplate = `
+<p><a href="/logout/{{.Provider}}">logout</a></p>
+<p>Name: {{.Name}} [{{.LastName}}, {{.FirstName}}]</p>
+<p>Email: {{.Email}}</p>
+<p>NickName: {{.NickName}}</p>
+<p>Location: {{.Location}}</p>
+<p>AvatarURL: {{.AvatarURL}} <img src="{{.AvatarURL}}"></p>
+<p>Description: {{.Description}}</p>
+<p>UserID: {{.UserID}}</p>
+<p>AccessToken: {{.AccessToken}}</p>
+<p>ExpiresAt: {{.ExpiresAt}}</p>
+<p>RefreshToken: {{.RefreshToken}}</p>
+<p>Provider: {{.Provider}}</p>
+`
+
+// Auth redirects the user to the Google OAuth page
+func (h *PublicHandler) Auth(w http.ResponseWriter, r *http.Request) {
+	// Include the provider to the query string
+	// since Chi doesn't do this automatically
+	provider := chi.URLParam(r, "provider")
+	r.URL.RawQuery = fmt.Sprintf("%s&provider=%s", r.URL.RawQuery, provider)
+
+	_, err := h.UserServices.AuthService.CompleteUserAuth(w, r)
+	if err == nil {
+		// User is authenticated, redirect to the admin page
+		http.Redirect(w, r, "/admin", http.StatusSeeOther)
+	} else {
+		// Redirect user to authentication handler
+		gothic.BeginAuthHandler(w, r)
+	}
+}
+
+// AuthCallback handles the callback from Google OAuth
+func (h *PublicHandler) AuthCallback(w http.ResponseWriter, r *http.Request) {
+	// Include the provider to the query string
+	// since Chi doesn't do this automatically
+	provider := chi.URLParam(r, "provider")
+	r.URL.RawQuery = fmt.Sprintf("%s&provider=%s", r.URL.RawQuery, provider)
+
+	user, err := h.UserServices.AuthService.CompleteUserAuth(w, r)
+	if err != nil {
+		h.Logger.Error("completing auth", "error", err)
+		http.Redirect(w, r, "/login", http.StatusSeeOther)
+		return
+	}
+
+	if user == nil {
+		h.Logger.Error("completing auth", "error", "user is nil")
+		http.Redirect(w, r, "/login", http.StatusSeeOther)
+		return
+	}
+
+	session, err := sessions.New(r, *user)
+	if err != nil {
+		h.Logger.Error("creating session", "err", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		c := templates.LoginError("An error occurred while trying to log in. Please try again.")
+		c.Render(r.Context(), w)
+		return
+	}
+	session.Save(r, w)
+
+	w.Write([]byte(`
+<!DOCTYPE html>
+<html>
+<head><meta http-equiv="refresh" content="0; url='/admin'"></head>
+<body></body>
+</html>
+		`))
 }

@@ -13,13 +13,15 @@ type AdminHandler struct {
 	Logger              *slog.Logger
 	GameManagerService  *services.GameManagerService
 	NotificationService services.NotificationService
+	UserServices        services.UserServices
 }
 
-func NewAdminHandler(logger *slog.Logger, gs *services.GameManagerService, ns services.NotificationService) *AdminHandler {
+func NewAdminHandler(logger *slog.Logger, gs *services.GameManagerService, ns services.NotificationService, us services.UserServices) *AdminHandler {
 	return &AdminHandler{
 		Logger:              logger,
 		GameManagerService:  gs,
 		NotificationService: ns,
+		UserServices:        us,
 	}
 }
 
