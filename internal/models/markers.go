@@ -135,7 +135,6 @@ func saveQRCode(qrc *qrcode.QRCode, path string) error {
 
 	err = qrc.Save(w)
 	if err != nil {
-		fmt.Printf("could not generate QRCode: %v", err)
 		return err
 	} else {
 		return nil
