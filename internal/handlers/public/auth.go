@@ -24,7 +24,7 @@ func (h *PublicHandler) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	c := templates.Login()
+	c := templates.Login(h.UserServices.AuthService.AllowGoogleLogin())
 	err = templates.AuthLayout(c, "Login").Render(r.Context(), w)
 
 	if err != nil {
@@ -78,7 +78,7 @@ func (h *PublicHandler) Logout(w http.ResponseWriter, r *http.Request) {
 
 // RegisterHandler is the handler for the admin register page
 func (h *PublicHandler) Register(w http.ResponseWriter, r *http.Request) {
-	c := templates.Register()
+	c := templates.Register(h.UserServices.AuthService.AllowGoogleLogin())
 	err := templates.AuthLayout(c, "Register").Render(r.Context(), w)
 
 	if err != nil {
