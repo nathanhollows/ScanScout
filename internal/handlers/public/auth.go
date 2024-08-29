@@ -204,3 +204,116 @@ func (h *PublicHandler) AuthCallback(w http.ResponseWriter, r *http.Request) {
 </html>
 		`))
 }
+
+// VerifyEmail is the handler for verifying a user's email address
+func (h *PublicHandler) VerifyEmail(w http.ResponseWriter, r *http.Request) {
+	user, err := h.UserServices.AuthService.GetAuthenticatedUser(r)
+	if err != nil || user == nil {
+		http.Redirect(w, r, "/login", http.StatusSeeOther)
+		return
+	}
+
+	if user.EmailVerified {
+		flash.NewInfo("Your email is already verified.").Save(w, r)
+		http.Redirect(w, r, "/admin", http.StatusSeeOther)
+		return
+	}
+
+	c := templates.VerifyEmail(*user)
+	err = templates.AuthLayout(c, "Verify Email").Render(r.Context(), w)
+
+	if err != nil {
+		h.Logger.Error("rendering verify email page", "err", err)
+	}
+}
+
+// VerifyEmailWithToken is the handler for verifying a user's email address
+func (h *PublicHandler) VerifyEmailWithToken(w http.ResponseWriter, r *http.Request) {
+	user, err := h.UserServices.AuthService.GetAuthenticatedUser(r)
+	if err != nil || user == nil {
+		http.Redirect(w, r, "/login", http.StatusSeeOther)
+		return
+	}
+
+	if user.EmailVerified {
+		flash.NewInfo("Your email is already verified.").Save(w, r)
+		http.Redirect(w, r, "/admin", http.StatusSeeOther)
+		return
+	}
+
+	token := chi.URLParam(r, "token")
+
+	err = h.UserServices.AuthService.VerifyEmail(r.Context(), user, token)
+	if err != nil {
+		if errors.Is(err, services.ErrInvalidToken) {
+			flash.NewError("Invalid link. Please try again.").Save(w, r)
+			http.Redirect(w, r, "/verify-email", http.StatusSeeOther)
+			return
+		}
+		if errors.Is(err, services.ErrTokenExpired) {
+			flash.NewError("Link expired. We have sent you a new email with a new token.").Save(w, r)
+			http.Redirect(w, r, "/verify-email", http.StatusSeeOther)
+			return
+		}
+		h.Logger.Error("verifying email", "err", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		flash.NewError("An error occurred while trying to verify your email. Please try again.").Save(w, r)
+		http.Redirect(w, r, "/verify-email", http.StatusSeeOther)
+		return
+	}
+
+	flash.NewSuccess("Email verified!").Save(w, r)
+	http.Redirect(w, r, "/admin", http.StatusSeeOther)
+}
+
+// Poll for email verification for HTMX
+func (h *PublicHandler) VerifyEmailStatus(w http.ResponseWriter, r *http.Request) {
+	user, err := h.UserServices.AuthService.GetAuthenticatedUser(r)
+	if err != nil || user == nil {
+		http.Redirect(w, r, "/login", http.StatusSeeOther)
+		return
+	}
+
+	if user.EmailVerified {
+		w.Header().Add("HX-Redirect", "/admin")
+		return
+	}
+
+	// Not verified yet
+	w.WriteHeader(http.StatusUnauthorized)
+}
+
+// ResendEmailVerification resends the email verification email
+func (h *PublicHandler) ResendEmailVerification(w http.ResponseWriter, r *http.Request) {
+	user, err := h.UserServices.AuthService.GetAuthenticatedUser(r)
+	if err != nil || user == nil {
+		http.Redirect(w, r, "/login", http.StatusSeeOther)
+		return
+	}
+
+	err = h.UserServices.AuthService.SendEmailVerification(r.Context(), user)
+	if err != nil {
+		if errors.Is(err, services.ErrUserAlreadyVerified) {
+			w.WriteHeader(http.StatusUnauthorized)
+			c := templates.Toast(
+				*flash.NewError("Your email is already verified."),
+			)
+			c.Render(r.Context(), w)
+			return
+		}
+
+		h.Logger.Error("sending email verification", "err", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		c := templates.Toast(
+			*flash.NewError("An error occurred while trying to send the email. Please try again."),
+		)
+		c.Render(r.Context(), w)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	c := templates.Toast(
+		*flash.NewSuccess("Email sent! Please check your inbox."),
+	)
+	c.Render(r.Context(), w)
+}

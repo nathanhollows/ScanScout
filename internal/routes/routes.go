@@ -127,6 +127,13 @@ func setupPublicRoutes(router chi.Router, publicHandler *public.PublicHandler) {
 		r.Get("/{provider}/callback", publicHandler.AuthCallback)
 	})
 
+	router.Route("/verify-email", func(r chi.Router) {
+		r.Get("/", publicHandler.VerifyEmail)
+		r.Get("/{token}", publicHandler.VerifyEmailWithToken)
+		r.Get("/status", publicHandler.VerifyEmailStatus)
+		r.Post("/resend", publicHandler.ResendEmailVerification)
+	})
+
 	router.NotFound(publicHandler.NotFound)
 
 }

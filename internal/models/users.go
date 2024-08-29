@@ -2,6 +2,7 @@ package models
 
 import (
 	"context"
+	"database/sql"
 	"errors"
 
 	"github.com/nathanhollows/Rapua/pkg/db"
@@ -11,11 +12,14 @@ import (
 type User struct {
 	baseModel
 
-	ID       string `bun:",unique,pk,type:varchar(36)" json:"id"`
-	Name     string `bun:",type:varchar(255)" json:"name"`
-	Email    string `bun:",unique,pk" json:"email"`
-	Password string `bun:",type:varchar(255)" json:"password"`
-	Provider string `bun:",type:varchar(255)" json:"provider"`
+	ID               string       `bun:",unique,pk,type:varchar(36)" json:"id"`
+	Name             string       `bun:",type:varchar(255)" json:"name"`
+	Email            string       `bun:",unique,pk" json:"email"`
+	EmailVerified    bool         `bun:",type:boolean" json:"email_verified"`
+	EmailToken       string       `bun:",type:varchar(36)" json:"email_token"`
+	EmailTokenExpiry sql.NullTime `bun:",nullzero" json:"email_token_expiry"`
+	Password         string       `bun:",type:varchar(255)" json:"password"`
+	Provider         string       `bun:",type:varchar(255)" json:"provider"`
 
 	Instances         Instances `bun:"rel:has-many,join:id=user_id" json:"instances"`
 	CurrentInstanceID string    `bun:",type:varchar(36)" json:"current_instance_id"`

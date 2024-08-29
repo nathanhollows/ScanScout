@@ -2,9 +2,11 @@ package services
 
 import (
 	"context"
+	"database/sql"
 	"errors"
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/markbates/goth"
@@ -18,6 +20,10 @@ import (
 var (
 	ErrUserNotAuthenticated = errors.New("user not authenticated")
 	ErrSessionNotFound      = errors.New("session not found")
+	ErrInvalidToken         = errors.New("invalid token")
+	ErrTokenExpired         = errors.New("token expired")
+	ErrUserAlreadyVerified  = errors.New("user already verified")
+	ErrRateLimitExceeded    = errors.New("rate limit exceeded")
 )
 
 type AuthService interface {
@@ -27,6 +33,8 @@ type AuthService interface {
 	CheckUserRegisteredWithOAuth(ctx context.Context, provider, userID string) (*models.User, error)
 	CreateUserWithOAuth(ctx context.Context, user goth.User) (*models.User, error)
 	CompleteUserAuth(w http.ResponseWriter, r *http.Request) (*models.User, error)
+	VerifyEmail(ctx context.Context, user *models.User, token string) error
+	SendEmailVerification(ctx context.Context, user *models.User) error
 }
 
 type authService struct {
@@ -136,4 +144,59 @@ func (s *authService) CompleteUserAuth(w http.ResponseWriter, r *http.Request) (
 	}
 
 	return user, nil
+}
+
+// VerifyEmail verifies the user's email address
+func (s *authService) VerifyEmail(ctx context.Context, user *models.User, token string) error {
+	if user.EmailToken != token {
+		return ErrInvalidToken
+	}
+
+	if user.EmailTokenExpiry.Time.Before(time.Now()) {
+		return ErrTokenExpired
+	}
+
+	user.EmailVerified = true
+	user.EmailToken = ""
+	user.EmailTokenExpiry = sql.NullTime{}
+
+	err := s.userRepository.UpdateUser(ctx, user)
+	if err != nil {
+		return fmt.Errorf("updating user: %w", err)
+	}
+
+	return nil
+}
+
+// SendVerificationEmail sends a verification email to the user
+func (s *authService) SendEmailVerification(ctx context.Context, user *models.User) error {
+	// If the user is already verified, return an error
+	if user.EmailVerified {
+		return ErrUserAlreadyVerified
+	}
+
+	// Reset the email token and expiry
+	token := uuid.New().String()
+	user.EmailToken = token
+	user.EmailTokenExpiry = sql.NullTime{
+		Time:  time.Now().Add(15 * time.Minute),
+		Valid: true,
+	}
+
+	err := s.userRepository.UpdateUser(ctx, user)
+	if err != nil {
+		return fmt.Errorf("updating user: %w", err)
+	}
+
+	fmt.Println("Sending verification email to:", user.Email)
+	res, err := s.emailService.SendVerificationEmail(ctx, *user)
+	if err != nil {
+		return fmt.Errorf("sending verification email: %w", err)
+	}
+
+	fmt.Println("Email sent to:", user.Email)
+	fmt.Println("Email response:", res)
+
+	// Send email
+	return nil
 }
