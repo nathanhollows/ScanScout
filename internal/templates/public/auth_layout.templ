@@ -8,6 +8,7 @@ templ AuthLayout(contents templ.Component, title string) {
 			if title != "Verify Email" {
 				@authNav(title)
 			}
+			<div id="alerts" class="toast toast-center"></div>
 			@contents
 		</body>
 	</html>
