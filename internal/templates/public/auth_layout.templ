@@ -5,7 +5,9 @@ templ AuthLayout(contents templ.Component, title string) {
 	<html lang="en" class="h-full">
 		@publicHeader(title)
 		<body class="h-screen flex flex-col">
-			@authNav(title)
+			if title != "Verify Email" {
+				@authNav(title)
+			}
 			@contents
 		</body>
 	</html>
