@@ -11,9 +11,10 @@ import (
 	"github.com/nathanhollows/Rapua/internal/services"
 )
 
-// AdminAuthMiddleware ensures the user is authenticated.
+// AdminAuthMiddleware ensures the user is authenticated and has verified their email.
 func AdminAuthMiddleware(authService services.AuthService, next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// Make sure the user is authenticated
 		user, err := authService.GetAuthenticatedUser(r)
 		if err != nil {
 			flash.NewError("You must be logged in to access this page").Save(w, r)
@@ -21,6 +22,13 @@ func AdminAuthMiddleware(authService services.AuthService, next http.Handler) ht
 			return
 		}
 
+		// Redirect to verify email if the user hasn't verified their email
+		if !user.EmailVerified {
+			http.Redirect(w, r, "/verify-email", http.StatusSeeOther)
+			return
+		}
+
+		// Add the user to the context
 		ctx := context.WithValue(r.Context(), contextkeys.UserKey, user)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
