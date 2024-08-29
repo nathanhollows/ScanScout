@@ -23,7 +23,8 @@ func AdminAuthMiddleware(authService services.AuthService, next http.Handler) ht
 		}
 
 		// Redirect to verify email if the user hasn't verified their email
-		if !user.EmailVerified {
+		// and they didn't sign up with OAuth
+		if !user.EmailVerified && user.Provider == "" {
 			http.Redirect(w, r, "/verify-email", http.StatusSeeOther)
 			return
 		}
