@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/a-h/templ"
 	"github.com/nathanhollows/Rapua/internal/models"
 	emails "github.com/nathanhollows/Rapua/internal/templates/emails"
 	"github.com/sendgrid/rest"
@@ -29,18 +30,20 @@ func (s emailService) SendVerificationEmail(ctx context.Context, user models.Use
 	to := mail.NewEmail(user.Name, user.Email)
 	subject := "Please verify your email"
 
+	url := templ.URL(os.Getenv("SITE_URL") + "/verify-email/" + user.EmailToken)
+
 	plainTextContent := `Tap the link below to finish verifying your account with Rapua. If you didn't register, you can safely ignore this email and your email will be automatically deleted from our system.
 Verify your email
 
-	https://rapua.nz/verify-email/%v
+	%v
 
 Cheers,
 Nathan`
-	plainTextContent = fmt.Sprintf(plainTextContent, user.EmailToken)
+	plainTextContent = fmt.Sprintf(plainTextContent, url)
 
 	// Render the html email template
 	w := new(bytes.Buffer)
-	c := emails.VerifyEmail(user.EmailToken)
+	c := emails.VerifyEmail(url)
 	c.Render(context.Background(), w)
 
 	message := mail.NewSingleEmail(from, subject, to, plainTextContent, w.String())
