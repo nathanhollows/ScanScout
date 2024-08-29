@@ -31,11 +31,13 @@ type AuthService interface {
 
 type authService struct {
 	userRepository repositories.UserRepository
+	emailService   EmailService
 }
 
 func NewAuthService(userRepository repositories.UserRepository) AuthService {
 	return &authService{
 		userRepository: userRepository,
+		emailService:   NewEmailService(),
 	}
 }
 
