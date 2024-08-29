@@ -29,6 +29,7 @@ var (
 type AuthService interface {
 	AuthenticateUser(ctx context.Context, email, password string) (*models.User, error)
 	GetAuthenticatedUser(r *http.Request) (*models.User, error)
+	AllowGoogleLogin() bool
 	OAuthLogin(ctx context.Context, provider string, user goth.User) (*models.User, error)
 	CheckUserRegisteredWithOAuth(ctx context.Context, provider, userID string) (*models.User, error)
 	CreateUserWithOAuth(ctx context.Context, user goth.User) (*models.User, error)
@@ -85,6 +86,12 @@ func (s *authService) GetAuthenticatedUser(r *http.Request) (*models.User, error
 	}
 
 	return user, nil
+}
+
+// Check if the system allows google login (env var set)
+func (s *authService) AllowGoogleLogin() bool {
+	provider, err := goth.GetProvider("google")
+	return err == nil && provider != nil
 }
 
 // OAuthLogin handles User Login via OAuth
