@@ -13,6 +13,7 @@ import (
 
 	"github.com/charmbracelet/log"
 	"github.com/nathanhollows/Rapua/internal/contextkeys"
+	extensions "github.com/nathanhollows/Rapua/internal/extensions/markdown"
 	"github.com/nathanhollows/Rapua/internal/helpers"
 	"github.com/nathanhollows/Rapua/internal/models"
 	enclave "github.com/quail-ink/goldmark-enclave"
@@ -191,7 +192,7 @@ var funcs = template.FuncMap{
 			goldmark.WithExtensions(
 				extension.Strikethrough,
 				extension.Linkify,
-				extension.TaskList,
+				extensions.TaskList,
 				extension.Typographer,
 				enclave.New(
 					&enclave.Config{},
