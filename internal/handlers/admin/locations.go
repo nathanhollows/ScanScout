@@ -68,7 +68,7 @@ func (h *AdminHandler) LocationNewPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	http.Redirect(w, r, "/admin/locations/"+location.ID, http.StatusSeeOther)
+	http.Redirect(w, r, "/admin/locations/"+location.MarkerID, http.StatusSeeOther)
 }
 
 // ReorderLocations handles reordering locations
