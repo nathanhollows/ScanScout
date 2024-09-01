@@ -122,6 +122,7 @@ func (h *AdminHandler) LocationEdit(w http.ResponseWriter, r *http.Request) {
 
 	location.LoadClues(r.Context())
 	data["location"] = location
+	data["title"] = "Editing " + location.Name
 	handlers.Render(w, data, handlers.AdminDir, "locations_edit")
 }
 
