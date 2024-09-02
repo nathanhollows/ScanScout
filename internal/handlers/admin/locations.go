@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"net/http"
-	"os"
 
 	"github.com/go-chi/chi"
 	"github.com/nathanhollows/Rapua/internal/flash"
@@ -30,7 +29,7 @@ func (h *AdminHandler) Locations(w http.ResponseWriter, r *http.Request) {
 func (h *AdminHandler) LocationNew(w http.ResponseWriter, r *http.Request) {
 	user := h.UserFromContext(r.Context())
 
-	c := templates.AddLocation(os.Getenv("MAPBOX_KEY"))
+	c := templates.AddLocation()
 	err := templates.Layout(c, *user, "New Location").Render(r.Context(), w)
 	if err != nil {
 		h.Logger.Error("LocationNew: rendering template", "error", err)
@@ -107,9 +106,6 @@ func (h *AdminHandler) ReorderLocations(w http.ResponseWriter, r *http.Request) 
 
 // LocationEdit shows the form to edit a location
 func (h *AdminHandler) LocationEdit(w http.ResponseWriter, r *http.Request) {
-	data := handlers.TemplateData(r)
-	data["messages"] = flash.Get(w, r)
-
 	// Get the location from the chi context
 	code := chi.URLParam(r, "id")
 
@@ -124,9 +120,9 @@ func (h *AdminHandler) LocationEdit(w http.ResponseWriter, r *http.Request) {
 	}
 
 	location.LoadClues(r.Context())
-	data["location"] = location
-	data["title"] = "Editing " + location.Name
-	handlers.Render(w, data, handlers.AdminDir, "locations_edit")
+
+	c := templates.EditLocation(*location, user.CurrentInstance.Settings)
+	err = templates.Layout(c, *user, "Edit Location").Render(r.Context(), w)
 }
 
 // LocationEditPost handles updating a location
@@ -138,8 +134,12 @@ func (h *AdminHandler) LocationEditPost(w http.ResponseWriter, r *http.Request) 
 
 	err := r.ParseForm()
 	if err != nil {
-		flash.NewError("location/edit: parsing form").Save(w, r)
-		http.Redirect(w, r, "/admin/locations", http.StatusSeeOther)
+		h.Logger.Error("LocationEditPost: parsing form", "error", err)
+		err := templates.Toast(*flash.NewError("Error parsing form")).Render(r.Context(), w)
+
+		if err != nil {
+			h.Logger.Error("LocaiotnEditPost: rendering toast:", "error", err)
+		}
 		return
 	}
 
@@ -153,9 +153,11 @@ func (h *AdminHandler) LocationEditPost(w http.ResponseWriter, r *http.Request) 
 		locationCode,
 	)
 	if err != nil {
-		h.Logger.Error("location/edit: finding location", "err", err)
-		flash.NewError("Location not found").Save(w, r)
-		http.Redirect(w, r, "/admin/locations", http.StatusSeeOther)
+		h.Logger.Error("LocationEditPost: finding location", "err", err)
+		err := templates.Toast(*flash.NewError("Location not found")).Render(r.Context(), w)
+		if err != nil {
+			h.Logger.Error("LocationEditPost: rendering toast:", "error", err)
+		}
 		return
 	}
 
@@ -167,20 +169,25 @@ func (h *AdminHandler) LocationEditPost(w http.ResponseWriter, r *http.Request) 
 	err = h.GameManagerService.UpdateLocation(r.Context(), location, newName, newContent, lat, lng)
 	if err != nil {
 		h.Logger.Error("LocationEditPost: updating location", "error", err)
-		flash.NewError("Error saving location: "+err.Error()).Save(w, r)
-		http.Redirect(w, r, "/admin/locations", http.StatusSeeOther)
+		err := templates.Toast(*flash.NewError("Error saving location")).Render(r.Context(), w)
+		if err != nil {
+			h.Logger.Error("LocationEditPost: rendering toast:", "error", err)
+		}
 		return
 	}
 
 	err = h.GameManagerService.UpdateClues(r.Context(), location, r.Form["clues[]"], r.Form["clue_ids[]"])
 	if err != nil {
 		h.Logger.Error("LocationEditPost: updating clues", "error", err)
-		flash.NewError("Could not save clues. Please try again.").Save(w, r)
-		http.Redirect(w, r, "/admin/locations", http.StatusSeeOther)
+		err := templates.Toast(*flash.NewError("Error saving clues")).Render(r.Context(), w)
+		if err != nil {
+			h.Logger.Error("LocationEditPost: rendering toast:", "error", err)
+		}
 		return
 	}
 
-	flash.NewSuccess("Location saved successfully").Save(w, r)
-	http.Redirect(w, r, r.Header.Get("referer"), http.StatusSeeOther)
-
+	err = templates.Toast(*flash.NewSuccess("Location updated!")).Render(r.Context(), w)
+	if err != nil {
+		h.Logger.Error("LocationEditPost: rendering toast:", "error", err)
+	}
 }
