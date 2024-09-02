@@ -6,13 +6,13 @@ import (
 	"os"
 )
 
-templ Layout(contents templ.Component, user models.User, title string) {
+templ Layout(contents templ.Component, user models.User, section string, title string) {
 	<!DOCTYPE html>
 	<html lang="en" class="h-full">
 		@header(title)
 		<body class="h-full">
 			<div id="app" class="m-auto" data-v-app="">
-				@nav(user, title)
+				@nav(user, section, title)
 				@Toast()
 				<span id="mapbox_key" class="hidden" data-key={ os.Getenv("MAPBOX_KEY") }></span>
 				<main class="max-w-7xl m-auto">
@@ -39,7 +39,7 @@ templ header(title string) {
 	</head>
 }
 
-templ nav(user models.User, title string) {
+templ nav(user models.User, section string, title string) {
 	<div class="bg-base-200">
 		<div class="navbar max-w-7xl font-bold m-auto">
 			<div class="navbar-start w-min sm:w-1/2">
@@ -72,7 +72,7 @@ templ nav(user models.User, title string) {
 						<li>
 							<a
 								href="/admin/"
-								if title == "Activity" {
+								if section == "Activity" {
 									class="active"
 								}
 							>
@@ -83,7 +83,7 @@ templ nav(user models.User, title string) {
 						<li>
 							<a
 								href="/admin/locations"
-								if title == "Locations" {
+								if section == "Locations" {
 									class="active"
 								}
 							>
@@ -94,7 +94,7 @@ templ nav(user models.User, title string) {
 						<li>
 							<a
 								href="/admin/teams"
-								if title == "Teams" {
+								if section == "Teams" {
 									class="active"
 								}
 							>
@@ -105,7 +105,7 @@ templ nav(user models.User, title string) {
 						<li>
 							<a
 								href="/admin/experience"
-								if title == "Experience" {
+								if section == "Experience" {
 									class="active"
 								}
 							>
@@ -128,7 +128,7 @@ templ nav(user models.User, title string) {
 					<li>
 						<a
 							href="/admin/"
-							if title == "Activity" {
+							if section == "Activity" {
 								class="active"
 							}
 						>
@@ -139,7 +139,7 @@ templ nav(user models.User, title string) {
 					<li>
 						<a
 							href="/admin/locations"
-							if title == "locations" {
+							if section == "Locations" {
 								class="active"
 							}
 						>
@@ -150,7 +150,7 @@ templ nav(user models.User, title string) {
 					<li>
 						<a
 							href="/admin/teams"
-							if title == "Teams" {
+							if section == "Teams" {
 								class="active"
 							}
 						>
@@ -161,7 +161,7 @@ templ nav(user models.User, title string) {
 					<li>
 						<a
 							href="/admin/experience"
-							if title == "Experience" {
+							if section == "Experience" {
 								class="active"
 							}
 						>
@@ -175,7 +175,7 @@ templ nav(user models.User, title string) {
 				<div class="dropdown dropdown-end mr-2">
 					<button
 						tabindex="0"
-						if title == "Instances" {
+						if section == "Instances" {
 							class="btn btn-ghost tooltip tooltip-bottom flex btn-active"
 						} else {
 							class="btn btn-ghost tooltip tooltip-bottom flex"

@@ -12,7 +12,7 @@ func (h *AdminHandler) Experience(w http.ResponseWriter, r *http.Request) {
 	user := h.UserFromContext(r.Context())
 
 	c := admin.Experience(user.CurrentInstance.Settings)
-	err := admin.Layout(c, *user, "Experience").Render(r.Context(), w)
+	err := admin.Layout(c, *user, "Experience", "Experience").Render(r.Context(), w)
 	if err != nil {
 		h.Logger.Error("rendering navigation page", "error", err.Error())
 	}

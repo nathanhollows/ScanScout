@@ -13,7 +13,7 @@ func (h *AdminHandler) Teams(w http.ResponseWriter, r *http.Request) {
 	user := h.UserFromContext(r.Context())
 
 	c := admin.Teams(user.CurrentInstance.Teams)
-	err := admin.Layout(c, *user, "Teams").Render(r.Context(), w)
+	err := admin.Layout(c, *user, "Teams", "Teams").Render(r.Context(), w)
 
 	if err != nil {
 		h.Logger.Error("rendering teams page", "error", err.Error())

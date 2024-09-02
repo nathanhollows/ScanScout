@@ -233,6 +233,8 @@ templ locationCSS() {
 templ locationScript() {
 	<script src="https://api.mapbox.com/mapbox-gl-js/v2.10.0/mapbox-gl.js"></script>
 	<script>
+
+	// Resize textareas to fit content
 	const tx = document.getElementsByTagName("textarea");
 for (let i = 0; i < tx.length; i++) {
   tx[i].setAttribute("style", "height:" + (tx[i].scrollHeight) + "px;overflow-y:hidden;");
@@ -243,6 +245,7 @@ function OnInput() {
   this.style.height = 'auto';
   this.style.height = (this.scrollHeight) + "px";
 }
+
   coords = [170.5111643, -45.8650509]
   zoom = 14
 

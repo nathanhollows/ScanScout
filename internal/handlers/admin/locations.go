@@ -30,7 +30,7 @@ func (h *AdminHandler) LocationNew(w http.ResponseWriter, r *http.Request) {
 	user := h.UserFromContext(r.Context())
 
 	c := templates.AddLocation()
-	err := templates.Layout(c, *user, "New Location").Render(r.Context(), w)
+	err := templates.Layout(c, *user, "Locations", "New Location").Render(r.Context(), w)
 	if err != nil {
 		h.Logger.Error("LocationNew: rendering template", "error", err)
 	}
@@ -122,7 +122,7 @@ func (h *AdminHandler) LocationEdit(w http.ResponseWriter, r *http.Request) {
 	location.LoadClues(r.Context())
 
 	c := templates.EditLocation(*location, user.CurrentInstance.Settings)
-	err = templates.Layout(c, *user, "Edit Location").Render(r.Context(), w)
+	err = templates.Layout(c, *user, "Locations", "Edit Location").Render(r.Context(), w)
 }
 
 // LocationEditPost handles updating a location

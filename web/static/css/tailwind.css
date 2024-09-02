@@ -4720,6 +4720,10 @@ details.collapse summary::-webkit-details-marker {
   z-index: 1;
 }
 
+.z-50 {
+  z-index: 50;
+}
+
 .m-1 {
   margin: 0.25rem;
 }
