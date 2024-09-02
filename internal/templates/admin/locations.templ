@@ -1,6 +1,6 @@
 package templates
 
-templ AddLocation(mapBoxKey string) {
+templ AddLocation() {
 	<link
 		href="https://api.mapbox.com/mapbox-gl-js/v2.10.0/mapbox-gl.css"
 		rel="stylesheet"
@@ -18,7 +18,7 @@ templ AddLocation(mapBoxKey string) {
 			<div class="flex-grow container mx-auto p-5">
 				<div class="flex flex-row space-x-8">
 					<div class="flex flex-col">
-						<div id="map" data-mapbox={ mapBoxKey } class="w-96 h-96 rounded-lg shadow-lg mt-5"></div>
+						<div id="map" class="w-96 h-96 rounded-lg shadow-lg mt-5"></div>
 						<div class="form-control">
 							<label class="label cursor-pointer">
 								<span class="label-text">Save map location</span>
@@ -81,7 +81,7 @@ templ AddLocation(mapBoxKey string) {
   coords = [170.5111643, -45.8650509]
   zoom = 14
 
-  mapboxgl.accessToken = document.getElementById('map').dataset.mapbox;
+  mapboxgl.accessToken = document.getElementById('mapbox_key').dataset.key;
   if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
     style = 'mapbox://styles/nathanhollows/cl9w3nxff002m14sy9fco4vnr'
   } else {

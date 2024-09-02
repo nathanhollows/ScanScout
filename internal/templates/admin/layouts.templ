@@ -3,6 +3,7 @@ package templates
 import (
 	"fmt"
 	"github.com/nathanhollows/Rapua/internal/models"
+	"os"
 )
 
 templ Layout(contents templ.Component, user models.User, title string) {
@@ -13,6 +14,7 @@ templ Layout(contents templ.Component, user models.User, title string) {
 			<div id="app" class="m-auto" data-v-app="">
 				@nav(user, title)
 				@Toast()
+				<span id="mapbox_key" class="hidden" data-key={ os.Getenv("MAPBOX_KEY") }></span>
 				<main class="max-w-7xl m-auto">
 					@contents
 				</main>
