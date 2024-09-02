@@ -2,11 +2,13 @@ package handlers
 
 import (
 	"net/http"
+	"os"
 
 	"github.com/go-chi/chi"
 	"github.com/nathanhollows/Rapua/internal/flash"
 	"github.com/nathanhollows/Rapua/internal/handlers"
 	"github.com/nathanhollows/Rapua/internal/models"
+	templates "github.com/nathanhollows/Rapua/internal/templates/admin"
 )
 
 // Locations shows admin the locations
@@ -26,12 +28,13 @@ func (h *AdminHandler) Locations(w http.ResponseWriter, r *http.Request) {
 
 // LocationNew shows the form to create a new location
 func (h *AdminHandler) LocationNew(w http.ResponseWriter, r *http.Request) {
-	handlers.SetDefaultHeaders(w)
-	data := handlers.TemplateData(r)
-	data["title"] = "New Location"
-	data["page"] = "locations"
-	data["messages"] = flash.Get(w, r)
-	handlers.Render(w, data, handlers.AdminDir, "locations_new")
+	user := h.UserFromContext(r.Context())
+
+	c := templates.AddLocation(os.Getenv("MAPBOX_KEY"))
+	err := templates.Layout(c, *user, "New Location").Render(r.Context(), w)
+	if err != nil {
+		h.Logger.Error("LocationNew: rendering template", "error", err)
+	}
 }
 
 // LocationNewPost handles creating a new location
