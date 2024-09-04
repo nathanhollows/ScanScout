@@ -12,7 +12,13 @@ templ VerifyEmail(user models.User) {
 					<p>You're almost there! We sent an email to <span class="font-bold">{ user.Email }</span></p>
 					<p>Just click on the link in that email to verify your email address and complete your registration. If you don't see it, you may need to <strong>check your spam folder</strong>.</p>
 					<p>Still didn't get the email? No problem.</p>
-					<button class="btn btn-primary btn-outline w-auto" hx-post="/verify-email/resend">Resend verification email</button>
+					<button class="btn btn-primary btn-outline w-auto flex justify-between" hx-post="/verify-email/resend" hx-target="#alerts">
+						<span class="w-6"></span>
+						<span>
+							Resend verification email
+						</span>
+						<span class="htmx-indicator loading loading-dots"></span>
+					</button>
 				</div>
 			</div>
 		</div>
