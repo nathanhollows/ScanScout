@@ -2069,23 +2069,6 @@ html {
   }
 }
 
-.kbd {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: var(--rounded-btn, 0.5rem);
-  border-width: 1px;
-  border-color: var(--fallback-bc,oklch(var(--bc)/var(--tw-border-opacity)));
-  --tw-border-opacity: 0.2;
-  --tw-bg-opacity: 1;
-  background-color: var(--fallback-b2,oklch(var(--b2)/var(--tw-bg-opacity)));
-  padding-left: 0.5rem;
-  padding-right: 0.5rem;
-  border-bottom-width: 2px;
-  min-height: 2.2em;
-  min-width: 2.2em;
-}
-
 .link {
   cursor: pointer;
   text-decoration-line: underline;
@@ -4238,15 +4221,6 @@ details.collapse summary::-webkit-details-marker {
   border-start-end-radius: inherit;
 }
 
-.kbd-sm {
-  padding-left: 0.25rem;
-  padding-right: 0.25rem;
-  font-size: 0.875rem;
-  line-height: 1.25rem;
-  min-height: 1.6em;
-  min-width: 1.6em;
-}
-
 .menu-horizontal {
   display: inline-flex;
   flex-direction: row;
@@ -4716,12 +4690,12 @@ details.collapse summary::-webkit-details-marker {
   top: 2rem;
 }
 
-.z-\[1\] {
-  z-index: 1;
-}
-
 .z-50 {
   z-index: 50;
+}
+
+.z-\[1\] {
+  z-index: 1;
 }
 
 .m-1 {
@@ -4743,11 +4717,6 @@ details.collapse summary::-webkit-details-marker {
 .mx-3 {
   margin-left: 0.75rem;
   margin-right: 0.75rem;
-}
-
-.mx-5 {
-  margin-left: 1.25rem;
-  margin-right: 1.25rem;
 }
 
 .mx-auto {
@@ -4844,10 +4813,6 @@ details.collapse summary::-webkit-details-marker {
 
 .mt-5 {
   margin-top: 1.25rem;
-}
-
-.ml-2 {
-  margin-left: 0.5rem;
 }
 
 .block {
@@ -5228,10 +5193,6 @@ details.collapse summary::-webkit-details-marker {
   border-radius: 0.5rem;
 }
 
-.rounded-none {
-  border-radius: 0px;
-}
-
 .rounded-r-full {
   border-top-right-radius: 9999px;
   border-bottom-right-radius: 9999px;
@@ -5243,10 +5204,6 @@ details.collapse summary::-webkit-details-marker {
 
 .border-2 {
   border-width: 2px;
-}
-
-.border-b {
-  border-bottom-width: 1px;
 }
 
 .border-base-300 {
@@ -5272,15 +5229,6 @@ details.collapse summary::-webkit-details-marker {
 .bg-neutral-content {
   --tw-bg-opacity: 1;
   background-color: var(--fallback-nc,oklch(var(--nc)/var(--tw-bg-opacity)));
-}
-
-.bg-transparent {
-  background-color: transparent;
-}
-
-.bg-base-300 {
-  --tw-bg-opacity: 1;
-  background-color: var(--fallback-b3,oklch(var(--b3)/var(--tw-bg-opacity)));
 }
 
 .fill-current {
@@ -5504,16 +5452,8 @@ details.collapse summary::-webkit-details-marker {
   color: var(--fallback-n,oklch(var(--n)/var(--tw-text-opacity)));
 }
 
-.underline {
-  text-decoration-line: underline;
-}
-
 .no-underline {
   text-decoration-line: none;
-}
-
-.decoration-dotted {
-  text-decoration-style: dotted;
 }
 
 .opacity-20 {

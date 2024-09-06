@@ -4,32 +4,21 @@ import (
 	"net/http"
 
 	"github.com/go-chi/chi"
-	"github.com/nathanhollows/Rapua/internal/flash"
 	"github.com/nathanhollows/Rapua/internal/handlers"
 	"github.com/nathanhollows/Rapua/internal/models"
 	"github.com/nathanhollows/Rapua/internal/services"
+	templates "github.com/nathanhollows/Rapua/internal/templates/admin"
 )
 
 // Activity displays the activity tracker page
 func (h *AdminHandler) Activity(w http.ResponseWriter, r *http.Request) {
-	handlers.SetDefaultHeaders(w)
-	data := handlers.TemplateData(r)
-	data["title"] = "Activity tracker"
-	data["page"] = "activity"
-
 	user := h.UserFromContext(r.Context())
-	data["locations"] = user.CurrentInstance.Locations
-	for i := range user.CurrentInstance.Teams {
-		if !user.CurrentInstance.Teams[i].HasStarted {
-			continue
-		}
-		user.CurrentInstance.Teams[i].LoadScans(r.Context())
-	}
-	data["teams"] = user.CurrentInstance.Teams
 
-	data["messages"] = flash.Get(w, r)
-	// Render the template
-	handlers.Render(w, data, handlers.AdminDir, "activity")
+	c := templates.ActivityTracker(*user)
+	err := templates.Layout(c, *user, "Activity", "Activity").Render(r.Context(), w)
+	if err != nil {
+		h.Logger.Error("Activity: rendering template", "error", err)
+	}
 }
 
 // TeamActivity displays the activity tracker page

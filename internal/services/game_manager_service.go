@@ -422,19 +422,17 @@ func (s *GameManagerService) UpdateSettings(ctx context.Context, settings *model
 func (s *GameManagerService) StartGame(ctx context.Context, user *models.User) (response ServiceResponse) {
 	response = ServiceResponse{}
 
-	instance := user.CurrentInstance
-
 	// Check if the game is already active
-	if instance.GetStatus() == models.Active {
-		response.AddFlashMessage(*flash.NewError("Game is already active"))
+	if user.CurrentInstance.GetStatus() == models.Active {
+		response.AddFlashMessage(*flash.NewInfo("Game is already active"))
 		response.Error = errors.New("game is already active")
 		return response
 	}
 
 	// Start the game
-	instance.StartTime = bun.NullTime{Time: time.Now()}
-	instance.EndTime = bun.NullTime{}
-	err := instance.Update(ctx)
+	user.CurrentInstance.StartTime = bun.NullTime{Time: time.Now()}
+	user.CurrentInstance.EndTime = bun.NullTime{}
+	err := user.CurrentInstance.Update(ctx)
 	if err != nil {
 		response.AddFlashMessage(*flash.NewError("Error updating instance"))
 		response.Error = fmt.Errorf("updating instance with new time: %w", err)
@@ -450,17 +448,15 @@ func (s *GameManagerService) StartGame(ctx context.Context, user *models.User) (
 func (s *GameManagerService) StopGame(ctx context.Context, user *models.User) (response ServiceResponse) {
 	response = ServiceResponse{}
 
-	instance := user.CurrentInstance
-
 	// Check if the game is already closed
-	if instance.GetStatus() == models.Closed {
+	if user.CurrentInstance.GetStatus() == models.Closed {
 		response.AddFlashMessage(*flash.NewError("Game is already over"))
 		response.Error = errors.New("game is already closed")
 		return response
 	}
 
-	instance.EndTime = bun.NullTime{Time: time.Now()}
-	err := instance.Update(ctx)
+	user.CurrentInstance.EndTime = bun.NullTime{Time: time.Now()}
+	err := user.CurrentInstance.Update(ctx)
 	if err != nil {
 		response.AddFlashMessage(*flash.NewError("Error updating instance"))
 		response.Error = fmt.Errorf("updating instance with new time: %w", err)
