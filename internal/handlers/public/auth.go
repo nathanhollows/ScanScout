@@ -78,8 +78,15 @@ func (h *PublicHandler) Logout(w http.ResponseWriter, r *http.Request) {
 
 // RegisterHandler is the handler for the admin register page
 func (h *PublicHandler) Register(w http.ResponseWriter, r *http.Request) {
+	user, err := h.UserServices.AuthService.GetAuthenticatedUser(r)
+	if err == nil || user != nil {
+		// User is already authenticated, redirect to the admin page
+		http.Redirect(w, r, "/admin", http.StatusSeeOther)
+		return
+	}
+
 	c := templates.Register(h.UserServices.AuthService.AllowGoogleLogin())
-	err := templates.AuthLayout(c, "Register").Render(r.Context(), w)
+	err = templates.AuthLayout(c, "Register").Render(r.Context(), w)
 
 	if err != nil {
 		h.Logger.Error("rendering register page", "err", err)
@@ -116,8 +123,15 @@ func (h *PublicHandler) RegisterPost(w http.ResponseWriter, r *http.Request) {
 
 // ForgotPasswordHandler is the handler for the forgot password page
 func (h *PublicHandler) ForgotPassword(w http.ResponseWriter, r *http.Request) {
+	user, err := h.UserServices.AuthService.GetAuthenticatedUser(r)
+	if err == nil || user != nil {
+		// User is already authenticated, redirect to the admin page
+		http.Redirect(w, r, "/admin", http.StatusSeeOther)
+		return
+	}
+
 	c := templates.ForgotPassword()
-	err := templates.AuthLayout(c, "Forgot Password").Render(r.Context(), w)
+	err = templates.AuthLayout(c, "Forgot Password").Render(r.Context(), w)
 
 	if err != nil {
 		h.Logger.Error("rendering forgot password page", "err", err)
