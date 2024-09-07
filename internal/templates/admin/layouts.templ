@@ -39,7 +39,7 @@ templ header(title string) {
 	</head>
 }
 
-templ nav(user models.User, section string, title string) {
+templ nav(user models.User, section string) {
 	<div class="bg-base-200">
 		<div class="navbar max-w-7xl font-bold m-auto">
 			<div class="navbar-start w-min sm:w-1/2">
@@ -223,6 +223,18 @@ templ nav(user models.User, section string, title string) {
 								Manage instances
 							</a>
 						</li>
+					</ul>
+				</div>
+				<div class="dropdown dropdown-end">
+					<div tabindex="0" role="button" class="btn btn-ghost btn-circle avatar">
+						<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-user-round w-7 h-7"><path d="M18 20a6 6 0 0 0-12 0"></path><circle cx="12" cy="10" r="4"></circle><circle cx="12" cy="12" r="10"></circle></svg>
+					</div>
+					<ul
+						tabindex="0"
+						class="menu menu-sm dropdown-content bg-base-200 rounded-box z-[1] mt-3 w-52 p-2 shadow-lg"
+					>
+						<li><a href="/pricing">Contribute</a></li>
+						<li><a href="/logout">Logout</a></li>
 					</ul>
 				</div>
 			</div>
