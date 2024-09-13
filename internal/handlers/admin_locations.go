@@ -3,7 +3,6 @@ package handlers
 import (
 	"net/http"
 
-	"github.com/charmbracelet/log"
 	"github.com/go-chi/chi"
 	"github.com/nathanhollows/Rapua/internal/contextkeys"
 	"github.com/nathanhollows/Rapua/internal/flash"
@@ -44,20 +43,4 @@ func AdminLocationQRZipHandler(w http.ResponseWriter, r *http.Request) {
 	// Serve the file
 	http.ServeFile(w, r, archive)
 
-}
-
-func AdminLocationPostersHandler(w http.ResponseWriter, r *http.Request) {
-	posters, err := models.GeneratePosters(r.Context(), r.Context().Value(contextkeys.UserKey).(*models.User).CurrentInstanceID)
-	if err != nil {
-		log.Error(err)
-		flash.NewError("Posters could not be generated").Save(w, r)
-		http.Redirect(w, r, "/admin/locations", http.StatusSeeOther)
-		return
-	}
-
-	// Overwrite the file download header
-	instance := r.Context().Value(contextkeys.UserKey).(*models.User).CurrentInstance
-	w.Header().Set("Content-Disposition", "attachment; filename="+instance.Name+" posters.pdf")
-	// Serve the file
-	http.ServeFile(w, r, posters)
 }
