@@ -209,7 +209,15 @@ templ ActivityTracker(user models.User) {
 }
 
 templ ActivityTeamsTable(locations models.Locations, teams models.Teams) {
-	<table class="table table-sm w-full mt-5 md:mt-0 md:w-7/12 h-auto self-start">
+	<table
+		id="team-activity"
+		class="table table-sm w-full mt-5 md:mt-0 md:w-7/12 h-auto self-start"
+		hx-get="/admin/activity/teams"
+		hx-target="#team-activity"
+		hx-indicator=".loading"
+		hx-swap="outerHTML"
+		hx-trigger="every 30s"
+	>
 		<thead>
 			<tr class="text-center">
 				<th
@@ -235,6 +243,7 @@ templ ActivityTeamsTable(locations models.Locations, teams models.Teams) {
 									hx-target="#team_modal .modal-box"
 									hx-trigger="click"
 									hx-indicator=".loading"
+									hx-swap="innerHTML"
 								>
 									{ location }
 									<span class="loading loading-spinner loading-lg" style="display:none;"></span>

@@ -149,6 +149,7 @@ func setupAdminRoutes(router chi.Router, adminHandler *admin.AdminHandler) {
 		r.Get("/", adminHandler.Activity)
 		r.Route("/activity", func(r chi.Router) {
 			r.Get("/", adminHandler.Activity)
+			r.Get("/teams", adminHandler.ActivityTeamsOverview)
 			r.Get("/team/{teamCode}", adminHandler.TeamActivity)
 		})
 

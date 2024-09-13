@@ -21,6 +21,16 @@ func (h *AdminHandler) Activity(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// ActivityTeamsOverview displays the activity tracker page
+func (h *AdminHandler) ActivityTeamsOverview(w http.ResponseWriter, r *http.Request) {
+	user := h.UserFromContext(r.Context())
+
+	err := templates.ActivityTeamsTable(user.CurrentInstance.Locations, user.CurrentInstance.Teams).Render(r.Context(), w)
+	if err != nil {
+		h.Logger.Error("ActivityTeamsOverview: rendering template", "error", err)
+	}
+}
+
 // TeamActivity displays the activity tracker page
 // It accepts HTMX requests to update the team activity
 func (h *AdminHandler) TeamActivity(w http.ResponseWriter, r *http.Request) {
