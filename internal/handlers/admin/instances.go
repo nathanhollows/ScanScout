@@ -6,17 +6,18 @@ import (
 	"github.com/go-chi/chi"
 	"github.com/nathanhollows/Rapua/internal/flash"
 	"github.com/nathanhollows/Rapua/internal/handlers"
+	templates "github.com/nathanhollows/Rapua/internal/templates/admin"
 )
 
 // Instances shows admin the instances
 func (h *AdminHandler) Instances(w http.ResponseWriter, r *http.Request) {
-	handlers.SetDefaultHeaders(w)
-	data := handlers.TemplateData(r)
-	data["title"] = "Instances"
-	data["page"] = "instances"
+	user := h.UserFromContext(r.Context())
 
-	data["messages"] = flash.Get(w, r)
-	handlers.Render(w, data, handlers.AdminDir, "instances_index")
+	c := templates.Instances(user.Instances, user.CurrentInstance)
+	err := templates.Layout(c, *user, "Instances", "Instances").Render(r.Context(), w)
+	if err != nil {
+		h.Logger.Error("Instances: rendering template", "error", err)
+	}
 }
 
 // InstancesCreate creates a new instance

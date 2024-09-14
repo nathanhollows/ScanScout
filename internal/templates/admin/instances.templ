@@ -1,0 +1,195 @@
+package templates
+
+import (
+	"fmt"
+	"github.com/nathanhollows/Rapua/internal/models"
+)
+
+templ Instances(instances models.Instances, currentInstance models.Instance) {
+	<div class="flex flex-row justify-between items-center w-full p-5">
+		<h1 class="text-2xl font-bold">Instances</h1>
+		<button
+			class="btn btn-secondary"
+			onclick="new_modal.showModal()"
+		>
+			<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-plus w-5 h-5"><path d="M5 12h14"></path><path d="M12 5v14"></path></svg>
+			Create a new instance
+		</button>
+	</div>
+	if len(instances) > 0 {
+		<div class=":">
+			<table class="table">
+				<thead>
+					<tr>
+						<th class="text-left">Name</th>
+						<th class="text-left">Actions</th>
+					</tr>
+				</thead>
+				<tbody>
+					for _, instance := range instances {
+						<tr class="hover">
+							<td class="font-bold">{ instance.Name }</td>
+							<td>
+								if instance.ID == currentInstance.ID {
+									<span class="tooltip cursor-not-allowed" data-tip="Already active">
+										<a
+											href={ templ.SafeURL(fmt.Sprint("/admin/instances/", fmt.Sprint(instance.ID), "/switch")) }
+											class="btn btn-sm"
+											disabled
+										>
+											Activate
+										</a>
+									</span>
+								} else {
+									<a
+										href={ templ.SafeURL(fmt.Sprint("/admin/instances/", fmt.Sprint(instance.ID), "/switch")) }
+										class="btn btn-sm"
+									>
+										Activate
+									</a>
+								}
+								<button
+									class="btn btn-sm btn-secondary"
+									data-id={ fmt.Sprint(instance.ID) }
+									data-name={ instance.Name }
+									onclick="confirmDuplicate()"
+								>
+									Duplicate
+								</button>
+								if instance.ID == currentInstance.ID {
+									<span class="tooltip cursor-not-allowed" data-tip="Cannot delete current instance">
+										<button
+											class="btn btn-sm btn-error tooltip"
+											data-tip="Cannot delete current instance"
+											aria-disabled="true"
+											aria-label="Cannot delete current instance"
+											disabled
+										>
+											Delete
+										</button>
+									</span>
+								} else {
+									<button
+										class="btn btn-sm btn-error"
+										data-id={ fmt.Sprint(instance.ID) }
+										data-name={ instance.Name }
+										onclick="confirmDelete()"
+									>
+										Delete
+									</button>
+								}
+							</td>
+						</tr>
+					}
+				</tbody>
+			</table>
+		</div>
+	} else {
+		<p class="py-4">No instances to show.</p>
+	}
+	<dialog id="confirm_duplicate_modal" class="modal">
+		<div class="modal-box prose">
+			<h3 class="text-lg font-bold">Duplicate an instance</h3>
+			<p class="pt-4">You are about to duplicate an instance including:</p>
+			<ul class="mt-0">
+				<li>all associated locations</li>
+				<li>all associated events</li>
+			</ul>
+			This will <strong>not</strong> duplicate any teams or activities/check-ins.
+			<form method="post" action="/admin/instances/duplicate">
+				<label class="form-control w-full">
+					<div class="label">
+						<span class="label-text">New instance name</span>
+					</div>
+					<input type="text" class="input input-bordered w-full" name="name" required/>
+					<input type="hidden" name="id" value=""/>
+				</label>
+				<div class="modal-action">
+					<button type="button" class="btn" onclick="confirm_duplicate_modal.close()">Nevermind</button>
+					<button type="submit" class="btn btn-primary">Duplicate</button>
+				</div>
+			</form>
+		</div>
+	</dialog>
+	<dialog id="confirm_delete_modal" class="modal">
+		<div class="modal-box prose outline outline-1 outline-offset-1 outline-error">
+			<h3 class="text-lg font-bold">Delete an instance</h3>
+			<p class="pt-4">You are about to delete an instance. Doing this will delete:</p>
+			<ul>
+				<li>all associated teams</li>
+				<li>all associated locations</li>
+				<li>all associated activities/scans</li>
+			</ul>
+			<p>To confirm, please type the name of the instance you want to delete: <code id="instance_name">instance</code></p>
+			<form method="post" action="/admin/instances/delete">
+				<label class="form-control w-full">
+					<div class="label">
+						<span class="label-text">Instance name</span>
+					</div>
+					<input type="text" class="input input-bordered w-full" name="name" required/>
+					<input type="hidden" name="id" value=""/>
+				</label>
+				<div class="modal-action">
+					<button type="button" class="btn" onclick="confirm_delete_modal.close()">Nevermind</button>
+					<button type="submit" class="btn btn-error">Delete</button>
+				</div>
+			</form>
+		</div>
+	</dialog>
+	<dialog id="new_modal" class="modal">
+		<div class="modal-box">
+			<form method="post" action="/admin/instances/new">
+				<h3 class="text-lg font-bold">Create a new instance</h3>
+				<label class="form-control w-full">
+					<div class="label">
+						<span class="label-text">What is the name of the new instance?</span>
+					</div>
+					<input type="text" class="input input-bordered w-full" name="name" required/>
+				</label>
+				<div class="modal-action">
+					<button
+						class="btn"
+						type="button"
+						onclick="new_modal.close()"
+					>
+						Nevermind
+					</button>
+					<button type="submit" class="btn btn-primary">Save</button>
+				</div>
+			</form>
+		</div>
+	</dialog>
+	<script>
+// Delete modal
+const confirm_delete_modal = document.getElementById('confirm_delete_modal');
+
+function confirmDelete() {
+  const id = event.target.dataset.id;
+  const name = event.target.dataset.name;
+  const instance_name = document.getElementById('instance_name');
+  const form = confirm_delete_modal.querySelector('form');
+  const input = form.querySelector('input[name="name"]');
+  const hidden = form.querySelector('input[name="id"]');
+
+  instance_name.textContent = name;
+  input.value = '';
+  hidden.value = id;
+
+  confirm_delete_modal.showModal();
+}
+
+function confirmDuplicate() {
+  const id = event.target.dataset.id;
+  const name = event.target.dataset.name;
+  const form = document.getElementById('confirm_duplicate_modal').querySelector('form');
+  const input = form.querySelector('input[name="name"]');
+  const hidden = form.querySelector('input[name="id"]');
+
+  input.value = name + ' (copy)';
+  hidden.value = id;
+
+  confirm_duplicate_modal.showModal();
+}
+
+</script>
+}
