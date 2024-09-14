@@ -187,3 +187,40 @@ func (h *AdminHandler) LocationEditPost(w http.ResponseWriter, r *http.Request) 
 		h.Logger.Error("LocationEditPost: rendering toast:", "error", err)
 	}
 }
+
+// LocationDelete handles deleting a location
+func (h *AdminHandler) LocationDelete(w http.ResponseWriter, r *http.Request) {
+	locationCode := chi.URLParam(r, "id")
+
+	user := h.UserFromContext(r.Context())
+	user.CurrentInstance.LoadLocations(r.Context())
+
+	// Make sure the location exists and is part of the current instance
+	var location models.Location
+	for _, l := range user.CurrentInstance.Locations {
+		if l.MarkerID == locationCode {
+			location = l
+			break
+		}
+	}
+	if location.MarkerID == "" {
+		h.Logger.Error("LocationDelete: finding location", "error", "location not found")
+		err := templates.Toast(*flash.NewError("Location not found")).Render(r.Context(), w)
+		if err != nil {
+			h.Logger.Error("LocationDelete: rendering toast:", "error", err)
+		}
+		return
+	}
+
+	err := h.GameManagerService.DeleteLocation(r.Context(), &location)
+	if err != nil {
+		h.Logger.Error("LocationDelete: deleting location", "error", err)
+		err := templates.Toast(*flash.NewError("Error deleting location")).Render(r.Context(), w)
+		if err != nil {
+			h.Logger.Error("LocationDelete: rendering toast:", "error", err)
+		}
+		return
+	}
+
+	w.Header().Set("HX-Redirect", "/admin/locations")
+}

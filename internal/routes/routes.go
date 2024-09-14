@@ -159,6 +159,7 @@ func setupAdminRoutes(router chi.Router, adminHandler *admin.AdminHandler) {
 			r.Post("/new", adminHandler.LocationNewPost)
 			r.Get("/{id}", adminHandler.LocationEdit)
 			r.Post("/{id}", adminHandler.LocationEditPost)
+			r.Delete("/{id}", adminHandler.LocationDelete)
 			// Disabled for now
 			// r.Get("/qr/{id}.png", handlers.AdminLocationQRHandler)
 			r.Get("/qr-codes.zip", handlers.AdminLocationQRZipHandler)

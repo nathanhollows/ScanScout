@@ -601,3 +601,8 @@ func (s *GameManagerService) UpdateClues(ctx context.Context, location *models.L
 
 	return nil
 }
+
+// DeleteLocation deletes a location
+func (s *GameManagerService) DeleteLocation(ctx context.Context, location *models.Location) error {
+	return location.Delete(ctx)
+}
