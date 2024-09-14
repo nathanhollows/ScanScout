@@ -32,6 +32,7 @@ func adminGenerateQRHandler(w http.ResponseWriter, r *http.Request) {
 func AdminLocationQRZipHandler(w http.ResponseWriter, r *http.Request) {
 	archive, err := models.GenerateQRCodeArchive(r.Context(), r.Context().Value(contextkeys.UserKey).(*models.User).CurrentInstanceID)
 	if err != nil {
+		log.Error("QR codes could not be zipped", "error", err, "instance", r.Context().Value(contextkeys.UserKey).(*models.User).CurrentInstanceID)
 		flash.NewError("QR codes could not be zipped").Save(w, r)
 		http.Redirect(w, r, "/admin/locations", http.StatusSeeOther)
 		return
