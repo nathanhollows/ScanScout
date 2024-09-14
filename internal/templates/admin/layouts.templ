@@ -40,12 +40,17 @@ templ header(title string) {
 		<script src="https://unpkg.com/htmx.org@1.8.5" integrity="sha384-7aHh9lqPYGYZ7sTHvzP1t3BAfLhYSTy9ArHdP3Xsr9/3TlGurYgcPBoFmXX2TX/w" crossorigin="anonymous" defer></script>
 		<script src="https://api.mapbox.com/mapbox-gl-js/v2.10.0/mapbox-gl.js"></script>
 		<link href="https://api.mapbox.com/mapbox-gl-js/v2.10.0/mapbox-gl.css" rel="stylesheet"/>
+		<script src="/assets/js/Sortable.min.js"></script>
+		<script src="/assets/js/htmx.min.js"></script>
 	</head>
 }
 
 templ nav(user models.User, section string) {
 	<div class="bg-base-200">
-		<div class="navbar max-w-7xl font-bold m-auto">
+		<div
+			class="navbar max-w-7xl font-bold m-auto"
+			hx-boost="true"
+		>
 			<div class="navbar-start w-min sm:w-1/2">
 				<div class="dropdown">
 					<div
@@ -71,7 +76,6 @@ templ nav(user models.User, section string) {
 					<ul
 						tabindex="0"
 						class="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow-xl bg-base-200 rounded-box w-52"
-						hx-boost="true"
 					>
 						<li>
 							<a
@@ -127,7 +131,6 @@ templ nav(user models.User, section string) {
 			<div class="navbar-center hidden lg:flex">
 				<ul
 					class="menu menu-horizontal px-1 gap-x-1"
-					hx-boost="true"
 				>
 					<li>
 						<a
