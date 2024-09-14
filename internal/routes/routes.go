@@ -9,7 +9,6 @@ import (
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
 	"github.com/nathanhollows/Rapua/internal/filesystem"
-	"github.com/nathanhollows/Rapua/internal/handlers"
 	admin "github.com/nathanhollows/Rapua/internal/handlers/admin"
 	players "github.com/nathanhollows/Rapua/internal/handlers/players"
 	public "github.com/nathanhollows/Rapua/internal/handlers/public"
@@ -162,7 +161,7 @@ func setupAdminRoutes(router chi.Router, adminHandler *admin.AdminHandler) {
 			r.Delete("/{id}", adminHandler.LocationDelete)
 			// Disabled for now
 			// r.Get("/qr/{id}.png", handlers.AdminLocationQRHandler)
-			r.Get("/qr-codes.zip", handlers.AdminLocationQRZipHandler)
+			r.Get("/qr-codes.zip", adminHandler.GenerateQRCodeArchive)
 			r.Get("/posters.pdf", adminHandler.GeneratePosters)
 			r.Post("/reorder", adminHandler.ReorderLocations)
 		})
