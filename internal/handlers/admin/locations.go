@@ -5,24 +5,20 @@ import (
 
 	"github.com/go-chi/chi"
 	"github.com/nathanhollows/Rapua/internal/flash"
-	"github.com/nathanhollows/Rapua/internal/handlers"
 	"github.com/nathanhollows/Rapua/internal/models"
 	templates "github.com/nathanhollows/Rapua/internal/templates/admin"
 )
 
 // Locations shows admin the locations
 func (h *AdminHandler) Locations(w http.ResponseWriter, r *http.Request) {
-	handlers.SetDefaultHeaders(w)
-	data := handlers.TemplateData(r)
-	data["title"] = "Locations"
-	data["page"] = "locations"
-
 	user := h.UserFromContext(r.Context())
-	user.CurrentInstance.Locations.LoadClues(r.Context())
-	data["locations"] = user.CurrentInstance.Locations
 
-	data["messages"] = flash.Get(w, r)
-	handlers.Render(w, data, handlers.AdminDir, "locations_index")
+	c := templates.LocationsIndex(user.CurrentInstance.Settings, user.CurrentInstance.Locations)
+	err := templates.Layout(c, *user, "Locations", "Locations").Render(r.Context(), w)
+	if err != nil {
+		h.Logger.Error("Locations: rendering template", "error", err)
+	}
+
 }
 
 // LocationNew shows the form to create a new location
