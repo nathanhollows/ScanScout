@@ -11,6 +11,7 @@ templ LocationsIndex(settings models.InstanceSettings, locations models.Location
 		<h1 class="text-2xl font-bold">
 			Locations 
 			<span class="badge badge-ghost">{ fmt.Sprint(len(locations)) }</span>
+			<span class="htmx-indicator loading loading-dots loading-md text-info">Updating</span>
 		</h1>
 		<span class="flex md:flex-row flex-wrap justify-center space-x-3">
 			if len(locations) > 1 {
@@ -51,6 +52,7 @@ templ LocationsIndex(settings models.InstanceSettings, locations models.Location
 			hx-post="/admin/locations/reorder"
 			hx-trigger="end"
 			hx-swap="none"
+			hx-indicator=".htmx-indicator"
 		>
 			for _, location := range locations {
 				<div
@@ -147,34 +149,6 @@ htmx.onLoad(function(content) {
       });
     }
 })
-
-htmx.on('htmx:beforeRequest', function(evt) {
-  const toastContainer = document.getElementById('toast-container');
-  if (!toastContainer) {
-    const container = document.createElement('div');
-    container.id = 'toast-container';
-    container.className = 'toast toast-end';
-    document.body.appendChild(container);
-  }
-});
-
-htmx.on('htmx:afterRequest', function(evt) {
-  const toastContainer = document.getElementById('toast-container');
-
-  const showToast = (message, type) => {
-    const toast = document.createElement('div');
-    toast.className = `alert alert-${type}`;
-    toast.innerHTML = `<span>${message}</span>`;
-    toastContainer.appendChild(toast);
-    setTimeout(() => toast.remove(), 5000);
-  };
-
-  if (evt.detail.successful) {
-    showToast('Locations reordered successfully!', 'success');
-  } else {
-    showToast('Failed to reorder locations.', 'error');
-  }
-});
 </script>
 }
 
