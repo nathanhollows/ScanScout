@@ -4,7 +4,7 @@ import (
 	"net/http"
 
 	"github.com/go-chi/chi"
-	"github.com/nathanhollows/Rapua/internal/handlers"
+	"github.com/nathanhollows/Rapua/internal/flash"
 	"github.com/nathanhollows/Rapua/internal/models"
 	"github.com/nathanhollows/Rapua/internal/services"
 	templates "github.com/nathanhollows/Rapua/internal/templates/admin"
@@ -34,17 +34,19 @@ func (h *AdminHandler) ActivityTeamsOverview(w http.ResponseWriter, r *http.Requ
 // TeamActivity displays the activity tracker page
 // It accepts HTMX requests to update the team activity
 func (h *AdminHandler) TeamActivity(w http.ResponseWriter, r *http.Request) {
-	handlers.SetDefaultHeaders(w)
-	data := handlers.TemplateData(r)
-
 	user := h.UserFromContext(r.Context())
 
 	gameplayService := &services.GameplayService{}
 	team, err := gameplayService.GetTeamByCode(r.Context(), chi.URLParam(r, "teamCode"))
 	if err != nil || team.InstanceID != user.CurrentInstanceID {
-		http.Error(w, "Team not found", http.StatusNotFound)
+		h.Logger.Error("TeamActivity: team not found", "error", err, "instanceID", user.CurrentInstanceID, "teamCode", chi.URLParam(r, "teamCode"))
+		err := templates.Toast(*flash.NewError("Team not found")).Render(r.Context(), w)
+		if err != nil {
+			h.Logger.Error("TeamActivity: rendering template", "error", err)
+		}
 		return
 	}
+
 	team.LoadScans(r.Context())
 	response := gameplayService.SuggestNextLocations(r.Context(), team, user.CurrentInstance.Settings.MaxNextLocations)
 	if response.Error != nil {
@@ -58,9 +60,9 @@ func (h *AdminHandler) TeamActivity(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	data["notifications"] = notifications
-	data["settings"] = user.CurrentInstance.Settings
-	data["locations"] = response.Data["nextLocations"].(models.Locations)
-	data["team"] = team
-	handlers.RenderHTMX(w, data, handlers.AdminDir, "team_activity")
+	err = templates.TeamActivity(user.CurrentInstance.Settings, *team, notifications, response.Data["nextLocations"].(models.Locations)).Render(r.Context(), w)
+	if err != nil {
+		h.Logger.Error("TeamActivity: rendering template", "error", err)
+	}
+
 }
