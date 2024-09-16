@@ -29,8 +29,10 @@ templ TeamsList(teams models.Teams) {
 }
 
 templ Teams(teams models.Teams) {
-	<div class="flex flex-row justify-between items-center w-full p-5">
-		<h1 class="text-2xl font-bold">Teams</h1>
+	<div class="flex flex-col gap-3 md:flex-row justify-between items-center w-full p-5">
+		<h1 class="text-2xl font-bold">
+			Teams
+		</h1>
 		<div class="flex gap-3">
 			if len(teams) > 0 {
 				<button
