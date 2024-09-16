@@ -15,7 +15,7 @@ templ Layout(contents templ.Component, user models.User, section string, title s
 		<body class="h-full">
 			<div id="app" class="m-auto" data-v-app="">
 				@nav(user, section)
-				@Toast()
+				<div class="toast toast-center z-50" id="alerts"></div>
 				<span id="mapbox_key" class="hidden" data-key={ os.Getenv("MAPBOX_KEY") }></span>
 				<main class="max-w-7xl m-auto pb-8">
 					@contents
