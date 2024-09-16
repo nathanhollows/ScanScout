@@ -18,6 +18,11 @@ func (h *PlayerHandler) Next(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if team.MustScanOut != "" {
+		http.Redirect(w, r, "/checkins", http.StatusFound)
+		return
+	}
+
 	response := h.GameplayService.SuggestNextLocations(r.Context(), team, 3)
 	for _, message := range response.FlashMessages {
 		message.Save(w, r)

@@ -63,20 +63,6 @@ func (s *NavigationService) DetermineNextLocations(ctx context.Context, team *mo
 		return response
 	}
 
-	// Check if the team has a blocking location
-	if team.MustScanOut != "" {
-		err := team.LoadBlockingLocation(ctx)
-		if err != nil {
-			msg := flash.NewError("Something went wrong. Please try again.")
-			response.AddFlashMessage(*msg)
-			response.Error = fmt.Errorf("load blocking location: %w", err)
-			return response
-		}
-		response.Data["blockingLocation"] = team.BlockingLocation
-		response.AddFlashMessage(*flash.NewWarning("You must scan out of " + team.BlockingLocation.Name + " first."))
-		return response
-	}
-
 	// Check if the team has visited all locations
 	if len(team.Scans) == len(team.Instance.Locations) {
 		response.Error = errors.New("all locations visited")

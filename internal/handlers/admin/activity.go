@@ -36,8 +36,10 @@ func (h *AdminHandler) ActivityTeamsOverview(w http.ResponseWriter, r *http.Requ
 func (h *AdminHandler) TeamActivity(w http.ResponseWriter, r *http.Request) {
 	user := h.UserFromContext(r.Context())
 
+	teamCode := chi.URLParam(r, "teamCode")
+
 	gameplayService := &services.GameplayService{}
-	team, err := gameplayService.GetTeamByCode(r.Context(), chi.URLParam(r, "teamCode"))
+	team, err := gameplayService.GetTeamByCode(r.Context(), teamCode)
 	if err != nil || team.InstanceID != user.CurrentInstanceID {
 		h.Logger.Error("TeamActivity: team not found", "error", err, "instanceID", user.CurrentInstanceID, "teamCode", chi.URLParam(r, "teamCode"))
 		err := templates.Toast(*flash.NewError("Team not found")).Render(r.Context(), w)
@@ -60,7 +62,14 @@ func (h *AdminHandler) TeamActivity(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = templates.TeamActivity(user.CurrentInstance.Settings, *team, notifications, response.Data["nextLocations"].(models.Locations)).Render(r.Context(), w)
+	var nextLocations models.Locations
+	if response.Data["nextLocations"] == nil {
+		nextLocations = models.Locations{}
+	} else {
+		nextLocations = response.Data["nextLocations"].(models.Locations)
+	}
+
+	err = templates.TeamActivity(user.CurrentInstance.Settings, *team, notifications, nextLocations).Render(r.Context(), w)
 	if err != nil {
 		h.Logger.Error("TeamActivity: rendering template", "error", err)
 	}
