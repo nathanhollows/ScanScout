@@ -14,8 +14,13 @@ import (
 func (h *AdminHandler) Activity(w http.ResponseWriter, r *http.Request) {
 	user := h.UserFromContext(r.Context())
 
+	err := h.GameManagerService.LoadTeams(r.Context(), &user.CurrentInstance.Teams)
+	if err != nil {
+		h.Logger.Error("Activity: loading teams", "error", err)
+	}
+
 	c := templates.ActivityTracker(*user)
-	err := templates.Layout(c, *user, "Activity", "Activity").Render(r.Context(), w)
+	err = templates.Layout(c, *user, "Activity", "Activity").Render(r.Context(), w)
 	if err != nil {
 		h.Logger.Error("Activity: rendering template", "error", err)
 	}
@@ -25,7 +30,12 @@ func (h *AdminHandler) Activity(w http.ResponseWriter, r *http.Request) {
 func (h *AdminHandler) ActivityTeamsOverview(w http.ResponseWriter, r *http.Request) {
 	user := h.UserFromContext(r.Context())
 
-	err := templates.ActivityTeamsTable(user.CurrentInstance.Locations, user.CurrentInstance.Teams).Render(r.Context(), w)
+	err := h.GameManagerService.LoadTeams(r.Context(), &user.CurrentInstance.Teams)
+	if err != nil {
+		h.Logger.Error("Activity: loading teams", "error", err)
+	}
+
+	err = templates.ActivityTeamsTable(user.CurrentInstance.Locations, user.CurrentInstance.Teams).Render(r.Context(), w)
 	if err != nil {
 		h.Logger.Error("ActivityTeamsOverview: rendering template", "error", err)
 	}

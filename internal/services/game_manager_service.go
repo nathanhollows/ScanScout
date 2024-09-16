@@ -144,6 +144,16 @@ func (s *GameManagerService) DuplicateInstance(ctx context.Context, user *models
 	return response
 }
 
+func (s *GameManagerService) LoadTeams(ctx context.Context, teams *models.Teams) error {
+	for i := range *teams {
+		err := (*teams)[i].LoadScans(ctx)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 func (s *GameManagerService) DeleteInstance(ctx context.Context, user *models.User, instanceID, confirmName string) (response ServiceResponse) {
 	response = ServiceResponse{}
 	instance, err := models.FindInstanceByID(ctx, instanceID)

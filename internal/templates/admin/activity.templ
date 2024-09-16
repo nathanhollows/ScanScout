@@ -281,7 +281,7 @@ templ ActivityTeamsTable(locations models.Locations, teams models.Teams) {
 // ● for visiting, ✔ for visited, blank for not visited
 func teamLocationMatrix(locations models.Locations, teams models.Teams) [][]string {
 	matrix := make([][]string, len(teams))
-	for i, _ := range matrix {
+	for i := range matrix {
 		matrix[i] = make([]string, len(locations)+1)
 	}
 	// Sort teams by code
@@ -297,13 +297,16 @@ func teamLocationMatrix(locations models.Locations, teams models.Teams) [][]stri
 		}
 		matrix[i][0] = team.Code
 		for j, location := range locations {
-			if team.MustScanOut == location.MarkerID {
-				matrix[i][j] = "●"
+			if team.MustScanOut == location.ID {
+				matrix[i][j+1] = "●"
 				continue
 			}
+			fmt.Println(team.Scans)
 			for _, visit := range team.Scans {
+				fmt.Println(visit.LocationID, location.ID)
+				fmt.Println(visit.LocationID == location.ID)
 				if visit.LocationID == location.ID {
-					matrix[i][j] = "✔"
+					matrix[i][j+1] = "✔"
 					break
 				}
 			}
