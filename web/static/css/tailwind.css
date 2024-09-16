@@ -5263,6 +5263,10 @@ details.collapse summary::-webkit-details-marker {
   flex-direction: row;
 }
 
+.flex-row-reverse {
+  flex-direction: row-reverse;
+}
+
 .flex-col {
   flex-direction: column;
 }
@@ -5275,12 +5279,24 @@ details.collapse summary::-webkit-details-marker {
   align-content: center;
 }
 
+.content-start {
+  align-content: flex-start;
+}
+
 .items-start {
   align-items: flex-start;
 }
 
 .items-center {
   align-items: center;
+}
+
+.justify-normal {
+  justify-content: normal;
+}
+
+.justify-start {
+  justify-content: flex-start;
 }
 
 .justify-end {
@@ -5870,6 +5886,10 @@ details.collapse summary::-webkit-details-marker {
     flex-direction: row;
   }
 
+  .sm\:justify-start {
+    justify-content: flex-start;
+  }
+
   .sm\:overflow-y-auto {
     overflow-y: auto;
   }
@@ -5912,6 +5932,10 @@ details.collapse summary::-webkit-details-marker {
 
   .md\:flex-row {
     flex-direction: row;
+  }
+
+  .md\:justify-start {
+    justify-content: flex-start;
   }
 
   .md\:space-x-24 > :not([hidden]) ~ :not([hidden]) {
