@@ -301,10 +301,7 @@ func teamLocationMatrix(locations models.Locations, teams models.Teams) [][]stri
 				matrix[i][j+1] = "●"
 				continue
 			}
-			fmt.Println(team.Scans)
 			for _, visit := range team.Scans {
-				fmt.Println(visit.LocationID, location.ID)
-				fmt.Println(visit.LocationID == location.ID)
 				if visit.LocationID == location.ID {
 					matrix[i][j+1] = "✔"
 					break
