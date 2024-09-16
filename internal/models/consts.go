@@ -28,9 +28,9 @@ const (
 const (
 	CheckInOnly CompletionMethod = iota
 	CheckInAndOut
-	SubmitContent
-	Password
-	ClickButton
+	// SubmitContent
+	// Password
+	// ClickButton
 )
 
 const (
@@ -51,7 +51,7 @@ func GetNavigationMethods() NavigationMethods {
 
 // GetCompletionMethods returns a list of completion methods
 func GetCompletionMethods() CompletionMethods {
-	return []CompletionMethod{CheckInOnly, CheckInAndOut, SubmitContent, Password, ClickButton}
+	return []CompletionMethod{CheckInOnly, CheckInAndOut}
 }
 
 // GetGameStatuses returns a list of game statuses
@@ -155,12 +155,12 @@ func ParseCompletionMethod(s string) (CompletionMethod, error) {
 		return CheckInOnly, nil
 	case "Check In and Out":
 		return CheckInAndOut, nil
-	case "Submit Content":
-		return SubmitContent, nil
-	case "Password":
-		return Password, nil
-	case "Click Button":
-		return ClickButton, nil
+	// case "Submit Content":
+	// 	return SubmitContent, nil
+	// case "Password":
+	// 	return Password, nil
+	// case "Click Button":
+	// 	return ClickButton, nil
 	default:
 		return CheckInOnly, errors.New("invalid CompletionMethod")
 	}
