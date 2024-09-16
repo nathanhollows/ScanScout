@@ -61,7 +61,7 @@ templ ActivityTracker(user models.User) {
 								>{ location.Marker.Name }</a>
 								if user.CurrentInstance.Settings.CompletionMethod.String() == "Check In and Out" {
 									<span
-										class="tooltip flex space-x-2"
+										class="tooltip flex space-x-2 tooltip-left md:tooltip-top"
 										data-tip={ fmt.Sprint(location.CurrentCount) + " currently visiting, " + fmt.Sprint(location.TotalVisits) + " scans total" }
 									>
 										<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-scan-face"><path d="M3 7V5a2 2 0 0 1 2-2h2"></path> <path d="M17 3h2a2 2 0 0 1 2 2v2"></path> <path d="M21 17v2a2 2 0 0 1-2 2h-2"></path> <path d="M7 21H5a2 2 0 0 1-2-2v-2"></path> <path d="M8 14s1.5 2 4 2 4-2 4-2"></path> <path d="M9 9h.01"></path> <path d="M15 9h.01"></path> </svg>
@@ -81,7 +81,9 @@ templ ActivityTracker(user models.User) {
 				}
 			</div>
 		</div>
-		@ActivityTeamsTable(user.CurrentInstance.Locations, user.CurrentInstance.Teams)
+		<div class="overflow-y-auto w-full">
+			@ActivityTeamsTable(user.CurrentInstance.Locations, user.CurrentInstance.Teams)
+		</div>
 	</div>
 	<dialog id="schedule_modal" class="modal modal-bottom sm:modal-middle">
 		<form method="post" action="/admin/schedule/" class="modal-box">
@@ -218,7 +220,7 @@ document.getElementById("team_modal").addEventListener('htmx:afterSwap', (evt) =
 templ ActivityTeamsTable(locations models.Locations, teams models.Teams) {
 	<table
 		id="team-activity"
-		class="table table-sm w-full mt-5 md:mt-0 md:w-7/12 h-auto self-start"
+		class="table table-sm w-full mt-5 md:mt-0 h-auto self-start"
 		hx-get="/admin/activity/teams"
 		hx-target="#team-activity"
 		hx-indicator=".loading"

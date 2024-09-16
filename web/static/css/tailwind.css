@@ -4487,6 +4487,14 @@ details.collapse summary::-webkit-details-marker {
   bottom: auto;
 }
 
+.tooltip-left:before {
+  transform: translateY(-50%);
+  top: 50%;
+  left: auto;
+  right: var(--tooltip-offset);
+  bottom: auto;
+}
+
 .tooltip-right:before {
   transform: translateY(-50%);
   top: 50%;
@@ -4826,6 +4834,15 @@ details.collapse summary::-webkit-details-marker {
   top: var(--tooltip-tail-offset);
   left: 50%;
   right: auto;
+  bottom: auto;
+}
+
+.tooltip-left:after {
+  transform: translateY(-50%);
+  border-color: transparent transparent transparent var(--tooltip-color);
+  top: 50%;
+  left: auto;
+  right: calc(var(--tooltip-tail-offset) + 0.0625rem);
   bottom: auto;
 }
 
@@ -5374,6 +5391,22 @@ details.collapse summary::-webkit-details-marker {
   align-self: center;
 }
 
+.overflow-x-auto {
+  overflow-x: auto;
+}
+
+.overflow-y-auto {
+  overflow-y: auto;
+}
+
+.overflow-x-hidden {
+  overflow-x: hidden;
+}
+
+.overflow-y-hidden {
+  overflow-y: hidden;
+}
+
 .overflow-y-scroll {
   overflow-y: scroll;
 }
@@ -5752,6 +5785,25 @@ details.collapse summary::-webkit-details-marker {
   }
 }
 
+@media (min-width: 768px) {
+  .md\:tooltip-top:before {
+    transform: translateX(-50%);
+    top: auto;
+    left: 50%;
+    right: auto;
+    bottom: var(--tooltip-offset);
+  }
+
+  .md\:tooltip-top:after {
+    transform: translateX(-50%);
+    border-color: var(--tooltip-color) transparent transparent transparent;
+    top: auto;
+    left: 50%;
+    right: auto;
+    bottom: var(--tooltip-tail-offset);
+  }
+}
+
 @media (min-width: 1024px) {
   .lg\:phone-2.artboard {
     width: 375px;
@@ -5818,6 +5870,10 @@ details.collapse summary::-webkit-details-marker {
     flex-direction: row;
   }
 
+  .sm\:overflow-y-auto {
+    overflow-y: auto;
+  }
+
   .sm\:shadow-2xl {
     --tw-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.25);
     --tw-shadow-colored: 0 25px 50px -12px var(--tw-shadow-color);
@@ -5868,6 +5924,10 @@ details.collapse summary::-webkit-details-marker {
     --tw-space-x-reverse: 0;
     margin-right: calc(1.25rem * var(--tw-space-x-reverse));
     margin-left: calc(1.25rem * calc(1 - var(--tw-space-x-reverse)));
+  }
+
+  .md\:overflow-y-auto {
+    overflow-y: auto;
   }
 
   .md\:rounded-none {
