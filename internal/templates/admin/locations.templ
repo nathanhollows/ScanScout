@@ -399,72 +399,93 @@ const confirm_delete_modal = document.getElementById('confirm_delete_modal');
 
 templ locationScript() {
 	<script>
+(function () {
+  let map; // Store the map instance globally within the IIFE
+  let marker; // Store the marker instance globally within the IIFE
 
-	// Resize textareas to fit content
-	const tx = document.getElementsByTagName("textarea");
-for (let i = 0; i < tx.length; i++) {
-  tx[i].setAttribute("style", "height:" + (tx[i].scrollHeight) + "px;overflow-y:hidden;");
-  tx[i].addEventListener("input", OnInput, false);
-}
+  function initializeMapAndTextarea() {
+    // --- TEXTAREA AUTO-RESIZE LOGIC ---
+    const tx = document.getElementsByTagName("textarea");
+    for (let i = 0; i < tx.length; i++) {
+      tx[i].setAttribute("style", "height:" + (tx[i].scrollHeight) + "px;overflow-y:hidden;");
+      tx[i].addEventListener("input", function() {
+        this.style.height = 'auto';
+        this.style.height = (this.scrollHeight) + "px";
+      });
+    }
 
-function OnInput() {
-  this.style.height = 'auto';
-  this.style.height = (this.scrollHeight) + "px";
-}
+    // --- MAPBOX INITIALIZATION LOGIC ---
+    let coords = [170.5111643, -45.8650509];
+    let zoom = 14;
 
-  coords = [170.5111643, -45.8650509]
-  zoom = 14
+    // Check if longitude and latitude fields are set
+    if (document.querySelector('input[name="longitude"]').value != "" && document.querySelector('input[name="latitude"]').value != "") {
+      coords = [
+        parseFloat(document.querySelector('input[name="longitude"]').value),
+        parseFloat(document.querySelector('input[name="latitude"]').value)
+      ];
+      zoom = 16;
+    }
 
-  // Check if #longitude and #latitude are set
-  if (document.querySelector('input[name="longitude"]').value != "" && document.querySelector('input[name="latitude"]').value != "") {
-	  coords = [parseFloat(document.querySelector('input[name="longitude"]').value), parseFloat(document.querySelector('input[name="latitude"]').value)]
-	  zoom = 16
-  }
+    // Destroy existing map instance if it exists
+    if (map) {
+      map.remove();
+      map = null; // Explicitly set to null to clear reference
+    }
 
-  mapboxgl.accessToken = document.getElementById('mapbox_key').dataset.key;
-  if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-    style = 'mapbox://styles/nathanhollows/cl9w3nxff002m14sy9fco4vnr'
-  } else {
-    style = 'mapbox://styles/nathanhollows/clszboe2y005i01oid8ca37jm'
-  }
-  var coordinates = document.getElementById('coordinates');
-  var map = new mapboxgl.Map({
+    // Set the Mapbox access token
+    mapboxgl.accessToken = document.getElementById('mapbox_key').dataset.key;
+
+    // Determine map style based on color scheme
+    const style = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+      ? 'mapbox://styles/nathanhollows/cl9w3nxff002m14sy9fco4vnr'
+      : 'mapbox://styles/nathanhollows/clszboe2y005i01oid8ca37jm';
+
+    // Create the map
+    map = new mapboxgl.Map({
       container: 'map',
       style: style,
       center: coords,
       zoom: zoom
-  });
+    });
 
-  var marker = new mapboxgl.Marker({
-  })
-  .setLngLat(coords)
-  .addTo(map);
+    // Create and place marker
+    marker = new mapboxgl.Marker()
+      .setLngLat(coords)
+      .addTo(map);
 
-  map.on('drag', function() {
-      centro=map.getCenter();
-      marker.setLngLat(centro);
-      // Set the latitude and longitude fields
-      document.querySelector('input[name="latitude"]').value = centro.lat;
-      document.querySelector('input[name="longitude"]').value = centro.lng;
-      // Set the switch to true
+    // Update marker position on map drag
+    map.on('drag', function() {
+      const center = map.getCenter();
+      marker.setLngLat(center);
+      document.querySelector('input[name="latitude"]').value = center.lat;
+      document.querySelector('input[name="longitude"]').value = center.lng;
       document.querySelector('input[name="location"]').checked = true;
-  });
-  map.on('zoom', function() {
-      centro=map.getCenter();
-      marker.setLngLat(centro);
-  });
-  // If the switch is checked, save the map location else don't
-  document.querySelector('input[name="switch"]').addEventListener('change', function(e) {
+    });
+
+    // Update marker position on map zoom
+    map.on('zoom', function() {
+      const center = map.getCenter();
+      marker.setLngLat(center);
+    });
+
+    // Add event listener for location saving switch
+    document.querySelector('input[name="switch"]').addEventListener('change', function(e) {
       if (e.target.checked) {
-          centro=map.getCenter();
-          marker.setLngLat(centro);
-          // Set the latitude and longitude fields
-          document.querySelector('input[name="latitude"]').value = centro.lat;
-          document.querySelector('input[name="longitude"]').value = centro.lng;
+        const center = map.getCenter();
+        marker.setLngLat(center);
+        document.querySelector('input[name="latitude"]').value = center.lat;
+        document.querySelector('input[name="longitude"]').value = center.lng;
       } else {
-          document.querySelector('input[name="latitude"]').value = "";
-          document.querySelector('input[name="longitude"]').value = "";
+        document.querySelector('input[name="latitude"]').value = "";
+        document.querySelector('input[name="longitude"]').value = "";
       }
-  });
+    });
+  }
+
+  // Initialize map and textarea on page load
+  initializeMapAndTextarea();
+
+})();
 </script>
 }

@@ -21,7 +21,7 @@ templ ActivityTracker(user models.User) {
 	<div class="relative flex flex-col md:flex-row px-5 md:space-x-5">
 		<div class="w-full md:w-5/12">
 			<div
-				id="map"
+				id="map-activity"
 				class="w-full h-96 rounded-lg shadow-lg my-5"
 			></div>
 			<div class="join join-vertical w-full">
@@ -142,64 +142,76 @@ templ ActivityTracker(user models.User) {
 		</div>
 	</dialog>
 	<script>
-  // Function to open the modal once content is loaded
-  document.body.addEventListener('htmx:afterSwap', (evt) => {
-    // Check if the event's target is the modal content box
-    let target = evt.detail.target;
-    console.log("Target ID:", target.id);
-    
-    if (target.closest && target.closest("#team_modal")) {
-      document.getElementById("team_modal").showModal();
+document.getElementById("team_modal").addEventListener('htmx:afterSwap', (evt) => {
+  // Open the modal once the content is loaded and swapped
+  document.getElementById("team_modal").showModal();
+});
+
+(function () {
+  let map; // Store the map instance globally within the IIFE
+  let markerArray = []; // Store the markers array globally within the IIFE
+
+  function initializeMap() {
+    const coords = [170.5111643, -45.8650509];
+    const zoom = 17;
+
+    // Clear any existing markers
+    markerArray.forEach(marker => marker.remove());
+    markerArray = [];
+
+    // Destroy existing map instance if it exists
+    if (map) {
+      map.remove();
+      map = null; // Explicitly set to null to clear reference
     }
-  });
 
-  coords = [170.5111643, -45.8650509]
-  zoom = 17
+    // Set the Mapbox access token
+    mapboxgl.accessToken = document.getElementById('mapbox_key').dataset.key;
 
-  mapboxgl.accessToken = document.getElementById('mapbox_key').dataset.key;
-  if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-    style = 'mapbox://styles/nathanhollows/cl9w3nxff002m14sy9fco4vnr'
-  } else {
-    style = 'mapbox://styles/nathanhollows/clszboe2y005i01oid8ca37jm'
+    // Determine the style based on color scheme
+    const style = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+      ? 'mapbox://styles/nathanhollows/cl9w3nxff002m14sy9fco4vnr'
+      : 'mapbox://styles/nathanhollows/clszboe2y005i01oid8ca37jm';
+
+    // Create the map
+    map = new mapboxgl.Map({
+      container: 'map-activity',
+      style: style,
+      center: coords,
+      zoom: zoom
+    });
+
+    // Find and loop through .location-name elements to create markers
+    document.querySelectorAll('.location-name').forEach(function(location) {
+      const marker = new mapboxgl.Marker()
+        .setLngLat([location.dataset.lng, location.dataset.lat]);
+      markerArray.push(marker);
+    });
+
+    // Sort markers by latitude
+    markerArray.sort(function(a, b) {
+      // If northern hemisphere, sort by descending latitude
+      return a.getLngLat().lat < 0
+        ? b.getLngLat().lat - a.getLngLat().lat
+        : a.getLngLat().lat - b.getLngLat().lat;
+    });
+
+    // Add markers to the map
+    markerArray.forEach(marker => marker.addTo(map));
+
+    // Fit the map to the bounds of the markers
+    const bounds = new mapboxgl.LngLatBounds();
+    markerArray.forEach(marker => {
+      bounds.extend(marker.getLngLat());
+    });
+
+    map.fitBounds(bounds, { padding: 50 });
   }
-  var map = new mapboxgl.Map({
-       container: 'map',
-       style: style,
-       center: coords,
-       zoom: zoom
-  });
 
-  let markerArray = []
-  let marker; // Declare marker variable outside the loop
+  // Initialize the map on page load
+  initializeMap();
 
-  // find and loop through .location-name elements
-  document.querySelectorAll('.location-name').forEach(function(location) {
-	// Create a marker for each location
-	marker = new mapboxgl.Marker()
-	  .setLngLat([location.dataset.lng, location.dataset.lat]);
-	markerArray.push(marker);
-  });
-
-  // Order the markers by their their latitudes and re-add them to the map
-  markerArray.sort(function(a, b) {
-    // If northern hemisphere, sort by descending latitude
-    if (a.getLngLat().lat < 0) {
-      return b.getLngLat().lat - a.getLngLat().lat;
-    }
-    return a.getLngLat().lat - b.getLngLat().lat;
-  });
-  for (let i = 0; i < markerArray.length; i++) {
-    markerArray[i].addTo(map);
-  }
-
-  // Calculate the bounds
-  let bounds = new mapboxgl.LngLatBounds();
-  markerArray.forEach(function(marker) {
-     bounds.extend(marker.getLngLat());
-  });
-
-  // Fit the map to the bounds
-  map.fitBounds(bounds, { padding: 50 });
+})();
 </script>
 }
 
