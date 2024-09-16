@@ -345,7 +345,7 @@ templ Experience(settings models.InstanceSettings) {
 		</div>
 	</form>
 	<script>
-const locations = [
+var locations = [
   { name: "Eiffel Tower", clue: "Find the tallest structure in Paris." },
   { name: "Statue of Liberty", clue: "Look for the statue that welcomes visitors to New York Harbor." },
   { name: "Colosseum", clue: "Find the ancient amphitheater in Rome." },
@@ -353,7 +353,7 @@ const locations = [
   { name: "Taj Mahal", clue: "Locate the white marble mausoleum in India." }
 ];
 
-const teams = Array.from({ length: locations.length }, () => Math.floor(Math.random() * 5) + 1);
+var teams = Array.from({ length: locations.length }, () => Math.floor(Math.random() * 5) + 1);
 
 function getCheckedData(name) {
   const checkedElement = document.querySelector(`input[name="${name}"]:checked`);
@@ -487,73 +487,5 @@ function updateTeamCountVisibility(navigationMethod) {
 
 // Initial update
 updatePreview();
-
-htmx.onLoad(function(content) {
-    var sortables = content.querySelectorAll(".sortable");
-    for (var i = 0; i < sortables.length; i++) {
-      var sortable = sortables[i];
-      var sortableInstance = new Sortable(sortable, {
-          animation: 150,
-          ghostClass: 'blue-background-class',
-
-          // Make the `.htmx-indicator` unsortable
-          filter: ".htmx-indicator",
-          onMove: function (evt) {
-            return evt.related.className.indexOf('htmx-indicator') === -1;
-          },
-
-          // Disable sorting on the `end` event
-          onEnd: function (evt) {
-            this.option("disabled", true);
-          }
-      });
-
-      // Re-enable sorting on the `htmx:afterSwap` event
-      sortable.addEventListener("htmx:afterSwap", function() {
-        sortableInstance.option("disabled", false);
-      });
-    }
-})
-
-htmx.on('htmx:beforeRequest', function(evt) {
-  const toastContainer = document.getElementById('toast-container');
-  if (!toastContainer) {
-    const container = document.createElement('div');
-    container.id = 'toast-container';
-    container.className = 'toast toast-end';
-    document.body.appendChild(container);
-  }
-
-  const updatingToast = document.createElement('div');
-  updatingToast.className = 'alert alert-info';
-  updatingToast.innerHTML = '<span><span class="loading loading-dots loading-md"></span> Updating...</span>';
-  toastContainer.appendChild(updatingToast);
-
-  evt.detail.target.setAttribute('data-updating-toast', updatingToast);
-});
-
-htmx.on('htmx:afterRequest', function(evt) {
-  const toastContainer = document.getElementById('toast-container');
-  const updatingToast = evt.detail.target.getAttribute('data-updating-toast');
-
-  if (updatingToast) {
-    updatingToast.remove();
-    evt.detail.target.removeAttribute('data-updating-toast');
-  }
-
-  const showToast = (message, type) => {
-    const toast = document.createElement('div');
-    toast.className = `alert alert-${type}`;
-    toast.innerHTML = `<span>${message}</span>`;
-    toastContainer.appendChild(toast);
-    setTimeout(() => toast.remove(), 5000);
-  };
-
-  if (evt.detail.successful) {
-    showToast('Locations reordered successfully!', 'success');
-  } else {
-    showToast('Failed to reorder locations.', 'error');
-  }
-});
 </script>
 }
