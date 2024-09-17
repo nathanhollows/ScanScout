@@ -104,14 +104,16 @@ func (h *AdminHandler) InstanceSwitch(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	instance, err := h.GameManagerService.SwitchInstance(r.Context(), user, id)
+	_, err := h.GameManagerService.SwitchInstance(r.Context(), user, id)
 	if err != nil {
-		flash.NewError("Error switching instance: "+err.Error()).Save(w, r)
 		http.Redirect(w, r, "/admin/instances", http.StatusSeeOther)
+		err := templates.Toast(*flash.NewError("Error switching instance: " + err.Error())).Render(r.Context(), w)
+		if err != nil {
+			h.Logger.Error("InstanceSwitch: rendering template", "error", err)
+		}
 		return
 	}
 
-	flash.NewSuccess("You are now using "+instance.Name+" as your current instance").Save(w, r)
 	http.Redirect(w, r, r.Header.Get("Referer"), http.StatusSeeOther)
 }
 
