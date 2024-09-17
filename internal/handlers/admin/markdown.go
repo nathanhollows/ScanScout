@@ -5,17 +5,19 @@ import (
 	"net/http"
 
 	"github.com/nathanhollows/Rapua/internal/flash"
-	"github.com/nathanhollows/Rapua/internal/handlers"
+	"github.com/nathanhollows/Rapua/internal/helpers"
+	templates "github.com/nathanhollows/Rapua/internal/templates/admin"
 )
 
 // Instances shows admin the instances
 func (h *AdminHandler) MarkdownGuide(w http.ResponseWriter, r *http.Request) {
-	data := handlers.TemplateData(r)
-	data["title"] = "Markdown Guide"
-	data["page"] = "markdown"
+	user := h.UserFromContext(r.Context())
 
-	data["messages"] = flash.Get(w, r)
-	handlers.Render(w, data, handlers.AdminDir, "markdown")
+	c := templates.MarkdownGuide()
+	err := templates.Layout(c, *user, "Markdown", "Markdown Guide").Render(r.Context(), w)
+	if err != nil {
+		h.Logger.Error("MarkdownGuide: rendering template", "error", err)
+	}
 }
 
 // PreviewMarkdown takes markdown from a form and renders it for htmx
@@ -25,19 +27,31 @@ func (h *AdminHandler) PreviewMarkdown(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	handlers.SetDefaultHeaders(w)
-	data := handlers.TemplateData(r)
-
 	decoder := json.NewDecoder(r.Body)
 	var m map[string]string
 	err := decoder.Decode(&m)
 	if err != nil {
 		h.Logger.Error("markdown preview: decoding JSON", "error", err)
-		http.Error(w, "Error decoding JSON", http.StatusBadRequest)
+		err := templates.Toast(*flash.NewError("Error converting markdown")).Render(r.Context(), w)
+		if err != nil {
+			h.Logger.Error("markdown preview: rendering template", "error", err)
+		}
 		return
 	}
 
-	data["markdown"] = m["markdown"]
+	md, err := helpers.MarkdownToHTML(m["markdown"])
+	if err != nil {
+		h.Logger.Error("markdown preview: converting string to markdown", "error", err)
+		err := templates.Toast(*flash.NewError("Error converting markdown")).Render(r.Context(), w)
+		if err != nil {
+			h.Logger.Error("markdown preview: rendering template", "error", err)
+		}
+		return
+	}
 
-	handlers.RenderHTMX(w, data, handlers.AdminDir, "markdown_preview")
+	err = templates.MarkdownPreview(md).Render(r.Context(), w)
+	if err != nil {
+		h.Logger.Error("markdown preview: rendering template", "error", err)
+	}
+
 }
