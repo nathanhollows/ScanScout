@@ -7,7 +7,7 @@ import (
 
 templ LocationsIndex(settings models.InstanceSettings, locations models.Locations) {
 	<!-- Header -->
-	<div class="flex flex-col md:flex-row justify-between items-center w-full p-5">
+	<div class="flex flex-col gap-3 md:flex-row justify-between items-center w-full p-5">
 		<h1 class="text-2xl font-bold">
 			Locations 
 			<span class="badge badge-ghost">{ fmt.Sprint(len(locations)) }</span>
@@ -153,11 +153,14 @@ htmx.onLoad(function(content) {
 }
 
 templ AddLocation() {
+	<!-- Header -->
+	<div class="flex flex-col gap-3 md:flex-row justify-between items-center w-full p-5">
+		<h1 class="text-2xl font-bold">
+			Add a location
+		</h1>
+		<!-- <button type="submit" class="btn btn-primary">Save</button> -->
+	</div>
 	<div class="flex flex-col w-full items-start">
-		<!-- Header -->
-		<div class="p-5">
-			<h1 class="text-2xl font-bold">Add a location</h1>
-		</div>
 		<!-- Content -->
 		<form
 			class="w-full"
@@ -232,16 +235,16 @@ templ EditLocation(location models.Location, settings models.InstanceSettings) {
 		hx-swap="none"
 	>
 		<!-- Header -->
-		<div class="flex flex-row justify-between items-center w-full p-5">
+		<div class="flex flex-col sm:flex-row gap-3 justify-between items-center w-full p-5">
 			<h1 class="text-2xl font-bold">Editing <em>{ location.Name }</em></h1>
-			<div>
+			<div class="flex gap-3">
 				<button type="button" class="btn btn-error" onclick="confirm_delete_modal.showModal();">Delete</button>
 				<button type="submit" class="btn btn-primary">Save</button>
 			</div>
 		</div>
-		<div class="flex-grow container mx-auto">
-			<div class="flex flex-col md:flex-row p-5 space-5 md:space-x-24">
-				<div class="flex-1">
+		<div class="flex-grow mx-auto">
+			<div class="flex flex-col md:flex-row p-5 space-5 space-x-5 lg:space-x-20">
+				<div class="flex flex-col flex-grow">
 					<!-- Location Title -->
 					<label for="name" class="form-control w-full max-w-xs mb-5">
 						<div class="label">
@@ -295,31 +298,35 @@ templ EditLocation(location models.Location, settings models.InstanceSettings) {
 							}
 						</span>
 					</div>
-					<div>
-						for _, clue := range location.Clues {
-							<div class="prose my-5 mx-3">
-								<blockquote class="mb-0">
-									<div class="flex gap-3 justify-end">
-										{ clue.Content }
-										<button type="button" class="btn btn-xs btn-ghost" onclick="this.previousElementSibling.classList.toggle('hidden')">
-											<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-pencil w-4 h-4"><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"></path><path d="m15 5 4 4"></path></svg>
-											Edit
-										</button>
-										<button type="button" class="btn btn-xs btn-ghost text-error" onclick="this.closest('div').remove()">
-											<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-delete w-4 h-4"><path d="M10 5a2 2 0 0 0-1.344.519l-6.328 5.74a1 1 0 0 0 0 1.481l6.328 5.741A2 2 0 0 0 10 19h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2z"></path><path d="m12 9 6 6"></path><path d="m18 9-6 6"></path></svg>
-											Delete
-										</button>
-									</div>
-								</blockquote>
-							</div>
-						}
+					if settings.NavigationMethod.String() == "Show Clues" {
+						<div>
+							for _, clue := range location.Clues {
+								<div class="prose my-5 mx-3">
+									<blockquote class="mb-0">
+										<div class="flex gap-3 justify-end">
+											{ clue.Content }
+											<button type="button" class="btn btn-xs btn-ghost" onclick="this.previousElementSibling.classList.toggle('hidden')">
+												<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-pencil w-4 h-4"><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"></path><path d="m15 5 4 4"></path></svg>
+												Edit
+											</button>
+											<button type="button" class="btn btn-xs btn-ghost text-error" onclick="this.closest('div').remove()">
+												<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-delete w-4 h-4"><path d="M10 5a2 2 0 0 0-1.344.519l-6.328 5.74a1 1 0 0 0 0 1.481l6.328 5.741A2 2 0 0 0 10 19h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2z"></path><path d="m12 9 6 6"></path><path d="m18 9-6 6"></path></svg>
+												Delete
+											</button>
+										</div>
+									</blockquote>
+								</div>
+							}
+						</div>
+					}
+					<div class="w-full text-center md:text-start">
+						<button class="btn btn-primary w-4/5 mx-auto my-5 md:my-0 md:mx-0 md:w-auto">Save</button>
 					</div>
-					<button class="btn btn-primary">Save</button>
 				</div>
 				<!-- Sidebar -->
 				<div class="flex flex-col">
 					<!-- Map -->
-					<div id="map" class="w-96 h-96 rounded-lg shadow-lg mt-5"></div>
+					<div id="map" class="w-full aspect-square md:w-[35vw] lg:w-96 rounded-lg shadow-lg mt-5"></div>
 					<div class="form-control">
 						<label class="label cursor-pointer">
 							<span class="label-text">Save map location</span>
