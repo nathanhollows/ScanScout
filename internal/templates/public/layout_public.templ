@@ -5,6 +5,7 @@ templ PublicLayout(contents templ.Component, title string) {
 	<html lang="en" class="h-full">
 		@publicHeader(title)
 		<body class="h-full">
+			<div id="alerts" class="toast toast-center"></div>
 			@publicNav(title)
 			@contents
 			@publicFooter()

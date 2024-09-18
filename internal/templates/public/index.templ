@@ -7,7 +7,7 @@ templ Index() {
 		<section class="text-center mb-12">
 			<h1 class="text-4xl font-bold mb-4">Welcome to Rapua</h1>
 			<p class="text-lg mb-6">Engage students with interactive, location-based learning games.</p>
-			<form class="max-w-md mx-auto space-y-6" method="post">
+			<form class="max-w-md mx-auto space-y-6" hx-post="/play" hx-swap="none">
 				<p class="text-center text-3xl pb-3"></p>
 				<div>
 					<label class="form-control w-full" for="team">
