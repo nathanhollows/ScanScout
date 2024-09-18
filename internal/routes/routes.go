@@ -96,7 +96,7 @@ func setupPlayerRoutes(router chi.Router, playerHandler *players.PlayerHandler) 
 	router.Route("/checkins", func(r chi.Router) {
 		r.Use(middlewares.TeamMiddleware)
 		r.Use(middlewares.LobbyMiddleware)
-		r.Get("/", playerHandler.CheckInList)
+		r.Get("/", playerHandler.MyCheckins)
 		r.Get("/{id}", playerHandler.CheckInView)
 	})
 
