@@ -59,8 +59,8 @@ func setupPlayerRoutes(router chi.Router, playerHandler *players.PlayerHandler) 
 	// Home route
 	// Takes a GET request to show the home page
 	// Takes a POST request to submit the home page form
-	router.Get("/", playerHandler.Home)
-	router.Post("/", playerHandler.Home)
+	router.Get("/play", playerHandler.Play)
+	router.Post("/play", playerHandler.PlayPost)
 
 	// Show the next available locations
 	router.Route("/next", func(r chi.Router) {
@@ -105,7 +105,7 @@ func setupPlayerRoutes(router chi.Router, playerHandler *players.PlayerHandler) 
 }
 
 func setupPublicRoutes(router chi.Router, publicHandler *public.PublicHandler) {
-	router.Get("/home", publicHandler.Index)
+	router.Get("/", publicHandler.Index)
 	router.Get("/pricing", publicHandler.Pricing)
 	router.Get("/about", publicHandler.About)
 	router.Get("/privacy", publicHandler.Privacy)

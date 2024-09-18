@@ -16,13 +16,13 @@ func (h *PlayerHandler) CheckInList(w http.ResponseWriter, r *http.Request) {
 	team, err := h.getTeamFromContext(r.Context())
 	if err != nil {
 		flash.NewError("Error loading team.").Save(w, r)
-		http.Redirect(w, r, "/", http.StatusFound)
+		http.Redirect(w, r, "/play", http.StatusFound)
 		return
 	}
 
 	if team == nil {
 		flash.NewError("You haven't started a game yet. Please enter your team code to start.").Save(w, r)
-		http.Redirect(w, r, "/", http.StatusFound)
+		http.Redirect(w, r, "/play", http.StatusFound)
 		return
 	}
 
@@ -69,7 +69,7 @@ func (h *PlayerHandler) CheckInView(w http.ResponseWriter, r *http.Request) {
 	team, err := h.getTeamFromContext(r.Context())
 	if err != nil {
 		flash.NewError("Error loading team.").Save(w, r)
-		http.Redirect(w, r, "/", http.StatusFound)
+		http.Redirect(w, r, "/play", http.StatusFound)
 		return
 	}
 

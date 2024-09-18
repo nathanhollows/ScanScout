@@ -15,7 +15,7 @@ func (h *PlayerHandler) Lobby(w http.ResponseWriter, r *http.Request) {
 	team, err := h.getTeamFromContext(r.Context())
 	if err != nil {
 		flash.NewError("Error loading team.").Save(w, r)
-		http.Redirect(w, r, "/", http.StatusFound)
+		http.Redirect(w, r, "/play", http.StatusFound)
 		return
 	}
 
@@ -26,23 +26,23 @@ func (h *PlayerHandler) Lobby(w http.ResponseWriter, r *http.Request) {
 	}
 	if response.Error != nil {
 		h.Logger.Error("Lobby: checking game status", "error", response.Error.Error())
-		http.Redirect(w, r, "/", http.StatusFound)
+		http.Redirect(w, r, "/play", http.StatusFound)
 	}
 
 	status, ok := response.Data["status"].(models.GameStatus)
 	if !ok {
 		h.Logger.Error("Lobby: checking game status", "error", "status not found")
 		flash.NewError("Error checking game status.").Save(w, r)
-		http.Redirect(w, r, "/", http.StatusFound)
+		http.Redirect(w, r, "/play", http.StatusFound)
 	}
 
 	switch status {
 	case models.Active:
 		flash.NewSuccess("The game has started!").Save(w, r)
-		http.Redirect(w, r, "/", http.StatusFound)
+		http.Redirect(w, r, "/play", http.StatusFound)
 	case models.Closed:
 		flash.NewSuccess("The game has finished. Thanks for playing!").Save(w, r)
-		http.Redirect(w, r, "/", http.StatusFound)
+		http.Redirect(w, r, "/play", http.StatusFound)
 	default:
 		data["title"] = "Lobby"
 		data["notifications"], _ = h.NotificationService.GetNotifications(r.Context(), team.Code)

@@ -48,7 +48,7 @@ func (h *PlayerHandler) CheckIn(w http.ResponseWriter, r *http.Request) {
 	if response.Error != nil {
 		flash.NewWarning("Please double check the code and try again.").
 			SetTitle("Location not found").Save(w, r)
-		http.Redirect(w, r, "/", http.StatusFound)
+		http.Redirect(w, r, "/play", http.StatusFound)
 		return
 	}
 	data["marker"] = response.Data["marker"].(*models.Marker)
@@ -108,7 +108,7 @@ func (h *PlayerHandler) CheckOut(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		flash.NewWarning("Please double check the code and try again.").
 			SetTitle("Team code not found").Save(w, r)
-		http.Redirect(w, r, "/", http.StatusFound)
+		http.Redirect(w, r, "/play", http.StatusFound)
 		return
 	}
 	team.LoadBlockingLocation(r.Context())

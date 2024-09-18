@@ -34,5 +34,5 @@ func (h *PlayerHandler) DismissNotificationPost(w http.ResponseWriter, r *http.R
 		return
 	}
 
-	http.Redirect(w, r, "/", http.StatusSeeOther)
+	http.Redirect(w, r, "/play", http.StatusSeeOther)
 }

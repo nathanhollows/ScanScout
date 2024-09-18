@@ -14,7 +14,7 @@ func (h *PlayerHandler) Next(w http.ResponseWriter, r *http.Request) {
 	team, err := h.getTeamFromContext(r.Context())
 	if err != nil {
 		flash.NewError("Error loading team.").Save(w, r)
-		http.Redirect(w, r, "/", http.StatusFound)
+		http.Redirect(w, r, "/play", http.StatusFound)
 		return
 	}
 
@@ -29,7 +29,7 @@ func (h *PlayerHandler) Next(w http.ResponseWriter, r *http.Request) {
 	}
 	if response.Error != nil {
 		h.Logger.Error("suggesting next locations", "error", response.Error.Error())
-		http.Redirect(w, r, "/", http.StatusFound)
+		http.Redirect(w, r, "/play", http.StatusFound)
 	}
 
 	if response.Data["blockingLocation"] != nil {
