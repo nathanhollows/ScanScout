@@ -10,8 +10,6 @@ templ Layout(contents templ.Component, user models.User, section string, title s
 	<!DOCTYPE html>
 	<html lang="en" class="h-full">
 		@header(title)
-		<link href="https://api.mapbox.com/mapbox-gl-js/v2.10.0/mapbox-gl.css" rel="stylesheet"/>
-		<script src="https://api.mapbox.com/mapbox-gl-js/v2.10.0/mapbox-gl.js" defer></script>
 		<body class="h-full">
 			<div id="app" class="m-auto" data-v-app="">
 				@nav(user, section)
@@ -32,14 +30,16 @@ templ header(title string) {
 			name="viewport"
 			content="width=device-width, initial-scale=1.0"
 		/>
+		<title>{ title } | Rapua</title>
+		<!-- CSS -->
 		<link rel="stylesheet" href="/assets/css/tailwind.css"/>
 		<link rel="icon" type="image/svg+xml" href="/assets/images/favicon.svg"/>
 		<link rel="icon" type="image/png" href="/assets/images/favicon.png"/>
 		<link rel="icon" type="image/x-icon" href="/assets/images/favicon.ico"/>
-		<title>{ title } | Rapua</title>
+		<link href="https://api.mapbox.com/mapbox-gl-js/v2.10.0/mapbox-gl.css" rel="stylesheet"/>
+		<!-- JS -->
 		<script src="https://unpkg.com/htmx.org@1.8.5" integrity="sha384-7aHh9lqPYGYZ7sTHvzP1t3BAfLhYSTy9ArHdP3Xsr9/3TlGurYgcPBoFmXX2TX/w" crossorigin="anonymous" defer></script>
 		<script src="https://api.mapbox.com/mapbox-gl-js/v2.10.0/mapbox-gl.js"></script>
-		<link href="https://api.mapbox.com/mapbox-gl-js/v2.10.0/mapbox-gl.css" rel="stylesheet"/>
 		<script src="/assets/js/Sortable.min.js"></script>
 		<script src="/assets/js/htmx.min.js"></script>
 	</head>
