@@ -15,6 +15,7 @@ type InstanceSettings struct {
 	ShowTeamCount     bool             `bun:",type:bool" json:"show_team_count"`
 	EnablePoints      bool             `bun:",type:bool" json:"enable_points"`
 	EnableBonusPoints bool             `bun:",type:bool" json:"enable_bonus_points"`
+	ShowLeaderboard   bool             `bun:",type:bool" json:"show_leaderboard"`
 }
 
 // Save saves the instance settings to the database
