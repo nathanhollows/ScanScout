@@ -3,6 +3,7 @@ package models
 import (
 	"archive/zip"
 	"context"
+	"fmt"
 	"io"
 	"os"
 	"strings"
@@ -119,16 +120,17 @@ func (i *Instance) GetStatus() GameStatus {
 	}
 
 	// If the start time is in the future, the game is scheduled
-	if i.StartTime.Time.After(time.Now()) {
+	if i.StartTime.Time.After(time.Now().UTC()) {
 		return Scheduled
 	}
 
 	// If the end time is in the past, the game is closed
-	if !i.EndTime.Time.IsZero() && i.EndTime.Time.Before(time.Now()) {
+	if !i.EndTime.Time.IsZero() && i.EndTime.Time.Before(time.Now().UTC()) {
 		return Closed
 	}
 
 	// If the start time is in the past, the game is active
+	fmt.Println("Start time is in the past")
 	return Active
 
 }
