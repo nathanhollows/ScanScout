@@ -5,7 +5,6 @@ import (
 
 	"github.com/go-chi/chi"
 	"github.com/nathanhollows/Rapua/internal/flash"
-	"github.com/nathanhollows/Rapua/internal/handlers"
 	templates "github.com/nathanhollows/Rapua/internal/templates/players"
 )
 
@@ -52,7 +51,6 @@ func (h *PlayerHandler) MyCheckins(w http.ResponseWriter, r *http.Request) {
 
 // CheckInView shows the page for a specific location
 func (h *PlayerHandler) CheckInView(w http.ResponseWriter, r *http.Request) {
-	data := handlers.TemplateData(r)
 	locationCode := chi.URLParam(r, "id")
 
 	team, err := h.getTeamFromContext(r.Context())
@@ -98,9 +96,10 @@ func (h *PlayerHandler) CheckInView(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	data["title"] = team.Scans[index].Location.Name
-	data["scan"] = team.Scans[index]
-	data["notifications"], _ = h.NotificationService.GetNotifications(r.Context(), team.Code)
-	data["messages"] = flash.Get(w, r)
-	handlers.Render(w, data, handlers.PlayerDir, "checkin_view")
+	c := templates.CheckInView(team.Scans[index])
+	err = templates.Layout(c, team.Scans[index].Location.Name).Render(r.Context(), w)
+	if err != nil {
+		h.Logger.Error("rendering checkin view", "error", err.Error())
+	}
+
 }
