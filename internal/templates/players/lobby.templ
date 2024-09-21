@@ -6,7 +6,7 @@ import (
 )
 
 templ Lobby(team models.Team) {
-	<div class="flex min-h-full flex-col justify-center px-6 py-12 lg:px-8" hx-get="/lobby" hx-trigger="every 20s, timer" hx-boost="true">
+	<div class="flex min-h-full flex-col justify-center px-6 py-12 lg:px-8" hx-get="/lobby" hx-swap="none" hx-trigger="every 20s, timer" hx-boost="true">
 		<!-- Header -->
 		<div class="sm:mx-auto sm:w-full sm:max-w-sm">
 			<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide w-16 h-16 lucide-qr-code m-auto"><rect width="5" height="5" x="3" y="3" rx="1"></rect> <rect width="5" height="5" x="16" y="3" rx="1"></rect> <rect width="5" height="5" x="3" y="16" rx="1"></rect> <path d="M21 16h-3a2 2 0 0 0-2 2v3"></path> <path d="M21 21v.01"></path> <path d="M12 7v3a2 2 0 0 1-2 2H7"></path> <path d="M3 12h.01"></path> <path d="M12 3h.01"></path> <path d="M12 16v.01"></path> <path d="M16 12h1"></path> <path d="M21 12v.01"></path> <path d="M12 21v-1"></path> </svg>
@@ -68,7 +68,7 @@ templ Lobby(team models.Team) {
 					case models.Scheduled:
 						<a href="/lobby" hx-boost="true" class="btn btn-neutral" disabled>Waiting for game to start</a>
 					case models.Active:
-						<a href="/next" hx-boost="true" class="btn btn-primary">Start Playing</a>
+						<a href="/next" hx-boost="true" hx-swap="outerHTML" class="btn btn-primary">Start Playing</a>
 					default:
 				}
 			</div>
@@ -87,7 +87,6 @@ templ Lobby(team models.Team) {
     function updateCountdown() {
       const now = new Date();
       const remainingTime = new Date(startTime) - now;
-	  console.log(now, startTime, remainingTime);
 
       if (remainingTime == 0) {
 		window.location.reload();
@@ -124,9 +123,14 @@ templ Lobby(team models.Team) {
   }
 
   if (document.getElementById('start-time') != null) {
+		function UTCtoLocal(time) {
+			const utc = new Date(`${time}`);
+			const local = new Date(utc.getTime() - utc.getTimezoneOffset() * 60000);
+			return local
+		}
 	  const startTimeElement = document.getElementById('start-time');
 	  const startTime = startTimeElement.dataset.start;
-	  startCountdown(startTime);
+	  startCountdown(UTCtoLocal(startTime));
   }
 </script>
 }
