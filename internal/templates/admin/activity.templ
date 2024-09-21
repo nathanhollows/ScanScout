@@ -55,6 +55,7 @@ templ ActivityTracker(user models.User) {
 								<strong>{ intToString(i + 1) }</strong>
 								<a
 									href={ templ.URL(fmt.Sprintf("/admin/locations/%s", location.Marker.Code)) }
+									hx-boost="true"
 									class="link flex-grow location-name"
 									data-lat={ fmt.Sprint(location.Marker.Lat) }
 									data-lng={ fmt.Sprint(location.Marker.Lng) }
