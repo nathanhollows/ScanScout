@@ -2,9 +2,11 @@ package handlers
 
 import (
 	"net/http"
+	"time"
 
 	"github.com/nathanhollows/Rapua/internal/flash"
 	"github.com/nathanhollows/Rapua/internal/handlers"
+	"github.com/nathanhollows/Rapua/internal/helpers"
 	templates "github.com/nathanhollows/Rapua/internal/templates/admin"
 )
 
@@ -54,13 +56,61 @@ func (h *AdminHandler) ScheduleGame(w http.ResponseWriter, r *http.Request) {
 
 	r.ParseForm()
 
-	response := h.GameManagerService.ScheduleGame(r.Context(), user, r.Form)
-	for _, msg := range response.FlashMessages {
-		msg.Save(w, r)
-	}
-	if response.Error != nil {
-		h.Logger.Error("scheduling game", "err", response.Error)
+	var sTime, eTime time.Time
+	var err error
+	if r.Form.Get("set_start") != "" {
+		startDate := r.Form.Get("utc_start_date")
+		startTime := r.Form.Get("utc_start_time")
+		sTime, err = helpers.ParseDateTime(startDate, startTime)
+		if err != nil {
+			h.Logger.Error("parsing start date and time", "err", err)
+			err := templates.Toast(*flash.NewError("Error parsing start date and time")).Render(r.Context(), w)
+			if err != nil {
+				h.Logger.Error("ScheduleGame: rendering template", "error", err)
+			}
+			return
+		}
 	}
 
-	http.Redirect(w, r, "/admin", http.StatusSeeOther)
+	if r.Form.Get("set_end") != "" {
+		endDate := r.Form.Get("utc_end_date")
+		endTime := r.Form.Get("utc_end_time")
+		eTime, err = helpers.ParseDateTime(endDate, endTime)
+		if err != nil {
+			h.Logger.Error("parsing end date and time", "err", err)
+			err := templates.Toast(*flash.NewError("Error parsing end date and time")).Render(r.Context(), w)
+			if err != nil {
+				h.Logger.Error("ScheduleGame: rendering template", "error", err)
+			}
+			return
+		}
+	}
+
+	if sTime.After(eTime) && !eTime.IsZero() {
+		err := templates.Toast(*flash.NewError("Start time must be before end time")).Render(r.Context(), w)
+		if err != nil {
+			h.Logger.Error("ScheduleGame: rendering template", "error", err)
+		}
+		return
+	}
+
+	response := h.GameManagerService.ScheduleGame(r.Context(), user, sTime, eTime)
+	for _, msg := range response.FlashMessages {
+		err := templates.GameScheduleStatus(user.CurrentInstance, msg).Render(r.Context(), w)
+		if err != nil {
+			h.Logger.Error("ScheduleGame: rendering template", "error", err)
+		}
+		return
+	}
+	if response.Error != nil {
+		templates.Toast(*flash.NewError("Error scheduling game")).Render(r.Context(), w)
+		h.Logger.Error("scheduling game", "err", response.Error)
+		return
+	}
+
+	err = templates.GameScheduleStatus(user.CurrentInstance, *flash.NewSuccess("Schedule updated!")).Render(r.Context(), w)
+	if err != nil {
+		h.Logger.Error("ScheduleGame: rendering template", "error", err)
+	}
+
 }

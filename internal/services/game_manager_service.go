@@ -430,6 +430,16 @@ func (s *GameManagerService) UpdateSettings(ctx context.Context, settings *model
 
 // StartGame starts the game immediately
 func (s *GameManagerService) StartGame(ctx context.Context, user *models.User) (response ServiceResponse) {
+	return s.SetStartTime(ctx, user, time.Now())
+}
+
+// StopGame stops the game immediately
+func (s *GameManagerService) StopGame(ctx context.Context, user *models.User) (response ServiceResponse) {
+	return s.SetEndTime(ctx, user, time.Now())
+}
+
+// SetStartTime sets the game start time to the given time
+func (s *GameManagerService) SetStartTime(ctx context.Context, user *models.User, time time.Time) (response ServiceResponse) {
 	response = ServiceResponse{}
 
 	// Check if the game is already active
@@ -439,9 +449,12 @@ func (s *GameManagerService) StartGame(ctx context.Context, user *models.User) (
 		return response
 	}
 
-	// Start the game
-	user.CurrentInstance.StartTime = bun.NullTime{Time: time.Now()}
-	user.CurrentInstance.EndTime = bun.NullTime{}
+	// Update the start time
+	user.CurrentInstance.StartTime = bun.NullTime{Time: time}
+	if !user.CurrentInstance.EndTime.After(time) {
+		user.CurrentInstance.EndTime = bun.NullTime{}
+	}
+
 	err := user.CurrentInstance.Update(ctx)
 	if err != nil {
 		response.AddFlashMessage(*flash.NewError("Error updating instance"))
@@ -449,13 +462,13 @@ func (s *GameManagerService) StartGame(ctx context.Context, user *models.User) (
 		return response
 	}
 
-	msg := flash.NewSuccess("Game started!")
+	msg := flash.NewSuccess("Game scheduled to start at " + time.Format("2006-01-02 15:04:05"))
 	response.AddFlashMessage(*msg)
 	return response
 }
 
-// StopGame stops the game immediately
-func (s *GameManagerService) StopGame(ctx context.Context, user *models.User) (response ServiceResponse) {
+// SetEndTime sets the game end time to the given time
+func (s *GameManagerService) SetEndTime(ctx context.Context, user *models.User, time time.Time) (response ServiceResponse) {
 	response = ServiceResponse{}
 
 	// Check if the game is already closed
@@ -465,7 +478,15 @@ func (s *GameManagerService) StopGame(ctx context.Context, user *models.User) (r
 		return response
 	}
 
-	user.CurrentInstance.EndTime = bun.NullTime{Time: time.Now()}
+	// Make sure the end time is after the start time
+	if !user.CurrentInstance.StartTime.IsZero() && time.Before(user.CurrentInstance.StartTime.Time) {
+		response.AddFlashMessage(*flash.NewError("End time must be after start time"))
+		response.Error = errors.New("end time must be after start time")
+		return response
+	}
+
+	// Update the end time
+	user.CurrentInstance.EndTime = bun.NullTime{Time: time}
 	err := user.CurrentInstance.Update(ctx)
 	if err != nil {
 		response.AddFlashMessage(*flash.NewError("Error updating instance"))
@@ -473,57 +494,27 @@ func (s *GameManagerService) StopGame(ctx context.Context, user *models.User) (r
 		return response
 	}
 
-	msg := flash.NewSuccess("Game stopped!")
+	msg := flash.NewSuccess("Game scheduled to end at " + time.Format("2006-01-02 15:04:05"))
 	response.AddFlashMessage(*msg)
 	return response
 }
 
 // ScheduleGame schedules the game to start and/or end at a specific time
-// Expects a form with set_start, start_date, start_time, set_end, end_date, and end_time
-func (s *GameManagerService) ScheduleGame(ctx context.Context, user *models.User, form url.Values) (response ServiceResponse) {
+// Expects a form with set_start, utc_start_date, utc_start_time, set_end, utc_end_date, and utc_end_time
+func (s *GameManagerService) ScheduleGame(ctx context.Context, user *models.User, start time.Time, end time.Time) (response ServiceResponse) {
 	response = ServiceResponse{}
 
 	instance := user.CurrentInstance
-	instance.LoadSettings(ctx)
-
-	// Parse start time
-	setStart := form.Get("set_start")
-	startDate := form.Get("start_date")
-	startTime := form.Get("start_time")
-	if setStart == "on" && startDate != "" && startTime != "" {
-		startDateTime, err := helpers.ParseDateTime(startDate, startTime)
-		if err != nil {
-			response.AddFlashMessage(*flash.NewError("Error parsing start date and time"))
-			response.Error = fmt.Errorf("parsing start date and time: %w", err)
-			return response
-		}
-		instance.StartTime = bun.NullTime{Time: startDateTime}
-	} else {
-		instance.StartTime = bun.NullTime{}
-	}
-
-	// Parse end time
-	setEnd := form.Get("set_end")
-	endDate := form.Get("end_date")
-	endTime := form.Get("end_time")
-	if setEnd == "on" && endDate != "" && endTime != "" {
-		endDateTime, err := helpers.ParseDateTime(endDate, endTime)
-		if err != nil {
-			response.AddFlashMessage(*flash.NewError("Error parsing end date and time"))
-			response.Error = fmt.Errorf("parsing end date and time: %w", err)
-			return response
-		}
-		instance.EndTime = bun.NullTime{Time: endDateTime}
-	} else {
-		instance.EndTime = bun.NullTime{}
-	}
 
 	// Check if the end time is before the start time
-	if !instance.StartTime.Time.IsZero() && !instance.EndTime.Time.IsZero() && instance.StartTime.Time.After(instance.EndTime.Time) {
+	if !instance.EndTime.IsZero() && instance.EndTime.Time.Before(instance.StartTime.Time) {
 		response.AddFlashMessage(*flash.NewError("End time must be after start time"))
 		response.Error = errors.New("end time must be after start time")
 		return response
 	}
+
+	instance.StartTime = bun.NullTime{Time: start}
+	instance.EndTime = bun.NullTime{Time: end}
 
 	// Save instance
 	err := instance.Update(ctx)
@@ -533,7 +524,6 @@ func (s *GameManagerService) ScheduleGame(ctx context.Context, user *models.User
 		return response
 	}
 
-	response.AddFlashMessage(*flash.NewSuccess("Game scheduled!"))
 	return response
 }
 
