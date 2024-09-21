@@ -22,8 +22,8 @@ templ ActivityTracker(user models.User) {
 						{ user.CurrentInstance.GetStatus().String() }
 					</span>
 				case models.Closed:
-					<span class="badge badge-error">
-						{ user.CurrentInstance.GetStatus().String() }
+					<span class="badge badge-outline">
+						Inactive
 					</span>
 			}
 		</h1>
