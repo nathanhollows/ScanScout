@@ -75,7 +75,7 @@ templ nav(user models.User, section string) {
 					</div>
 					<ul
 						tabindex="0"
-						class="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow-xl bg-base-200 rounded-box w-52"
+						class="menu menu-sm dropdown-content border border-base-300 mt-3 z-[1] p-2 shadow-xl bg-base-200 rounded-box w-52"
 					>
 						<li>
 							<a
@@ -199,7 +199,7 @@ templ nav(user models.User, section string) {
 					</button>
 					<ul
 						tabindex="0"
-						class="menu menu-sm dropdown-content bg-base-200 rounded-box z-[1] mt-3 w-64 p-2 shadow-xl"
+						class="menu menu-sm dropdown-content border border-base-300 bg-base-200 rounded-box z-[1] mt-3 w-64 p-2 shadow-xl"
 					>
 						if len(user.Instances) > 0 {
 							<li>
@@ -238,7 +238,7 @@ templ nav(user models.User, section string) {
 					</div>
 					<ul
 						tabindex="0"
-						class="menu menu-sm dropdown-content bg-base-200 rounded-box z-[1] mt-3 w-52 p-2 shadow-lg"
+						class="menu menu-sm dropdown-content border border-base-300 bg-base-200 rounded-box z-[1] mt-3 w-52 p-2 shadow-lg"
 					>
 						<li><a href="/pricing">Contribute</a></li>
 						<li><a href="/logout">Logout</a></li>
