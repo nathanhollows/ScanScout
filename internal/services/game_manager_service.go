@@ -298,13 +298,15 @@ func (s *GameManagerService) CreateLocation(ctx context.Context, user *models.Us
 	return response
 }
 
-func (s *GameManagerService) UpdateLocation(ctx context.Context, location *models.Location, newName, newContent, lat, lng string) error {
+func (s *GameManagerService) UpdateLocation(ctx context.Context, location *models.Location, newName, newContent, lat, lng string, points int) error {
 	if newContent != "" {
 		location.Content.Content = newContent
 		if err := location.Content.Save(ctx); err != nil {
 			return err
 		}
 	}
+
+	location.Points = points
 
 	marker := location.Marker
 	if lat != "" && lng != "" {
