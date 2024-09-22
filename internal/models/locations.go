@@ -136,11 +136,13 @@ func (l *Location) LogCheckIn(ctx context.Context, team Team, mustCheckOut bool)
 		LocationID:  l.ID,
 		TimeIn:      time.Now().UTC(),
 		MustScanOut: mustCheckOut,
+		Points:      l.Points,
 	}
 	scan.Save(ctx)
 
 	if mustCheckOut {
 		team.MustScanOut = l.ID
+		team.Points += l.Points
 		team.Update(ctx)
 	}
 
