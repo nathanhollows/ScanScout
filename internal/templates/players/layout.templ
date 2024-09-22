@@ -1,6 +1,11 @@
 package templates
 
-import "os"
+import (
+	"fmt"
+	"github.com/nathanhollows/Rapua/internal/models"
+	"os"
+	"time"
+)
 
 templ Layout(contents templ.Component, title string) {
 	<!DOCTYPE html>
@@ -26,7 +31,22 @@ templ Layout(contents templ.Component, title string) {
 		<body class="h-full">
 			<span id="mapbox_key" class="hidden" data-key={ os.Getenv("MAPBOX_KEY") }></span>
 			<div class="toast toast-center z-50" id="alerts"></div>
-			@contents
+			<div class="flex min-h-full flex-col justify-center px-6 py-12 lg:px-8">
+				@contents
+			</div>
 		</body>
 	</html>
+}
+
+templ footer(team models.Team) {
+	<footer class="text-center text-sm text-gray-500 mt-8">
+		<div class="mt-4">
+			<p>
+				{ team.Instance.Name }
+			</p>
+			<p>
+				&copy; { fmt.Sprint(time.Now().Year()) } Rapua
+			</p>
+		</div>
+	</footer>
 }
