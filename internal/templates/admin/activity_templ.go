@@ -166,7 +166,7 @@ func ActivityTracker(user models.User) templ.Component {
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				if user.CurrentInstance.Settings.CompletionMethod.String() == "Check In and Out" {
+				if user.CurrentInstance.Settings.CompletionMethod == models.CheckInAndOut {
 					templ_7745c5c3_Err = templ.WriteWatchModeString(templ_7745c5c3_Buffer, 16)
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
