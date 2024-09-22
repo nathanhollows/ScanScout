@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/go-chi/chi"
 	"github.com/nathanhollows/Rapua/internal/flash"
@@ -161,8 +162,18 @@ func (h *AdminHandler) LocationEditPost(w http.ResponseWriter, r *http.Request) 
 	newContent := r.FormValue("content")
 	lat := r.FormValue("latitude")
 	lng := r.FormValue("longitude")
+	pts := r.FormValue("points")
+	points, err := strconv.Atoi(pts)
+	if err != nil {
+		h.Logger.Error("LocationEditPost: converting points", "error", err)
+		err := templates.Toast(*flash.NewError("Error saving location")).Render(r.Context(), w)
+		if err != nil {
+			h.Logger.Error("LocationEditPost: rendering toast:", "error", err)
+		}
+		return
+	}
 
-	err = h.GameManagerService.UpdateLocation(r.Context(), location, newName, newContent, lat, lng)
+	err = h.GameManagerService.UpdateLocation(r.Context(), location, newName, newContent, lat, lng, points)
 	if err != nil {
 		h.Logger.Error("LocationEditPost: updating location", "error", err)
 		err := templates.Toast(*flash.NewError("Error saving location")).Render(r.Context(), w)
