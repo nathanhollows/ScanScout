@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"net/url"
+	"os"
 	"strconv"
 	"time"
 
@@ -360,6 +361,28 @@ func (s *GameManagerService) isMarkerShared(ctx context.Context, markerID, insta
 		return false, err
 	}
 	return count > 0, nil
+}
+
+func (s *GameManagerService) ValidateLocationMarker(user *models.User, id string) bool {
+	for _, loc := range user.CurrentInstance.Locations {
+		if loc.MarkerID == id {
+			return true
+		}
+	}
+	return false
+}
+
+func (s *GameManagerService) GetQRCodePathAndContent(action, id, extension string) (string, string) {
+	content := os.Getenv("SITE_URL")
+	path := "assets/codes/"
+	if action == "in" {
+		content = content + "/s/" + id
+		path = path + id + "." + extension
+	} else {
+		content = content + "/o/" + id
+		path = path + id + ".out." + extension
+	}
+	return path, content
 }
 
 // UpdateSettings parses the form values and updates the instance settings
