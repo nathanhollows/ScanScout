@@ -43,7 +43,11 @@ func SetupRouter(
 	setupPlayerRoutes(router, playerHandler)
 
 	// Admin routes
-	adminHandler := admin.NewAdminHandler(logger, gameManagerService, notificationService, *userServices)
+	adminHandler := admin.NewAdminHandler(
+		logger,
+		gameManagerService,
+		notificationService,
+		*userServices)
 	setupAdminRoutes(router, adminHandler)
 
 	// Static files
@@ -108,6 +112,7 @@ func setupPublicRoutes(router chi.Router, publicHandler *public.PublicHandler) {
 	router.Get("/", publicHandler.Index)
 	router.Get("/pricing", publicHandler.Pricing)
 	router.Get("/about", publicHandler.About)
+	router.Get("/contact", publicHandler.Contact)
 	router.Get("/privacy", publicHandler.Privacy)
 
 	router.Route("/login", func(r chi.Router) {
@@ -160,7 +165,7 @@ func setupAdminRoutes(router chi.Router, adminHandler *admin.AdminHandler) {
 			r.Post("/{id}", adminHandler.LocationEditPost)
 			r.Delete("/{id}", adminHandler.LocationDelete)
 			// Disabled for now
-			// r.Get("/qr/{id}.png", handlers.AdminLocationQRHandler)
+			r.Get("/qr/{action}/{id}.{extension}", adminHandler.QRCodeHandler)
 			r.Get("/qr-codes.zip", adminHandler.GenerateQRCodeArchive)
 			r.Get("/posters.pdf", adminHandler.GeneratePosters)
 			r.Post("/reorder", adminHandler.ReorderLocations)
