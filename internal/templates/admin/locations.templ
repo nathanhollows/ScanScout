@@ -245,6 +245,52 @@ templ EditLocation(location models.Location, settings models.InstanceSettings) {
 		<div class="flex flex-col sm:flex-row gap-3 justify-between items-center w-full p-5">
 			<h1 class="text-2xl font-bold">Editing <em>{ location.Name }</em></h1>
 			<div class="flex gap-3">
+				<div class="dropdown">
+					<div tabindex="0" role="button" class="btn btn-outline">
+						Downloads
+						<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down w-4 h-4"><path d="m6 9 6 6 6-6"></path></svg>
+					</div>
+					<ul tabindex="0" class="dropdown-content menu bg-base-100 rounded-box z-[1] w-52 p-2 shadow">
+						<h2 class="menu-title">Check-In</h2>
+						<li>
+							<ul>
+								<!-- <li><a>Poster (PDF)</a></li> -->
+								<li>
+									<a
+										href={ templ.SafeURL(fmt.Sprint("/admin/locations/qr/in/", location.MarkerID, ".png")) }
+										download={ fmt.Sprint("Check In ", location.MarkerID, " ", location.Name, ".png") }
+									>QR Code (PNG)</a>
+								</li>
+								<li>
+									<a
+										href={ templ.SafeURL(fmt.Sprint("/admin/locations/qr/in/", location.MarkerID, ".svg")) }
+										download={ fmt.Sprint("Check In ", location.MarkerID, " ", location.Name, ".svg") }
+									>QR Code (SVG)</a>
+								</li>
+							</ul>
+						</li>
+						if settings.CompletionMethod == models.CheckInAndOut {
+							<h2 class="menu-title">Check-Out</h2>
+							<li>
+								<ul>
+									<!-- <li><a>Poster (PDF)</a></li> -->
+									<li>
+										<a
+											href={ templ.SafeURL(fmt.Sprint("/admin/locations/qr/out/", location.MarkerID, ".png")) }
+											download={ fmt.Sprint("Check Out ", location.MarkerID, " ", location.Name, ".png") }
+										>QR Code (PNG)</a>
+									</li>
+									<li>
+										<a
+											href={ templ.SafeURL(fmt.Sprint("/admin/locations/qr/out/", location.MarkerID, ".svg")) }
+											download={ fmt.Sprint("Check Out ", location.MarkerID, " ", location.Name, ".svg") }
+										>QR Code (SVG)</a>
+									</li>
+								</ul>
+							</li>
+						}
+					</ul>
+				</div>
 				<button type="button" class="btn btn-error" onclick="confirm_delete_modal.showModal();">Delete</button>
 				<button type="submit" class="btn btn-primary">Save</button>
 			</div>
