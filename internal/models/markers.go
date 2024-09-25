@@ -2,14 +2,10 @@ package models
 
 import (
 	"context"
-	"fmt"
-	"os"
 	"strings"
 
 	"github.com/nathanhollows/Rapua/internal/helpers"
 	"github.com/nathanhollows/Rapua/pkg/db"
-	qrcode "github.com/yeqown/go-qrcode/v2"
-	qrwriter "github.com/yeqown/go-qrcode/writer/standard"
 )
 
 type Marker struct {
@@ -44,101 +40,12 @@ func (l *Marker) Save(ctx context.Context) error {
 	return err
 }
 
-func (l *Marker) GenerateQRCode() error {
-	// Only generate the QR code if it doesn't exist
-	if l.checkQRPath(true) && l.checkQRPath(false) {
-		return nil
-	}
-
-	qrc, err := l.generateQRCode(true)
-	if err != nil {
-		return err
-	}
-
-	if err := saveQRCode(qrc, l.getQRPath(true)); err != nil {
-		return err
-	}
-
-	// Commented out for now
-	// This is for the scan out QR code
-	// if l.MustScanOut {
-	// 	qrc, err := l.generateQRCode(false)
-	// 	if err != nil {
-	// 		return err
-	// 	}
-	//
-	// 	if err := saveQRCode(qrc, l.getQRPath(false)); err != nil {
-	// 		return err
-	// 	}
-	// }
-
-	return nil
-}
-
 // FindMarkerByCode returns a marker by code
 func FindMarkerByCode(ctx context.Context, code string) (*Marker, error) {
 	code = strings.ToUpper(strings.TrimSpace(code))
 	var marker Marker
 	err := db.DB.NewSelect().Model(&marker).Where("code = ?", code).Scan(ctx)
 	return &marker, err
-}
-
-func (l *Marker) getScanURL(scanningIn bool) string {
-	var url string
-	if scanningIn {
-		url = os.Getenv("SITE_URL") + "/s/" + l.Code
-	} else {
-		url = os.Getenv("SITE_URL") + "/o/" + l.Code
-	}
-	return url
-}
-
-func (l *Marker) getQRFilename(scanningIn bool) string {
-	var path string
-	if scanningIn {
-		path = l.Code + " " + l.Name + " in.png"
-	} else {
-		path = l.Code + " " + l.Name + " out.png"
-	}
-	return path
-}
-
-func (l *Marker) getQRPath(scanningIn bool) string {
-	return "./assets/codes/" + l.getQRFilename(scanningIn)
-}
-
-func (l *Marker) checkQRPath(scanningIn bool) bool {
-	_, err := os.Stat(l.getQRPath(scanningIn))
-	return err == nil
-}
-
-func (l *Marker) generateQRCode(scanningIn bool) (*qrcode.QRCode, error) {
-	url := l.getScanURL(scanningIn)
-	qrc, err := qrcode.New(url)
-	if err != nil {
-		fmt.Printf("could not generate QRCode: %v", err)
-		return nil, err
-	} else {
-		return qrc, nil
-	}
-}
-
-func saveQRCode(qrc *qrcode.QRCode, path string) error {
-	w, err := qrwriter.New(
-		path,
-		qrwriter.WithBgTransparent(),
-		qrwriter.WithBuiltinImageEncoder(qrwriter.PNG_FORMAT))
-	if err != nil {
-		fmt.Printf("could not generate QRCode: %v", err)
-		return err
-	}
-
-	err = qrc.Save(w)
-	if err != nil {
-		return err
-	} else {
-		return nil
-	}
 }
 
 // SetCoords sets the latitude and longitude of the location

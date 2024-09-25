@@ -175,78 +175,6 @@ func (i *Instance) LoadTeams(ctx context.Context) error {
 	return nil
 }
 
-func GenerateQRCodeArchive(ctx context.Context, instanceID string) (string, error) {
-	locations, err := FindAllLocations(ctx, instanceID)
-	if err != nil {
-		return "", err
-	}
-	for _, location := range locations {
-		err = location.Marker.GenerateQRCode()
-		if err != nil {
-			return "", err
-		}
-	}
-
-	// Create a zip file
-	path := "./assets/codes/" + instanceID + ".zip"
-	archive, err := os.Create(path)
-	if err != nil {
-		return "", err
-	}
-	defer archive.Close()
-
-	zipWriter := zip.NewWriter(archive)
-	defer zipWriter.Close()
-
-	// Collect the paths
-	var paths []string
-	for _, location := range locations {
-		paths = append(paths, location.Marker.getQRFilename(true))
-		// Commented out because we don't need to scan out
-		// TODO: Implement scan out on a Locations level
-		// if location.Coords.MustScanOut {
-		// 	paths = append(paths, location.Coords.getQRFilename(false))
-		// }
-	}
-
-	// Add each file to the zip
-	adder := func(path string) error {
-		file, err := os.Open("./assets/codes/" + path)
-		if err != nil {
-			return err
-		}
-		defer file.Close()
-
-		info, err := file.Stat()
-		if err != nil {
-			return err
-		}
-
-		header, err := zip.FileInfoHeader(info)
-		if err != nil {
-			return err
-		}
-
-		header.Name = path
-		writer, err := zipWriter.CreateHeader(header)
-		if err != nil {
-			return err
-		}
-
-		_, err = io.Copy(writer, file)
-		return err
-	}
-
-	for _, path := range paths {
-		err = adder(path)
-		if err != nil {
-			return "", err
-		}
-	}
-
-	return path, nil
-}
-
 func (i *Instance) ZipPosters(ctx context.Context) (string, error) {
 	// Create a zip file
 	path := "./assets/posters/" + i.ID + ".zip"
@@ -261,13 +189,13 @@ func (i *Instance) ZipPosters(ctx context.Context) (string, error) {
 
 	// Collect the paths
 	var paths []string
-	instanceLocations, err := FindAllLocations(ctx, i.ID)
+	// instanceLocations, err := FindAllLocations(ctx, i.ID)
 	if err != nil {
 		return "", err
 	}
-	for _, instanceLocation := range instanceLocations {
-		paths = append(paths, instanceLocation.Marker.getQRFilename(true))
-	}
+	// for _, instanceLocation := range instanceLocations {
+	// 	paths = append(paths, instanceLocation.Marker.getQRFilename(true))
+	// }
 
 	// Add each file to the zip
 	adder := func(path string) error {
@@ -315,13 +243,13 @@ func GeneratePosters(ctx context.Context, instanceID string) (string, error) {
 	pdf.AddUTF8Font("ArchivoBlack", "", "./assets/fonts/ArchivoBlack-Regular.ttf")
 	pdf.AddUTF8Font("OpenSans", "", "./assets/fonts/OpenSans.ttf")
 
-	for _, location := range instance.Locations {
-		location.Marker.GenerateQRCode()
-		generatePosterPage(pdf, &location.Marker, instance, true)
-		// if location.Coords.MustScanOut {
-		// 	generatePosterPage(pdf, &location.Coords, i, false)
-		// }
-	}
+	// for _, location := range instance.Locations {
+	// 	location.Marker.GenerateQRCode()
+	// 	generatePosterPage(pdf, &location.Marker, instance, true)
+	// 	// if location.Coords.MustScanOut {
+	// 	// 	generatePosterPage(pdf, &location.Coords, i, false)
+	// 	// }
+	// }
 
 	path := "./assets/posters/" + instance.ID + " posters.pdf"
 	err = pdf.OutputFileAndClose(path)
@@ -356,7 +284,7 @@ func generatePosterPage(pdf *fpdf.Fpdf, coords *Marker, instance *Instance, scan
 	pdf.Cell(40, 70, locationName)
 
 	// Add the image
-	pdf.Image(coords.getQRPath(scanIn), 50, 90, 110, 0, false, "", 0, "")
+	// pdf.Image(coords.getQRPath(scanIn), 50, 90, 110, 0, false, "", 0, "")
 
 	// Add Scan In/Out
 	scanText := "Scan In"
