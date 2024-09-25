@@ -1,11 +1,16 @@
 package services
 
 import (
+	"archive/zip"
 	"context"
 	"errors"
 	"fmt"
+	"io"
+	"os"
 	"strings"
+	"time"
 
+	"github.com/nathanhollows/Rapua/internal/helpers"
 	go_qr "github.com/piglig/go-qr"
 )
 
@@ -52,7 +57,11 @@ type AssetGenerator interface {
 	// WithBackground sets the background color of the QR code
 	WithBackground(color string) QRCodeOption
 
-	CreateQRCodeArchive(ctx context.Context, data []string) (string, error)
+	// CreateArchive creates a zip archive from the given paths
+	// Returns the path to the archive
+	// Accepts a list of paths to files to add to the archive
+	// Accepts an optional list of filenames to use for the files in the archive
+	CreateArchive(ctx context.Context, paths []string) (path string, err error)
 	CreatePDF(ctx context.Context, data []string) (string, error)
 }
 
@@ -99,8 +108,49 @@ func (s *assetGenerator) CreateQRCodeImage(ctx context.Context, path string, con
 	return nil
 }
 
-func (s *assetGenerator) CreateQRCodeArchive(ctx context.Context, data []string) (string, error) {
-	return "", nil
+func (s *assetGenerator) CreateArchive(ctx context.Context, paths []string) (path string, err error) {
+	// Create the file
+	path = "assets/codes/" + helpers.NewCode(10) + "-" + fmt.Sprint(time.Now().UnixNano()) + ".zip"
+	archive, err := os.Create(path)
+	if err != nil {
+		return "", fmt.Errorf("could not create archive: %w", err)
+	}
+	defer archive.Close()
+
+	zipWriter := zip.NewWriter(archive)
+	defer zipWriter.Close()
+
+	// Add each file to the zip
+	for _, path := range paths {
+		file, err := os.Open(path)
+		if err != nil {
+			return "", err
+		}
+		defer file.Close()
+
+		info, err := file.Stat()
+		if err != nil {
+			return "", err
+		}
+
+		header, err := zip.FileInfoHeader(info)
+		if err != nil {
+			return "", err
+		}
+
+		header.Name = strings.TrimPrefix(path, "assets/codes/")
+		writer, err := zipWriter.CreateHeader(header)
+		if err != nil {
+			return "", err
+		}
+
+		_, err = io.Copy(writer, file)
+		if err != nil {
+			return "", err
+		}
+	}
+
+	return path, nil
 }
 
 func (s *assetGenerator) CreatePDF(ctx context.Context, data []string) (string, error) {

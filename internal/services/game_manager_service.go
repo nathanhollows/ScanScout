@@ -6,7 +6,9 @@ import (
 	"fmt"
 	"net/url"
 	"os"
+	"regexp"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/nathanhollows/Rapua/internal/flash"
@@ -372,15 +374,18 @@ func (s *GameManagerService) ValidateLocationMarker(user *models.User, id string
 	return false
 }
 
-func (s *GameManagerService) GetQRCodePathAndContent(action, id, extension string) (string, string) {
+func (s *GameManagerService) GetQRCodePathAndContent(action, id, name, extension string) (string, string) {
 	content := os.Getenv("SITE_URL")
 	path := "assets/codes/"
+	name = strings.Trim(name, " ")
+	re := regexp.MustCompile(`[^\d\p{Latin} -]`)
+	name = re.ReplaceAllString(name, "")
 	if action == "in" {
 		content = content + "/s/" + id
-		path = path + id + "." + extension
+		path = path + extension + "/" + id + " " + name + "." + extension
 	} else {
 		content = content + "/o/" + id
-		path = path + id + ".out." + extension
+		path = path + extension + "/" + id + " " + name + " Check Out." + extension
 	}
 	return path, content
 }

@@ -8,11 +8,10 @@ import (
 	"github.com/nathanhollows/Rapua/internal/contextkeys"
 	"github.com/nathanhollows/Rapua/internal/flash"
 	"github.com/nathanhollows/Rapua/internal/models"
-	templates "github.com/nathanhollows/Rapua/internal/templates/admin"
 )
 
-// QRCodeHandler handles the generation of QR codes for the current instance.
-func (h *AdminHandler) QRCodeHandler(w http.ResponseWriter, r *http.Request) {
+// QRCode handles the generation of QR codes for the current instance.
+func (h *AdminHandler) QRCode(w http.ResponseWriter, r *http.Request) {
 	user := r.Context().Value(contextkeys.UserKey).(*models.User)
 
 	// Extract parameters from the URL
@@ -45,7 +44,7 @@ func (h *AdminHandler) QRCodeHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Get the path and content for the QR code
-	path, content := h.GameManagerService.GetQRCodePathAndContent(action, id, extension)
+	path, content := h.GameManagerService.GetQRCodePathAndContent(action, id, "", extension)
 
 	// Check if the file already exists, if so serve it
 	if _, err := os.Stat(path); err == nil {
@@ -108,17 +107,45 @@ func (h *AdminHandler) GeneratePosters(w http.ResponseWriter, r *http.Request) {
 func (h *AdminHandler) GenerateQRCodeArchive(w http.ResponseWriter, r *http.Request) {
 	user := r.Context().Value(contextkeys.UserKey).(*models.User)
 
-	archive, err := models.GenerateQRCodeArchive(r.Context(), user.CurrentInstanceID)
+	var paths []string
+	actions := []string{"in"}
+	if user.CurrentInstance.Settings.CompletionMethod == models.CheckInAndOut {
+		actions = []string{"in", "out"}
+	}
+	for _, location := range user.CurrentInstance.Locations {
+		for _, extension := range []string{"png", "svg"} {
+			for _, action := range actions {
+				path, content := h.GameManagerService.GetQRCodePathAndContent(action, location.MarkerID, location.Name, extension)
+				paths = append(paths, path)
+
+				// Check if the file already exists, otherwise generate it
+				if _, err := os.Stat(path); err == nil {
+					continue
+				}
+
+				// Generate the QR code
+				err := h.AssetGenerator.CreateQRCodeImage(
+					r.Context(),
+					path,
+					content,
+					h.AssetGenerator.WithFormat(extension),
+				)
+				if err != nil {
+					h.Logger.Error("QRCodeHandler: Could not create QR code", "error", err)
+					http.Error(w, "Could not create QR code", http.StatusInternalServerError)
+					return
+				}
+			}
+		}
+	}
+
+	path, err := h.AssetGenerator.CreateArchive(r.Context(), paths)
 	if err != nil {
 		h.Logger.Error("QR codes could not be zipped", "error", err, "instance", user.CurrentInstanceID)
-		err := templates.Toast(*flash.NewError("QR codes could not be zipped")).Render(r.Context(), w)
-		if err != nil {
-			h.Logger.Error("GenerateQRCodeArchive: Could not render toast", "error", err)
-		}
+		http.Error(w, "QR codes could not be zipped", http.StatusInternalServerError)
 		return
 	}
 
-	instance := user.CurrentInstance.Name
-	w.Header().Set("Content-Disposition", "attachment; filename="+instance+" QR codes .zip")
-	http.ServeFile(w, r, archive)
+	http.ServeFile(w, r, path)
+	os.Remove(path)
 }
