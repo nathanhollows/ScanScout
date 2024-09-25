@@ -167,6 +167,7 @@ func setupAdminRoutes(router chi.Router, adminHandler *admin.AdminHandler) {
 			// Disabled for now
 			r.Get("/qr/{action}/{id}.{extension}", adminHandler.QRCode)
 			r.Get("/qr-codes.zip", adminHandler.GenerateQRCodeArchive)
+			r.Get("/poster/{id}.pdf", adminHandler.GeneratePoster)
 			r.Get("/posters.pdf", adminHandler.GeneratePosters)
 			r.Post("/reorder", adminHandler.ReorderLocations)
 		})

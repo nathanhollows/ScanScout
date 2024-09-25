@@ -30,7 +30,7 @@ func TestCreateQRCodeImage(t *testing.T) {
 			path:    "invalid_format.qr",
 			content: "Hello, QR!",
 			options: []QRCodeOption{
-				assetGen.WithFormat("bmp"),
+				assetGen.WithQRFormat("bmp"),
 			},
 			expectErr: true,
 		},
@@ -39,7 +39,7 @@ func TestCreateQRCodeImage(t *testing.T) {
 			path:    "valid.png",
 			content: "Hello, QR-1!",
 			options: []QRCodeOption{
-				assetGen.WithFormat("png"),
+				assetGen.WithQRFormat("png"),
 			},
 			expectErr: false,
 			cleanupFn: func() { os.Remove("valid.png") },
@@ -49,7 +49,7 @@ func TestCreateQRCodeImage(t *testing.T) {
 			path:    "valid.svg",
 			content: "Hello, QR-2!",
 			options: []QRCodeOption{
-				assetGen.WithFormat("svg"),
+				assetGen.WithQRFormat("svg"),
 			},
 			expectErr: false,
 			cleanupFn: func() { os.Remove("valid.svg") },
@@ -59,9 +59,9 @@ func TestCreateQRCodeImage(t *testing.T) {
 			path:    "colored.svg",
 			content: "Hello, QR-3!",
 			options: []QRCodeOption{
-				assetGen.WithFormat("svg"),
-				assetGen.WithForeground("#FF0000"),
-				assetGen.WithBackground("#00FF00"),
+				assetGen.WithQRFormat("svg"),
+				assetGen.WithQRForeground("#FF0000"),
+				assetGen.WithQRBackground("#00FF00"),
 			},
 			expectErr: false,
 			cleanupFn: func() { os.Remove("colored.svg") },

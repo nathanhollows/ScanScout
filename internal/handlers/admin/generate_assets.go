@@ -5,14 +5,13 @@ import (
 	"os"
 
 	"github.com/go-chi/chi"
-	"github.com/nathanhollows/Rapua/internal/contextkeys"
-	"github.com/nathanhollows/Rapua/internal/flash"
 	"github.com/nathanhollows/Rapua/internal/models"
+	"github.com/nathanhollows/Rapua/internal/services"
 )
 
 // QRCode handles the generation of QR codes for the current instance.
 func (h *AdminHandler) QRCode(w http.ResponseWriter, r *http.Request) {
-	user := r.Context().Value(contextkeys.UserKey).(*models.User)
+	user := h.UserFromContext(r.Context())
 
 	// Extract parameters from the URL
 	extension := chi.URLParam(r, "extension")
@@ -62,7 +61,7 @@ func (h *AdminHandler) QRCode(w http.ResponseWriter, r *http.Request) {
 		r.Context(),
 		path,
 		content,
-		h.AssetGenerator.WithFormat(extension),
+		h.AssetGenerator.WithQRFormat(extension),
 	)
 	if err != nil {
 		h.Logger.Error("QRCodeHandler: Could not create QR code", "error", err)
@@ -81,31 +80,11 @@ func (h *AdminHandler) QRCode(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	http.ServeFile(w, r, path)
-
-}
-
-// Show the form to edit the navigation settings.
-func (h *AdminHandler) GeneratePosters(w http.ResponseWriter, r *http.Request) {
-	user := r.Context().Value(contextkeys.UserKey).(*models.User)
-
-	posters, err := models.GeneratePosters(r.Context(), user.CurrentInstanceID)
-	if err != nil {
-		h.Logger.Error("Posters could not be generated", "error", err, "instance", user.CurrentInstanceID)
-
-		flash.NewError("Posters could not be generated").Save(w, r)
-		http.Redirect(w, r, "/admin/locations", http.StatusSeeOther)
-		return
-	}
-
-	instance := user.CurrentInstance.Name
-	w.Header().Set("Content-Disposition", "attachment; filename="+instance+" posters.pdf")
-	w.Header().Set("Content-Type", "application/pdf")
-	http.ServeFile(w, r, posters)
 }
 
 // GenerateQRCodeArchive generates a zip file containing all the QR codes for the current instance.
 func (h *AdminHandler) GenerateQRCodeArchive(w http.ResponseWriter, r *http.Request) {
-	user := r.Context().Value(contextkeys.UserKey).(*models.User)
+	user := h.UserFromContext(r.Context())
 
 	var paths []string
 	actions := []string{"in"}
@@ -128,7 +107,7 @@ func (h *AdminHandler) GenerateQRCodeArchive(w http.ResponseWriter, r *http.Requ
 					r.Context(),
 					path,
 					content,
-					h.AssetGenerator.WithFormat(extension),
+					h.AssetGenerator.WithQRFormat(extension),
 				)
 				if err != nil {
 					h.Logger.Error("QRCodeHandler: Could not create QR code", "error", err)
@@ -146,6 +125,142 @@ func (h *AdminHandler) GenerateQRCodeArchive(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
+	http.ServeFile(w, r, path)
+	os.Remove(path)
+}
+
+// GeneratePosters generates a PDF file containing all the QR codes for the current instance.
+func (h *AdminHandler) GeneratePosters(w http.ResponseWriter, r *http.Request) {
+	user := h.UserFromContext(r.Context())
+
+	pdfData := services.PDFData{
+		InstanceName: user.CurrentInstance.Name,
+		Pages:        services.PDFPages{},
+	}
+
+	actions := []string{"in"}
+	if user.CurrentInstance.Settings.CompletionMethod == models.CheckInAndOut {
+		actions = []string{"in", "out"}
+	}
+	for _, location := range user.CurrentInstance.Locations {
+		for _, action := range actions {
+			path, content := h.GameManagerService.GetQRCodePathAndContent(action, location.MarkerID, location.Name, "png")
+
+			// Check if the file already exists, otherwise generate it
+			if _, err := os.Stat(path); err != nil {
+				// Generate the QR code
+				err := h.AssetGenerator.CreateQRCodeImage(
+					r.Context(),
+					path,
+					content,
+					h.AssetGenerator.WithQRFormat("png"),
+				)
+				if err != nil {
+					h.Logger.Error("GeneratePoster: Could not create posters", "error", err)
+					http.Error(w, "Could not create posters", http.StatusInternalServerError)
+					return
+				}
+
+			}
+
+			page := services.PDFPage{
+				LocationName: location.Name,
+				ImagePath:    path,
+				URL:          content,
+			}
+			if action == "out" {
+				page.Background = []int{255, 216, 216}
+			}
+			pdfData.Pages = append(pdfData.Pages, page)
+		}
+	}
+	path, err := h.AssetGenerator.CreatePDF(r.Context(), pdfData)
+	if err != nil {
+		h.Logger.Error("Posters could not be generated", "error", err, "instance", user.CurrentInstanceID)
+		http.Error(w, "Posters could not be generated", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Disposition", "attachment; filename="+user.CurrentInstance.Name+" posters.pdf")
+	w.Header().Set("Content-Type", "application/pdf")
+	http.ServeFile(w, r, path)
+	os.Remove(path)
+}
+
+// GeneratePoster generates a poster for the given location.
+func (h *AdminHandler) GeneratePoster(w http.ResponseWriter, r *http.Request) {
+	user := h.UserFromContext(r.Context())
+
+	id := chi.URLParam(r, "id")
+	if id == "" {
+		h.Logger.Error("QRCodeHandler: No location provided")
+		http.Error(w, "No location provided", http.StatusNotFound)
+		return
+	}
+
+	found := false
+	var location models.Location
+	for _, loc := range user.CurrentInstance.Locations {
+		if loc.MarkerID == id {
+			found = true
+			location = loc
+			break
+		}
+	}
+	if !found {
+		h.Logger.Error("GeneratePoster: Location not found", "location", id)
+		http.Error(w, "Location not found", http.StatusNotFound)
+		return
+	}
+
+	pdfData := services.PDFData{
+		InstanceName: user.CurrentInstance.Name,
+		Pages:        services.PDFPages{},
+	}
+
+	actions := []string{"in"}
+	if user.CurrentInstance.Settings.CompletionMethod == models.CheckInAndOut {
+		actions = []string{"in", "out"}
+	}
+	for _, action := range actions {
+		path, content := h.GameManagerService.GetQRCodePathAndContent(action, location.MarkerID, location.Name, "png")
+
+		// Check if the file already exists, otherwise generate it
+		if _, err := os.Stat(path); err != nil {
+			// Generate the QR code
+			err := h.AssetGenerator.CreateQRCodeImage(
+				r.Context(),
+				path,
+				content,
+				h.AssetGenerator.WithQRFormat("png"),
+			)
+			if err != nil {
+				h.Logger.Error("GeneratePoster: Could not create posters", "error", err)
+				http.Error(w, "Could not create posters", http.StatusInternalServerError)
+				return
+			}
+
+		}
+
+		page := services.PDFPage{
+			LocationName: location.Name,
+			ImagePath:    path,
+			URL:          content,
+		}
+		if action == "out" {
+			page.Background = []int{255, 216, 216}
+		}
+		pdfData.Pages = append(pdfData.Pages, page)
+	}
+	path, err := h.AssetGenerator.CreatePDF(r.Context(), pdfData)
+	if err != nil {
+		h.Logger.Error("Posters could not be generated", "error", err, "instance", user.CurrentInstanceID)
+		http.Error(w, "Posters could not be generated", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Disposition", "attachment; filename="+user.CurrentInstance.Name+" - "+location.Name+" poster.pdf")
+	w.Header().Set("Content-Type", "application/pdf")
 	http.ServeFile(w, r, path)
 	os.Remove(path)
 }

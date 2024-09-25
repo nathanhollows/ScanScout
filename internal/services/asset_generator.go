@@ -10,9 +10,25 @@ import (
 	"strings"
 	"time"
 
+	"github.com/go-pdf/fpdf"
 	"github.com/nathanhollows/Rapua/internal/helpers"
 	go_qr "github.com/piglig/go-qr"
 )
+
+type PDFPage struct {
+	LocationName string
+	URL          string
+	ImagePath    string
+	// []int{R, G, B}
+	Background []int
+}
+
+type PDFPages []PDFPage
+
+type PDFData struct {
+	InstanceName string
+	Pages        PDFPages
+}
 
 type QRCodeOptions struct {
 	format     string
@@ -23,19 +39,19 @@ type QRCodeOptions struct {
 
 type QRCodeOption func(*QRCodeOptions)
 
-func (_ *assetGenerator) WithFormat(format string) QRCodeOption {
+func (_ *assetGenerator) WithQRFormat(format string) QRCodeOption {
 	return func(o *QRCodeOptions) {
 		o.format = strings.ToLower(format)
 	}
 }
 
-func (_ *assetGenerator) WithForeground(color string) QRCodeOption {
+func (_ *assetGenerator) WithQRForeground(color string) QRCodeOption {
 	return func(o *QRCodeOptions) {
 		o.foreground = color
 	}
 }
 
-func (_ *assetGenerator) WithBackground(color string) QRCodeOption {
+func (_ *assetGenerator) WithQRBackground(color string) QRCodeOption {
 	return func(o *QRCodeOptions) {
 		o.background = color
 	}
@@ -44,25 +60,27 @@ func (_ *assetGenerator) WithBackground(color string) QRCodeOption {
 type AssetGenerator interface {
 	// CreateQRCodeImage creates a QR code image with the given options
 	// Supported options are:
-	// - WithFormat(format string), where format is "png" or "svg"
+	// - WithQRFormat(format string), where format is "png" or "svg"
 	// - WithScanType(scanType string), where scanType is "in" or "out"
 	// - WithForeground(color string), where color is a hex color code
 	// - WithBackground(color string), where color is a hex color code
 	CreateQRCodeImage(ctx context.Context, path string, content string, options ...QRCodeOption) (err error)
-	// WithFormat sets the format of the QR code
+	// WithQRFormat sets the format of the QR code
 	// Supported formats are "png" and "svg"
-	WithFormat(format string) QRCodeOption
-	// WithForeground sets the foreground color of the QR code
-	WithForeground(color string) QRCodeOption
-	// WithBackground sets the background color of the QR code
-	WithBackground(color string) QRCodeOption
+	WithQRFormat(format string) QRCodeOption
+	// WithQRForeground sets the foreground color of the QR code
+	WithQRForeground(color string) QRCodeOption
+	// WithQRBackground sets the background color of the QR code
+	WithQRBackground(color string) QRCodeOption
 
 	// CreateArchive creates a zip archive from the given paths
 	// Returns the path to the archive
 	// Accepts a list of paths to files to add to the archive
 	// Accepts an optional list of filenames to use for the files in the archive
 	CreateArchive(ctx context.Context, paths []string) (path string, err error)
-	CreatePDF(ctx context.Context, data []string) (string, error)
+	// CreatePDF creates a PDF document from the given data
+	// Returns the path to the PDF
+	CreatePDF(ctx context.Context, data PDFData) (string, error)
 }
 
 type assetGenerator struct{}
@@ -153,6 +171,63 @@ func (s *assetGenerator) CreateArchive(ctx context.Context, paths []string) (pat
 	return path, nil
 }
 
-func (s *assetGenerator) CreatePDF(ctx context.Context, data []string) (string, error) {
-	return "", nil
+func (s *assetGenerator) CreatePDF(ctx context.Context, data PDFData) (path string, err error) {
+	// Set up the document
+	pdf := fpdf.New(fpdf.OrientationPortrait, fpdf.UnitMillimeter, fpdf.PageSizeA4, "")
+	pdf.AddUTF8Font("ArchivoBlack", "", "./assets/fonts/ArchivoBlack-Regular.ttf")
+	pdf.AddUTF8Font("OpenSans", "", "./assets/fonts/OpenSans.ttf")
+
+	// Add pages
+	for _, page := range data.Pages {
+		err := s.addPage(pdf, page, data.InstanceName)
+		if err != nil {
+			return "", err
+		}
+	}
+
+	path = "assets/codes/" + helpers.NewCode(10) + "-" + fmt.Sprint(time.Now().UnixNano()) + ".pdf"
+	err = pdf.OutputFileAndClose(path)
+	if err != nil {
+		return "", err
+	}
+
+	return path, nil
+}
+
+func (s *assetGenerator) addPage(pdf *fpdf.Fpdf, page PDFPage, instanceName string) error {
+	pdf.AddPage()
+	// Set the background color
+	if len(page.Background) == 3 {
+		pdf.SetFillColor(page.Background[0], page.Background[1], page.Background[2])
+		pdf.Rect(0, 0, 210, 297, "F")
+	}
+
+	// Add the instance name
+	pdf.SetFont("ArchivoBlack", "", 28)
+	title := strings.ToUpper(instanceName)
+	pdf.SetY(32)
+	pdf.SetX((210 - pdf.GetStringWidth(title)) / 2)
+	pdf.Cell(130, 32, title)
+
+	// Add the location name
+	pdf.SetFont("OpenSans", "", 20)
+	pdf.SetY(40)
+	pdf.SetX((210 - pdf.GetStringWidth(page.LocationName)) / 2)
+	pdf.Cell(40, 70, page.LocationName)
+
+	// Add the QR code
+	if page.ImagePath[len(page.ImagePath)-3:] == "png" {
+		pdf.Image(page.ImagePath, 50, 90, 110, 110, false, "", 0, "")
+	}
+
+	// Render the URL
+	scanText := page.URL
+	scanText = strings.Replace(scanText, "https://", "", -1)
+	scanText = strings.Replace(scanText, "http://", "", -1)
+	scanText = strings.Replace(scanText, "www.", "", -1)
+	pdf.SetY(180)
+	pdf.SetX((210 - pdf.GetStringWidth(scanText)) / 2)
+	pdf.Cell(40, 70, scanText)
+
+	return nil
 }

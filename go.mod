@@ -13,7 +13,6 @@ require (
 	github.com/sendgrid/rest v2.6.9+incompatible
 	github.com/sendgrid/sendgrid-go v3.16.0+incompatible
 	github.com/uptrace/bun v1.2.1
-	github.com/yeqown/go-qrcode/v2 v2.2.2
 	github.com/yuin/goldmark v1.7.4
 	golang.org/x/crypto v0.24.0
 	golang.org/x/exp v0.0.0-20231108232855-2478ac86f678
@@ -28,9 +27,7 @@ require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/dustin/go-humanize v1.0.1 // indirect
 	github.com/fatih/color v1.16.0 // indirect
-	github.com/fogleman/gg v1.3.0 // indirect
 	github.com/go-logfmt/logfmt v0.6.0 // indirect
-	github.com/golang/freetype v0.0.0-20170609003504-e2365dfdc4a0 // indirect
 	github.com/golang/protobuf v1.5.3 // indirect
 	github.com/gorilla/context v1.1.1 // indirect
 	github.com/gorilla/css v1.0.1 // indirect
@@ -46,12 +43,9 @@ require (
 	github.com/muesli/reflow v0.3.0 // indirect
 	github.com/muesli/termenv v0.15.2 // indirect
 	github.com/ncruces/go-strftime v0.1.9 // indirect
-	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/remyoudompheng/bigfft v0.0.0-20230129092748-24d4a6f8daec // indirect
 	github.com/rivo/uniseg v0.2.0 // indirect
-	github.com/yeqown/reedsolomon v1.0.0 // indirect
-	golang.org/x/image v0.12.0 // indirect
 	golang.org/x/mod v0.17.0 // indirect
 	golang.org/x/net v0.26.0 // indirect
 	golang.org/x/oauth2 v0.17.0 // indirect
@@ -81,6 +75,5 @@ require (
 	github.com/uptrace/bun/extra/bundebug v1.2.1
 	github.com/vmihailenco/msgpack/v5 v5.4.1 // indirect
 	github.com/vmihailenco/tagparser/v2 v2.0.0 // indirect
-	github.com/yeqown/go-qrcode/writer/standard v1.2.2
 	golang.org/x/sys v0.21.0 // indirect
 )
