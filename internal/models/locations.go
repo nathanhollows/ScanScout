@@ -118,12 +118,6 @@ func FindOrderedLocations(ctx context.Context, team *Team) (*Locations, error) {
 	return nil, nil
 }
 
-// FindPseudoRandomLocations returns a set of locations in pseudo-random order
-func FindPseudoRandomLocations(ctx context.Context, team *Team) (*Locations, error) {
-	// Implement logic to return a set of locations in pseudo-random order
-	return nil, nil
-}
-
 // LogCheckIn creates a new scan entry for the location
 // This function does not check if the team is allowed to scan in
 func (l *Location) LogCheckIn(ctx context.Context, team Team, mustCheckOut bool) (scan *Scan, err error) {
