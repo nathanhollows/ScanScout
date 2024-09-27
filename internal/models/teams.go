@@ -267,6 +267,7 @@ func (t *Team) LoadScans(ctx context.Context) error {
 			Where("team_id = ?", t.Code).
 			Relation("Location").
 			Relation("Location.Content").
+			Order("time_in DESC").
 			Scan(ctx)
 		if err != nil {
 			return fmt.Errorf("LoadScans: %v", err)

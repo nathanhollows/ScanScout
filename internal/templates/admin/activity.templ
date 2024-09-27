@@ -5,7 +5,9 @@ import (
 	"github.com/nathanhollows/Rapua/internal/flash"
 	"github.com/nathanhollows/Rapua/internal/models"
 	"github.com/uptrace/bun/schema"
+	"math"
 	"sort"
+	"time"
 )
 
 templ ActivityTracker(user models.User) {
@@ -88,7 +90,7 @@ templ ActivityTracker(user models.User) {
 										if location.AvgDuration > 0 {
 											<p class="flex flex-row space-x-3 text-center">
 												<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-timer"><line x1="10" x2="14" y1="2" y2="2"></line> <line x1="12" x2="15" y1="14" y2="11"></line> <circle cx="12" cy="14" r="8"></circle> </svg>
-												<span>{ fmt.Sprint(location.AvgDuration) } </span>
+												<span>{ fmt.Sprintf("%s", time.Duration(math.Round(location.AvgDuration) * 1e9  )) } </span>
 											</p>
 										}
 									</span>
@@ -474,7 +476,12 @@ templ TeamActivity(settings models.InstanceSettings, team models.Team, notificat
 				<div class="prose">
 					<ul>
 						for _, scan := range team.Scans {
-							<li>{ scan.Location.Name } `@` { fmt.Sprint(scan.CreatedAt) }</li>
+							<li>
+								<span>
+									{ scan.Location.Name }
+								</span>
+								<span class="convert-time badge badge-sm badge-ghost" data-datetime={ fmt.Sprint(scan.CreatedAt.UTC()) }></span>
+							</li>
 						}
 					</ul>
 				</div>

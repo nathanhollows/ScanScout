@@ -60,9 +60,9 @@
 <p>No activity</p>
 </div><!-- Check-ins --><div class=\"w-full\"><p class=\"py-3 font-bold\">Check-ins</p>
 <div class=\"prose\"><ul>
-<li>
- `@` 
-</li>
+<li><span>
+</span> <span class=\"convert-time badge badge-sm badge-ghost\" data-datetime=\"
+\"></span></li>
 </ul></div>
 <p>No activity</p>
 </div></div>
