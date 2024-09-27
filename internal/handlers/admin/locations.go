@@ -116,9 +116,15 @@ func (h *AdminHandler) LocationEdit(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	blocks, err := h.BlockService.GetByLocationID(r.Context(), location.ID)
+	if err != nil {
+		h.Logger.Error("LocationEdit: getting blocks", "error", err)
+		http.Redirect(w, r, "/admin/locations", http.StatusSeeOther)
+	}
+
 	location.LoadClues(r.Context())
 
-	c := templates.EditLocation(*location, user.CurrentInstance.Settings)
+	c := templates.EditLocation(*location, user.CurrentInstance.Settings, blocks)
 	err = templates.Layout(c, *user, "Locations", "Edit Location").Render(r.Context(), w)
 }
 

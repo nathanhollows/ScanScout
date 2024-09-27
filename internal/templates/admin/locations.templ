@@ -2,6 +2,7 @@ package templates
 
 import (
 	"fmt"
+	"github.com/nathanhollows/Rapua/internal/blocks"
 	"github.com/nathanhollows/Rapua/internal/models"
 )
 
@@ -234,7 +235,7 @@ templ AddLocation() {
 	@locationScript()
 }
 
-templ EditLocation(location models.Location, settings models.InstanceSettings) {
+templ EditLocation(location models.Location, settings models.InstanceSettings, contentBlocks blocks.Blocks) {
 	<form
 		hx-post={ fmt.Sprint("/admin/locations/", location.MarkerID) }
 		hx-trigger="submit"
@@ -352,6 +353,30 @@ templ EditLocation(location models.Location, settings models.InstanceSettings) {
 						} else {
 							<input type="hidden" name="points" value={ fmt.Sprint(location.Points) }/>
 						}
+					</div>
+					<!-- Blocks -->
+					<div class="divider">
+						<div class="dropdown">
+							<div class="block">
+								<div tabindex="0" role="button" class="btn btn-sm w-32 flex flex-col">
+									<svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-plus"><path d="M5 12h14"></path><path d="M12 5v14"></path></svg>
+									Add a Block
+								</div>
+							</div>
+							<div tabindex="0" class="dropdown-content card bg-base-100 border shadow-xl w-80 -ml-24 mt-3">
+								<div class="card-body">
+									<h2 class="card-title mb-3">Add a Block</h2>
+									<div class="grid grid-cols-2 grid-flow-row gap-5">
+										for _, block := range blocks.RegisteredBlocks {
+											<div class="btn btn-outline h-auto p-3 cursor-pointer tooltip flex flex-col gap-1 items-center rounded-md" data-tip={ block.GetDescription() }>
+												@templ.Raw(block.GetIconSVG())
+												{ block.GetName() }
+											</div>
+										}
+									</div>
+								</div>
+							</div>
+						</div>
 					</div>
 					<!-- Content -->
 					<label for="content" class="form-control w-full my-5">
