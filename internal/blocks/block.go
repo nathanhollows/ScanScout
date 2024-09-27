@@ -19,3 +19,9 @@ type Block interface {
 }
 
 type Blocks []Block
+
+var RegisteredBlocks = Blocks{
+	&MarkdownBlock{},
+	&PasswordBlock{},
+	&ChecklistBlock{},
+}
