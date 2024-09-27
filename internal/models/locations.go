@@ -31,6 +31,7 @@ type Location struct {
 	Instance Instance        `bun:"rel:has-one,join:instance_id=id" json:"instance"`
 	Marker   Marker          `bun:"rel:has-one,join:marker_id=code" json:"marker"`
 	Content  LocationContent `bun:"rel:has-one,join:content_id=id" json:"content"`
+	Blocks   Blocks          `bun:"rel:has-many,join:id=location_id" json:"blocks"`
 }
 
 type Locations []Location

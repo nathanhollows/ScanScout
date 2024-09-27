@@ -13,6 +13,8 @@ func CreateTables(logger *slog.Logger) {
 	var models = []interface{}{
 		(*Notification)(nil),
 		(*InstanceSettings)(nil),
+		(*Block)(nil),
+		(*TeamBlockProgress)(nil),
 		(*Location)(nil),
 		(*Clue)(nil),
 		(*LocationContent)(nil),

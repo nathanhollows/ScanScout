@@ -18,3 +18,5 @@ type TeamBlockProgress struct {
 	IsComplete     bool            `bun:",type:bool" json:"is_complete"`
 	Progress       json.RawMessage `bun:",type:jsonb" json:"progress"`
 }
+
+type TeamBlockProgresses []TeamBlockProgress
