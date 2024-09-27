@@ -5,13 +5,15 @@ import (
 )
 
 type UserServices struct {
-	AuthService AuthService
-	UserService UserService
+	AuthService  AuthService
+	UserService  UserService
+	BlockService BlockService
 }
 
 func NewUserServices(repo repositories.UserRepository) *UserServices {
 	return &UserServices{
-		AuthService: NewAuthService(repo),
-		UserService: NewUserService(repo),
+		AuthService:  NewAuthService(repo),
+		UserService:  NewUserService(repo),
+		BlockService: NewBlockService(repositories.NewBlockRepository()),
 	}
 }

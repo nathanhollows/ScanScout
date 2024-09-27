@@ -1,0 +1,11 @@
+package templates
+
+import "html/template"
+
+templ MarkdownPlayer(md template.HTML) {
+	@templ.Raw(md)
+}
+
+templ MarkdownAdmin(md template.HTML) {
+	@templ.Raw(md)
+}

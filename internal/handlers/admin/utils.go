@@ -6,6 +6,7 @@ import (
 
 	"github.com/nathanhollows/Rapua/internal/contextkeys"
 	"github.com/nathanhollows/Rapua/internal/models"
+	"github.com/nathanhollows/Rapua/internal/repositories"
 	"github.com/nathanhollows/Rapua/internal/services"
 )
 
@@ -15,6 +16,7 @@ type AdminHandler struct {
 	NotificationService services.NotificationService
 	UserServices        services.UserServices
 	AssetGenerator      services.AssetGenerator
+	BlockService        services.BlockService
 }
 
 func NewAdminHandler(logger *slog.Logger, gs *services.GameManagerService, ns services.NotificationService, us services.UserServices) *AdminHandler {
@@ -24,6 +26,7 @@ func NewAdminHandler(logger *slog.Logger, gs *services.GameManagerService, ns se
 		NotificationService: ns,
 		UserServices:        us,
 		AssetGenerator:      services.NewAssetGenerator(),
+		BlockService:        services.NewBlockService(repositories.NewBlockRepository()),
 	}
 }
 
