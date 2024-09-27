@@ -29,7 +29,6 @@ func (r *blockRepository) GetByLocationID(ctx context.Context, locationID string
 	contentBlocks := models.Blocks{}
 	err := db.DB.NewSelect().
 		Model(&contentBlocks).
-		Relation("ContentBlock").
 		Where("location_id = ?", locationID).
 		Scan(ctx)
 	if err != nil {
