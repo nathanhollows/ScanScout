@@ -39,10 +39,9 @@ templ ActivityTracker(user models.User) {
 	</div>
 	<div class="relative flex flex-col md:flex-row px-5 md:space-x-5">
 		<div class="w-full md:w-5/12">
-			<div
-				id="map-activity"
-				class="w-full h-96 rounded-lg shadow-lg my-5"
-			></div>
+			<div id="map-container" class="relative w-full aspect-square lg:w-96 rounded-lg shadow-lg my-5 overflow-hidden">
+				<div id="map-activity" class="map w-full h-full rounded-lg"></div>
+			</div>
 			<div class="join join-vertical w-full">
 				if len(user.CurrentInstance.Locations) == 0 {
 					<div role="alert" class="alert">
