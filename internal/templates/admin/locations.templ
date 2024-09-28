@@ -412,7 +412,15 @@ templ EditLocation(location models.Location, settings models.InstanceSettings, c
 				<!-- Sidebar -->
 				<div class="flex flex-col">
 					<!-- Map -->
-					<div id="map" class="w-full aspect-square md:w-[35vw] lg:w-96 rounded-lg shadow-lg mt-5"></div>
+					<div id="map-container" class="relative w-full aspect-square md:w-[35vw] lg:w-96 rounded-lg shadow-lg mt-5">
+						<div id="map" class="map w-full h-full rounded-lg"></div>
+						<!-- Overlay Button and Backdrop -->
+						<div id="map-lock-overlay" class="absolute inset-0 bg-neutral bg-opacity-50 flex justify-center items-center opacity-0 hover:opacity-100 transition rounded-lg focus:opacity-100" tabindex="0">
+							<button id="unlock-map-btn" class="bg-white text-black px-4 py-2 rounded shadow-lg" onclick="document.getElementById('map-lock-overlay').remove()">
+								Click to edit
+							</button>
+						</div>
+					</div>
 					<div class="form-control">
 						<label class="label cursor-pointer">
 							<span class="label-text">Save map location</span>
