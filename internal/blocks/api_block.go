@@ -1,40 +1,17 @@
 package blocks
 
 import (
-	"context"
 	"encoding/json"
-	"io"
 
-	"github.com/nathanhollows/Rapua/internal/helpers"
 	"github.com/nathanhollows/Rapua/internal/models"
-	templates "github.com/nathanhollows/Rapua/internal/templates/blocks"
 )
 
 type APIBlock struct {
-	ID       string
-	EndPoint string // URL that external system will call
-	Content  string // Optional content or instructions to display
-}
-
-// Ensure APIBlock implements the Block interface
-var _ Block = (*APIBlock)(nil)
-
-func (b *APIBlock) Render(ctx context.Context, user models.User, w io.Writer) error {
-	html, err := helpers.MarkdownToHTML(b.Content)
-	if err != nil {
-		return err
-	}
-	err = templates.MarkdownPlayer(html).Render(ctx, w)
-	return err
-}
-
-func (b *APIBlock) RenderAdmin(ctx context.Context, user models.User, w io.Writer) error {
-	html, err := helpers.MarkdownToHTML(b.Content)
-	if err != nil {
-		return err
-	}
-	err = templates.MarkdownAdmin(html).Render(ctx, w)
-	return err
+	BaseBlock
+	// The endpoint to call
+	EndPoint string `json:"end_point"`
+	// Optional instructions for players
+	Content string `json:"content"`
 }
 
 func (b *APIBlock) Validate(userID string, input map[string]string) error {
@@ -54,4 +31,12 @@ func (b *APIBlock) GetID() string   { return b.ID }
 func (b *APIBlock) Data() json.RawMessage {
 	data, _ := json.Marshal(b)
 	return data
+}
+
+func (b *APIBlock) readFromModel(model models.Block) error {
+	b.ID = model.ID
+	b.LocationID = model.LocationID
+	b.Order = model.Order
+	err := json.Unmarshal(model.Data, b)
+	return err
 }

@@ -16,6 +16,7 @@ type BlockRepository interface {
 	GetByID(ctx context.Context, contentBlockID string) (blocks.Block, error)
 	// SaveContentBlock saves a content block to the database
 	Save(ctx context.Context, contentBlock *blocks.Block) error
+	Create(ctx context.Context, contentBlock *blocks.Block, locationID string) error
 }
 
 type blockRepository struct{}
@@ -34,7 +35,7 @@ func (r *blockRepository) GetByLocationID(ctx context.Context, locationID string
 	if err != nil {
 		return nil, err
 	}
-	return blocks.NewBlocksFromModel(contentBlocks)
+	return blocks.ConvertModelsToBlocks(contentBlocks)
 }
 
 // GetByID fetches a content block by its ID
@@ -47,7 +48,7 @@ func (r *blockRepository) GetByID(ctx context.Context, contentBlockID string) (b
 	if err != nil {
 		return nil, err
 	}
-	return blocks.NewBlockFromModel(contentBlock)
+	return blocks.ConvertModelToBlock(contentBlock)
 }
 
 // Save saves a content block to the database
@@ -64,5 +65,25 @@ func (r *blockRepository) Save(ctx context.Context, block *blocks.Block) error {
 		return err
 	}
 	_, err := db.DB.NewUpdate().Model(&contentBlock).WherePK().Exec(ctx)
+	return err
+}
+
+// Create saves a content block to the database
+func (r *blockRepository) Create(ctx context.Context, block *blocks.Block, locationID string) error {
+	contentBlock := models.Block{
+		LocationID: locationID,
+		Type:       (*block).GetType(),
+		Data:       (*block).Data(),
+		Order:      1e4,
+	}
+
+	uuid := uuid.New()
+	contentBlock.ID = uuid.String()
+	_, err := db.DB.NewInsert().Model(&contentBlock).Exec(ctx)
+	if err != nil {
+		return err
+	}
+
+	_, err = db.DB.NewUpdate().Model(&contentBlock).WherePK().Exec(ctx)
 	return err
 }

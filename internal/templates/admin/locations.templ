@@ -355,20 +355,26 @@ templ EditLocation(location models.Location, settings models.InstanceSettings, c
 						}
 					</div>
 					<!-- Blocks -->
-					<div class="divider">
+					<div class="divider mt-5 mb-10">
 						<div class="dropdown">
 							<div class="block">
-								<div tabindex="0" role="button" class="btn btn-sm w-32 flex flex-col">
+								<div tabindex="0" role="button" class="btn btn-sm btn-neutral w-32 flex flex-col">
 									<svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-plus"><path d="M5 12h14"></path><path d="M12 5v14"></path></svg>
 									Add a Block
 								</div>
 							</div>
-							<div tabindex="0" class="dropdown-content card bg-base-100 border shadow-xl w-80 -ml-24 mt-3">
+							<div tabindex="0" class="dropdown-content card bg-base-100 border shadow-xl w-80 -ml-24 mt-3 z-50">
 								<div class="card-body">
 									<h2 class="card-title mb-3">Add a Block</h2>
 									<div class="grid grid-cols-2 grid-flow-row gap-5">
 										for _, block := range blocks.RegisteredBlocks {
-											<div class="btn btn-outline h-auto p-3 cursor-pointer tooltip flex flex-col gap-1 items-center rounded-md" data-tip={ block.GetDescription() }>
+											<div
+												class="btn btn-outline h-auto p-3 tooltip flex flex-col gap-1 items-center rounded-md"
+												data-tip={ block.GetDescription() }
+												hx-post={ fmt.Sprint("/admin/locations/", location.ID, "/blocks/new/", block.GetType()) }
+												hx-target="#blocks"
+												hx-swap="beforeend"
+											>
 												@templ.Raw(block.GetIconSVG())
 												{ block.GetName() }
 											</div>
@@ -377,6 +383,35 @@ templ EditLocation(location models.Location, settings models.InstanceSettings, c
 								</div>
 							</div>
 						</div>
+					</div>
+					<div id="blocks">
+						for _, block := range contentBlocks {
+							<div class="relative flex flex-col md:flex-row rounded-2xl bg-base-200 mb-5 gap-5 p-8">
+								<div class="flex flex-1 flex-row gap-5">
+									<div
+										class="tooltip flex items-center cursor-move text-base-content"
+										data-tip="Drag to reorder"
+									>
+										<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-grip-vertical"><circle cx="9" cy="12" r="1"></circle><circle cx="9" cy="5" r="1"></circle><circle cx="9" cy="19" r="1"></circle><circle cx="15" cy="12" r="1"></circle><circle cx="15" cy="5" r="1"></circle><circle cx="15" cy="19" r="1"></circle></svg>
+									</div>
+									<div class="flex flex-col gap-1">
+										<h3 class="text-lg font-bold flex flex-row gap-3 items-center">
+											<span class="">
+												@templ.Raw(block.GetIconSVG())
+											</span>
+											{ block.GetName() }
+											<span class="badge badge-sm">10 pts</span>
+										</h3>
+										{ block.GetDescription() }
+									</div>
+								</div>
+								<div class="flex justify-end self-center gap-3 content-center">
+									<button type="button" class="btn btn-secondary btn-xs btn-outline">Edit</button>
+									<button type="button" class="btn btn-error btn-xs btn-outline">Delete</button>
+									<input type="hidden" name="location" value={ block.GetID() }/>
+								</div>
+							</div>
+						}
 					</div>
 					<!-- Content -->
 					<label for="content" class="form-control w-full my-5">
@@ -494,10 +529,11 @@ const confirm_delete_modal = document.getElementById('confirm_delete_modal');
 
 </script>
 	<script>
-  function previewMD() {
-    var checkBox = document.getElementById("togglePreview");
-    var textarea = document.getElementById("content");
-    var preview = document.getElementById("preview-content");
+  function previewMD(e) {
+	var checkBox = e.target;
+	var id = e.target.dataset.block;
+    var textarea = document.getElementById("md-" + id);
+    var preview = document.getElementById("preview-md-" + id);
 
     if (checkBox.checked == true){
       textarea.classList.add("hidden");

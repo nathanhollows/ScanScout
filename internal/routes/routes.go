@@ -159,17 +159,27 @@ func setupAdminRoutes(router chi.Router, adminHandler *admin.AdminHandler) {
 
 		r.Route("/locations", func(r chi.Router) {
 			r.Get("/", adminHandler.Locations)
+			r.Post("/reorder", adminHandler.ReorderLocations)
 			r.Get("/new", adminHandler.LocationNew)
 			r.Post("/new", adminHandler.LocationNewPost)
 			r.Get("/{id}", adminHandler.LocationEdit)
 			r.Post("/{id}", adminHandler.LocationEditPost)
 			r.Delete("/{id}", adminHandler.LocationDelete)
-			// Disabled for now
+			// Assets
 			r.Get("/qr/{action}/{id}.{extension}", adminHandler.QRCode)
 			r.Get("/qr-codes.zip", adminHandler.GenerateQRCodeArchive)
 			r.Get("/poster/{id}.pdf", adminHandler.GeneratePoster)
 			r.Get("/posters.pdf", adminHandler.GeneratePosters)
-			r.Post("/reorder", adminHandler.ReorderLocations)
+			// Blocks
+			r.Route("/{location}/blocks", func(r chi.Router) {
+				// r.Get("/", adminHandler.Blocks)
+				// r.Post("/", adminHandler.BlocksPost)
+				// r.Post("/reorder", adminHandler.ReorderBlocks)
+				r.Post("/new/{type}", adminHandler.BlockNewPost)
+				r.Get("/{blockID}", adminHandler.BlockEdit)
+				// r.Post("/{blockID}", adminHandler.BlockEditPost)
+				// r.Delete("/{blockID}", adminHandler.BlockDelete)
+			})
 		})
 
 		r.Route("/teams", func(r chi.Router) {

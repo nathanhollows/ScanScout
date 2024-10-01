@@ -1,39 +1,21 @@
 package blocks
 
 import (
-	"context"
 	"encoding/json"
-	"io"
 
-	"github.com/nathanhollows/Rapua/internal/helpers"
 	"github.com/nathanhollows/Rapua/internal/models"
-	templates "github.com/nathanhollows/Rapua/internal/templates/blocks"
 )
 
 type ChecklistBlock struct {
-	ID      string
-	Content string
+	BaseBlock
+	Content string          `json:"content"`
+	List    []ChecklistItem `json:"list"`
 }
 
-// Ensure ChecklistBlock implements the Block interface
-var _ Block = (*ChecklistBlock)(nil)
-
-func (b *ChecklistBlock) Render(ctx context.Context, user models.User, w io.Writer) error {
-	html, err := helpers.MarkdownToHTML(b.Content)
-	if err != nil {
-		return err
-	}
-	err = templates.MarkdownPlayer(html).Render(ctx, w)
-	return err
-}
-
-func (b *ChecklistBlock) RenderAdmin(ctx context.Context, user models.User, w io.Writer) error {
-	html, err := helpers.MarkdownToHTML(b.Content)
-	if err != nil {
-		return err
-	}
-	err = templates.MarkdownAdmin(html).Render(ctx, w)
-	return err
+type ChecklistItem struct {
+	ID          string `json:"id"`
+	Description string `json:"description"`
+	Checked     bool   `json:"checked"`
 }
 
 func (b *ChecklistBlock) Validate(userID string, input map[string]string) error {
@@ -53,4 +35,12 @@ func (b *ChecklistBlock) GetID() string   { return b.ID }
 func (b *ChecklistBlock) Data() json.RawMessage {
 	data, _ := json.Marshal(b)
 	return data
+}
+
+func (b *ChecklistBlock) readFromModel(model models.Block) error {
+	b.ID = model.ID
+	b.LocationID = model.LocationID
+	b.Order = model.Order
+	err := json.Unmarshal(model.Data, b)
+	return err
 }

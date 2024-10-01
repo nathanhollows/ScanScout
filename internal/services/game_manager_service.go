@@ -374,6 +374,15 @@ func (s *GameManagerService) ValidateLocationMarker(user *models.User, id string
 	return false
 }
 
+func (s *GameManagerService) ValidateLocationID(user *models.User, id string) bool {
+	for _, loc := range user.CurrentInstance.Locations {
+		if loc.ID == id {
+			return true
+		}
+	}
+	return false
+}
+
 func (s *GameManagerService) GetQRCodePathAndContent(action, id, name, extension string) (string, string) {
 	content := os.Getenv("SITE_URL")
 	path := "assets/codes/"
