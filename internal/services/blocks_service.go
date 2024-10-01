@@ -16,6 +16,7 @@ type BlockService interface {
 	ValidateBlock(ctx context.Context, team models.Team, block blocks.Block) error
 	ValidateBlocks(ctx context.Context, team models.Team, blocks blocks.Blocks) error
 	NewBlock(ctx context.Context, locationID string, blockType string) (blocks.Block, error)
+	UpdateBlock(ctx context.Context, block *blocks.Block) error
 }
 
 type blockService struct {
@@ -68,4 +69,9 @@ func (s *blockService) createBlock(blockType string) blocks.Block {
 	default:
 		return nil
 	}
+}
+
+// UpdateBlock updates a block
+func (s *blockService) UpdateBlock(ctx context.Context, block *blocks.Block) error {
+	return s.Repo.Update(ctx, block)
 }

@@ -56,6 +56,57 @@ func (h *AdminHandler) BlockEdit(w http.ResponseWriter, r *http.Request) {
 
 }
 
+// BlockEditPost updates the block
+func (h *AdminHandler) BlockEditPost(w http.ResponseWriter, r *http.Request) {
+	user := h.UserFromContext(r.Context())
+
+	location := chi.URLParam(r, "location")
+	if !h.GameManagerService.ValidateLocationID(user, location) {
+		h.Logger.Error("BlockEditPost: invalid location", "location", location)
+		err := templates.Toast(*flash.NewError("Could not update block. Invalid location")).Render(r.Context(), w)
+		if err != nil {
+			h.Logger.Error("BlockEditPost: rendering template", "error", err)
+		}
+		return
+	}
+
+	blockID := chi.URLParam(r, "blockID")
+
+	block, err := h.BlockService.GetByBlockID(r.Context(), blockID)
+	if err != nil {
+		h.Logger.Error("BlockEditPost: getting block", "error", err)
+		err := templates.Toast(*flash.NewError("Could not update block")).Render(r.Context(), w)
+		if err != nil {
+			h.Logger.Error("BlockEditPost: rendering template", "error", err)
+		}
+		return
+	}
+
+	if block.GetLocationID() != location {
+		h.Logger.Error("BlockEditPost: block does not belong to location", "blockID", blockID, "location", location)
+		err := templates.Toast(*flash.NewError("Could not update block")).Render(r.Context(), w)
+		if err != nil {
+			h.Logger.Error("BlockEditPost: rendering template", "error", err)
+		}
+		return
+	}
+
+	err = h.BlockService.UpdateBlock(r.Context(), &block)
+	if err != nil {
+		h.Logger.Error("BlockEditPost: updating block", "error", err)
+		err := templates.Toast(*flash.NewError("Could not update block")).Render(r.Context(), w)
+		if err != nil {
+			h.Logger.Error("BlockEditPost: rendering template", "error", err)
+		}
+		return
+	}
+
+	err = templates.Toast(*flash.NewSuccess("Block updated")).Render(r.Context(), w)
+	if err != nil {
+		h.Logger.Error("BlockEditPost: rendering template", "error", err)
+	}
+}
+
 // Show the form to edit the navigation settings.
 func (h *AdminHandler) BlockNewPost(w http.ResponseWriter, r *http.Request) {
 	user := h.UserFromContext(r.Context())

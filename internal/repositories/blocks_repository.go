@@ -17,6 +17,7 @@ type BlockRepository interface {
 	// SaveContentBlock saves a content block to the database
 	Save(ctx context.Context, contentBlock *blocks.Block) error
 	Create(ctx context.Context, contentBlock *blocks.Block, locationID string) error
+	Update(ctx context.Context, contentBlock *blocks.Block) error
 }
 
 type blockRepository struct{}
@@ -85,5 +86,16 @@ func (r *blockRepository) Create(ctx context.Context, block *blocks.Block, locat
 	}
 
 	_, err = db.DB.NewUpdate().Model(&contentBlock).WherePK().Exec(ctx)
+	return err
+}
+
+// Update saves a content block to the database
+func (r *blockRepository) Update(ctx context.Context, block *blocks.Block) error {
+	contentBlock := models.Block{
+		ID:   (*block).GetID(),
+		Type: (*block).GetType(),
+		Data: (*block).Data(),
+	}
+	_, err := db.DB.NewUpdate().Model(&contentBlock).WherePK().Exec(ctx)
 	return err
 }
