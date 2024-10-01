@@ -406,8 +406,22 @@ templ EditLocation(location models.Location, settings models.InstanceSettings, c
 									</div>
 								</div>
 								<div class="flex justify-end self-center gap-3 content-center">
-									<button type="button" class="btn btn-secondary btn-xs btn-outline">Edit</button>
-									<button type="button" class="btn btn-error btn-xs btn-outline">Delete</button>
+									<button
+										type="button"
+										class="btn btn-secondary btn-xs btn-outline"
+										hx-get={ fmt.Sprint("/admin/locations/", location.ID, "/blocks/", block.GetID(), "/edit") }
+										hx-target="#block_edit_modal"
+										hx-trigger="click"
+										hx-swap="innerHTML"
+										onclick="block_edit_modal.showModal();"
+									>Edit</button>
+									<button
+										type="button"
+										class="btn btn-error btn-xs btn-outline"
+										data-location={ location.ID }
+										data-block={ block.GetID() }
+										onclick="confirm_delete_block.showModal();"
+									>Delete</button>
 									<input type="hidden" name="location" value={ block.GetID() }/>
 								</div>
 							</div>
@@ -502,6 +516,46 @@ templ EditLocation(location models.Location, settings models.InstanceSettings, c
 			</div>
 		</div>
 	</form>
+	<dialog id="block_edit_modal" class="modal modal-bottom md:modal-middle">
+		<div class="modal-box prose">
+			<h3 class="text-lg font-bold">Update the block</h3>
+			<p class="pt-4">You are about to delete this location. Are you sure?</p>
+			<div class="modal-action">
+				<button
+					type="button"
+					class="btn"
+					onclick="block_edit_modal.close()"
+				>Nevermind</button>
+				<button
+					type="button"
+					class="btn btn-primary"
+					hx-delete={ fmt.Sprint("/admin/locations/", location.MarkerID) }
+					hx-trigger="click"
+					onclick="block_edit_modal.close()"
+				>Save</button>
+			</div>
+		</div>
+	</dialog>
+	<dialog id="confirm_delete_block" class="modal">
+		<div class="modal-box prose outline outline-1 outline-offset-1 outline-error">
+			<h3 class="text-lg font-bold">Delete this location?</h3>
+			<p class="pt-4">You are about to delete this location. Are you sure?</p>
+			<div class="modal-action">
+				<button
+					type="button"
+					class="btn"
+					onclick="confirm_delete_block.close()"
+				>Nevermind</button>
+				<button
+					type="button"
+					class="btn btn-error"
+					hx-delete={ fmt.Sprint("/admin/locations/", location.MarkerID) }
+					hx-trigger="click"
+					onclick="confirm_delete_block.close()"
+				>Delete</button>
+			</div>
+		</div>
+	</dialog>
 	<dialog id="confirm_delete_modal" class="modal">
 		<div class="modal-box prose outline outline-1 outline-offset-1 outline-error">
 			<h3 class="text-lg font-bold">Delete this location?</h3>
@@ -634,7 +688,7 @@ templ locationScript() {
     });
 
     // Add event listener for location saving switch
-    document.querySelector('input[name="switch"]').addEventListener('change', function(e) {
+    document.querySelector('input[name="preview"]').addEventListener('change', function(e) {
       if (e.target.checked) {
         const center = map.getCenter();
         marker.setLngLat(center);

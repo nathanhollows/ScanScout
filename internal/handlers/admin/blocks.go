@@ -44,12 +44,14 @@ func (h *AdminHandler) BlockEdit(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	w.Header().Set("Content-Type", "text/html")
 	switch block.(type) {
 	case *blocks.MarkdownBlock:
 		b := block.(*blocks.MarkdownBlock)
 		err = bTemplates.MarkdownAdmin(*b).Render(r.Context(), w)
 	case *blocks.PasswordBlock:
-		err = bTemplates.PasswordAdmin().Render(r.Context(), w)
+		b := block.(*blocks.PasswordBlock)
+		err = bTemplates.PasswordAdmin(*b).Render(r.Context(), w)
 	}
 
 }

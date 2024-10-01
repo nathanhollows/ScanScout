@@ -2350,6 +2350,48 @@ html {
   min-width: 4rem;
 }
 
+.swap {
+  position: relative;
+  display: inline-grid;
+  -webkit-user-select: none;
+     -moz-user-select: none;
+          user-select: none;
+  place-content: center;
+  cursor: pointer;
+}
+
+.swap > * {
+  grid-column-start: 1;
+  grid-row-start: 1;
+  transition-duration: 300ms;
+  transition-timing-function: cubic-bezier(0, 0, 0.2, 1);
+  transition-property: transform, opacity;
+}
+
+.swap input {
+  -webkit-appearance: none;
+     -moz-appearance: none;
+          appearance: none;
+}
+
+.swap .swap-on,
+.swap .swap-indeterminate,
+.swap input:indeterminate ~ .swap-on {
+  opacity: 0;
+}
+
+.swap input:checked ~ .swap-off,
+.swap-active .swap-off,
+.swap input:indeterminate ~ .swap-off {
+  opacity: 0;
+}
+
+.swap input:checked ~ .swap-on,
+.swap-active .swap-on,
+.swap input:indeterminate ~ .swap-indeterminate {
+  opacity: 1;
+}
+
 .table {
   position: relative;
   width: 100%;
@@ -5194,6 +5236,10 @@ details.collapse summary::-webkit-details-marker {
   width: min-content;
 }
 
+.w-11\/12 {
+  width: 91.666667%;
+}
+
 .min-w-80 {
   min-width: 20rem;
 }
@@ -5877,12 +5923,29 @@ details.collapse summary::-webkit-details-marker {
     border-color: var(--fallback-b2,oklch(var(--b2)/var(--tw-border-opacity)));
   }
 
+  .md\:modal-middle {
+    place-items: center;
+  }
+
   .md\:tooltip-top:before {
     transform: translateX(-50%);
     top: auto;
     left: 50%;
     right: auto;
     bottom: var(--tooltip-offset);
+  }
+
+  .md\:modal-middle :where(.modal-box) {
+    width: 91.666667%;
+    max-width: 32rem;
+    --tw-translate-y: 0px;
+    --tw-scale-x: .9;
+    --tw-scale-y: .9;
+    transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
+    border-top-left-radius: var(--rounded-box, 1rem);
+    border-top-right-radius: var(--rounded-box, 1rem);
+    border-bottom-right-radius: var(--rounded-box, 1rem);
+    border-bottom-left-radius: var(--rounded-box, 1rem);
   }
 
   .md\:tooltip-top:after {
@@ -6018,6 +6081,10 @@ details.collapse summary::-webkit-details-marker {
 
   .md\:w-auto {
     width: auto;
+  }
+
+  .md\:w-11\/12 {
+    width: 91.666667%;
   }
 
   .md\:grid-cols-2 {
