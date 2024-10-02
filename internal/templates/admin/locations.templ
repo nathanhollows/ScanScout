@@ -385,7 +385,12 @@ templ EditLocation(location models.Location, settings models.InstanceSettings, c
 							</div>
 						</div>
 					</div>
-					<div id="blocks">
+					<div
+						id="blocks"
+						class="sortable"
+						hx-post={ fmt.Sprint("/admin/locations/", location.ID, "/blocks/reorder") }
+						hx-trigger="end"
+					>
 						for _, block := range contentBlocks {
 							@bTemplates.RenderAdminBlock(settings, block)
 						}
@@ -530,6 +535,35 @@ templ EditLocation(location models.Location, settings models.InstanceSettings, c
       preview.innerHTML = null
     }
   }
+
+function sortables() {
+    var sortables = document.querySelectorAll(".sortable");
+    for (var i = 0; i < sortables.length; i++) {
+      var sortable = sortables[i];
+      var sortableInstance = new Sortable(sortable, {
+          animation: 150,
+          ghostClass: 'blue-background-class',
+          handle: ".cursor-move",
+
+          // Make the `.htmx-indicator` unsortable
+          filter: ".htmx-indicator",
+          onMove: function (evt) {
+            return evt.related.className.indexOf('htmx-indicator') === -1;
+          },
+
+          // Disable sorting on the `end` event
+          onEnd: function (evt) {
+            this.option("disabled", true);
+          }
+      });
+
+      // Re-enable sorting on the `htmx:afterSwap` event
+      sortable.addEventListener("htmx:afterSwap", function() {
+        sortableInstance.option("disabled", false);
+      });
+    }
+}
+sortables();
 </script>
 	@locationScript()
 }
@@ -596,7 +630,7 @@ templ locationScript() {
     });
 
     // Add event listener for location saving switch
-    document.querySelector('input[name="preview"]').addEventListener('change', function(e) {
+    document.querySelector('input[name="location"]').addEventListener('change', function(e) {
       if (e.target.checked) {
         const center = map.getCenter();
         marker.setLngLat(center);

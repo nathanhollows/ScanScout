@@ -7,7 +7,7 @@ type Block struct {
 	LocationID string          `bun:",notnull" json:"location_id"`
 	Type       string          `bun:",type:int" json:"type"`
 	Data       json.RawMessage `bun:",type:jsonb" json:"data"`
-	Order      int             `bun:",type:int" json:"order"`
+	Ordering   int             `bun:",type:int" json:"order"`
 }
 
 type Blocks []Block

@@ -36,7 +36,7 @@ func (b *APIBlock) Data() json.RawMessage {
 func (b *APIBlock) NewFromBaseBlock(model models.Block) error {
 	b.ID = model.ID
 	b.LocationID = model.LocationID
-	b.Order = model.Order
+	b.Order = model.Ordering
 	err := json.Unmarshal(model.Data, b)
 	return err
 }

@@ -140,3 +140,29 @@ func (h *AdminHandler) BlockDelete(w http.ResponseWriter, r *http.Request) {
 
 	h.handleSuccess(w, r, "Block deleted")
 }
+
+// ReorderBlocks reorders the blocks
+func (h *AdminHandler) ReorderBlocks(w http.ResponseWriter, r *http.Request) {
+	user := h.UserFromContext(r.Context())
+
+	location := chi.URLParam(r, "location")
+	if !h.GameManagerService.ValidateLocationID(user, location) {
+		h.handleError(w, r, "ReorderBlocks: invalid location", "Could not reorder blocks. Invalid location", "location", location)
+		return
+	}
+
+	err := r.ParseForm()
+	if err != nil {
+		h.handleError(w, r, "ReorderBlocks: parsing form", "Could not reorder blocks", "error", err)
+		return
+	}
+
+	blockOrder := r.Form["block_id"]
+	err = h.BlockService.ReorderBlocks(r.Context(), location, blockOrder)
+	if err != nil {
+		h.handleError(w, r, "ReorderBlocks: reordering blocks", "Could not reorder blocks", "error", err)
+		return
+	}
+
+	h.handleSuccess(w, r, "Blocks reordered")
+}

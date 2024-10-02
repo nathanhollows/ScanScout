@@ -19,6 +19,7 @@ type BlockRepository interface {
 	Create(ctx context.Context, contentBlock *blocks.Block, locationID string) error
 	Update(ctx context.Context, contentBlock *blocks.Block) error
 	Delete(ctx context.Context, contentBlockID string) error
+	Reorder(ctx context.Context, locationID string, blockIDs []string) error
 }
 
 type blockRepository struct{}
@@ -33,6 +34,7 @@ func (r *blockRepository) GetByLocationID(ctx context.Context, locationID string
 	err := db.DB.NewSelect().
 		Model(&contentBlocks).
 		Where("location_id = ?", locationID).
+		Order("ordering ASC").
 		Scan(ctx)
 	if err != nil {
 		return nil, err
@@ -72,7 +74,7 @@ func (r *blockRepository) Create(ctx context.Context, block *blocks.Block, locat
 		LocationID: locationID,
 		Type:       (*block).GetType(),
 		Data:       (*block).GetData(),
-		Order:      1e4,
+		Ordering:   1e4,
 	}
 
 	uuid := uuid.New()
@@ -100,7 +102,7 @@ func (r *blockRepository) Update(ctx context.Context, block *blocks.Block) error
 		Type:       (*block).GetType(),
 		Data:       (*block).GetData(),
 		LocationID: (*block).GetLocationID(),
-		Order:      (*block).GetOrder(),
+		Ordering:   (*block).GetOrder(),
 	}
 	_, err := db.DB.NewUpdate().Model(&contentBlock).WherePK().Exec(ctx)
 	return err
@@ -112,21 +114,21 @@ func (b *blockRepository) ConvertBlockToModel(block blocks.Block) models.Block {
 		ID:         block.GetID(),
 		LocationID: block.GetLocationID(),
 		Type:       block.GetType(),
-		Order:      block.GetOrder(),
+		Ordering:   block.GetOrder(),
 		Data:       block.GetData(),
 	}
 }
 
 func ConvertModelsToBlocks(cbs models.Blocks) (blocks.Blocks, error) {
-	blocks := make(blocks.Blocks, len(cbs))
+	b := make(blocks.Blocks, len(cbs))
 	for i, cb := range cbs {
 		block, err := ConvertModelToBlock(&cb)
 		if err != nil {
 			return nil, err
 		}
-		blocks[i] = block
+		b[i] = block
 	}
-	return blocks, nil
+	return b, nil
 }
 
 func ConvertModelToBlock(m *models.Block) (blocks.Block, error) {
@@ -136,7 +138,7 @@ func ConvertModelToBlock(m *models.Block) (blocks.Block, error) {
 		LocationID: m.LocationID,
 		Type:       m.Type,
 		Data:       m.Data,
-		Order:      m.Order,
+		Order:      m.Ordering,
 	})
 	if err != nil {
 		return nil, err
@@ -152,4 +154,19 @@ func ConvertModelToBlock(m *models.Block) (blocks.Block, error) {
 func (r *blockRepository) Delete(ctx context.Context, contentBlockID string) error {
 	_, err := db.DB.NewDelete().Model(&models.Block{}).Where("id = ?", contentBlockID).Exec(ctx)
 	return err
+}
+
+// Reorder reorders the content blocks
+func (r *blockRepository) Reorder(ctx context.Context, locationID string, blockIDs []string) error {
+	for i, blockID := range blockIDs {
+		_, err := db.DB.NewUpdate().
+			Model(&models.Block{}).
+			Set("ordering = ?", i).
+			Where("id = ?", blockID).
+			Exec(ctx)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }

@@ -19,6 +19,7 @@ type BlockService interface {
 	NewBlock(ctx context.Context, locationID string, blockType string) (blocks.Block, error)
 	UpdateBlock(ctx context.Context, block *blocks.Block, data map[string]string) error
 	DeleteBlock(ctx context.Context, blockID string) error
+	ReorderBlocks(ctx context.Context, locationID string, blockIDs []string) error
 }
 
 type blockService struct {
@@ -74,4 +75,9 @@ func (s *blockService) UpdateBlock(ctx context.Context, block *blocks.Block, dat
 // DeleteBlock deletes a block
 func (s *blockService) DeleteBlock(ctx context.Context, blockID string) error {
 	return s.Repo.Delete(ctx, blockID)
+}
+
+// ReorderBlocks reorders the blocks in a location
+func (s *blockService) ReorderBlocks(ctx context.Context, locationID string, blockIDs []string) error {
+	return s.Repo.Reorder(ctx, locationID, blockIDs)
 }
