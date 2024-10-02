@@ -5,8 +5,6 @@ import (
 
 	"github.com/go-chi/chi"
 	"github.com/nathanhollows/Rapua/internal/blocks"
-	"github.com/nathanhollows/Rapua/internal/flash"
-	templates "github.com/nathanhollows/Rapua/internal/templates/admin"
 	bTemplates "github.com/nathanhollows/Rapua/internal/templates/blocks"
 )
 
@@ -15,11 +13,7 @@ func (h *AdminHandler) BlockEdit(w http.ResponseWriter, r *http.Request) {
 	user := h.UserFromContext(r.Context())
 	location := chi.URLParam(r, "location")
 	if !h.GameManagerService.ValidateLocationID(user, location) {
-		h.Logger.Error("BlockEdit: invalid location", "location", location)
-		err := templates.Toast(*flash.NewError("Could not find block")).Render(r.Context(), w)
-		if err != nil {
-			h.Logger.Error("BlockEdit: rendering template", "error", err)
-		}
+		h.handleError(w, r, "BlockEdit: invalid location", "Could not find block", "location", location)
 		return
 	}
 
@@ -27,20 +21,12 @@ func (h *AdminHandler) BlockEdit(w http.ResponseWriter, r *http.Request) {
 
 	block, err := h.BlockService.GetByBlockID(r.Context(), blockID)
 	if err != nil {
-		h.Logger.Error("BlockEdit: getting block", "error", err)
-		err := templates.Toast(*flash.NewError("Could not find block")).Render(r.Context(), w)
-		if err != nil {
-			h.Logger.Error("BlockEdit: rendering template", "error", err)
-		}
+		h.handleError(w, r, "BlockEdit: getting block", "Could not find block", "error", err)
 		return
 	}
 
 	if block.GetLocationID() != location {
-		h.Logger.Error("BlockEdit: block does not belong to location", "blockID", blockID, "location", location)
-		err := templates.Toast(*flash.NewError("Could not find block")).Render(r.Context(), w)
-		if err != nil {
-			h.Logger.Error("BlockEdit: rendering template", "error", err)
-		}
+		h.handleError(w, r, "BlockEdit: block does not belong to location", "Could not find block", "blockID", blockID, "location", location)
 		return
 	}
 
@@ -62,11 +48,7 @@ func (h *AdminHandler) BlockEditPost(w http.ResponseWriter, r *http.Request) {
 
 	location := chi.URLParam(r, "location")
 	if !h.GameManagerService.ValidateLocationID(user, location) {
-		h.Logger.Error("BlockEditPost: invalid location", "location", location)
-		err := templates.Toast(*flash.NewError("Could not update block. Invalid location")).Render(r.Context(), w)
-		if err != nil {
-			h.Logger.Error("BlockEditPost: rendering template", "error", err)
-		}
+		h.handleError(w, r, "BlockEditPost: invalid location", "Could not update block. Invalid location", "location", location)
 		return
 	}
 
@@ -74,30 +56,18 @@ func (h *AdminHandler) BlockEditPost(w http.ResponseWriter, r *http.Request) {
 
 	block, err := h.BlockService.GetByBlockID(r.Context(), blockID)
 	if err != nil {
-		h.Logger.Error("BlockEditPost: getting block", "error", err)
-		err := templates.Toast(*flash.NewError("Could not update block")).Render(r.Context(), w)
-		if err != nil {
-			h.Logger.Error("BlockEditPost: rendering template", "error", err)
-		}
+		h.handleError(w, r, "BlockEditPost: getting block", "Could not update block", "error", err)
 		return
 	}
 
 	if block.GetLocationID() != location {
-		h.Logger.Error("BlockEditPost: block does not belong to location", "blockID", blockID, "location", location)
-		err := templates.Toast(*flash.NewError("Could not update block")).Render(r.Context(), w)
-		if err != nil {
-			h.Logger.Error("BlockEditPost: rendering template", "error", err)
-		}
+		h.handleError(w, r, "BlockEditPost: block does not belong to location", "Could not update block", "blockID", blockID, "location", location)
 		return
 	}
 
 	err = r.ParseForm()
 	if err != nil {
-		h.Logger.Error("BlockEditPost: parsing form", "error", err)
-		err := templates.Toast(*flash.NewError("Error parsing form")).Render(r.Context(), w)
-		if err != nil {
-			h.Logger.Error("BlockEditPost: rendering template", "error", err)
-		}
+		h.handleError(w, r, "BlockEditPost: parsing form", "Could not update block", "error", err)
 		return
 	}
 
@@ -108,18 +78,11 @@ func (h *AdminHandler) BlockEditPost(w http.ResponseWriter, r *http.Request) {
 
 	err = h.BlockService.UpdateBlock(r.Context(), &block, data)
 	if err != nil {
-		h.Logger.Error("BlockEditPost: updating block", "error", err)
-		err := templates.Toast(*flash.NewError("Could not update block")).Render(r.Context(), w)
-		if err != nil {
-			h.Logger.Error("BlockEditPost: rendering template", "error", err)
-		}
+		h.handleError(w, r, "BlockEditPost: updating block", "Could not update block", "error", err)
 		return
 	}
 
-	err = templates.Toast(*flash.NewSuccess("Block updated")).Render(r.Context(), w)
-	if err != nil {
-		h.Logger.Error("BlockEditPost: rendering template", "error", err)
-	}
+	h.handleSuccess(w, r, "Block updated")
 }
 
 // Show the form to edit the navigation settings.
@@ -130,21 +93,13 @@ func (h *AdminHandler) BlockNewPost(w http.ResponseWriter, r *http.Request) {
 
 	location := chi.URLParam(r, "location")
 	if !h.GameManagerService.ValidateLocationID(user, location) {
-		h.Logger.Error("BlockNewPost: invalid location", "location", location)
-		err := templates.Toast(*flash.NewError("Could not create block. Invalid location")).Render(r.Context(), w)
-		if err != nil {
-			h.Logger.Error("BlockNewPost: rendering template", "error", err)
-		}
+		h.handleError(w, r, "BlockNewPost: invalid location", "Could not create block. Invalid location", "location", location)
 		return
 	}
 
 	block, err := h.BlockService.NewBlock(r.Context(), location, blockType)
 	if err != nil {
-		h.Logger.Error("BlockNewPost: creating block", "error", err)
-		err := templates.Toast(*flash.NewError("Could not create block")).Render(r.Context(), w)
-		if err != nil {
-			h.Logger.Error("BlockNewPost: rendering template", "error", err)
-		}
+		h.handleError(w, r, "BlockNewPost: creating block", "Could not create block", "error", err)
 		return
 	}
 
@@ -153,4 +108,35 @@ func (h *AdminHandler) BlockNewPost(w http.ResponseWriter, r *http.Request) {
 		h.Logger.Error("BlockNewPost: rendering template", "error", err)
 	}
 
+}
+
+// BlockDelete deletes a block
+func (h *AdminHandler) BlockDelete(w http.ResponseWriter, r *http.Request) {
+	user := h.UserFromContext(r.Context())
+
+	location := chi.URLParam(r, "location")
+	if !h.GameManagerService.ValidateLocationID(user, location) {
+		h.handleError(w, r, "BlockDelete: invalid location", "Could not delete block. Invalid location", "location", location)
+		return
+	}
+
+	blockID := chi.URLParam(r, "blockID")
+	block, err := h.BlockService.GetByBlockID(r.Context(), blockID)
+	if err != nil {
+		h.handleError(w, r, "BlockDelete: getting block", "Could not delete block", "error", err)
+		return
+	}
+
+	if block.GetLocationID() != location {
+		h.handleError(w, r, "BlockDelete: block does not belong to location", "Could not delete block", "blockID", blockID, "location", location)
+		return
+	}
+
+	err = h.BlockService.DeleteBlock(r.Context(), block.GetID())
+	if err != nil {
+		h.handleError(w, r, "BlockDelete: deleting block", "Could not delete block", "error", err)
+		return
+	}
+
+	h.handleSuccess(w, r, "Block deleted")
 }

@@ -18,6 +18,7 @@ type BlockRepository interface {
 	Save(ctx context.Context, contentBlock *blocks.Block) error
 	Create(ctx context.Context, contentBlock *blocks.Block, locationID string) error
 	Update(ctx context.Context, contentBlock *blocks.Block) error
+	Delete(ctx context.Context, contentBlockID string) error
 }
 
 type blockRepository struct{}
@@ -145,4 +146,10 @@ func ConvertModelToBlock(m *models.Block) (blocks.Block, error) {
 		return nil, err
 	}
 	return newBlock, nil
+}
+
+// Delete deletes a content block from the database
+func (r *blockRepository) Delete(ctx context.Context, contentBlockID string) error {
+	_, err := db.DB.NewDelete().Model(&models.Block{}).Where("id = ?", contentBlockID).Exec(ctx)
+	return err
 }

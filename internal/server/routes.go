@@ -178,7 +178,7 @@ func setupAdminRoutes(router chi.Router, adminHandler *admin.AdminHandler) {
 				r.Post("/new/{type}", adminHandler.BlockNewPost)
 				r.Get("/{blockID}/edit", adminHandler.BlockEdit)
 				r.Post("/{blockID}/update", adminHandler.BlockEditPost)
-				// r.Delete("/{blockID}", adminHandler.BlockDelete)
+				r.Delete("/{blockID}/delete", adminHandler.BlockDelete)
 			})
 		})
 

@@ -18,6 +18,7 @@ type BlockService interface {
 	ValidateBlocks(ctx context.Context, team models.Team, blocks blocks.Blocks) error
 	NewBlock(ctx context.Context, locationID string, blockType string) (blocks.Block, error)
 	UpdateBlock(ctx context.Context, block *blocks.Block, data map[string]string) error
+	DeleteBlock(ctx context.Context, blockID string) error
 }
 
 type blockService struct {
@@ -68,4 +69,9 @@ func (s *blockService) NewBlock(ctx context.Context, locationID string, blockTyp
 func (s *blockService) UpdateBlock(ctx context.Context, block *blocks.Block, data map[string]string) error {
 	(*block).UpdateData(data)
 	return s.Repo.Update(ctx, block)
+}
+
+// DeleteBlock deletes a block
+func (s *blockService) DeleteBlock(ctx context.Context, blockID string) error {
+	return s.Repo.Delete(ctx, blockID)
 }

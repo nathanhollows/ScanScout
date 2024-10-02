@@ -476,8 +476,6 @@ templ EditLocation(location models.Location, settings models.InstanceSettings, c
 				<button
 					type="button"
 					class="btn btn-error"
-					hx-delete={ fmt.Sprint("/admin/locations/", location.MarkerID) }
-					hx-trigger="click"
 					onclick="confirm_delete_block.close()"
 				>Delete</button>
 			</div>
@@ -542,18 +540,7 @@ templ locationScript() {
   let map; // Store the map instance globally within the IIFE
   let marker; // Store the marker instance globally within the IIFE
 
-  function initializeMapAndTextarea() {
-    // --- TEXTAREA AUTO-RESIZE LOGIC ---
-    const tx = document.getElementsByTagName("textarea");
-    for (let i = 0; i < tx.length; i++) {
-      tx[i].setAttribute("style", "height:" + (tx[i].scrollHeight) + "px;overflow-y:hidden;");
-      tx[i].addEventListener("input", function() {
-        this.style.height = 'auto';
-        this.style.height = (this.scrollHeight) + "px";
-      });
-    }
-
-    // --- MAPBOX INITIALIZATION LOGIC ---
+  function initializeMap() {
     let coords = [170.5111643, -45.8650509];
     let zoom = 14;
 
@@ -622,8 +609,30 @@ templ locationScript() {
     });
   }
 
-  // Initialize map and textarea on page load
-  initializeMapAndTextarea();
+  // Delete block confirmation dialog
+  function confirmDeleteBlock(event) {
+	modal = document.getElementById("confirm_delete_block");
+	url = "/admin/locations/" + event.target.dataset.location + "/blocks/" + event.target.dataset.block + "/delete";
+	btn = modal.querySelector("button.btn-error")
+	btn.setAttribute("hx-delete", url);
+	btn.setAttribute("hx-swap", "outerHTML");
+	btn.setAttribute("hx-target", "#" + event.target.closest(".collapse").id);
+	modal.showModal();
+	htmx.process(modal);
+  }
+
+  for (const element of document.querySelectorAll('.block-delete')) {
+	element.addEventListener('click', confirmDeleteBlock);
+  }
+
+  // Add listener to #blocks for new blocks
+  document.getElementById("blocks").addEventListener("htmx:afterSwap", function(event) {
+	  for (const element of document.querySelectorAll('.block-delete')) {
+		element.addEventListener('click', confirmDeleteBlock);
+	  }
+  });
+
+  initializeMap();
 
 })();
 </script>
