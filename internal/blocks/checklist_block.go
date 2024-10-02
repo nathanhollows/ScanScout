@@ -18,6 +18,8 @@ type ChecklistItem struct {
 	Checked     bool   `json:"checked"`
 }
 
+// Ensure ChecklistBlock implements the Block interface
+
 func (b *ChecklistBlock) Validate(userID string, input map[string]string) error {
 	// No validation required
 	return nil

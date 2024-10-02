@@ -2,6 +2,7 @@ package services
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/nathanhollows/Rapua/internal/blocks"
 	"github.com/nathanhollows/Rapua/internal/models"
@@ -16,7 +17,7 @@ type BlockService interface {
 	ValidateBlock(ctx context.Context, team models.Team, block blocks.Block) error
 	ValidateBlocks(ctx context.Context, team models.Team, blocks blocks.Blocks) error
 	NewBlock(ctx context.Context, locationID string, blockType string) (blocks.Block, error)
-	UpdateBlock(ctx context.Context, block *blocks.Block) error
+	UpdateBlock(ctx context.Context, block *blocks.Block, data map[string]string) error
 }
 
 type blockService struct {
@@ -49,29 +50,22 @@ func (s *blockService) ValidateBlocks(ctx context.Context, team models.Team, blo
 	return s.ValidateBlocks(ctx, team, blocks)
 }
 
-// TODO: Finish
 func (s *blockService) NewBlock(ctx context.Context, locationID string, blockType string) (blocks.Block, error) {
-	block := s.createBlock(blockType)
+	var block blocks.Block
+	switch blockType {
+	case "markdown":
+		block = &blocks.MarkdownBlock{}
+	case "password":
+		block = &blocks.PasswordBlock{}
+	default:
+		return nil, fmt.Errorf("block type %s not found", blockType)
+	}
 	s.Repo.Create(ctx, &block, locationID)
 	return block, nil
 }
 
-func (s *blockService) createBlock(blockType string) blocks.Block {
-	switch blockType {
-	case "markdown":
-		return &blocks.MarkdownBlock{}
-	case "password":
-		return &blocks.PasswordBlock{}
-	// case "checklist":
-	// 	return &blocks.ChecklistBlock{}
-	// case "api":
-	// 	return &blocks.APIBlock{}
-	default:
-		return nil
-	}
-}
-
 // UpdateBlock updates a block
-func (s *blockService) UpdateBlock(ctx context.Context, block *blocks.Block) error {
+func (s *blockService) UpdateBlock(ctx context.Context, block *blocks.Block, data map[string]string) error {
+	(*block).UpdateData(data)
 	return s.Repo.Update(ctx, block)
 }

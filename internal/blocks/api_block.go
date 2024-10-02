@@ -33,7 +33,7 @@ func (b *APIBlock) Data() json.RawMessage {
 	return data
 }
 
-func (b *APIBlock) readFromModel(model models.Block) error {
+func (b *APIBlock) NewFromBaseBlock(model models.Block) error {
 	b.ID = model.ID
 	b.LocationID = model.LocationID
 	b.Order = model.Order

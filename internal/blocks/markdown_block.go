@@ -2,8 +2,6 @@ package blocks
 
 import (
 	"encoding/json"
-
-	"github.com/nathanhollows/Rapua/internal/models"
 )
 
 type MarkdownBlock struct {
@@ -25,19 +23,18 @@ func (b *MarkdownBlock) GetIconSVG() string {
 }
 func (b *MarkdownBlock) GetType() string       { return "markdown" }
 func (b *MarkdownBlock) GetID() string         { return b.ID }
+func (b *MarkdownBlock) GetOrder() int         { return b.Order }
 func (b *MarkdownBlock) GetLocationID() string { return b.LocationID }
-func (b *MarkdownBlock) GetAdminData() interface{} {
-	return b
-}
-func (b *MarkdownBlock) Data() json.RawMessage {
+func (b *MarkdownBlock) GetData() json.RawMessage {
 	data, _ := json.Marshal(b)
 	return data
 }
 
-func (b *MarkdownBlock) readFromModel(model models.Block) error {
-	b.ID = model.ID
-	b.LocationID = model.LocationID
-	b.Order = model.Order
-	err := json.Unmarshal(model.Data, b)
-	return err
+func (b *MarkdownBlock) ParseData() error {
+	return json.Unmarshal(b.Data, b)
+}
+
+func (b *MarkdownBlock) UpdateData(data map[string]string) error {
+	b.Content = data["content"]
+	return nil
 }

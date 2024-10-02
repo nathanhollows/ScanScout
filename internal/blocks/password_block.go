@@ -2,8 +2,6 @@ package blocks
 
 import (
 	"encoding/json"
-
-	"github.com/nathanhollows/Rapua/internal/models"
 )
 
 type PasswordBlock struct {
@@ -27,19 +25,23 @@ func (b *PasswordBlock) GetIconSVG() string {
 }
 func (b *PasswordBlock) GetType() string       { return "password" }
 func (b *PasswordBlock) GetID() string         { return b.ID }
+func (b *PasswordBlock) GetOrder() int         { return b.Order }
 func (b *PasswordBlock) GetLocationID() string { return b.LocationID }
 func (b *PasswordBlock) GetAdminData() interface{} {
 	return &b
 }
-func (b *PasswordBlock) Data() json.RawMessage {
+func (b *PasswordBlock) GetData() json.RawMessage {
 	data, _ := json.Marshal(b)
 	return data
 }
 
-func (b *PasswordBlock) readFromModel(model models.Block) error {
-	b.ID = model.ID
-	b.LocationID = model.LocationID
-	b.Order = model.Order
-	err := json.Unmarshal(model.Data, b)
-	return err
+func (b *PasswordBlock) ParseData() error {
+	return json.Unmarshal(b.Data, b)
+}
+
+func (b *PasswordBlock) UpdateData(data map[string]string) error {
+	b.Content = data["content"]
+	b.Password = data["block-passphrase"]
+	b.Fuzzy = data["fuzzy"] == "on"
+	return nil
 }

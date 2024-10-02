@@ -91,7 +91,22 @@ func (h *AdminHandler) BlockEditPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = h.BlockService.UpdateBlock(r.Context(), &block)
+	err = r.ParseForm()
+	if err != nil {
+		h.Logger.Error("BlockEditPost: parsing form", "error", err)
+		err := templates.Toast(*flash.NewError("Error parsing form")).Render(r.Context(), w)
+		if err != nil {
+			h.Logger.Error("BlockEditPost: rendering template", "error", err)
+		}
+		return
+	}
+
+	data := make(map[string]string)
+	for key, value := range r.Form {
+		data[key] = value[0]
+	}
+
+	err = h.BlockService.UpdateBlock(r.Context(), &block, data)
 	if err != nil {
 		h.Logger.Error("BlockEditPost: updating block", "error", err)
 		err := templates.Toast(*flash.NewError("Could not update block")).Render(r.Context(), w)

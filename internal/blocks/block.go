@@ -2,8 +2,7 @@ package blocks
 
 import (
 	"encoding/json"
-
-	"github.com/nathanhollows/Rapua/internal/models"
+	"fmt"
 )
 
 type Block interface {
@@ -12,22 +11,24 @@ type Block interface {
 	GetLocationID() string
 	GetName() string
 	GetDescription() string
+	GetOrder() int
 	GetIconSVG() string
-	GetAdminData() interface{}
-	// Data returns the block data as a json.RawMessage
-	Data() json.RawMessage
+	GetData() json.RawMessage
+	//
+	ParseData() error
+	UpdateData(data map[string]string) error
 	// Render renders the block to html
 	Validate(teamCode string, input map[string]string) error
-	readFromModel(model models.Block) error
 }
 
 type Blocks []Block
 
 type BaseBlock struct {
-	ID         string `json:"-"`
-	LocationID string `json:"-"`
-	Type       string `json:"-"`
-	Order      int    `json:"-"`
+	ID         string          `json:"-"`
+	LocationID string          `json:"-"`
+	Type       string          `json:"-"`
+	Data       json.RawMessage `json:"-"`
+	Order      int             `json:"-"`
 }
 
 var RegisteredBlocks = Blocks{
@@ -35,4 +36,19 @@ var RegisteredBlocks = Blocks{
 	&PasswordBlock{},
 	// &ChecklistBlock{},
 	// &APIBlock{},
+}
+
+// CreateFromBaseBlock creates a block from a base block
+func CreateFromBaseBlock(baseBlock BaseBlock) (Block, error) {
+	switch baseBlock.Type {
+	case "markdown":
+		return &MarkdownBlock{
+			BaseBlock: baseBlock,
+		}, nil
+	case "password":
+		return &PasswordBlock{
+			BaseBlock: baseBlock,
+		}, nil
+	}
+	return nil, fmt.Errorf("block type %s not found", baseBlock.Type)
 }

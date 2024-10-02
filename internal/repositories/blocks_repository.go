@@ -36,7 +36,7 @@ func (r *blockRepository) GetByLocationID(ctx context.Context, locationID string
 	if err != nil {
 		return nil, err
 	}
-	return blocks.ConvertModelsToBlocks(contentBlocks)
+	return ConvertModelsToBlocks(contentBlocks)
 }
 
 // GetByID fetches a content block by its ID
@@ -49,23 +49,19 @@ func (r *blockRepository) GetByID(ctx context.Context, contentBlockID string) (b
 	if err != nil {
 		return nil, err
 	}
-	return blocks.ConvertModelToBlock(contentBlock)
+	return ConvertModelToBlock(contentBlock)
 }
 
 // Save saves a content block to the database
 func (r *blockRepository) Save(ctx context.Context, block *blocks.Block) error {
-	contentBlock := models.Block{
-		ID:   (*block).GetID(),
-		Type: (*block).GetType(),
-		Data: (*block).Data(),
-	}
-	if contentBlock.ID == "" {
+	m := r.ConvertBlockToModel(*block)
+	if m.ID == "" {
 		uuid := uuid.New()
-		contentBlock.ID = uuid.String()
-		_, err := db.DB.NewInsert().Model(&contentBlock).Exec(ctx)
+		m.ID = uuid.String()
+		_, err := db.DB.NewInsert().Model(&m).Exec(ctx)
 		return err
 	}
-	_, err := db.DB.NewUpdate().Model(&contentBlock).WherePK().Exec(ctx)
+	_, err := db.DB.NewUpdate().Model(&m).WherePK().Exec(ctx)
 	return err
 }
 
@@ -74,7 +70,7 @@ func (r *blockRepository) Create(ctx context.Context, block *blocks.Block, locat
 	contentBlock := models.Block{
 		LocationID: locationID,
 		Type:       (*block).GetType(),
-		Data:       (*block).Data(),
+		Data:       (*block).GetData(),
 		Order:      1e4,
 	}
 
@@ -86,16 +82,67 @@ func (r *blockRepository) Create(ctx context.Context, block *blocks.Block, locat
 	}
 
 	_, err = db.DB.NewUpdate().Model(&contentBlock).WherePK().Exec(ctx)
-	return err
+	if err != nil {
+		return err
+	}
+	*block, err = ConvertModelToBlock(&contentBlock)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 // Update saves a content block to the database
 func (r *blockRepository) Update(ctx context.Context, block *blocks.Block) error {
 	contentBlock := models.Block{
-		ID:   (*block).GetID(),
-		Type: (*block).GetType(),
-		Data: (*block).Data(),
+		ID:         (*block).GetID(),
+		Type:       (*block).GetType(),
+		Data:       (*block).GetData(),
+		LocationID: (*block).GetLocationID(),
+		Order:      (*block).GetOrder(),
 	}
 	_, err := db.DB.NewUpdate().Model(&contentBlock).WherePK().Exec(ctx)
 	return err
+}
+
+// Convert block to model
+func (b *blockRepository) ConvertBlockToModel(block blocks.Block) models.Block {
+	return models.Block{
+		ID:         block.GetID(),
+		LocationID: block.GetLocationID(),
+		Type:       block.GetType(),
+		Order:      block.GetOrder(),
+		Data:       block.GetData(),
+	}
+}
+
+func ConvertModelsToBlocks(cbs models.Blocks) (blocks.Blocks, error) {
+	blocks := make(blocks.Blocks, len(cbs))
+	for i, cb := range cbs {
+		block, err := ConvertModelToBlock(&cb)
+		if err != nil {
+			return nil, err
+		}
+		blocks[i] = block
+	}
+	return blocks, nil
+}
+
+func ConvertModelToBlock(m *models.Block) (blocks.Block, error) {
+	// Convert model to block
+	newBlock, err := blocks.CreateFromBaseBlock(blocks.BaseBlock{
+		ID:         m.ID,
+		LocationID: m.LocationID,
+		Type:       m.Type,
+		Data:       m.Data,
+		Order:      m.Order,
+	})
+	if err != nil {
+		return nil, err
+	}
+	err = newBlock.ParseData()
+	if err != nil {
+		return nil, err
+	}
+	return newBlock, nil
 }
