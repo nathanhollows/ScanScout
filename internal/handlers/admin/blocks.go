@@ -133,11 +133,9 @@ func (h *AdminHandler) BlockNewPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	data := block.GetAdminData()
-	switch data.(type) {
-	case blocks.MarkdownBlock:
-		b := data.(blocks.MarkdownBlock)
-		err = bTemplates.MarkdownAdmin(b).Render(r.Context(), w)
+	err = bTemplates.RenderAdminBlock(user.CurrentInstance.Settings, block).Render(r.Context(), w)
+	if err != nil {
+		h.Logger.Error("BlockNewPost: rendering template", "error", err)
 	}
 
 }
