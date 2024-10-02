@@ -248,7 +248,14 @@ func (h *PlayerHandler) CheckInView(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	c := templates.CheckInView(team.Scans[index])
+	blocks, err := h.BlockService.GetByLocationID(r.Context(), team.Scans[index].Location.ID)
+	if err != nil {
+		flash.NewError("Error loading blocks.").Save(w, r)
+		http.Redirect(w, r, r.Header.Get("referer"), http.StatusFound)
+		return
+	}
+
+	c := templates.CheckInView(team.Instance.Settings, team.Scans[index], blocks)
 	err = templates.Layout(c, team.Scans[index].Location.Name).Render(r.Context(), w)
 	if err != nil {
 		h.Logger.Error("rendering checkin view", "error", err.Error())

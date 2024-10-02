@@ -2,7 +2,9 @@ package templates
 
 import (
 	"fmt"
+	"github.com/nathanhollows/Rapua/internal/blocks"
 	"github.com/nathanhollows/Rapua/internal/models"
+	templates "github.com/nathanhollows/Rapua/internal/templates/blocks"
 )
 
 templ Checkins(team models.Team) {
@@ -36,17 +38,17 @@ templ Checkins(team models.Team) {
 	</div>
 }
 
-templ CheckInView(scan models.Scan) {
+templ CheckInView(settings models.InstanceSettings, scan models.Scan, blocks blocks.Blocks) {
 	<div class="sm:mx-auto sm:w-full sm:max-w-sm">
 		<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-map-pin-check-inside w-16 h-16 m-auto"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"></path><path d="m9 10 2 2 4-4"></path></svg>
 		<h2 class="mt-5 text-center text-2xl font-bold leading-9 tracking-tight">
 			{ scan.Location.Name }
 		</h2>
 	</div>
-	<div class="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
-		<div class="prose">
-			@templ.Raw(stringToMarkdown(scan.Location.Content.Content))
-		</div>
+	<div class="mt-10 sm:mx-auto sm:w-full sm:max-w-sm flex flex-col gap-8">
+		for _, block := range blocks {
+			@templates.RenderPlayer(settings, block)
+		}
 		<div class="flex flex-row justify-center join mt-12">
 			<a href="/checkins" hx-boost="true" class="btn btn-ghost btn-outline join-item">
 				<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-map-pin"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"></path> <circle cx="12" cy="10" r="3"></circle></svg>

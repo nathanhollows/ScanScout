@@ -8,6 +8,7 @@ import (
 
 	"github.com/nathanhollows/Rapua/internal/contextkeys"
 	"github.com/nathanhollows/Rapua/internal/models"
+	"github.com/nathanhollows/Rapua/internal/repositories"
 	"github.com/nathanhollows/Rapua/internal/services"
 )
 
@@ -15,6 +16,7 @@ type PlayerHandler struct {
 	Logger              *slog.Logger
 	GameplayService     *services.GameplayService
 	NotificationService services.NotificationService
+	BlockService        services.BlockService
 }
 
 func NewPlayerHandler(logger *slog.Logger, gs *services.GameplayService, ns services.NotificationService) *PlayerHandler {
@@ -22,6 +24,7 @@ func NewPlayerHandler(logger *slog.Logger, gs *services.GameplayService, ns serv
 		Logger:              logger,
 		GameplayService:     gs,
 		NotificationService: ns,
+		BlockService:        services.NewBlockService(repositories.NewBlockRepository()),
 	}
 }
 

@@ -18,6 +18,18 @@ func RenderAdmin(settings models.InstanceSettings, block blocks.Block) templ.Com
 	return RenderAdminError()
 }
 
+func RenderPlayer(settings models.InstanceSettings, block blocks.Block) templ.Component {
+	switch block.GetType() {
+	case "markdown":
+		b := block.(*blocks.MarkdownBlock)
+		return MarkdownPlayer(settings, *b)
+	case "password":
+		b := block.(*blocks.PasswordBlock)
+		return PasswordPlayer(settings, *b)
+	}
+	return RenderAdminError()
+}
+
 templ RenderAdminBlock(settings models.InstanceSettings, block blocks.Block) {
 	<div
 		id={ fmt.Sprint("block-", block.GetID()) }

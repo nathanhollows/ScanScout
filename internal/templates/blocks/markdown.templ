@@ -4,11 +4,12 @@ import (
 	"fmt"
 	"github.com/nathanhollows/Rapua/internal/blocks"
 	"github.com/nathanhollows/Rapua/internal/models"
-	"html/template"
 )
 
-templ MarkdownPlayer(md template.HTML) {
-	@templ.Raw(md)
+templ MarkdownPlayer(settings models.InstanceSettings, block blocks.MarkdownBlock) {
+	<div class="card prose p-5 bg-base-200 shadow-lg">
+		@templ.Raw(stringToMarkdown(block.Content))
+	</div>
 }
 
 templ MarkdownAdmin(settings models.InstanceSettings, block blocks.MarkdownBlock) {

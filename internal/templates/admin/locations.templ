@@ -395,19 +395,6 @@ templ EditLocation(location models.Location, settings models.InstanceSettings, c
 							@bTemplates.RenderAdminBlock(settings, block)
 						}
 					</div>
-					<!-- Content -->
-					<label for="content" class="form-control w-full my-5">
-						<textarea
-							id="content"
-							name="content"
-							rows="4"
-							class="textarea textarea-bordered w-full font-mono"
-							placeholder="Enter optional content here"
-						>{ location.Content.Content }</textarea>
-					</label>
-					<div class="w-full text-center md:text-start">
-						<button class="btn btn-primary w-4/5 mx-auto my-5 md:my-0 md:mx-0 md:w-auto">Save</button>
-					</div>
 				</div>
 				<!-- Sidebar -->
 				<div class="flex flex-col">
