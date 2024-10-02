@@ -120,6 +120,7 @@ func (h *AdminHandler) LocationEdit(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		h.Logger.Error("LocationEdit: getting blocks", "error", err)
 		http.Redirect(w, r, "/admin/locations", http.StatusSeeOther)
+		return
 	}
 
 	location.LoadClues(r.Context())
