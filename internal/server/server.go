@@ -12,7 +12,6 @@ import (
 	"time"
 
 	"github.com/go-chi/chi"
-	"github.com/nathanhollows/Rapua/internal/routes"
 	"github.com/nathanhollows/Rapua/internal/services"
 )
 
@@ -24,7 +23,7 @@ func Start(logger *slog.Logger) {
 	gameManagerService := &services.GameManagerService{}
 	notificationService := services.NewNotificationService()
 
-	router = routes.SetupRouter(logger, gameplayService, gameManagerService, notificationService)
+	router = setupRouter(logger, gameplayService, gameManagerService, notificationService)
 
 	killSig := make(chan os.Signal, 1)
 

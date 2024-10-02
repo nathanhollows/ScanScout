@@ -1,4 +1,4 @@
-package routes
+package server
 
 import (
 	"log/slog"
@@ -17,7 +17,7 @@ import (
 	"github.com/nathanhollows/Rapua/internal/services"
 )
 
-func SetupRouter(
+func setupRouter(
 	logger *slog.Logger,
 	gameplayService *services.GameplayService,
 	gameManagerService *services.GameManagerService,
