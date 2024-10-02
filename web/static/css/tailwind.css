@@ -1590,6 +1590,19 @@ html {
   opacity: 0;
 }
 
+.collapse-content {
+  visibility: hidden;
+  grid-column-start: 1;
+  grid-row-start: 2;
+  min-height: 0px;
+  transition: visibility 0.2s;
+  transition: padding 0.2s ease-out,
+    background-color 0.2s ease-out;
+  padding-left: 1rem;
+  padding-right: 1rem;
+  cursor: unset;
+}
+
 .collapse[open],
 .collapse-open,
 .collapse:focus:not(.collapse-close) {
@@ -3085,6 +3098,42 @@ details.collapse summary::-webkit-details-marker {
   outline-color: var(--fallback-bc,oklch(var(--bc)/1));
 }
 
+.collapse-arrow > .collapse-title:after {
+  position: absolute;
+  display: block;
+  height: 0.5rem;
+  width: 0.5rem;
+  --tw-translate-y: -100%;
+  --tw-rotate: 45deg;
+  transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
+  transition-property: all;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-timing-function: cubic-bezier(0, 0, 0.2, 1);
+  transition-duration: 150ms;
+  transition-duration: 0.2s;
+  top: 1.9rem;
+  inset-inline-end: 1.4rem;
+  content: "";
+  transform-origin: 75% 75%;
+  box-shadow: 2px 2px;
+  pointer-events: none;
+}
+
+.collapse-plus > .collapse-title:after {
+  position: absolute;
+  display: block;
+  height: 0.5rem;
+  width: 0.5rem;
+  transition-property: all;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-timing-function: cubic-bezier(0, 0, 0.2, 1);
+  transition-duration: 300ms;
+  top: 0.9rem;
+  inset-inline-end: 1.4rem;
+  content: "+";
+  pointer-events: none;
+}
+
 .collapse:not(.collapse-open):not(.collapse-close) > input[type="checkbox"],
 .collapse:not(.collapse-open):not(.collapse-close) > input[type="radio"]:not(:checked),
 .collapse:not(.collapse-open):not(.collapse-close) > .collapse-title {
@@ -3093,6 +3142,10 @@ details.collapse summary::-webkit-details-marker {
 
 .collapse:focus:not(.collapse-open):not(.collapse-close):not(.collapse[open]) > .collapse-title {
   cursor: unset;
+}
+
+.collapse-title {
+  position: relative;
 }
 
 :where(.collapse > input[type="checkbox"]),
@@ -4928,6 +4981,10 @@ details.collapse summary::-webkit-details-marker {
   z-index: 1;
 }
 
+.z-10 {
+  z-index: 10;
+}
+
 .m-1 {
   margin: 0.25rem;
 }
@@ -5464,6 +5521,10 @@ details.collapse summary::-webkit-details-marker {
   overflow: hidden;
 }
 
+.overflow-visible {
+  overflow: visible;
+}
+
 .overflow-y-auto {
   overflow-y: auto;
 }
@@ -5521,6 +5582,11 @@ details.collapse summary::-webkit-details-marker {
 .border-base-300 {
   --tw-border-opacity: 1;
   border-color: var(--fallback-b3,oklch(var(--b3)/var(--tw-border-opacity)));
+}
+
+.border-neutral {
+  --tw-border-opacity: 1;
+  border-color: var(--fallback-n,oklch(var(--n)/var(--tw-border-opacity)));
 }
 
 .bg-accent {
@@ -5769,6 +5835,10 @@ details.collapse summary::-webkit-details-marker {
   font-weight: 700;
 }
 
+.font-medium {
+  font-weight: 500;
+}
+
 .uppercase {
   text-transform: uppercase;
 }
@@ -5835,6 +5905,10 @@ details.collapse summary::-webkit-details-marker {
   opacity: 0.7;
 }
 
+.opacity-50 {
+  opacity: 0.5;
+}
+
 .shadow {
   --tw-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
   --tw-shadow-colored: 0 1px 3px 0 var(--tw-shadow-color), 0 1px 2px -1px var(--tw-shadow-color);
@@ -5873,8 +5947,16 @@ details.collapse summary::-webkit-details-marker {
   outline-width: 1px;
 }
 
+.outline-2 {
+  outline-width: 2px;
+}
+
 .outline-offset-1 {
   outline-offset: 1px;
+}
+
+.outline-offset-2 {
+  outline-offset: 2px;
 }
 
 .outline-error {
@@ -5885,6 +5967,10 @@ details.collapse summary::-webkit-details-marker {
   outline-color: var(--fallback-in,oklch(var(--in)/1));
 }
 
+.outline-primary {
+  outline-color: var(--fallback-p,oklch(var(--p)/1));
+}
+
 .filter {
   filter: var(--tw-blur) var(--tw-brightness) var(--tw-contrast) var(--tw-grayscale) var(--tw-hue-rotate) var(--tw-invert) var(--tw-saturate) var(--tw-sepia) var(--tw-drop-shadow);
 }
@@ -5893,6 +5979,18 @@ details.collapse summary::-webkit-details-marker {
   transition-property: color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, -webkit-backdrop-filter;
   transition-property: color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter;
   transition-property: color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter, -webkit-backdrop-filter;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+}
+
+.transition-opacity {
+  transition-property: opacity;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+}
+
+.transition-all {
+  transition-property: all;
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
   transition-duration: 150ms;
 }
@@ -5994,6 +6092,11 @@ details.collapse summary::-webkit-details-marker {
   }
 }
 
+.hover\:border-neutral-500:hover {
+  --tw-border-opacity: 1;
+  border-color: rgb(115 115 115 / var(--tw-border-opacity));
+}
+
 .hover\:bg-base-300:hover {
   --tw-bg-opacity: 1;
   background-color: var(--fallback-b3,oklch(var(--b3)/var(--tw-bg-opacity)));
@@ -6007,8 +6110,21 @@ details.collapse summary::-webkit-details-marker {
   opacity: 0.6;
 }
 
+.hover\:outline:hover {
+  outline-style: solid;
+}
+
+.focus\:border-neutral-500:focus {
+  --tw-border-opacity: 1;
+  border-color: rgb(115 115 115 / var(--tw-border-opacity));
+}
+
 .focus\:opacity-100:focus {
   opacity: 1;
+}
+
+.focus\:outline:focus {
+  outline-style: solid;
 }
 
 @media (min-width: 640px) {

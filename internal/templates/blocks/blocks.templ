@@ -1,3 +1,22 @@
+package templates
+
+import (
+	"fmt"
+	"github.com/nathanhollows/Rapua/internal/blocks"
+	"github.com/nathanhollows/Rapua/internal/models"
+)
+
+func RenderAdmin(settings models.InstanceSettings, block blocks.Block) templ.Component {
+	switch block.GetType() {
+	case "markdown":
+		b := block.(*blocks.MarkdownBlock)
+		return MarkdownAdmin(settings, *b)
+	case "password":
+		b := block.(*blocks.PasswordBlock)
+		return PasswordAdmin(settings, *b)
+	}
+	return RenderAdminError()
+}
 
 templ RenderAdminBlock(settings models.InstanceSettings, block blocks.Block) {
 	<div class="collapse overflow-visible relative flex flex-col md:flex-row rounded-2xl bg-base-100 border border-neutral focus:outline outline-2 outline-primary outline-offset-2 mb-5 gap-5 p-8" tabindex="0">

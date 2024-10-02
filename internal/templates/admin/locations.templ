@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/nathanhollows/Rapua/internal/blocks"
 	"github.com/nathanhollows/Rapua/internal/models"
+	bTemplates "github.com/nathanhollows/Rapua/internal/templates/blocks"
 )
 
 templ LocationsIndex(settings models.InstanceSettings, locations models.Locations) {
@@ -386,73 +387,18 @@ templ EditLocation(location models.Location, settings models.InstanceSettings, c
 					</div>
 					<div id="blocks">
 						for _, block := range contentBlocks {
-							<div class="relative flex flex-col md:flex-row rounded-2xl bg-base-200 mb-5 gap-5 p-8">
-								<div class="flex flex-1 flex-row gap-5">
-									<div
-										class="tooltip flex items-center cursor-move text-base-content"
-										data-tip="Drag to reorder"
-									>
-										<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-grip-vertical"><circle cx="9" cy="12" r="1"></circle><circle cx="9" cy="5" r="1"></circle><circle cx="9" cy="19" r="1"></circle><circle cx="15" cy="12" r="1"></circle><circle cx="15" cy="5" r="1"></circle><circle cx="15" cy="19" r="1"></circle></svg>
-									</div>
-									<div class="flex flex-col gap-1">
-										<h3 class="text-lg font-bold flex flex-row gap-3 items-center">
-											<span class="">
-												@templ.Raw(block.GetIconSVG())
-											</span>
-											{ block.GetName() }
-											<span class="badge badge-sm">10 pts</span>
-										</h3>
-										{ block.GetDescription() }
-									</div>
-								</div>
-								<div class="flex justify-end self-center gap-3 content-center">
-									<button
-										type="button"
-										class="btn btn-secondary btn-xs btn-outline"
-										hx-get={ fmt.Sprint("/admin/locations/", location.ID, "/blocks/", block.GetID(), "/edit") }
-										hx-target="#block_edit_modal"
-										hx-trigger="click"
-										hx-swap="innerHTML"
-										onclick="block_edit_modal.showModal();"
-									>Edit</button>
-									<button
-										type="button"
-										class="btn btn-error btn-xs btn-outline"
-										data-location={ location.ID }
-										data-block={ block.GetID() }
-										onclick="confirm_delete_block.showModal();"
-									>Delete</button>
-									<input type="hidden" name="location" value={ block.GetID() }/>
-								</div>
-							</div>
+							@bTemplates.RenderAdminBlock(settings, block)
 						}
 					</div>
 					<!-- Content -->
 					<label for="content" class="form-control w-full my-5">
-						<div class="label">
-							<span class="label-text font-bold">Content</span>
-							<label class="label-text-alt flex flex-row gap-3">
-								Preview
-								<input type="checkbox" class="toggle toggle-sm" name="preview" id="togglePreview" class="checkbox" onclick="previewMD()"/>
-							</label>
-						</div>
 						<textarea
 							id="content"
 							name="content"
-							rows="7"
+							rows="4"
 							class="textarea textarea-bordered w-full font-mono"
 							placeholder="Enter optional content here"
 						>{ location.Content.Content }</textarea>
-						<div id="preview-content" class="flex items-center justify-center min-h-48 border border-base-300 hidden card w-full bg-base-200 rounded-[var(--rounded-btn)] p-5"></div>
-						<div class="label">
-							<span class="label-text-alt">This is shown to players after checking in.</span>
-							<span class="label-text-alt flex flex-row content-center gap-1">
-								<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-info w-5 h-5"><circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4"></path><path d="M12 8h.01"></path></svg>
-								<span class="self-center">
-									This app uses Markdown for formatting content. <a class="link" href="/admin/markdown" target="blank">Here's a quick guide</a>.
-								</span>
-							</span>
-						</div>
 					</label>
 					<div class="w-full text-center md:text-start">
 						<button class="btn btn-primary w-4/5 mx-auto my-5 md:my-0 md:mx-0 md:w-auto">Save</button>
@@ -516,30 +462,11 @@ templ EditLocation(location models.Location, settings models.InstanceSettings, c
 			</div>
 		</div>
 	</form>
-	<dialog id="block_edit_modal" class="modal modal-bottom md:modal-middle">
-		<div class="modal-box prose">
-			<h3 class="text-lg font-bold">Update the block</h3>
-			<p class="pt-4">You are about to delete this location. Are you sure?</p>
-			<div class="modal-action">
-				<button
-					type="button"
-					class="btn"
-					onclick="block_edit_modal.close()"
-				>Nevermind</button>
-				<button
-					type="button"
-					class="btn btn-primary"
-					hx-delete={ fmt.Sprint("/admin/locations/", location.MarkerID) }
-					hx-trigger="click"
-					onclick="block_edit_modal.close()"
-				>Save</button>
-			</div>
-		</div>
-	</dialog>
+	<dialog id="block_edit_modal" class="modal modal-bottom md:modal-middle"></dialog>
 	<dialog id="confirm_delete_block" class="modal">
-		<div class="modal-box prose outline outline-1 outline-offset-1 outline-error">
-			<h3 class="text-lg font-bold">Delete this location?</h3>
-			<p class="pt-4">You are about to delete this location. Are you sure?</p>
+		<div class="modal-box prose outline outline-2 outline-offset-1 outline-error">
+			<h3 class="text-lg font-bold">Delete this block?</h3>
+			<p class="pt-4">You are about to delete this block. Are you sure?</p>
 			<div class="modal-action">
 				<button
 					type="button"
@@ -557,7 +484,7 @@ templ EditLocation(location models.Location, settings models.InstanceSettings, c
 		</div>
 	</dialog>
 	<dialog id="confirm_delete_modal" class="modal">
-		<div class="modal-box prose outline outline-1 outline-offset-1 outline-error">
+		<div class="modal-box prose outline outline-2 outline-offset-1 outline-error">
 			<h3 class="text-lg font-bold">Delete this location?</h3>
 			<p class="pt-4">You are about to delete this location. Are you sure?</p>
 			<div class="modal-action">
