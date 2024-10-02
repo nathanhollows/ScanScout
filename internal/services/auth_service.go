@@ -195,14 +195,10 @@ func (s *authService) SendEmailVerification(ctx context.Context, user *models.Us
 		return fmt.Errorf("updating user: %w", err)
 	}
 
-	fmt.Println("Sending verification email to:", user.Email)
-	res, err := s.emailService.SendVerificationEmail(ctx, *user)
+	_, err = s.emailService.SendVerificationEmail(ctx, *user)
 	if err != nil {
 		return fmt.Errorf("sending verification email: %w", err)
 	}
-
-	fmt.Println("Email sent to:", user.Email)
-	fmt.Println("Email response:", res)
 
 	// Send email
 	return nil
