@@ -48,10 +48,10 @@ func (h *AdminHandler) BlockEdit(w http.ResponseWriter, r *http.Request) {
 	switch block.(type) {
 	case *blocks.MarkdownBlock:
 		b := block.(*blocks.MarkdownBlock)
-		err = bTemplates.MarkdownAdmin(*b).Render(r.Context(), w)
+		err = bTemplates.MarkdownAdmin(user.CurrentInstance.Settings, *b).Render(r.Context(), w)
 	case *blocks.PasswordBlock:
 		b := block.(*blocks.PasswordBlock)
-		err = bTemplates.PasswordAdmin(*b).Render(r.Context(), w)
+		err = bTemplates.PasswordAdmin(user.CurrentInstance.Settings, *b).Render(r.Context(), w)
 	}
 
 }

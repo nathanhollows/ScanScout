@@ -3,6 +3,7 @@ package templates
 import (
 	"fmt"
 	"github.com/nathanhollows/Rapua/internal/blocks"
+	"github.com/nathanhollows/Rapua/internal/models"
 	"html/template"
 )
 
@@ -10,14 +11,15 @@ templ MarkdownPlayer(md template.HTML) {
 	@templ.Raw(md)
 }
 
-templ MarkdownAdmin(block blocks.MarkdownBlock) {
+templ MarkdownAdmin(settings models.InstanceSettings, block blocks.MarkdownBlock) {
 	<form
-		hx-post={ fmt.Sprint("/admin/locations/", block.LocationID, "/blocks/", block.ID) }
+		hx-post={ fmt.Sprint("/admin/locations/", block.LocationID, "/blocks/", block.ID, "/update") }
+		hx-trigger="submit"
 		class="modal-box md:w-11/12 max-w-5xl"
 	>
 		<h3 class="text-lg font-bold flex flex-row gap-3">
 			@templ.Raw(block.GetIconSVG())
-			Updating { block.GetName() } block
+			Editing { block.GetName() } block
 		</h3>
 		<label
 			for={ fmt.Sprintf("md-%s", block.ID) }
@@ -39,7 +41,7 @@ templ MarkdownAdmin(block blocks.MarkdownBlock) {
 			</div>
 			<textarea
 				id={ fmt.Sprintf("md-%s", block.ID) }
-				name="md"
+				name="content"
 				rows="7"
 				class="textarea textarea-bordered w-full font-mono"
 				placeholder="Markdown content here..."
@@ -64,20 +66,10 @@ templ MarkdownAdmin(block blocks.MarkdownBlock) {
 				onclick="block_edit_modal.close()"
 			>Nevermind</button>
 			<button
-				type="button"
+				type="submit"
 				class="btn btn-primary"
-				hx-trigger="click"
 				onclick="block_edit_modal.close()"
 			>Save</button>
 		</div>
 	</form>
-}
-
-func BlockRenderAdmin(block blocks.Block) templ.Component {
-	switch block.(type) {
-	case *blocks.MarkdownBlock:
-		b := block.(*blocks.MarkdownBlock)
-		MarkdownAdmin(*b)
-	}
-	return nil
 }
