@@ -3,11 +3,14 @@ package handlers
 import (
 	"context"
 	"log/slog"
+	"net/http"
 
 	"github.com/nathanhollows/Rapua/internal/contextkeys"
+	"github.com/nathanhollows/Rapua/internal/flash"
 	"github.com/nathanhollows/Rapua/internal/models"
 	"github.com/nathanhollows/Rapua/internal/repositories"
 	"github.com/nathanhollows/Rapua/internal/services"
+	templates "github.com/nathanhollows/Rapua/internal/templates/admin"
 )
 
 type AdminHandler struct {
@@ -34,4 +37,19 @@ func NewAdminHandler(logger *slog.Logger, gs *services.GameManagerService, ns se
 // User will always be in the context because the middleware
 func (h AdminHandler) UserFromContext(ctx context.Context) *models.User {
 	return ctx.Value(contextkeys.UserKey).(*models.User)
+}
+
+func (h *AdminHandler) handleError(w http.ResponseWriter, r *http.Request, logMsg string, flashMsg string, params ...interface{}) {
+	h.Logger.Error(logMsg, params...)
+	err := templates.Toast(*flash.NewError(flashMsg)).Render(r.Context(), w)
+	if err != nil {
+		h.Logger.Error(logMsg+" - rendering template", "error", err)
+	}
+}
+
+func (h *AdminHandler) handleSuccess(w http.ResponseWriter, r *http.Request, flashMsg string) {
+	err := templates.Toast(*flash.NewSuccess(flashMsg)).Render(r.Context(), w)
+	if err != nil {
+		h.Logger.Error("rendering success template", "error", err)
+	}
 }
