@@ -22,15 +22,13 @@ func (h *AdminHandler) Instances(w http.ResponseWriter, r *http.Request) {
 
 // InstancesCreate creates a new instance
 func (h *AdminHandler) InstancesCreate(w http.ResponseWriter, r *http.Request) {
-	handlers.SetDefaultHeaders(w)
 	data := handlers.TemplateData(r)
 	data["title"] = "New Instance"
 
 	user := h.UserFromContext(r.Context())
 
 	if err := r.ParseForm(); err != nil {
-		flash.NewError("Error parsing form").Save(w, r)
-		http.Redirect(w, r, "/admin/instances", http.StatusSeeOther)
+		h.handleError(w, r, "InstancesCreate: parsing form", "Error parsing form", "error", err)
 		return
 	}
 
@@ -40,22 +38,18 @@ func (h *AdminHandler) InstancesCreate(w http.ResponseWriter, r *http.Request) {
 		message.Save(w, r)
 	}
 	if response.Error != nil {
-		h.Logger.Error("creating instance", "error", response.Error.Error())
-		http.Redirect(w, r, "/admin/instances", http.StatusSeeOther)
+		h.handleError(w, r, "InstancesCreate: creating instance", "Error creating instance", "error", response.Error)
 		return
 	}
 
 	// Switch to the new instance
 	_, err := h.GameManagerService.SwitchInstance(r.Context(), user, response.Data["instanceID"].(string))
 	if err != nil {
-		flash.NewSuccess("Instance created successfully").Save(w, r)
-		flash.NewError("Error switching instance to "+name+": "+err.Error()).Save(w, r)
-		http.Redirect(w, r, "/admin/instances", http.StatusSeeOther)
+		h.handleError(w, r, "InstancesCreate: switching instance", "Error switching instance", "error", err)
 		return
 	}
 
-	flash.NewSuccess("Now using "+name+" as your current instance").Save(w, r)
-	http.Redirect(w, r, "/admin/instances/", http.StatusSeeOther)
+	h.redirect(w, r, "/admin/instances")
 }
 
 // InstanceDuplicate duplicates an instance
@@ -91,7 +85,6 @@ func (h *AdminHandler) InstanceDuplicate(w http.ResponseWriter, r *http.Request)
 
 // InstanceSwitch switches the current instance
 func (h *AdminHandler) InstanceSwitch(w http.ResponseWriter, r *http.Request) {
-	handlers.SetDefaultHeaders(w)
 	data := handlers.TemplateData(r)
 	data["title"] = "Switch Instance"
 

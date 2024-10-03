@@ -4,7 +4,6 @@ import (
 	"net/http"
 
 	"github.com/go-chi/chi"
-	"github.com/nathanhollows/Rapua/internal/flash"
 	"github.com/nathanhollows/Rapua/internal/models"
 	"github.com/nathanhollows/Rapua/internal/services"
 	templates "github.com/nathanhollows/Rapua/internal/templates/admin"
@@ -16,7 +15,8 @@ func (h *AdminHandler) Activity(w http.ResponseWriter, r *http.Request) {
 
 	err := h.GameManagerService.LoadTeams(r.Context(), &user.CurrentInstance.Teams)
 	if err != nil {
-		h.Logger.Error("Activity: loading teams", "error", err)
+		h.handleError(w, r, "Activity: loading teams", "Error loading teams", "Could not load data", err)
+		return
 	}
 
 	c := templates.ActivityTracker(*user)
@@ -32,7 +32,8 @@ func (h *AdminHandler) ActivityTeamsOverview(w http.ResponseWriter, r *http.Requ
 
 	err := h.GameManagerService.LoadTeams(r.Context(), &user.CurrentInstance.Teams)
 	if err != nil {
-		h.Logger.Error("Activity: loading teams", "error", err)
+		h.handleError(w, r, "ActivityTeamsOverview: loading teams", "Error loading teams", "Could not load data", err)
+		return
 	}
 
 	err = templates.ActivityTeamsTable(user.CurrentInstance.Locations, user.CurrentInstance.Teams).Render(r.Context(), w)
@@ -51,24 +52,20 @@ func (h *AdminHandler) TeamActivity(w http.ResponseWriter, r *http.Request) {
 	gameplayService := &services.GameplayService{}
 	team, err := gameplayService.GetTeamByCode(r.Context(), teamCode)
 	if err != nil || team.InstanceID != user.CurrentInstanceID {
-		h.Logger.Error("TeamActivity: team not found", "error", err, "instanceID", user.CurrentInstanceID, "teamCode", chi.URLParam(r, "teamCode"))
-		err := templates.Toast(*flash.NewError("Team not found")).Render(r.Context(), w)
-		if err != nil {
-			h.Logger.Error("TeamActivity: rendering template", "error", err)
-		}
+		h.handleError(w, r, "TeamActivity: getting team", "Error getting team", "Could not load data", err)
 		return
 	}
 
 	team.LoadScans(r.Context())
 	response := gameplayService.SuggestNextLocations(r.Context(), team, user.CurrentInstance.Settings.MaxNextLocations)
 	if response.Error != nil {
-		http.Error(w, response.Error.Error(), http.StatusInternalServerError)
+		h.handleError(w, r, "TeamActivity: getting next locations", "Error getting next locations", "Could not load data", response.Error)
 		return
 	}
 
 	notifications, err := h.NotificationService.GetNotifications(r.Context(), team.Code)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		h.handleError(w, r, "TeamActivity: getting notifications", "Error getting notifications", "Could not load data", err)
 		return
 	}
 
