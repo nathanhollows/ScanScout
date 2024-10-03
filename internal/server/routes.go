@@ -74,6 +74,12 @@ func setupPlayerRoutes(router chi.Router, playerHandler *players.PlayerHandler) 
 		r.Post("/", playerHandler.Next)
 	})
 
+	router.Route("/blocks", func(r chi.Router) {
+		r.Use(middlewares.TeamMiddleware)
+		r.Use(middlewares.LobbyMiddleware)
+		r.Get("/validate", playerHandler.ValidateBlock)
+	})
+
 	// Show the lobby page
 	router.Route("/lobby", func(r chi.Router) {
 		r.Use(middlewares.TeamMiddleware)
