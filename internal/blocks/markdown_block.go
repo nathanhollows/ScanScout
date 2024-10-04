@@ -2,6 +2,8 @@ package blocks
 
 import (
 	"encoding/json"
+
+	"github.com/nathanhollows/Rapua/internal/models"
 )
 
 type MarkdownBlock struct {
@@ -11,8 +13,9 @@ type MarkdownBlock struct {
 
 func (b *MarkdownBlock) RequiresValidation() bool { return false }
 
-func (b *MarkdownBlock) ValidatePlayerInput(input map[string]string) error {
+func (b *MarkdownBlock) ValidatePlayerInput(state *models.TeamBlockState, input map[string]string) error {
 	// No validation required
+	state.IsComplete = true
 	return nil
 }
 

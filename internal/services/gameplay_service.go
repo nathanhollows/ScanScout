@@ -7,8 +7,10 @@ import (
 	"hash/fnv"
 	"strings"
 
+	"github.com/nathanhollows/Rapua/internal/blocks"
 	"github.com/nathanhollows/Rapua/internal/flash"
 	"github.com/nathanhollows/Rapua/internal/models"
+	"github.com/nathanhollows/Rapua/internal/repositories"
 	"golang.org/x/exp/rand"
 )
 
@@ -27,6 +29,7 @@ type GameplayService interface {
 	CheckIn(ctx context.Context, team *models.Team, locationCode string) ServiceResponse
 	CheckOut(ctx context.Context, team *models.Team, locationCode string) ServiceResponse
 	CheckValidLocation(ctx context.Context, team *models.Team, locationCode string) *ServiceResponse
+	ValidateAndUpdateBlockState(ctx context.Context, block blocks.Block, state *models.TeamBlockState, data map[string]string) error
 }
 
 type gameplayService struct{}
@@ -294,4 +297,26 @@ func (s *gameplayService) loadClues(ctx context.Context, team *models.Team, loca
 
 	response.Data["nextLocations"] = locations
 	return response
+}
+
+func (s *gameplayService) ValidateAndUpdateBlockState(ctx context.Context, block blocks.Block, state *models.TeamBlockState, data map[string]string) error {
+	blockStateRepo := repositories.NewBlockStateRepository()
+
+	// Check if the block is already complete
+	if state.IsComplete {
+		return nil
+	}
+
+	// Validate the block
+	err := block.ValidatePlayerInput(state, data)
+	if err != nil {
+		return fmt.Errorf("validating block: %w", err)
+	}
+
+	err = blockStateRepo.Save(ctx, state)
+	if err != nil {
+		return fmt.Errorf("saving block state: %w", err)
+	}
+
+	return nil
 }

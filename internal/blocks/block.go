@@ -3,6 +3,8 @@ package blocks
 import (
 	"encoding/json"
 	"fmt"
+
+	"github.com/nathanhollows/Rapua/internal/models"
 )
 
 type Block interface {
@@ -18,7 +20,7 @@ type Block interface {
 	ParseData() error
 	UpdateBlockData(data map[string]string) error
 	RequiresValidation() bool
-	ValidatePlayerInput(input map[string]string) error
+	ValidatePlayerInput(state *models.TeamBlockState, input map[string]string) error
 	// Calculate partial or full points for a block
 	CalculatePoints(input map[string]string) (int, error)
 }

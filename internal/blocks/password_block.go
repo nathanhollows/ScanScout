@@ -3,6 +3,8 @@ package blocks
 import (
 	"encoding/json"
 	"fmt"
+
+	"github.com/nathanhollows/Rapua/internal/models"
 )
 
 type PasswordBlock struct {
@@ -12,12 +14,39 @@ type PasswordBlock struct {
 	Fuzzy    bool   `json:"fuzzy"`
 }
 
+type passwordBlockData struct {
+	Attempts int      `json:"attempts"`
+	Guesses  []string `json:"guesses"`
+}
+
 func (b *PasswordBlock) RequiresValidation() bool { return true }
 
-func (b *PasswordBlock) ValidatePlayerInput(input map[string]string) error {
+func (b *PasswordBlock) ValidatePlayerInput(state *models.TeamBlockState, input map[string]string) error {
+	var err error
+	data := passwordBlockData{}
+	if state.PlayerData != nil {
+		json.Unmarshal(b.Data, &state.PlayerData)
+	}
+
+	if data.Attempts == 0 {
+		data.Guesses = []string{}
+	}
+	data.Attempts++
+	data.Guesses = append(data.Guesses, input["password"])
+
 	if input["password"] != b.Password {
+		state.PlayerData, err = json.Marshal(data)
+		if err != nil {
+			return fmt.Errorf("Error saving player data")
+		}
 		return fmt.Errorf("Incorrect password")
 	}
+
+	state.PlayerData, err = json.Marshal(data)
+	if err != nil {
+		return fmt.Errorf("Error saving player data")
+	}
+	state.IsComplete = true
 	return nil
 }
 

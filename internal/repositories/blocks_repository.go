@@ -10,15 +10,15 @@ import (
 )
 
 type BlockRepository interface {
-	// GetContentBlocksByLocationID fetches all content blocks for a location
+	// GetBlocksByLocationID fetches all blocks for a location
 	GetByLocationID(ctx context.Context, locationID string) (blocks.Blocks, error)
-	// GetContentBlockByID fetches a content block by its ID
-	GetByID(ctx context.Context, contentBlockID string) (blocks.Block, error)
-	// SaveContentBlock saves a content block to the database
-	Save(ctx context.Context, contentBlock *blocks.Block) error
-	Create(ctx context.Context, contentBlock *blocks.Block, locationID string) error
-	Update(ctx context.Context, contentBlock *blocks.Block) error
-	Delete(ctx context.Context, contentBlockID string) error
+	// GetBlockByID fetches a block by its ID
+	GetByID(ctx context.Context, blockID string) (blocks.Block, error)
+	// Saveblock saves a block to the database
+	Save(ctx context.Context, block *blocks.Block) error
+	Create(ctx context.Context, block *blocks.Block, locationID string) error
+	Update(ctx context.Context, block *blocks.Block) error
+	Delete(ctx context.Context, blockID string) error
 	Reorder(ctx context.Context, locationID string, blockIDs []string) error
 }
 
@@ -28,34 +28,34 @@ func NewBlockRepository() BlockRepository {
 	return &blockRepository{}
 }
 
-// GetByLocationID fetches all content blocks for a location
+// GetByLocationID fetches all blocks for a location
 func (r *blockRepository) GetByLocationID(ctx context.Context, locationID string) (blocks.Blocks, error) {
-	contentBlocks := models.Blocks{}
+	block := models.Blocks{}
 	err := db.DB.NewSelect().
-		Model(&contentBlocks).
+		Model(&block).
 		Where("location_id = ?", locationID).
 		Order("ordering ASC").
 		Scan(ctx)
 	if err != nil {
 		return nil, err
 	}
-	return convertModelsToBlocks(contentBlocks)
+	return convertModelsToBlocks(block)
 }
 
-// GetByID fetches a content block by its ID
-func (r *blockRepository) GetByID(ctx context.Context, contentBlockID string) (blocks.Block, error) {
-	contentBlock := &models.Block{}
+// GetByID fetches a block by its ID
+func (r *blockRepository) GetByID(ctx context.Context, blockID string) (blocks.Block, error) {
+	block := &models.Block{}
 	err := db.DB.NewSelect().
-		Model(contentBlock).
-		Where("id = ?", contentBlockID).
+		Model(block).
+		Where("id = ?", blockID).
 		Scan(ctx)
 	if err != nil {
 		return nil, err
 	}
-	return convertModelToBlock(contentBlock)
+	return convertModelToBlock(block)
 }
 
-// Save saves a content block to the database
+// Save saves a block to the database
 func (r *blockRepository) Save(ctx context.Context, block *blocks.Block) error {
 	m := r.ConvertBlockToModel(*block)
 	if m.ID == "" {
@@ -68,9 +68,9 @@ func (r *blockRepository) Save(ctx context.Context, block *blocks.Block) error {
 	return err
 }
 
-// Create saves a content block to the database
+// Create saves a block to the database
 func (r *blockRepository) Create(ctx context.Context, block *blocks.Block, locationID string) error {
-	contentBlock := models.Block{
+	mBlock := models.Block{
 		LocationID:         locationID,
 		Type:               (*block).GetType(),
 		Data:               (*block).GetData(),
@@ -80,26 +80,26 @@ func (r *blockRepository) Create(ctx context.Context, block *blocks.Block, locat
 	}
 
 	uuid := uuid.New()
-	contentBlock.ID = uuid.String()
-	_, err := db.DB.NewInsert().Model(&contentBlock).Exec(ctx)
+	mBlock.ID = uuid.String()
+	_, err := db.DB.NewInsert().Model(&mBlock).Exec(ctx)
 	if err != nil {
 		return err
 	}
 
-	_, err = db.DB.NewUpdate().Model(&contentBlock).WherePK().Exec(ctx)
+	_, err = db.DB.NewUpdate().Model(&mBlock).WherePK().Exec(ctx)
 	if err != nil {
 		return err
 	}
-	*block, err = convertModelToBlock(&contentBlock)
+	*block, err = convertModelToBlock(&mBlock)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-// Update saves a content block to the database
+// Update saves a block to the database
 func (r *blockRepository) Update(ctx context.Context, block *blocks.Block) error {
-	contentBlock := models.Block{
+	mBlock := models.Block{
 		ID:                 (*block).GetID(),
 		Type:               (*block).GetType(),
 		Data:               (*block).GetData(),
@@ -108,7 +108,7 @@ func (r *blockRepository) Update(ctx context.Context, block *blocks.Block) error
 		Points:             (*block).GetPoints(),
 		ValidationRequired: (*block).RequiresValidation(),
 	}
-	_, err := db.DB.NewUpdate().Model(&contentBlock).WherePK().Exec(ctx)
+	_, err := db.DB.NewUpdate().Model(&mBlock).WherePK().Exec(ctx)
 	return err
 }
 
@@ -157,13 +157,13 @@ func convertModelToBlock(m *models.Block) (blocks.Block, error) {
 	return newBlock, nil
 }
 
-// Delete deletes a content block from the database
-func (r *blockRepository) Delete(ctx context.Context, contentBlockID string) error {
-	_, err := db.DB.NewDelete().Model(&models.Block{}).Where("id = ?", contentBlockID).Exec(ctx)
+// Delete deletes a block from the database
+func (r *blockRepository) Delete(ctx context.Context, blockID string) error {
+	_, err := db.DB.NewDelete().Model(&models.Block{}).Where("id = ?", blockID).Exec(ctx)
 	return err
 }
 
-// Reorder reorders the content blocks
+// Reorder reorders the blocks
 func (r *blockRepository) Reorder(ctx context.Context, locationID string, blockIDs []string) error {
 	for i, blockID := range blockIDs {
 		_, err := db.DB.NewUpdate().

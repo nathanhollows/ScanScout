@@ -7,21 +7,21 @@ import (
 	"github.com/nathanhollows/Rapua/pkg/db"
 )
 
-type TeamBlockStateRepository interface {
+type BlockStateRepository interface {
 	GetByBlockAndTeam(ctx context.Context, blockID string, teamCode string) (models.TeamBlockState, error)
 	Create(ctx context.Context, teamBlockState *models.TeamBlockState) error
 	Save(ctx context.Context, teamBlockState *models.TeamBlockState) error
 	Delete(ctx context.Context, block_id string, team_code string) error
 }
 
-type teamBlockStateRepository struct{}
+type blockStateRepository struct{}
 
-func NewTeamBlockStateRepository() TeamBlockStateRepository {
-	return &teamBlockStateRepository{}
+func NewBlockStateRepository() BlockStateRepository {
+	return &blockStateRepository{}
 }
 
 // GetByBlockAndTeam fetches a specific team block state for a block and team
-func (r *teamBlockStateRepository) GetByBlockAndTeam(ctx context.Context, blockID string, teamCode string) (models.TeamBlockState, error) {
+func (r *blockStateRepository) GetByBlockAndTeam(ctx context.Context, blockID string, teamCode string) (models.TeamBlockState, error) {
 	teamBlockState := models.TeamBlockState{}
 	err := db.DB.NewSelect().
 		Model(&teamBlockState).
@@ -35,7 +35,7 @@ func (r *teamBlockStateRepository) GetByBlockAndTeam(ctx context.Context, blockI
 }
 
 // Create inserts a new team block state into the database
-func (r *teamBlockStateRepository) Create(ctx context.Context, teamBlockState *models.TeamBlockState) error {
+func (r *blockStateRepository) Create(ctx context.Context, teamBlockState *models.TeamBlockState) error {
 	_, err := db.DB.NewInsert().
 		Model(teamBlockState).
 		Exec(ctx)
@@ -46,9 +46,10 @@ func (r *teamBlockStateRepository) Create(ctx context.Context, teamBlockState *m
 }
 
 // Save modifies an existing team block state in the database
-func (r *teamBlockStateRepository) Save(ctx context.Context, teamBlockState *models.TeamBlockState) error {
+func (r *blockStateRepository) Save(ctx context.Context, teamBlockState *models.TeamBlockState) error {
 	_, err := db.DB.NewUpdate().
 		Model(teamBlockState).
+		WherePK().
 		Exec(ctx)
 	if err != nil {
 		return err
@@ -57,7 +58,7 @@ func (r *teamBlockStateRepository) Save(ctx context.Context, teamBlockState *mod
 }
 
 // Delete removes a team block state from the database by its ID
-func (r *teamBlockStateRepository) Delete(ctx context.Context, block_id string, team_code string) error {
+func (r *blockStateRepository) Delete(ctx context.Context, block_id string, team_code string) error {
 	_, err := db.DB.NewDelete().
 		Model(&models.TeamBlockState{}).
 		Where("block_id = ?", block_id).
