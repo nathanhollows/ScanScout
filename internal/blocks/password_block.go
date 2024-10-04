@@ -2,6 +2,7 @@ package blocks
 
 import (
 	"encoding/json"
+	"fmt"
 )
 
 type PasswordBlock struct {
@@ -11,8 +12,12 @@ type PasswordBlock struct {
 	Fuzzy    bool   `json:"fuzzy"`
 }
 
-func (b *PasswordBlock) Validate(userID string, input map[string]string) error {
-	// No validation required
+func (b *PasswordBlock) RequiresValidation() bool { return true }
+
+func (b *PasswordBlock) ValidatePlayerInput(input map[string]string) error {
+	if input["password"] != b.Password {
+		return fmt.Errorf("Incorrect password")
+	}
 	return nil
 }
 
@@ -27,6 +32,7 @@ func (b *PasswordBlock) GetType() string       { return "password" }
 func (b *PasswordBlock) GetID() string         { return b.ID }
 func (b *PasswordBlock) GetOrder() int         { return b.Order }
 func (b *PasswordBlock) GetLocationID() string { return b.LocationID }
+func (b *PasswordBlock) GetPoints() int        { return b.Points }
 func (b *PasswordBlock) GetAdminData() interface{} {
 	return &b
 }
@@ -39,9 +45,13 @@ func (b *PasswordBlock) ParseData() error {
 	return json.Unmarshal(b.Data, b)
 }
 
-func (b *PasswordBlock) UpdateData(data map[string]string) error {
+func (b *PasswordBlock) UpdateBlockData(data map[string]string) error {
 	b.Content = data["content"]
 	b.Password = data["block-passphrase"]
 	b.Fuzzy = data["fuzzy"] == "on"
 	return nil
+}
+
+func (b *PasswordBlock) CalculatePoints(input map[string]string) (int, error) {
+	return b.Points, nil
 }

@@ -14,7 +14,7 @@ func CreateTables(logger *slog.Logger) {
 		(*Notification)(nil),
 		(*InstanceSettings)(nil),
 		(*Block)(nil),
-		(*TeamBlockProgress)(nil),
+		(*TeamBlockState)(nil),
 		(*Location)(nil),
 		(*Clue)(nil),
 		(*LocationContent)(nil),

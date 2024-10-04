@@ -9,7 +9,9 @@ type MarkdownBlock struct {
 	Content string `json:"content"`
 }
 
-func (b *MarkdownBlock) Validate(userID string, input map[string]string) error {
+func (b *MarkdownBlock) RequiresValidation() bool { return false }
+
+func (b *MarkdownBlock) ValidatePlayerInput(input map[string]string) error {
 	// No validation required
 	return nil
 }
@@ -25,6 +27,7 @@ func (b *MarkdownBlock) GetType() string       { return "markdown" }
 func (b *MarkdownBlock) GetID() string         { return b.ID }
 func (b *MarkdownBlock) GetOrder() int         { return b.Order }
 func (b *MarkdownBlock) GetLocationID() string { return b.LocationID }
+func (b *MarkdownBlock) GetPoints() int        { return b.Points }
 func (b *MarkdownBlock) GetData() json.RawMessage {
 	data, _ := json.Marshal(b)
 	return data
@@ -34,7 +37,11 @@ func (b *MarkdownBlock) ParseData() error {
 	return json.Unmarshal(b.Data, b)
 }
 
-func (b *MarkdownBlock) UpdateData(data map[string]string) error {
+func (b *MarkdownBlock) UpdateBlockData(data map[string]string) error {
 	b.Content = data["content"]
 	return nil
+}
+
+func (b *MarkdownBlock) CalculatePoints(input map[string]string) (int, error) {
+	return 0, nil
 }

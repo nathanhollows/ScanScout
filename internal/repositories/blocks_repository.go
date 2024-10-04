@@ -39,7 +39,7 @@ func (r *blockRepository) GetByLocationID(ctx context.Context, locationID string
 	if err != nil {
 		return nil, err
 	}
-	return ConvertModelsToBlocks(contentBlocks)
+	return convertModelsToBlocks(contentBlocks)
 }
 
 // GetByID fetches a content block by its ID
@@ -52,7 +52,7 @@ func (r *blockRepository) GetByID(ctx context.Context, contentBlockID string) (b
 	if err != nil {
 		return nil, err
 	}
-	return ConvertModelToBlock(contentBlock)
+	return convertModelToBlock(contentBlock)
 }
 
 // Save saves a content block to the database
@@ -71,10 +71,12 @@ func (r *blockRepository) Save(ctx context.Context, block *blocks.Block) error {
 // Create saves a content block to the database
 func (r *blockRepository) Create(ctx context.Context, block *blocks.Block, locationID string) error {
 	contentBlock := models.Block{
-		LocationID: locationID,
-		Type:       (*block).GetType(),
-		Data:       (*block).GetData(),
-		Ordering:   1e4,
+		LocationID:         locationID,
+		Type:               (*block).GetType(),
+		Data:               (*block).GetData(),
+		Ordering:           1e4,
+		Points:             (*block).GetPoints(),
+		ValidationRequired: (*block).RequiresValidation(),
 	}
 
 	uuid := uuid.New()
@@ -88,7 +90,7 @@ func (r *blockRepository) Create(ctx context.Context, block *blocks.Block, locat
 	if err != nil {
 		return err
 	}
-	*block, err = ConvertModelToBlock(&contentBlock)
+	*block, err = convertModelToBlock(&contentBlock)
 	if err != nil {
 		return err
 	}
@@ -98,11 +100,13 @@ func (r *blockRepository) Create(ctx context.Context, block *blocks.Block, locat
 // Update saves a content block to the database
 func (r *blockRepository) Update(ctx context.Context, block *blocks.Block) error {
 	contentBlock := models.Block{
-		ID:         (*block).GetID(),
-		Type:       (*block).GetType(),
-		Data:       (*block).GetData(),
-		LocationID: (*block).GetLocationID(),
-		Ordering:   (*block).GetOrder(),
+		ID:                 (*block).GetID(),
+		Type:               (*block).GetType(),
+		Data:               (*block).GetData(),
+		LocationID:         (*block).GetLocationID(),
+		Ordering:           (*block).GetOrder(),
+		Points:             (*block).GetPoints(),
+		ValidationRequired: (*block).RequiresValidation(),
 	}
 	_, err := db.DB.NewUpdate().Model(&contentBlock).WherePK().Exec(ctx)
 	return err
@@ -111,18 +115,20 @@ func (r *blockRepository) Update(ctx context.Context, block *blocks.Block) error
 // Convert block to model
 func (b *blockRepository) ConvertBlockToModel(block blocks.Block) models.Block {
 	return models.Block{
-		ID:         block.GetID(),
-		LocationID: block.GetLocationID(),
-		Type:       block.GetType(),
-		Ordering:   block.GetOrder(),
-		Data:       block.GetData(),
+		ID:                 block.GetID(),
+		LocationID:         block.GetLocationID(),
+		Type:               block.GetType(),
+		Ordering:           block.GetOrder(),
+		Data:               block.GetData(),
+		Points:             block.GetPoints(),
+		ValidationRequired: block.RequiresValidation(),
 	}
 }
 
-func ConvertModelsToBlocks(cbs models.Blocks) (blocks.Blocks, error) {
+func convertModelsToBlocks(cbs models.Blocks) (blocks.Blocks, error) {
 	b := make(blocks.Blocks, len(cbs))
 	for i, cb := range cbs {
-		block, err := ConvertModelToBlock(&cb)
+		block, err := convertModelToBlock(&cb)
 		if err != nil {
 			return nil, err
 		}
@@ -131,7 +137,7 @@ func ConvertModelsToBlocks(cbs models.Blocks) (blocks.Blocks, error) {
 	return b, nil
 }
 
-func ConvertModelToBlock(m *models.Block) (blocks.Block, error) {
+func convertModelToBlock(m *models.Block) (blocks.Block, error) {
 	// Convert model to block
 	newBlock, err := blocks.CreateFromBaseBlock(blocks.BaseBlock{
 		ID:         m.ID,
@@ -139,6 +145,7 @@ func ConvertModelToBlock(m *models.Block) (blocks.Block, error) {
 		Type:       m.Type,
 		Data:       m.Data,
 		Order:      m.Ordering,
+		Points:     m.Points,
 	})
 	if err != nil {
 		return nil, err

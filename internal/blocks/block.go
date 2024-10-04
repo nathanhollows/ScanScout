@@ -12,13 +12,15 @@ type Block interface {
 	GetName() string
 	GetDescription() string
 	GetOrder() int
+	GetPoints() int
 	GetIconSVG() string
 	GetData() json.RawMessage
-	//
 	ParseData() error
-	UpdateData(data map[string]string) error
-	// Render renders the block to html
-	Validate(teamCode string, input map[string]string) error
+	UpdateBlockData(data map[string]string) error
+	RequiresValidation() bool
+	ValidatePlayerInput(input map[string]string) error
+	// Calculate partial or full points for a block
+	CalculatePoints(input map[string]string) (int, error)
 }
 
 type Blocks []Block
@@ -29,13 +31,18 @@ type BaseBlock struct {
 	Type       string          `json:"-"`
 	Data       json.RawMessage `json:"-"`
 	Order      int             `json:"-"`
+	Points     int             `json:"-"`
 }
 
-var RegisteredBlocks = Blocks{
+var registeredBlocks = Blocks{
 	&MarkdownBlock{},
 	&PasswordBlock{},
 	// &ChecklistBlock{},
 	// &APIBlock{},
+}
+
+func GetRegisteredBlocks() Blocks {
+	return registeredBlocks
 }
 
 // CreateFromBaseBlock creates a block from a base block
