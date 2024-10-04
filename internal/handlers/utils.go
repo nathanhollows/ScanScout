@@ -27,15 +27,8 @@ type TemplateDir string
 const (
 	AdminDir  TemplateDir = "admin"
 	PlayerDir TemplateDir = "players"
-	PublicDir TemplateDir = "public"
 )
 
-func SetDefaultHeaders(w http.ResponseWriter) {
-	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	w.Header().Set("Cache-Control", "no-cache, no-store, must-revalidate")
-	w.Header().Set("Pragma", "no-cache")
-	w.Header().Set("Expires", "0")
-}
 
 func TemplateData(r *http.Request) map[string]interface{} {
 	user, ok := r.Context().Value(contextkeys.UserKey).(*models.User)

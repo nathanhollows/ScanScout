@@ -5,7 +5,6 @@ import (
 	"time"
 
 	"github.com/nathanhollows/Rapua/internal/flash"
-	"github.com/nathanhollows/Rapua/internal/handlers"
 	"github.com/nathanhollows/Rapua/internal/helpers"
 	templates "github.com/nathanhollows/Rapua/internal/templates/admin"
 )
@@ -46,8 +45,6 @@ func (h *AdminHandler) StopGame(w http.ResponseWriter, r *http.Request) {
 
 // ScheduleGame schedules the game to start and/or end at a specific time
 func (h *AdminHandler) ScheduleGame(w http.ResponseWriter, r *http.Request) {
-	handlers.SetDefaultHeaders(w)
-
 	user := h.UserFromContext(r.Context())
 
 	r.ParseForm()
