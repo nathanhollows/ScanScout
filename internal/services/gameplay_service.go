@@ -2,6 +2,7 @@ package services
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"hash/fnv"
 	"strings"
@@ -9,6 +10,12 @@ import (
 	"github.com/nathanhollows/Rapua/internal/flash"
 	"github.com/nathanhollows/Rapua/internal/models"
 	"golang.org/x/exp/rand"
+)
+
+// Define errors
+var (
+	ErrTeamNotFound     = errors.New("team not found")
+	ErrAlreadyCheckedIn = errors.New("player has already scanned in")
 )
 
 type GameplayService struct{}
@@ -117,9 +124,7 @@ func (s *GameplayService) CheckIn(ctx context.Context, team *models.Team, locati
 				response.Error = fmt.Errorf("loading blocking location: %w", err)
 				return response
 			}
-			msg := flash.NewWarning(fmt.Sprintf("You need to scan out at %s.", team.BlockingLocation.Name)).SetTitle("You are already scanned in.")
-			response.AddFlashMessage(msg)
-			response.Error = fmt.Errorf("player must scan out first")
+			response.Error = ErrAlreadyCheckedIn
 			return response
 		}
 	}
@@ -134,9 +139,7 @@ func (s *GameplayService) CheckIn(ctx context.Context, team *models.Team, locati
 		}
 	}
 	if scanned {
-		msg := flash.NewWarning("Try checking in somewhere else.").SetTitle("Repeat check-in")
-		response.AddFlashMessage(msg)
-		response.Error = fmt.Errorf("player has already scanned in")
+		response.Error = ErrAlreadyCheckedIn
 		return response
 	}
 
@@ -161,8 +164,6 @@ func (s *GameplayService) CheckIn(ctx context.Context, team *models.Team, locati
 	response.Data = make(map[string]interface{})
 	response.Data["location"] = location
 
-	msg := flash.NewSuccess("You have scanned in.")
-	response.AddFlashMessage(*msg)
 	return response
 }
 

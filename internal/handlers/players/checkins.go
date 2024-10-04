@@ -9,16 +9,15 @@ import (
 	"github.com/nathanhollows/Rapua/internal/flash"
 	"github.com/nathanhollows/Rapua/internal/handlers"
 	"github.com/nathanhollows/Rapua/internal/models"
+	"github.com/nathanhollows/Rapua/internal/services"
 	"github.com/nathanhollows/Rapua/internal/sessions"
 	templates "github.com/nathanhollows/Rapua/internal/templates/players"
 )
 
 // CheckIn handles the GET request for scanning a location
 func (h *PlayerHandler) CheckIn(w http.ResponseWriter, r *http.Request) {
-	data := handlers.TemplateData(r)
 	code := chi.URLParam(r, "code")
 	code = strings.ToUpper(code)
-	data["code"] = code
 
 	team, err := h.getTeamFromContext(r.Context())
 	if err == nil {
@@ -27,37 +26,29 @@ func (h *PlayerHandler) CheckIn(w http.ResponseWriter, r *http.Request) {
 			if err != nil {
 				h.Logger.Error("CheckIn: loading blocking location", "err", err)
 				flash.NewError("Something went wrong. Please try again.").Save(w, r)
-				data["blocked"] = true
 				http.Redirect(w, r, r.Header.Get("/next"), http.StatusFound)
 				return
 			}
-
-			if team.BlockingLocation.MarkerID == code {
-				flash.NewDefault("Would you like to scan out instead?").Save(w, r)
-				http.Redirect(w, r, "/o/"+code, http.StatusFound)
-				return
-			}
-
-			flash.NewWarning(fmt.Sprintf("You need to scan out at %s.", team.BlockingLocation.Name)).
-				SetTitle("You are already scanned in.").
-				Save(w, r)
-			data["blocked"] = true
 		}
 	}
 
 	response := h.GameplayService.GetMarkerByCode(r.Context(), code)
 	if response.Error != nil {
-		flash.NewWarning("Please double check the code and try again.").
-			SetTitle("Location not found").Save(w, r)
-		http.Redirect(w, r, "/play", http.StatusFound)
+		h.redirect(w, r, "/404")
 		return
 	}
-	data["marker"] = response.Data["marker"].(*models.Marker)
 
-	data["team"] = team
-	data["notifications"], _ = h.NotificationService.GetNotifications(r.Context(), team.Code)
-	data["messages"] = flash.Get(w, r)
-	handlers.Render(w, data, handlers.PlayerDir, "scan")
+	marker, ok := response.Data["marker"].(*models.Marker)
+	if !ok {
+		h.redirect(w, r, "/404")
+		return
+	}
+
+	c := templates.CheckIn(*marker, team.Code, team.BlockingLocation)
+	err = templates.Layout(c, "Check In: "+marker.Name).Render(r.Context(), w)
+	if err != nil {
+		h.Logger.Error("rendering checkin", "error", err.Error())
+	}
 }
 
 // CheckInPost handles the POST request for scanning in
@@ -70,27 +61,31 @@ func (h *PlayerHandler) CheckInPost(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		team, err = h.GameplayService.GetTeamByCode(r.Context(), r.FormValue("team"))
 		if err != nil {
-			flash.NewWarning("Please double check the team code and try again.").
-				Save(w, r)
-			h.Logger.Error(`CheckInPost: getting team by code (post)`, "err", err)
-			http.Redirect(w, r, r.Header.Get("referer"), http.StatusFound)
+			h.handleError(w, r, "CheckInPost: getting team by code", "Error checking in", "error", err, "team", r.FormValue("team"))
 			return
 		}
 	}
 
 	response := h.GameplayService.CheckIn(r.Context(), team, locationCode)
-	for _, msg := range response.FlashMessages {
-		msg.Save(w, r)
-	}
 	if response.Error != nil {
-		h.Logger.Error("checking in team", "err", response.Error.Error(), "team", team.Code, "location", locationCode)
-		http.Redirect(w, r, r.Header.Get("referer"), http.StatusFound)
+		if response.Error == services.ErrAlreadyCheckedIn {
+			err := templates.Toast(*flash.NewInfo("You have already checked in here.")).Render(r.Context(), w)
+			if err != nil {
+				h.Logger.Error("CheckInPost: rendering toast", "error", err)
+			}
+			return
+		}
+		h.handleError(w, r, "CheckInPost: checking in", "Error checking in", "error", response.Error, "team", team.Code, "location", locationCode)
 		return
 	}
 
-	location := response.Data["location"].(*models.Location)
+	location, ok := response.Data["location"].(*models.Location)
+	if !ok {
+		h.handleError(w, r, "CheckInPost: getting location", "Error checking in", "error", fmt.Errorf("location not found"), "team", team.Code, "location", locationCode)
+		return
+	}
 
-	http.Redirect(w, r, "/checkins/"+location.MarkerID, http.StatusFound)
+	h.redirect(w, r, "/checkins/"+location.MarkerID)
 }
 
 func (h *PlayerHandler) CheckOut(w http.ResponseWriter, r *http.Request) {
@@ -194,7 +189,7 @@ func (h *PlayerHandler) MyCheckins(w http.ResponseWriter, r *http.Request) {
 	// TODO: Handle notifications
 	// notifications, _ := h.NotificationService.GetNotifications(r.Context(), team.Code)
 
-	c := templates.Checkins(*team)
+	c := templates.MyCheckins(*team)
 	err = templates.Layout(c, "My Check-ins").Render(r.Context(), w)
 	if err != nil {
 		h.Logger.Error("rendering checkins", "error", err.Error())

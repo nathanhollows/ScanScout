@@ -55,7 +55,7 @@ func (h PlayerHandler) getTeamFromContext(ctx context.Context) (*models.Team, er
 }
 
 // redirect is a helper function to redirect the user to a new page
-// It accounts for htmx requests and redirects the user to the referer
+// It accounts for htmx requests
 func (h PlayerHandler) redirect(w http.ResponseWriter, r *http.Request, path string) {
 	if r.Header.Get("HX-Request") == "true" {
 		w.Header().Set("HX-Redirect", path)

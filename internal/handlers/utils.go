@@ -29,7 +29,6 @@ const (
 	PlayerDir TemplateDir = "players"
 )
 
-
 func TemplateData(r *http.Request) map[string]interface{} {
 	user, ok := r.Context().Value(contextkeys.UserKey).(*models.User)
 	data := map[string]interface{}{
@@ -57,26 +56,6 @@ func Render(
 	if err != nil {
 		http.Error(w, "Template execution error: "+err.Error(), http.StatusInternalServerError)
 		slog.Error("executing template", "err", err)
-	}
-	return err
-}
-
-// RenderHTMX renders a template with HTMX headers
-// It renders the content block of the template instead of the base layout
-func RenderHTMX(
-	w http.ResponseWriter,
-	data map[string]interface{},
-	templateDir TemplateDir,
-	patterns ...string,
-) error {
-	w.Header().Set("Content-Type", "text/html")
-
-	baseDir := "web/templates/" + string(templateDir) + "/"
-	tmpl := parse(data, baseDir, patterns...)
-	err := tmpl.ExecuteTemplate(w, "content", data)
-	if err != nil {
-		slog.Error("executing template", "err", err)
-		http.Error(w, "Template execution error: "+err.Error(), http.StatusInternalServerError)
 	}
 	return err
 }

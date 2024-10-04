@@ -246,7 +246,13 @@ func (s *GameManagerService) SaveLocation(ctx context.Context, location *models.
 	return location.Save(ctx)
 }
 
-func (s *GameManagerService) CreateLocation(ctx context.Context, user *models.User, name, content, criteriaID, lat, lng string) (response *ServiceResponse) {
+func (s *GameManagerService) CreateLocation(ctx context.Context, user *models.User, data map[string]string) (response *ServiceResponse) {
+
+	name := data["name"]
+	content := data["content"]
+	lat := data["latitude"]
+	lng := data["longitude"]
+
 	response = &ServiceResponse{}
 	location := &models.Location{
 		Name:       name,
