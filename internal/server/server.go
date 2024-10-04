@@ -19,7 +19,7 @@ var router *chi.Mux
 var server *http.Server
 
 func Start(logger *slog.Logger) {
-	gameplayService := &services.GameplayService{}
+	gameplayService := services.NewGameplayService()
 	gameManagerService := &services.GameManagerService{}
 	notificationService := services.NewNotificationService()
 

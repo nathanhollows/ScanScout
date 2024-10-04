@@ -18,10 +18,25 @@ var (
 	ErrAlreadyCheckedIn = errors.New("player has already scanned in")
 )
 
-type GameplayService struct{}
+type GameplayService interface {
+	CheckGameStatus(ctx context.Context, team *models.Team) *ServiceResponse
+	GetTeamByCode(ctx context.Context, teamCode string) (*models.Team, error)
+	GetMarkerByCode(ctx context.Context, locationCode string) *ServiceResponse
+	StartPlaying(ctx context.Context, teamCode, customTeamName string) *ServiceResponse
+	SuggestNextLocations(ctx context.Context, team *models.Team, limit int) ServiceResponse
+	CheckIn(ctx context.Context, team *models.Team, locationCode string) ServiceResponse
+	CheckOut(ctx context.Context, team *models.Team, locationCode string) ServiceResponse
+	CheckValidLocation(ctx context.Context, team *models.Team, locationCode string) *ServiceResponse
+}
+
+type gameplayService struct{}
+
+func NewGameplayService() GameplayService {
+	return &gameplayService{}
+}
 
 // GetGameStatus returns the current status of the game
-func (s *GameplayService) CheckGameStatus(ctx context.Context, team *models.Team) (response *ServiceResponse) {
+func (s *gameplayService) CheckGameStatus(ctx context.Context, team *models.Team) (response *ServiceResponse) {
 	response = &ServiceResponse{}
 	response.Data = make(map[string]interface{})
 
@@ -37,7 +52,7 @@ func (s *GameplayService) CheckGameStatus(ctx context.Context, team *models.Team
 	return response
 }
 
-func (s *GameplayService) GetTeamByCode(ctx context.Context, teamCode string) (*models.Team, error) {
+func (s *gameplayService) GetTeamByCode(ctx context.Context, teamCode string) (*models.Team, error) {
 	teamCode = strings.TrimSpace(strings.ToUpper(teamCode))
 	team, err := models.FindTeamByCode(ctx, teamCode)
 	if err != nil {
@@ -46,7 +61,7 @@ func (s *GameplayService) GetTeamByCode(ctx context.Context, teamCode string) (*
 	return team, nil
 }
 
-func (s *GameplayService) GetMarkerByCode(ctx context.Context, locationCode string) (response *ServiceResponse) {
+func (s *gameplayService) GetMarkerByCode(ctx context.Context, locationCode string) (response *ServiceResponse) {
 	response = &ServiceResponse{}
 	response.Data = make(map[string]interface{})
 
@@ -60,7 +75,7 @@ func (s *GameplayService) GetMarkerByCode(ctx context.Context, locationCode stri
 	return response
 }
 
-func (s *GameplayService) StartPlaying(ctx context.Context, teamCode, customTeamName string) (response *ServiceResponse) {
+func (s *gameplayService) StartPlaying(ctx context.Context, teamCode, customTeamName string) (response *ServiceResponse) {
 	response = &ServiceResponse{}
 	response.Data = make(map[string]interface{})
 
@@ -87,7 +102,7 @@ func (s *GameplayService) StartPlaying(ctx context.Context, teamCode, customTeam
 	return response
 }
 
-func (s *GameplayService) SuggestNextLocations(ctx context.Context, team *models.Team, limit int) ServiceResponse {
+func (s *gameplayService) SuggestNextLocations(ctx context.Context, team *models.Team, limit int) ServiceResponse {
 	// Suggest the next locations for the team
 	navigationService := NewNavigationService()
 	response := navigationService.DetermineNextLocations(ctx, team)
@@ -106,7 +121,7 @@ func (s *GameplayService) SuggestNextLocations(ctx context.Context, team *models
 	return response
 }
 
-func (s *GameplayService) CheckIn(ctx context.Context, team *models.Team, locationCode string) (response ServiceResponse) {
+func (s *gameplayService) CheckIn(ctx context.Context, team *models.Team, locationCode string) (response ServiceResponse) {
 	response = ServiceResponse{}
 
 	location, err := models.FindLocationByInstanceAndCode(ctx, team.InstanceID, locationCode)
@@ -167,7 +182,7 @@ func (s *GameplayService) CheckIn(ctx context.Context, team *models.Team, locati
 	return response
 }
 
-func (s *GameplayService) CheckOut(ctx context.Context, team *models.Team, locationCode string) (response ServiceResponse) {
+func (s *gameplayService) CheckOut(ctx context.Context, team *models.Team, locationCode string) (response ServiceResponse) {
 	response = ServiceResponse{}
 
 	location, err := models.FindLocationByInstanceAndCode(ctx, team.InstanceID, locationCode)
@@ -220,7 +235,7 @@ func (s *GameplayService) CheckOut(ctx context.Context, team *models.Team, locat
 }
 
 // CheckLocation checks if the location is valid for the team to check in
-func (s *GameplayService) CheckValidLocation(ctx context.Context, team *models.Team, locationCode string) (response *ServiceResponse) {
+func (s *gameplayService) CheckValidLocation(ctx context.Context, team *models.Team, locationCode string) (response *ServiceResponse) {
 	response = &ServiceResponse{}
 	NavigationService := NewNavigationService()
 
@@ -246,7 +261,7 @@ func (s *GameplayService) CheckValidLocation(ctx context.Context, team *models.T
 
 // loadClues loads the clues for the current location
 // By default, it will only show one clue per location
-func (s *GameplayService) loadClues(ctx context.Context, team *models.Team, locations models.Locations) (response ServiceResponse) {
+func (s *gameplayService) loadClues(ctx context.Context, team *models.Team, locations models.Locations) (response ServiceResponse) {
 	response = ServiceResponse{}
 	response.Data = make(map[string]interface{})
 

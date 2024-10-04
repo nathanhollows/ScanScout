@@ -17,12 +17,12 @@ import (
 
 type PlayerHandler struct {
 	Logger              *slog.Logger
-	GameplayService     *services.GameplayService
+	GameplayService     services.GameplayService
 	NotificationService services.NotificationService
 	BlockService        services.BlockService
 }
 
-func NewPlayerHandler(logger *slog.Logger, gs *services.GameplayService, ns services.NotificationService) *PlayerHandler {
+func NewPlayerHandler(logger *slog.Logger, gs services.GameplayService, ns services.NotificationService) *PlayerHandler {
 	return &PlayerHandler{
 		Logger:              logger,
 		GameplayService:     gs,

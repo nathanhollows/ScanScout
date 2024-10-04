@@ -27,5 +27,13 @@ func (h *PlayerHandler) ValidateBlock(w http.ResponseWriter, r *http.Request) {
 		data[key] = value[0]
 	}
 
+	block, err := h.BlockService.GetByBlockID(r.Context(), data["block"])
+	if err != nil {
+		h.handleError(w, r, fmt.Errorf("validateBlock: getting block: %v", err).Error(), "Something went wrong!")
+		return
+	}
+
+	fmt.Println(block.GetLocationID())
+
 	return
 }

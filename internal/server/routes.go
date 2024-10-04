@@ -19,7 +19,7 @@ import (
 
 func setupRouter(
 	logger *slog.Logger,
-	gameplayService *services.GameplayService,
+	gameplayService services.GameplayService,
 	gameManagerService *services.GameManagerService,
 	notificationService services.NotificationService,
 ) *chi.Mux {
