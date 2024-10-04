@@ -173,6 +173,7 @@ templ AddLocation() {
 		<form
 			class="w-full"
 			method="post"
+			hx-post="/admin/locations/new"
 		>
 			<div class="flex-grow container mx-auto p-5">
 				<div class="flex flex-row gap-5">
@@ -529,7 +530,6 @@ function sortables() {
       var sortable = sortables[i];
       var sortableInstance = new Sortable(sortable, {
           animation: 150,
-          ghostClass: 'blue-background-class',
           handle: ".cursor-move",
 
           // Make the `.htmx-indicator` unsortable

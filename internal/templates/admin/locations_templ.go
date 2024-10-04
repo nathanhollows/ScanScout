@@ -270,7 +270,7 @@ func EditLocation(location models.Location, settings models.InstanceSettings, co
 		var templ_7745c5c3_Var11 string
 		templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprint("/admin/locations/", location.MarkerID))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/admin/locations.templ`, Line: 241, Col: 62}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/admin/locations.templ`, Line: 242, Col: 62}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
 		if templ_7745c5c3_Err != nil {
@@ -283,7 +283,7 @@ func EditLocation(location models.Location, settings models.InstanceSettings, co
 		var templ_7745c5c3_Var12 string
 		templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(location.Name)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/admin/locations.templ`, Line: 247, Col: 61}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/admin/locations.templ`, Line: 248, Col: 61}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
 		if templ_7745c5c3_Err != nil {
@@ -329,7 +329,7 @@ func EditLocation(location models.Location, settings models.InstanceSettings, co
 		var templ_7745c5c3_Var15 string
 		templ_7745c5c3_Var15, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprint("Check In ", location.MarkerID, " ", location.Name, ".png"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/admin/locations.templ`, Line: 277, Col: 91}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/admin/locations.templ`, Line: 278, Col: 91}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var15))
 		if templ_7745c5c3_Err != nil {
@@ -351,7 +351,7 @@ func EditLocation(location models.Location, settings models.InstanceSettings, co
 		var templ_7745c5c3_Var17 string
 		templ_7745c5c3_Var17, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprint("Check In ", location.MarkerID, " ", location.Name, ".svg"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/admin/locations.templ`, Line: 283, Col: 91}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/admin/locations.templ`, Line: 284, Col: 91}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var17))
 		if templ_7745c5c3_Err != nil {
@@ -378,7 +378,7 @@ func EditLocation(location models.Location, settings models.InstanceSettings, co
 			var templ_7745c5c3_Var19 string
 			templ_7745c5c3_Var19, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprint("Check Out ", location.MarkerID, " ", location.Name, ".png"))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/admin/locations.templ`, Line: 295, Col: 93}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/admin/locations.templ`, Line: 296, Col: 93}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var19))
 			if templ_7745c5c3_Err != nil {
@@ -400,7 +400,7 @@ func EditLocation(location models.Location, settings models.InstanceSettings, co
 			var templ_7745c5c3_Var21 string
 			templ_7745c5c3_Var21, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprint("Check Out ", location.MarkerID, " ", location.Name, ".svg"))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/admin/locations.templ`, Line: 301, Col: 93}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/admin/locations.templ`, Line: 302, Col: 93}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var21))
 			if templ_7745c5c3_Err != nil {
@@ -418,7 +418,7 @@ func EditLocation(location models.Location, settings models.InstanceSettings, co
 		var templ_7745c5c3_Var22 string
 		templ_7745c5c3_Var22, templ_7745c5c3_Err = templ.JoinStringErrs(location.Marker.Name)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/admin/locations.templ`, Line: 327, Col: 36}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/admin/locations.templ`, Line: 328, Col: 36}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var22))
 		if templ_7745c5c3_Err != nil {
@@ -446,7 +446,7 @@ func EditLocation(location models.Location, settings models.InstanceSettings, co
 			var templ_7745c5c3_Var23 string
 			templ_7745c5c3_Var23, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprint(location.Points))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/admin/locations.templ`, Line: 350, Col: 44}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/admin/locations.templ`, Line: 351, Col: 44}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var23))
 			if templ_7745c5c3_Err != nil {
@@ -464,7 +464,7 @@ func EditLocation(location models.Location, settings models.InstanceSettings, co
 			var templ_7745c5c3_Var24 string
 			templ_7745c5c3_Var24, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprint(location.Points))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/admin/locations.templ`, Line: 355, Col: 77}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/admin/locations.templ`, Line: 356, Col: 77}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var24))
 			if templ_7745c5c3_Err != nil {
@@ -487,7 +487,7 @@ func EditLocation(location models.Location, settings models.InstanceSettings, co
 			var templ_7745c5c3_Var25 string
 			templ_7745c5c3_Var25, templ_7745c5c3_Err = templ.JoinStringErrs(block.GetDescription())
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/admin/locations.templ`, Line: 374, Col: 45}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/admin/locations.templ`, Line: 375, Col: 45}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var25))
 			if templ_7745c5c3_Err != nil {
@@ -500,7 +500,7 @@ func EditLocation(location models.Location, settings models.InstanceSettings, co
 			var templ_7745c5c3_Var26 string
 			templ_7745c5c3_Var26, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprint("/admin/locations/", location.ID, "/blocks/new/", block.GetType()))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/admin/locations.templ`, Line: 375, Col: 99}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/admin/locations.templ`, Line: 376, Col: 99}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var26))
 			if templ_7745c5c3_Err != nil {
@@ -517,7 +517,7 @@ func EditLocation(location models.Location, settings models.InstanceSettings, co
 			var templ_7745c5c3_Var27 string
 			templ_7745c5c3_Var27, templ_7745c5c3_Err = templ.JoinStringErrs(block.GetName())
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/admin/locations.templ`, Line: 380, Col: 29}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/admin/locations.templ`, Line: 381, Col: 29}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var27))
 			if templ_7745c5c3_Err != nil {
@@ -535,7 +535,7 @@ func EditLocation(location models.Location, settings models.InstanceSettings, co
 		var templ_7745c5c3_Var28 string
 		templ_7745c5c3_Var28, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprint("/admin/locations/", location.ID, "/blocks/reorder"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/admin/locations.templ`, Line: 391, Col: 79}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/admin/locations.templ`, Line: 392, Col: 79}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var28))
 		if templ_7745c5c3_Err != nil {
@@ -558,7 +558,7 @@ func EditLocation(location models.Location, settings models.InstanceSettings, co
 		var templ_7745c5c3_Var29 string
 		templ_7745c5c3_Var29, templ_7745c5c3_Err = templ.JoinStringErrs(location.Marker.Code)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/admin/locations.templ`, Line: 423, Col: 66}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/admin/locations.templ`, Line: 424, Col: 66}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var29))
 		if templ_7745c5c3_Err != nil {
@@ -571,7 +571,7 @@ func EditLocation(location models.Location, settings models.InstanceSettings, co
 		var templ_7745c5c3_Var30 string
 		templ_7745c5c3_Var30, templ_7745c5c3_Err = templ.JoinStringErrs(floatToString(location.Marker.Lat))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/admin/locations.templ`, Line: 424, Col: 84}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/admin/locations.templ`, Line: 425, Col: 84}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var30))
 		if templ_7745c5c3_Err != nil {
@@ -584,7 +584,7 @@ func EditLocation(location models.Location, settings models.InstanceSettings, co
 		var templ_7745c5c3_Var31 string
 		templ_7745c5c3_Var31, templ_7745c5c3_Err = templ.JoinStringErrs(floatToString(location.Marker.Lng))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/admin/locations.templ`, Line: 425, Col: 85}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/admin/locations.templ`, Line: 426, Col: 85}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var31))
 		if templ_7745c5c3_Err != nil {
@@ -607,7 +607,7 @@ func EditLocation(location models.Location, settings models.InstanceSettings, co
 				var templ_7745c5c3_Var32 string
 				templ_7745c5c3_Var32, templ_7745c5c3_Err = templ.JoinStringErrs(clue.Content)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/admin/locations.templ`, Line: 438, Col: 25}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/admin/locations.templ`, Line: 439, Col: 25}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var32))
 				if templ_7745c5c3_Err != nil {
@@ -630,7 +630,7 @@ func EditLocation(location models.Location, settings models.InstanceSettings, co
 		var templ_7745c5c3_Var33 string
 		templ_7745c5c3_Var33, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprint("/admin/locations/", location.MarkerID))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/admin/locations.templ`, Line: 489, Col: 67}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/admin/locations.templ`, Line: 490, Col: 67}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var33))
 		if templ_7745c5c3_Err != nil {

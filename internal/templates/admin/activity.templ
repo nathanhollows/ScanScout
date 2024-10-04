@@ -504,11 +504,11 @@ templ TeamActivity(settings models.InstanceSettings, team models.Team, notificat
 	<p class="py-3 font-bold">Send an alert</p>
 	<!-- Send an alert -->
 	<label class="form-control w-full">
-		<form method="post" action="/admin/notify/team/">
+		<form hx-post="/admin/notify/team/" hx-swap="none">
 			<input type="hidden" name="teamCode" value={ team.Code }/>
 			<div class="join w-full">
 				<input class="input input-bordered join-item w-full" name="content" placeholder="Message" autocomplete="off" required/>
-				<button type="submit" class="btn btn-primary join-item rounded-r-full">
+				<button type="submit" class="btn btn-primary join-item rounded-r-full" onclick="announcement_modal.close()">
 					Send
 					<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-send-horizontal w-5 h-5"><path d="m3 3 3 9-3 9 19-9Z"></path><path d="M6 12h16"></path></svg>
 				</button>
@@ -667,7 +667,7 @@ templ scheduleModal(instance models.Instance) {
 
 templ announcementModal() {
 	<dialog id="announcement_modal" class="modal modal-bottom sm:modal-middle">
-		<form method="post" action="/admin/notify/all" class="modal-box">
+		<form hx-post="/admin/notify/all" hx-swap="none" class="modal-box">
 			<h3 class="text-lg font-bold">
 				<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-megaphone inline-block w-5 h-5 mb-1 mr-2"><path d="m3 11 18-5v12L3 14v-3z"></path><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"></path></svg>
 				Announcement
@@ -677,7 +677,7 @@ templ announcementModal() {
 			<p class="text-sm py-3"><em>Note:</em> This will only be sent to teams that have already started playing.</p>
 			<div class="modal-action">
 				<button class="btn" onclick="event.preventDefault(); announcement_modal.close()">Nevermind</button>
-				<button class="btn btn-primary">Send</button>
+				<button class="btn btn-primary" onclick="announcement_modal.close()">Send</button>
 			</div>
 		</form>
 	</dialog>

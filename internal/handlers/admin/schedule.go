@@ -15,36 +15,32 @@ func (h *AdminHandler) StartGame(w http.ResponseWriter, r *http.Request) {
 	user := h.UserFromContext(r.Context())
 
 	response := h.GameManagerService.StartGame(r.Context(), user)
-	for _, msg := range response.FlashMessages {
-		err := templates.GameScheduleStatus(user.CurrentInstance, msg).Render(r.Context(), w)
-		if err != nil {
-			h.Logger.Error("StartGame: rendering template", "error", err)
-		}
+	if response.Error != nil {
+		h.handleError(w, r, "starting game", "Error starting game", "Could not start game", response.Error, "instance_id", user.CurrentInstanceID)
 		return
 	}
-	if response.Error != nil {
-		templates.Toast(*flash.NewError("Error starting game")).Render(r.Context(), w)
-		h.Logger.Error("starting game", "err", response.Error)
+
+	msg := *flash.NewSuccess("Game started!")
+	err := templates.GameScheduleStatus(user.CurrentInstance, msg).Render(r.Context(), w)
+	if err != nil {
+		h.Logger.Error("StartGame: rendering template", "error", err)
 	}
 }
 
 // StopGame stops the game immediately
 func (h *AdminHandler) StopGame(w http.ResponseWriter, r *http.Request) {
-	handlers.SetDefaultHeaders(w)
-
 	user := h.UserFromContext(r.Context())
 
 	response := h.GameManagerService.StopGame(r.Context(), user)
-	for _, msg := range response.FlashMessages {
-		err := templates.GameScheduleStatus(user.CurrentInstance, msg).Render(r.Context(), w)
-		if err != nil {
-			h.Logger.Error("StopGame: rendering template", "error", err)
-		}
+	if response.Error != nil {
+		h.handleError(w, r, "stopping game", "Error stopping game", "Could not stop game", response.Error, "instance_id", user.CurrentInstanceID)
 		return
 	}
-	if response.Error != nil {
-		templates.Toast(*flash.NewError("Error starting game")).Render(r.Context(), w)
-		h.Logger.Error("stopping game", "err", response.Error)
+
+	msg := *flash.NewSuccess("Game stopped!")
+	err := templates.GameScheduleStatus(user.CurrentInstance, msg).Render(r.Context(), w)
+	if err != nil {
+		h.Logger.Error("StopGame: rendering template", "error", err)
 	}
 }
 
@@ -63,11 +59,7 @@ func (h *AdminHandler) ScheduleGame(w http.ResponseWriter, r *http.Request) {
 		startTime := r.Form.Get("utc_start_time")
 		sTime, err = helpers.ParseDateTime(startDate, startTime)
 		if err != nil {
-			h.Logger.Error("parsing start date and time", "err", err)
-			err := templates.Toast(*flash.NewError("Error parsing start date and time")).Render(r.Context(), w)
-			if err != nil {
-				h.Logger.Error("ScheduleGame: rendering template", "error", err)
-			}
+			h.handleError(w, r, "ScheduleGame: parsing start date and time", "Error parsing start date and time", "Could not parse date and time", err, "instance_id", user.CurrentInstanceID)
 			return
 		}
 	}
@@ -77,20 +69,13 @@ func (h *AdminHandler) ScheduleGame(w http.ResponseWriter, r *http.Request) {
 		endTime := r.Form.Get("utc_end_time")
 		eTime, err = helpers.ParseDateTime(endDate, endTime)
 		if err != nil {
-			h.Logger.Error("parsing end date and time", "err", err)
-			err := templates.Toast(*flash.NewError("Error parsing end date and time")).Render(r.Context(), w)
-			if err != nil {
-				h.Logger.Error("ScheduleGame: rendering template", "error", err)
-			}
+			h.handleError(w, r, "ScheduleGame: parsing end date and time", "Error parsing end date and time", "Could not parse date and time", err, "instance_id", user.CurrentInstanceID)
 			return
 		}
 	}
 
 	if sTime.After(eTime) && !eTime.IsZero() {
-		err := templates.Toast(*flash.NewError("Start time must be before end time")).Render(r.Context(), w)
-		if err != nil {
-			h.Logger.Error("ScheduleGame: rendering template", "error", err)
-		}
+		h.handleError(w, r, "ScheduleGame: start time after end time", "Error scheduling game", "Start time must be before end time", nil, "instance_id", user.CurrentInstanceID)
 		return
 	}
 
