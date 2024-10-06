@@ -12,7 +12,6 @@ func (h *AdminHandler) NotFound(w http.ResponseWriter, r *http.Request) {
 	user := h.UserFromContext(r.Context())
 
 	w.Header().Set("Content-Type", "text/html")
-	http.Error(w, "Not Found", http.StatusNotFound)
 
 	c := templates.NotFound()
 	err := templates.Layout(c, *user, "Error", "Not Found").Render(r.Context(), w)
