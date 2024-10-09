@@ -23,30 +23,33 @@ func (b *PasswordBlock) RequiresValidation() bool { return true }
 
 func (b *PasswordBlock) ValidatePlayerInput(state *models.TeamBlockState, input map[string]string) error {
 	var err error
-	data := passwordBlockData{}
+	newPlayerData := passwordBlockData{}
 	if state.PlayerData != nil {
-		json.Unmarshal(b.Data, &state.PlayerData)
+		json.Unmarshal(state.PlayerData, &newPlayerData)
 	}
+	fmt.Println("Player data", string(state.PlayerData))
+	fmt.Println("New Player data", newPlayerData)
 
-	if data.Attempts == 0 {
-		data.Guesses = []string{}
+	if newPlayerData.Attempts == 0 {
+		newPlayerData.Guesses = []string{}
 	}
-	data.Attempts++
-	data.Guesses = append(data.Guesses, input["password"])
+	newPlayerData.Attempts++
+	newPlayerData.Guesses = append(newPlayerData.Guesses, input["password"])
 
 	if input["password"] != b.Password {
-		state.PlayerData, err = json.Marshal(data)
+		state.PlayerData, err = json.Marshal(newPlayerData)
 		if err != nil {
 			return fmt.Errorf("Error saving player data")
 		}
 		return fmt.Errorf("Incorrect password")
 	}
 
-	state.PlayerData, err = json.Marshal(data)
+	state.PlayerData, err = json.Marshal(newPlayerData)
 	if err != nil {
 		return fmt.Errorf("Error saving player data")
 	}
 	state.IsComplete = true
+	state.PointsAwarded = b.Points
 	return nil
 }
 
