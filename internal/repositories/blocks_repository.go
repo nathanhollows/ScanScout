@@ -20,6 +20,8 @@ type BlockRepository interface {
 	Update(ctx context.Context, block *blocks.Block) error
 	Delete(ctx context.Context, blockID string) error
 	Reorder(ctx context.Context, locationID string, blockIDs []string) error
+	GetBlocksAndStatesByLocationIDAndTeamCode(ctx context.Context, locationID string, teamCode string) (models.Blocks, models.TeamBlockStates, error)
+	GetBlockAndStateByBlockIDAndTeamCode(ctx context.Context, blockID string, teamCode string) (models.Block, models.TeamBlockState, error)
 }
 
 type blockRepository struct{}
@@ -176,4 +178,57 @@ func (r *blockRepository) Reorder(ctx context.Context, locationID string, blockI
 		}
 	}
 	return nil
+}
+
+// GetBlocksAndStatesByLocationIDAndTeamCode fetches all blocks for a location with their player states
+func (r *blockRepository) GetBlocksAndStatesByLocationIDAndTeamCode(ctx context.Context, locationID string, teamCode string) (models.Blocks, models.TeamBlockStates, error) {
+	blocks := []models.Block{}
+	err := db.DB.NewSelect().
+		Model(&blocks).
+		Where("location_id = ?", locationID).
+		Order("ordering ASC").
+		Scan(ctx)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	states := []models.TeamBlockState{}
+	if teamCode != "" {
+		err = db.DB.NewSelect().
+			Model(&states).
+			Where("block_id IN (?)", db.DB.NewSelect().Model((*models.Block)(nil)).Column("id").Where("location_id = ?", locationID)).
+			Where("team_code = ?", teamCode).
+			Scan(ctx)
+		if err != nil {
+			return nil, nil, err
+		}
+	}
+
+	return blocks, states, nil
+}
+
+// GetBlockAndStateByBlockIDAndTeamCode fetches a block by its ID with the player state for a given team
+func (r *blockRepository) GetBlockAndStateByBlockIDAndTeamCode(ctx context.Context, blockID string, teamCode string) (models.Block, models.TeamBlockState, error) {
+	block := models.Block{}
+	err := db.DB.NewSelect().
+		Model(&block).
+		Where("id = ?", blockID).
+		Scan(ctx)
+	if err != nil {
+		return block, models.TeamBlockState{}, err
+	}
+
+	state := models.TeamBlockState{}
+	if teamCode != "" {
+		err = db.DB.NewSelect().
+			Model(&state).
+			Where("block_id = ?", blockID).
+			Where("team_code = ?", teamCode).
+			Scan(ctx)
+		if err != nil && err.Error() != "sql: no rows in result set" {
+			return block, state, err
+		}
+	}
+
+	return block, state, nil
 }

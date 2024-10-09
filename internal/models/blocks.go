@@ -18,10 +18,12 @@ type Blocks []Block
 
 type TeamBlockState struct {
 	baseModel
-	TeamCode   string          `bun:",pk,notnull" json:"team_code"`
-	BlockID    string          `bun:",pk,notnull" json:"block_id"`
-	IsComplete bool            `bun:",type:bool" json:"is_complete"`
-	PlayerData json.RawMessage `bun:",type:jsonb" json:"player_data"`
+	ID            string          `bun:",pk,notnull" json:"id"`
+	TeamCode      string          `bun:",notnull" json:"team_code"`
+	BlockID       string          `bun:",notnull" json:"block_id"`
+	IsComplete    bool            `bun:",type:bool" json:"is_complete"`
+	PointsAwarded int             `bun:",type:int" json:"points"`
+	PlayerData    json.RawMessage `bun:",type:jsonb" json:"player_data"`
 }
 
 type TeamBlockStates []TeamBlockState

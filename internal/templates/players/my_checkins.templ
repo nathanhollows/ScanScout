@@ -3,8 +3,8 @@ package templates
 import (
 	"fmt"
 	"github.com/nathanhollows/Rapua/internal/blocks"
+	templates "github.com/nathanhollows/Rapua/internal/blocks/templates"
 	"github.com/nathanhollows/Rapua/internal/models"
-	templates "github.com/nathanhollows/Rapua/internal/templates/blocks"
 )
 
 templ MyCheckins(team models.Team) {
@@ -20,7 +20,7 @@ templ MyCheckins(team models.Team) {
 				<a
 					href={ templ.SafeURL(fmt.Sprint("/checkins/", scan.Location.MarkerID)) }
 					hx-boost="true"
-					class="flex flex-row justify-between items-center space-x-3 bg-base-200 hover:bg-base-300 border-base-300 rounded-lg p-4 join-item border-y"
+					class="flex flex-row justify-between items-center space-x-3 bg-base-200 hover:bg-base-300 border-base-300 rounded-lg p-4 join-item border-y w-full"
 				>
 					{ scan.Location.Name }
 					if team.Instance.Settings.EnablePoints {
@@ -38,7 +38,7 @@ templ MyCheckins(team models.Team) {
 	</div>
 }
 
-templ CheckInView(settings models.InstanceSettings, scan models.Scan, blocks blocks.Blocks) {
+templ CheckInView(settings models.InstanceSettings, scan models.Scan, blocks blocks.Blocks, states map[string]models.TeamBlockState) {
 	<div class="sm:mx-auto sm:w-full sm:max-w-sm">
 		<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-map-pin-check-inside w-16 h-16 m-auto"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"></path><path d="m9 10 2 2 4-4"></path></svg>
 		<h2 class="mt-5 text-center text-2xl font-bold leading-9 tracking-tight">
@@ -47,7 +47,7 @@ templ CheckInView(settings models.InstanceSettings, scan models.Scan, blocks blo
 	</div>
 	<div class="mt-10 sm:mx-auto sm:w-full sm:max-w-sm flex flex-col gap-8">
 		for _, block := range blocks {
-			@templates.RenderPlayer(settings, block)
+			@templates.RenderPlayerView(settings, block, states[block.GetID()])
 		}
 		<div class="flex flex-row justify-center join mt-12">
 			<a href="/checkins" hx-boost="true" class="btn btn-ghost btn-outline join-item">

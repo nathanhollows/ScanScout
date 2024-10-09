@@ -4,13 +4,12 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/nathanhollows/Rapua/internal/repositories"
+	templates "github.com/nathanhollows/Rapua/internal/blocks/templates"
 	"github.com/nathanhollows/Rapua/internal/sessions"
 )
 
 // ValidateBlock runs input validation on the block
 func (h *PlayerHandler) ValidateBlock(w http.ResponseWriter, r *http.Request) {
-	blockStateRepo := repositories.NewBlockStateRepository()
 	session, _ := sessions.Get(r, "scanscout")
 	teamCode := session.Values["team"]
 
@@ -29,22 +28,20 @@ func (h *PlayerHandler) ValidateBlock(w http.ResponseWriter, r *http.Request) {
 		data[key] = value[0]
 	}
 
-	block, err := h.BlockService.GetByBlockID(r.Context(), data["block"])
+	block, state, err := h.BlockService.GetBlockWithStateByBlockIDAndTeamCode(r.Context(), data["block"], team.Code)
 	if err != nil {
-		h.handleError(w, r, fmt.Errorf("validateBlock: getting block: %v", err).Error(), "Something went wrong!")
+		h.handleError(w, r, fmt.Errorf("validateBlock: getting block with state: %v", err).Error(), "Something went wrong!")
 		return
-	}
-
-	state, err := blockStateRepo.GetByBlockAndTeam(r.Context(), block.GetID(), team.Code)
-	if err != nil {
-		if err.Error() != "sql: no rows in result set" {
-			h.handleError(w, r, "validateBlock: getting team block state", "Something went wrong!", "error", err)
-			return
-		}
 	}
 
 	if state.IsComplete {
 		h.handleSuccess(w, r, "Block already completed")
+	}
+
+	if state.BlockID == "" {
+		state.BlockID = block.GetID()
+		state.TeamCode = team.Code
+		state.PlayerData = []byte("{}")
 	}
 
 	err = h.GameplayService.ValidateAndUpdateBlockState(r.Context(), block, &state, data)
@@ -53,7 +50,11 @@ func (h *PlayerHandler) ValidateBlock(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	h.handleSuccess(w, r, "Block validated")
+	err = templates.RenderPlayerView(team.Instance.Settings, block, state).Render(r.Context(), w)
+	if err != nil {
+		h.handleError(w, r, fmt.Errorf("validateBlock: rendering template: %v", err).Error(), "Something went wrong!")
+		return
+	}
 
 	return
 }

@@ -11,8 +11,8 @@ import templruntime "github.com/a-h/templ/runtime"
 import (
 	"fmt"
 	"github.com/nathanhollows/Rapua/internal/blocks"
+	templates "github.com/nathanhollows/Rapua/internal/blocks/templates"
 	"github.com/nathanhollows/Rapua/internal/models"
-	templates "github.com/nathanhollows/Rapua/internal/templates/blocks"
 )
 
 func MyCheckins(team models.Team) templ.Component {
@@ -96,7 +96,7 @@ func MyCheckins(team models.Team) templ.Component {
 	})
 }
 
-func CheckInView(settings models.InstanceSettings, scan models.Scan, blocks blocks.Blocks) templ.Component {
+func CheckInView(settings models.InstanceSettings, scan models.Scan, blocks blocks.Blocks, states map[string]models.TeamBlockState) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
@@ -132,7 +132,7 @@ func CheckInView(settings models.InstanceSettings, scan models.Scan, blocks bloc
 			return templ_7745c5c3_Err
 		}
 		for _, block := range blocks {
-			templ_7745c5c3_Err = templates.RenderPlayer(settings, block).Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = templates.RenderPlayerView(settings, block, states[block.GetID()]).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

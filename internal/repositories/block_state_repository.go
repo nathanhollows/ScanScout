@@ -2,7 +2,9 @@ package repositories
 
 import (
 	"context"
+	"fmt"
 
+	"github.com/google/uuid"
 	"github.com/nathanhollows/Rapua/internal/models"
 	"github.com/nathanhollows/Rapua/pkg/db"
 )
@@ -11,6 +13,7 @@ type BlockStateRepository interface {
 	GetByBlockAndTeam(ctx context.Context, blockID string, teamCode string) (models.TeamBlockState, error)
 	Create(ctx context.Context, teamBlockState *models.TeamBlockState) error
 	Save(ctx context.Context, teamBlockState *models.TeamBlockState) error
+	Update(ctx context.Context, teamBlockState *models.TeamBlockState) error
 	Delete(ctx context.Context, block_id string, team_code string) error
 }
 
@@ -47,14 +50,39 @@ func (r *blockStateRepository) Create(ctx context.Context, teamBlockState *model
 
 // Save modifies an existing team block state in the database
 func (r *blockStateRepository) Save(ctx context.Context, teamBlockState *models.TeamBlockState) error {
-	_, err := db.DB.NewUpdate().
-		Model(teamBlockState).
-		WherePK().
-		Exec(ctx)
+	if teamBlockState.BlockID == "" || teamBlockState.TeamCode == "" {
+		return fmt.Errorf("block_id and team_code must be set")
+	}
+	if teamBlockState.ID != "" {
+		return r.Update(ctx, teamBlockState)
+	}
+
+	id, err := uuid.NewRandom()
 	if err != nil {
 		return err
 	}
-	return nil
+	teamBlockState.ID = id.String()
+
+	_, err = db.DB.NewInsert().
+		Model(teamBlockState).
+		Exec(ctx)
+
+	return err
+}
+
+// Update modifies an existing team block state in the database
+func (r *blockStateRepository) Update(ctx context.Context, teamBlockState *models.TeamBlockState) error {
+	if teamBlockState.ID == "" {
+		return fmt.Errorf("id must be set")
+	}
+	if teamBlockState.BlockID == "" || teamBlockState.TeamCode == "" {
+		return fmt.Errorf("block_id and team_code must be set")
+	}
+	_, err := db.DB.NewUpdate().
+		Model(teamBlockState).
+		WherePK("id").
+		Exec(ctx)
+	return err
 }
 
 // Delete removes a team block state from the database by its ID
