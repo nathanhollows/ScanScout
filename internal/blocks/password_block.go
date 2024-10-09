@@ -27,8 +27,6 @@ func (b *PasswordBlock) ValidatePlayerInput(state *models.TeamBlockState, input 
 	if state.PlayerData != nil {
 		json.Unmarshal(state.PlayerData, &newPlayerData)
 	}
-	fmt.Println("Player data", string(state.PlayerData))
-	fmt.Println("New Player data", newPlayerData)
 
 	if newPlayerData.Attempts == 0 {
 		newPlayerData.Guesses = []string{}
