@@ -30,17 +30,6 @@ func RenderPlayerView(settings models.InstanceSettings, block blocks.Block, data
 	return nil
 }
 
-func RenderPlayerFeedback(settings models.InstanceSettings, block blocks.Block, data models.TeamBlockState) templ.Component {
-	switch block.GetType() {
-	case "markdown":
-		return nil
-	case "password":
-		b := block.(*blocks.PasswordBlock)
-		return passwordPlayerFeedback(settings, *b, data)
-	}
-	return nil
-}
-
 templ RenderAdminError() {
 }
 
