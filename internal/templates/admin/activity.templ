@@ -445,49 +445,47 @@ templ TeamActivity(settings models.InstanceSettings, team models.Team, notificat
 			| { team.Name }
 		}
 	</h3>
-	<div class="flex gap-3 flex-col sm:flex-row justify-evenly">
-		<!-- Next Locations -->
-		<div class="w-full">
-			<p class="py-3 font-bold">Next Locations</p>
-			if len(nextLocations) > 0 {
-				<div class="prose">
-					<ul>
-						for _, location := range nextLocations {
-							<li>
-								{ location.Marker.Name }
-								if settings.NavigationMethod.String() == "Show Clues" {
-									for _, clue := range location.Clues {
-										<blockquote class="text-sm"><p>{ clue.Content }</p></blockquote>
-									}
+	<!-- Next Locations -->
+	<div class="w-full">
+		<p class="py-3 font-bold">Next Locations</p>
+		if len(nextLocations) > 0 {
+			<div class="prose">
+				<ul>
+					for _, location := range nextLocations {
+						<li>
+							{ location.Marker.Name }
+							if settings.NavigationMethod.String() == "Show Clues" {
+								for _, clue := range location.Clues {
+									<blockquote class="text-sm"><p>{ clue.Content }</p></blockquote>
 								}
-							</li>
-						}
-					</ul>
-				</div>
-			} else {
-				<p>No activity</p>
-			}
-		</div>
-		<!-- Check-ins -->
-		<div class="w-full">
-			<p class="py-3 font-bold">Check-ins</p>
-			if len(team.Scans) > 0 {
-				<div class="prose">
-					<ul>
-						for _, scan := range team.Scans {
-							<li>
-								<span>
-									{ scan.Location.Name }
-								</span>
-								<span class="convert-time badge badge-sm badge-ghost" data-datetime={ fmt.Sprint(scan.CreatedAt.UTC()) }></span>
-							</li>
-						}
-					</ul>
-				</div>
-			} else {
-				<p>No activity</p>
-			}
-		</div>
+							}
+						</li>
+					}
+				</ul>
+			</div>
+		} else {
+			<p>No activity</p>
+		}
+	</div>
+	<!-- Check-ins -->
+	<div class="w-full">
+		<p class="py-3 font-bold">Check-ins</p>
+		if len(team.Scans) > 0 {
+			<div class="prose">
+				<ul>
+					for _, scan := range team.Scans {
+						<li>
+							<span>
+								{ scan.Location.Name }
+							</span>
+							<span class="convert-time badge badge-sm badge-ghost" data-datetime={ fmt.Sprint(scan.CreatedAt.UTC()) }></span>
+						</li>
+					}
+				</ul>
+			</div>
+		} else {
+			<p>No activity</p>
+		}
 	</div>
 	if len(notifications) > 0 {
 		<p class="py-3 font-bold">Unread Notifications</p>
@@ -507,7 +505,7 @@ templ TeamActivity(settings models.InstanceSettings, team models.Team, notificat
 		<form hx-post="/admin/notify/team/" hx-swap="none">
 			<input type="hidden" name="teamCode" value={ team.Code }/>
 			<div class="join w-full">
-				<input class="input input-bordered join-item w-full" name="content" placeholder="Message" autocomplete="off" required/>
+				<input class="input input-bordered join-item w-full" name="content" placeholder="Message" autocomplete="off" autofocus="off" required/>
 				<button type="submit" class="btn btn-primary join-item rounded-r-full" onclick="announcement_modal.close()">
 					Send
 					<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-send-horizontal w-5 h-5"><path d="m3 3 3 9-3 9 19-9Z"></path><path d="M6 12h16"></path></svg>
