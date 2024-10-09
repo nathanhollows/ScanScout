@@ -1,4 +1,4 @@
-<div class=\"card prose p-5 bg-base-200 shadow-lg\">
+<div class=\"card prose\">
 </div>
 <form hx-post=\"
 \" hx-trigger=\"submit\" class=\"modal-box md:w-11/12 max-w-5xl\"><h3 class=\"text-lg font-bold flex flex-row gap-3\">
