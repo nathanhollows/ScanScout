@@ -1,4 +1,4 @@
-package templates
+package blocks
 
 import (
 	"fmt"
@@ -6,28 +6,42 @@ import (
 	"github.com/nathanhollows/Rapua/internal/models"
 )
 
-func RenderAdmin(settings models.InstanceSettings, block blocks.Block) templ.Component {
+func RenderAdminEdit(settings models.InstanceSettings, block blocks.Block) templ.Component {
 	switch block.GetType() {
 	case "markdown":
 		b := block.(*blocks.MarkdownBlock)
-		return MarkdownAdmin(settings, *b)
+		return markdownAdmin(settings, *b)
 	case "password":
 		b := block.(*blocks.PasswordBlock)
-		return PasswordAdmin(settings, *b)
+		return passwordAdmin(settings, *b)
 	}
-	return RenderAdminError()
+	return nil
 }
 
-func RenderPlayer(settings models.InstanceSettings, block blocks.Block) templ.Component {
+func RenderPlayerView(settings models.InstanceSettings, block blocks.Block, data models.TeamBlockState) templ.Component {
 	switch block.GetType() {
 	case "markdown":
 		b := block.(*blocks.MarkdownBlock)
-		return MarkdownPlayer(settings, *b)
+		return markdownPlayer(settings, *b)
 	case "password":
 		b := block.(*blocks.PasswordBlock)
-		return PasswordPlayer(settings, *b)
+		return passwordPlayer(settings, *b, data)
 	}
-	return RenderAdminError()
+	return nil
+}
+
+func RenderPlayerFeedback(settings models.InstanceSettings, block blocks.Block, data models.TeamBlockState) templ.Component {
+	switch block.GetType() {
+	case "markdown":
+		return nil
+	case "password":
+		b := block.(*blocks.PasswordBlock)
+		return passwordPlayerFeedback(settings, *b, data)
+	}
+	return nil
+}
+
+templ RenderAdminError() {
 }
 
 templ RenderAdminBlock(settings models.InstanceSettings, block blocks.Block) {
@@ -101,7 +115,4 @@ templ RenderAdminBlock(settings models.InstanceSettings, block blocks.Block) {
 			<input type="hidden" name="block_id" value={ block.GetID() }/>
 		</div>
 	</div>
-}
-
-templ RenderAdminError() {
 }

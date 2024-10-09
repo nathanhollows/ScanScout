@@ -1,4 +1,4 @@
-package templates
+package blocks
 
 import (
 	"fmt"
@@ -6,13 +6,13 @@ import (
 	"github.com/nathanhollows/Rapua/internal/models"
 )
 
-templ MarkdownPlayer(settings models.InstanceSettings, block blocks.MarkdownBlock) {
+templ markdownPlayer(settings models.InstanceSettings, block blocks.MarkdownBlock) {
 	<div class="card prose p-5 bg-base-200 shadow-lg">
 		@templ.Raw(stringToMarkdown(block.Content))
 	</div>
 }
 
-templ MarkdownAdmin(settings models.InstanceSettings, block blocks.MarkdownBlock) {
+templ markdownAdmin(settings models.InstanceSettings, block blocks.MarkdownBlock) {
 	<form
 		hx-post={ fmt.Sprint("/admin/locations/", block.LocationID, "/blocks/", block.ID, "/update") }
 		hx-trigger="submit"

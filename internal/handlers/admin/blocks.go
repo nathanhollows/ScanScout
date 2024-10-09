@@ -4,8 +4,7 @@ import (
 	"net/http"
 
 	"github.com/go-chi/chi"
-	"github.com/nathanhollows/Rapua/internal/blocks"
-	bTemplates "github.com/nathanhollows/Rapua/internal/templates/blocks"
+	templates "github.com/nathanhollows/Rapua/internal/blocks/templates"
 )
 
 // BlockEdit shows the form to edit a block
@@ -30,14 +29,9 @@ func (h *AdminHandler) BlockEdit(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.Header().Set("Content-Type", "text/html")
-	switch block.(type) {
-	case *blocks.MarkdownBlock:
-		b := block.(*blocks.MarkdownBlock)
-		err = bTemplates.MarkdownAdmin(user.CurrentInstance.Settings, *b).Render(r.Context(), w)
-	case *blocks.PasswordBlock:
-		b := block.(*blocks.PasswordBlock)
-		err = bTemplates.PasswordAdmin(user.CurrentInstance.Settings, *b).Render(r.Context(), w)
+	err = templates.RenderAdminEdit(user.CurrentInstance.Settings, block).Render(r.Context(), w)
+	if err != nil {
+		h.Logger.Error("BlockEdit: rendering template", "error", err)
 	}
 
 }
@@ -103,7 +97,7 @@ func (h *AdminHandler) BlockNewPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = bTemplates.RenderAdminBlock(user.CurrentInstance.Settings, block).Render(r.Context(), w)
+	err = templates.RenderAdminBlock(user.CurrentInstance.Settings, block).Render(r.Context(), w)
 	if err != nil {
 		h.Logger.Error("BlockNewPost: rendering template", "error", err)
 	}
