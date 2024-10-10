@@ -20,7 +20,7 @@ type BlockRepository interface {
 	Update(ctx context.Context, block *blocks.Block) error
 	Delete(ctx context.Context, blockID string) error
 	Reorder(ctx context.Context, locationID string, blockIDs []string) error
-	GetBlocksAndStatesByLocationIDAndTeamCode(ctx context.Context, locationID string, teamCode string) (models.Blocks, models.TeamBlockStates, error)
+	GetBlocksAndStatesByLocationIDAndTeamCode(ctx context.Context, locationID string, teamCode string) (models.Blocks, []models.TeamBlockState, error)
 	GetBlockAndStateByBlockIDAndTeamCode(ctx context.Context, blockID string, teamCode string) (models.Block, models.TeamBlockState, error)
 }
 
@@ -181,7 +181,7 @@ func (r *blockRepository) Reorder(ctx context.Context, locationID string, blockI
 }
 
 // GetBlocksAndStatesByLocationIDAndTeamCode fetches all blocks for a location with their player states
-func (r *blockRepository) GetBlocksAndStatesByLocationIDAndTeamCode(ctx context.Context, locationID string, teamCode string) (models.Blocks, models.TeamBlockStates, error) {
+func (r *blockRepository) GetBlocksAndStatesByLocationIDAndTeamCode(ctx context.Context, locationID string, teamCode string) (models.Blocks, []models.TeamBlockState, error) {
 	blocks := []models.Block{}
 	err := db.DB.NewSelect().
 		Model(&blocks).

@@ -25,5 +25,3 @@ type TeamBlockState struct {
 	PointsAwarded int             `bun:",type:int" json:"points"`
 	PlayerData    json.RawMessage `bun:",type:jsonb" json:"player_data"`
 }
-
-type TeamBlockStates []TeamBlockState

@@ -22,11 +22,11 @@ type Team struct {
 	MustScanOut string `bun:"" json:"must_scan_out"`
 	Points      int    `bun:"," json:"points"`
 
-	Instance         Instance        `bun:"rel:has-one,join:instance_id=id" json:"instance"`
-	Scans            Scans           `bun:"rel:has-many,join:code=team_id" json:"scans"`
-	BlockingLocation Location        `bun:"rel:has-one,join:must_scan_out=marker_id,join:instance_id=instance_id" json:"blocking_location"`
-	Messages         Notifications   `bun:"rel:has-many,join:code=team_code" json:"messages"`
-	Blocks           TeamBlockStates `bun:"rel:has-many,join:code=team_code" json:"blocks"`
+	Instance         Instance         `bun:"rel:has-one,join:instance_id=id" json:"instance"`
+	Scans            Scans            `bun:"rel:has-many,join:code=team_id" json:"scans"`
+	BlockingLocation Location         `bun:"rel:has-one,join:must_scan_out=marker_id,join:instance_id=instance_id" json:"blocking_location"`
+	Messages         Notifications    `bun:"rel:has-many,join:code=team_code" json:"messages"`
+	Blocks           []TeamBlockState `bun:"rel:has-many,join:code=team_code" json:"blocks"`
 }
 
 type Teams []Team
