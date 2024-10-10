@@ -156,6 +156,10 @@ func setupAdminRoutes(router chi.Router, adminHandler *admin.AdminHandler) {
 		})
 		r.Use(middlewares.AdminCheckInstanceMiddleware)
 
+		r.Route("/payment", func(r chi.Router) {
+			r.Get("/", adminHandler.Payment)
+		})
+
 		r.Get("/", adminHandler.Activity)
 		r.Route("/activity", func(r chi.Router) {
 			r.Get("/", adminHandler.Activity)

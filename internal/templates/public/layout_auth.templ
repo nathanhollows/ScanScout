@@ -5,7 +5,7 @@ templ AuthLayout(contents templ.Component, title string) {
 	<html lang="en" class="h-full">
 		@publicHeader(title)
 		<body class="h-screen flex flex-col">
-			if title != "Verify Email" {
+			if title != "Verify Email" && title != "Payment" {
 				@authNav(title)
 			}
 			<div id="alerts" class="toast toast-center"></div>
@@ -23,7 +23,7 @@ templ authNav(title string) {
 			<div class="navbar-end">
 				if title == "Login" {
 					<a href="/register" class="btn btn-sm btn-neutral">Register</a>
-				} else {
+				} else if title == "Register" {
 					<a href="/login" class="btn btn-sm btn-secondary">Login</a>
 				}
 			</div>
