@@ -8,6 +8,7 @@ import (
 )
 
 type Block interface {
+	// Basic Attributes Getters
 	GetID() string
 	GetType() string
 	GetLocationID() string
@@ -17,11 +18,12 @@ type Block interface {
 	GetPoints() int
 	GetIconSVG() string
 	GetData() json.RawMessage
+	// Data Operations
 	ParseData() error
 	UpdateBlockData(data map[string]string) error
+	// Validation and Points Calculation
 	RequiresValidation() bool
 	ValidatePlayerInput(state *models.TeamBlockState, input map[string]string) error
-	// Calculate partial or full points for a block
 	CalculatePoints(input map[string]string) (int, error)
 }
 
@@ -47,17 +49,25 @@ func GetRegisteredBlocks() Blocks {
 	return registeredBlocks
 }
 
-// CreateFromBaseBlock creates a block from a base block
 func CreateFromBaseBlock(baseBlock BaseBlock) (Block, error) {
 	switch baseBlock.Type {
 	case "markdown":
-		return &MarkdownBlock{
-			BaseBlock: baseBlock,
-		}, nil
+		return NewMarkdownBlock(baseBlock), nil
 	case "password":
-		return &PasswordBlock{
-			BaseBlock: baseBlock,
-		}, nil
+	default:
+		return nil, fmt.Errorf("block type %s not found", baseBlock.Type)
 	}
-	return nil, fmt.Errorf("block type %s not found", baseBlock.Type)
+}
+
+// Example constructor functions
+func NewMarkdownBlock(base BaseBlock) *MarkdownBlock {
+	return &MarkdownBlock{
+		BaseBlock: base,
+	}
+}
+
+func NewPasswordBlock(base BaseBlock) *PasswordBlock {
+	return &PasswordBlock{
+		BaseBlock: base,
+	}
 }
