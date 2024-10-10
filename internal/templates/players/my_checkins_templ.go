@@ -10,9 +10,9 @@ import templruntime "github.com/a-h/templ/runtime"
 
 import (
 	"fmt"
-	"github.com/nathanhollows/Rapua/internal/blocks"
-	templates "github.com/nathanhollows/Rapua/internal/blocks/templates"
+	"github.com/nathanhollows/Rapua/blocks"
 	"github.com/nathanhollows/Rapua/internal/models"
+	templates "github.com/nathanhollows/Rapua/internal/templates/blocks"
 )
 
 func MyCheckins(team models.Team) templ.Component {

@@ -7,7 +7,7 @@ import (
 	"hash/fnv"
 	"strings"
 
-	"github.com/nathanhollows/Rapua/internal/blocks"
+	"github.com/nathanhollows/Rapua/blocks"
 	"github.com/nathanhollows/Rapua/internal/flash"
 	"github.com/nathanhollows/Rapua/internal/models"
 	"github.com/nathanhollows/Rapua/internal/repositories"

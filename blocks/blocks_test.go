@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"testing"
 
-	"github.com/nathanhollows/Rapua/internal/blocks"
+	"github.com/nathanhollows/Rapua/blocks"
 	"github.com/stretchr/testify/assert"
 )
 
