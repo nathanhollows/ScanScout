@@ -43,16 +43,24 @@ func (s *blockService) GetByLocationID(ctx context.Context, locationID string) (
 }
 
 func (s *blockService) NewBlock(ctx context.Context, locationID string, blockType string) (blocks.Block, error) {
-	var block blocks.Block
-	switch blockType {
-	case "markdown":
-		block = &blocks.MarkdownBlock{}
-	case "password":
-		block = &blocks.PasswordBlock{}
-	default:
-		return nil, fmt.Errorf("block type %s not found", blockType)
+	// Use the blocks package to create the appropriate block based on the type.
+	baseBlock := blocks.BaseBlock{
+		Type:       blockType,
+		LocationID: locationID,
 	}
-	s.Repo.Create(ctx, &block, locationID)
+
+	// Let the blocks package handle the creation logic.
+	block, err := blocks.CreateFromBaseBlock(baseBlock)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create block of type %s: %w", blockType, err)
+	}
+
+	// Store the new block in the repository.
+	err = s.Repo.Create(ctx, &block, locationID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to store block of type %s: %w", blockType, err)
+	}
+
 	return block, nil
 }
 
