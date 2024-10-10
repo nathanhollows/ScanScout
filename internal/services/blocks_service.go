@@ -127,7 +127,7 @@ func (s *blockService) ConvertBlockToModel(block blocks.Block) models.Block {
 	}
 }
 
-func (s *blockService) convertModelsToBlocks(cbs models.Blocks) (blocks.Blocks, error) {
+func (s *blockService) convertModelsToBlocks(cbs []models.Block) (blocks.Blocks, error) {
 	b := make(blocks.Blocks, len(cbs))
 	for i, cb := range cbs {
 		block, err := s.convertModelToBlock(&cb)

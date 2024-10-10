@@ -14,8 +14,6 @@ type Block struct {
 	ValidationRequired bool            `bun:",type:bool" json:"validation_required"`
 }
 
-type Blocks []Block
-
 type TeamBlockState struct {
 	baseModel
 	ID            string          `bun:",pk,notnull" json:"id"`
