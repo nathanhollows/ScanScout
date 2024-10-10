@@ -18,9 +18,11 @@ type Block interface {
 	GetPoints() int
 	GetIconSVG() string
 	GetData() json.RawMessage
+
 	// Data Operations
 	ParseData() error
 	UpdateBlockData(data map[string]string) error
+
 	// Validation and Points Calculation
 	RequiresValidation() bool
 	ValidatePlayerInput(state *models.TeamBlockState, input map[string]string) error
@@ -41,7 +43,7 @@ type BaseBlock struct {
 var registeredBlocks = Blocks{
 	&MarkdownBlock{},
 	&PasswordBlock{},
-	// &ChecklistBlock{},
+	&ChecklistBlock{},
 	// &APIBlock{},
 }
 
@@ -54,6 +56,9 @@ func CreateFromBaseBlock(baseBlock BaseBlock) (Block, error) {
 	case "markdown":
 		return NewMarkdownBlock(baseBlock), nil
 	case "password":
+		return NewPasswordBlock(baseBlock), nil
+	case "checklist":
+		return NewChecklistBlock(baseBlock), nil
 	default:
 		return nil, fmt.Errorf("block type %s not found", baseBlock.Type)
 	}
@@ -68,6 +73,12 @@ func NewMarkdownBlock(base BaseBlock) *MarkdownBlock {
 
 func NewPasswordBlock(base BaseBlock) *PasswordBlock {
 	return &PasswordBlock{
+		BaseBlock: base,
+	}
+}
+
+func NewChecklistBlock(base BaseBlock) *ChecklistBlock {
+	return &ChecklistBlock{
 		BaseBlock: base,
 	}
 }
