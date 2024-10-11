@@ -130,7 +130,7 @@ func (s *authService) CreateUserWithOAuth(ctx context.Context, user goth.User) (
 		Provider: user.Provider,
 	}
 
-	err := s.userRepository.CreateUser(ctx, &newUser)
+	err := s.userRepository.Create(ctx, &newUser)
 	if err != nil {
 		return nil, fmt.Errorf("creating user: %w", err)
 	}
@@ -167,7 +167,7 @@ func (s *authService) VerifyEmail(ctx context.Context, user *models.User, token 
 	user.EmailToken = ""
 	user.EmailTokenExpiry = sql.NullTime{}
 
-	err := s.userRepository.UpdateUser(ctx, user)
+	err := s.userRepository.Update(ctx, user)
 	if err != nil {
 		return fmt.Errorf("updating user: %w", err)
 	}
@@ -190,7 +190,7 @@ func (s *authService) SendEmailVerification(ctx context.Context, user *models.Us
 		Valid: true,
 	}
 
-	err := s.userRepository.UpdateUser(ctx, user)
+	err := s.userRepository.Update(ctx, user)
 	if err != nil {
 		return fmt.Errorf("updating user: %w", err)
 	}

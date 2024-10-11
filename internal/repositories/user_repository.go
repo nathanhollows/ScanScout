@@ -15,10 +15,10 @@ var (
 )
 
 type UserRepository interface {
-	// CreateUser creates a new user in the database
-	CreateUser(ctx context.Context, user *models.User) error
-	// UpdateUser updates a user in the database
-	UpdateUser(ctx context.Context, user *models.User) error
+	// Create creates a new user in the database
+	Create(ctx context.Context, user *models.User) error
+	// Update updates a user in the database
+	Update(ctx context.Context, user *models.User) error
 	// GetUserByEmail retrieves a user by their email address
 	GetUserByEmail(ctx context.Context, email string) (*models.User, error)
 	// FindUserByID fetches a user by their ID from the database.
@@ -34,7 +34,7 @@ func NewUserRepository() UserRepository {
 }
 
 // Update the user in the database
-func (r *userRepository) UpdateUser(ctx context.Context, user *models.User) error {
+func (r *userRepository) Update(ctx context.Context, user *models.User) error {
 	_, err := db.DB.NewUpdate().
 		Model(user).
 		WherePK().
@@ -42,8 +42,8 @@ func (r *userRepository) UpdateUser(ctx context.Context, user *models.User) erro
 	return err
 }
 
-// CreateUser creates a new user in the database
-func (r *userRepository) CreateUser(ctx context.Context, user *models.User) error {
+// Create creates a new user in the database
+func (r *userRepository) Create(ctx context.Context, user *models.User) error {
 	if user.ID == "" {
 		uuid := uuid.New()
 		user.ID = uuid.String()

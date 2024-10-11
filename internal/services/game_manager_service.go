@@ -22,11 +22,13 @@ import (
 
 type GameManagerService struct {
 	LocationService LocationService
+	UserService     UserService
 }
 
 func NewGameManagerService() *GameManagerService {
 	return &GameManagerService{
 		LocationService: NewLocationService(repositories.NewClueRepository()),
+		UserService:     NewUserService(repositories.NewUserRepository()),
 	}
 }
 
@@ -51,7 +53,8 @@ func (s *GameManagerService) CreateInstance(ctx context.Context, name string, us
 	}
 
 	user.CurrentInstanceID = instance.ID
-	if err := user.Update(ctx); err != nil {
+	err := s.UserService.UpdateUser(ctx, user)
+	if err != nil {
 		response.AddFlashMessage(*flash.NewError("Error updating user"))
 		response.Error = fmt.Errorf("updating user: %w", err)
 		return response
@@ -60,7 +63,7 @@ func (s *GameManagerService) CreateInstance(ctx context.Context, name string, us
 	settings := &internalModels.InstanceSettings{
 		InstanceID: instance.ID,
 	}
-	err := settings.Save(ctx)
+	err = settings.Save(ctx)
 	if err != nil {
 		response.AddFlashMessage(*flash.NewError("Error saving settings"))
 		response.Error = fmt.Errorf("saving settings: %w", err)
@@ -78,8 +81,9 @@ func (s *GameManagerService) SwitchInstance(ctx context.Context, user *internalM
 	}
 
 	user.CurrentInstanceID = instance.ID
-	if err := user.Update(ctx); err != nil {
-		return nil, err
+	err = s.UserService.UpdateUser(ctx, user)
+	if err != nil {
+		return nil, fmt.Errorf("updating user: %w", err)
 	}
 
 	return instance, nil
@@ -186,7 +190,8 @@ func (s *GameManagerService) DeleteInstance(ctx context.Context, user *internalM
 
 	if user.CurrentInstanceID == instance.ID {
 		user.CurrentInstanceID = ""
-		if err := user.Update(ctx); err != nil {
+		err := s.UserService.UpdateUser(ctx, user)
+		if err != nil {
 			response.AddFlashMessage(*flash.NewError("Error updating user"))
 			response.Error = fmt.Errorf("updating user: %w", err)
 			return response
