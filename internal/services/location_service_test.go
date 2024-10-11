@@ -4,7 +4,6 @@ import (
 	"context"
 	"testing"
 
-	"github.com/google/uuid"
 	internalModels "github.com/nathanhollows/Rapua/internal/models"
 	"github.com/nathanhollows/Rapua/internal/repositories"
 	"github.com/nathanhollows/Rapua/internal/services"
@@ -29,23 +28,23 @@ func TestLocationService_LoadCluesForLocation(t *testing.T) {
 	// Save some clues for testing
 	clueRepo := repositories.NewClueRepository()
 	clue1 := &models.Clue{
-		ID:         uuid.New().String(),
 		InstanceID: "instance-1",
 		LocationID: locationID,
 		Content:    "Clue 1",
 	}
 	clue2 := &models.Clue{
-		ID:         uuid.New().String(),
 		InstanceID: "instance-2",
 		LocationID: locationID,
 		Content:    "Clue 2",
 	}
-	clueRepo.Save(ctx, clue1)
-	clueRepo.Save(ctx, clue2)
+	err := clueRepo.Save(ctx, clue1)
+	assert.NoError(t, err, "expected no error when saving clue 1")
+	err = clueRepo.Save(ctx, clue2)
+	assert.NoError(t, err, "expected no error when saving clue 2")
 
 	// Create location and load clues
 	location := &internalModels.Location{ID: locationID}
-	err := locationService.LoadCluesForLocation(ctx, location)
+	err = locationService.LoadCluesForLocation(ctx, location)
 
 	assert.NoError(t, err, "expected no error when loading clues for location")
 	assert.Len(t, location.Clues, 2, "expected two clues to be loaded")
