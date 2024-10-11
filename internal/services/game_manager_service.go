@@ -605,6 +605,8 @@ func (s *GameManagerService) ReorderLocations(ctx context.Context, user *models.
 // The clues are passed as a slice of strings and the IDs are passed as a slice of strings
 // There may be new clues, updated clues, or deleted clues
 func (s *GameManagerService) UpdateClues(ctx context.Context, location *models.Location, clues []string, ids []string) error {
+	clueRepo := repositories.NewClueRepository()
+
 	err := s.LocationService.LoadCluesForLocation(ctx, location)
 	if err != nil {
 		return fmt.Errorf("loading clues for location: %w", err)
@@ -615,16 +617,18 @@ func (s *GameManagerService) UpdateClues(ctx context.Context, location *models.L
 		if i < len(ids) {
 			// Delete any empty clues
 			if clue == "" {
-				if err := location.Clues[i].Delete(ctx); err != nil {
-					return err
+				err := clueRepo.Delete(ctx, &location.Clues[i])
+				if err != nil {
+					return fmt.Errorf("deleting clue: %w", err)
 				}
 				continue
 			}
 
 			// Update existing clue
 			location.Clues[i].Content = clue
-			if err := location.Clues[i].Save(ctx); err != nil {
-				return err
+			err := clueRepo.Save(ctx, &location.Clues[i])
+			if err != nil {
+				return fmt.Errorf("saving clue: %w", err)
 			}
 			continue
 		}
@@ -640,15 +644,17 @@ func (s *GameManagerService) UpdateClues(ctx context.Context, location *models.L
 			LocationID: location.ID,
 			Content:    clue,
 		}
-		if err := newClue.Save(ctx); err != nil {
-			return err
+		err := clueRepo.Save(ctx, newClue)
+		if err != nil {
+			return fmt.Errorf("saving new clue: %w", err)
 		}
 	}
 
 	// Delete any remaining clues
 	for i := len(clues); i < len(location.Clues); i++ {
-		if err := location.Clues[i].Delete(ctx); err != nil {
-			return err
+		err := clueRepo.Delete(ctx, &location.Clues[i])
+		if err != nil {
+			return fmt.Errorf("deleting clue: %w", err)
 		}
 	}
 

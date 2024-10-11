@@ -14,7 +14,7 @@ type ClueRepository interface {
 	// Delete removes the clue from the database
 	Delete(ctx context.Context, c *models.Clue) error
 	// FindCluesByLocation returns all clues for a given location
-	FindCluesByLocation(ctx context.Context, locationID string) (models.Clues, error)
+	FindCluesByLocation(ctx context.Context, locationID string) ([]models.Clue, error)
 }
 
 type clueRepository struct{}
@@ -42,8 +42,8 @@ func (r *clueRepository) Delete(ctx context.Context, c *models.Clue) error {
 }
 
 // FindCluesByLocation returns all clues for a given location
-func (r *clueRepository) FindCluesByLocation(ctx context.Context, locationID string) (models.Clues, error) {
-	var clues models.Clues
+func (r *clueRepository) FindCluesByLocation(ctx context.Context, locationID string) ([]models.Clue, error) {
+	var clues []models.Clue
 	err := db.DB.NewSelect().Model(&clues).Where("location_id = ?", locationID).Scan(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("finding clues by location: %w", err)
