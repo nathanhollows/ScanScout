@@ -5,13 +5,14 @@ import (
 	"testing"
 
 	"github.com/google/uuid"
-	"github.com/nathanhollows/Rapua/internal/models"
+	db "github.com/nathanhollows/Rapua/internal/models"
 	"github.com/nathanhollows/Rapua/internal/repositories"
+	"github.com/nathanhollows/Rapua/models"
 	"github.com/stretchr/testify/assert"
 )
 
 func setup(t *testing.T) func() {
-	return models.SetupTestDB(t)
+	return db.SetupTestDB(t)
 }
 
 func TestClueRepository_Save(t *testing.T) {

@@ -4,9 +4,10 @@ import (
 	"fmt"
 	"github.com/nathanhollows/Rapua/blocks"
 	"github.com/nathanhollows/Rapua/internal/models"
+	internalModels "github.com/nathanhollows/Rapua/internal/models"
 )
 
-func RenderAdminEdit(settings models.InstanceSettings, block blocks.Block) templ.Component {
+func RenderAdminEdit(settings internalModels.InstanceSettings, block blocks.Block) templ.Component {
 	switch block.GetType() {
 	case "markdown":
 		b := block.(*blocks.MarkdownBlock)
@@ -21,7 +22,7 @@ func RenderAdminEdit(settings models.InstanceSettings, block blocks.Block) templ
 	return nil
 }
 
-func RenderPlayerView(settings models.InstanceSettings, block blocks.Block, data models.TeamBlockState) templ.Component {
+func RenderPlayerView(settings internalModels.InstanceSettings, block blocks.Block, data models.TeamBlockState) templ.Component {
 	switch block.GetType() {
 	case "markdown":
 		b := block.(*blocks.MarkdownBlock)
@@ -39,7 +40,7 @@ func RenderPlayerView(settings models.InstanceSettings, block blocks.Block, data
 templ RenderAdminError() {
 }
 
-templ RenderAdminBlock(settings models.InstanceSettings, block blocks.Block) {
+templ RenderAdminBlock(settings internalModels.InstanceSettings, block blocks.Block) {
 	<div
 		id={ fmt.Sprint("block-", block.GetID()) }
 		class="collapse overflow-visible relative flex flex-col md:flex-row rounded-2xl bg-base-100 border border-neutral focus:outline outline-2 outline-primary outline-offset-2 mb-5 gap-5 p-8"

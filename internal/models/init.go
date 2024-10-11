@@ -6,6 +6,7 @@ import (
 	"log/slog"
 	"time"
 
+	"github.com/nathanhollows/Rapua/models"
 	"github.com/nathanhollows/Rapua/pkg/db"
 )
 
@@ -13,10 +14,10 @@ func CreateTables(logger *slog.Logger) {
 	var models = []interface{}{
 		(*Notification)(nil),
 		(*InstanceSettings)(nil),
-		(*Block)(nil),
-		(*TeamBlockState)(nil),
+		(*models.Block)(nil),
+		(*models.TeamBlockState)(nil),
 		(*Location)(nil),
-		(*Clue)(nil),
+		(*models.Clue)(nil),
 		(*LocationContent)(nil),
 		(*Team)(nil),
 		(*Marker)(nil),

@@ -11,11 +11,12 @@ import templruntime "github.com/a-h/templ/runtime"
 import (
 	"fmt"
 	"github.com/nathanhollows/Rapua/blocks"
-	"github.com/nathanhollows/Rapua/internal/models"
+	internalModels "github.com/nathanhollows/Rapua/internal/models"
 	templates "github.com/nathanhollows/Rapua/internal/templates/blocks"
+	"github.com/nathanhollows/Rapua/models"
 )
 
-func MyCheckins(team models.Team) templ.Component {
+func MyCheckins(team internalModels.Team) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
@@ -54,7 +55,7 @@ func MyCheckins(team models.Team) templ.Component {
 			var templ_7745c5c3_Var3 string
 			templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(scan.Location.Name)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/players/my_checkins.templ`, Line: 25, Col: 25}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/players/my_checkins.templ`, Line: 26, Col: 25}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 			if templ_7745c5c3_Err != nil {
@@ -72,7 +73,7 @@ func MyCheckins(team models.Team) templ.Component {
 				var templ_7745c5c3_Var4 string
 				templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprint(scan.Points))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/players/my_checkins.templ`, Line: 27, Col: 63}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/players/my_checkins.templ`, Line: 28, Col: 63}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 				if templ_7745c5c3_Err != nil {
@@ -96,7 +97,7 @@ func MyCheckins(team models.Team) templ.Component {
 	})
 }
 
-func CheckInView(settings models.InstanceSettings, scan models.Scan, blocks blocks.Blocks, states map[string]models.TeamBlockState) templ.Component {
+func CheckInView(settings internalModels.InstanceSettings, scan internalModels.Scan, blocks blocks.Blocks, states map[string]models.TeamBlockState) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
@@ -121,7 +122,7 @@ func CheckInView(settings models.InstanceSettings, scan models.Scan, blocks bloc
 		var templ_7745c5c3_Var6 string
 		templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(scan.Location.Name)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/players/my_checkins.templ`, Line: 45, Col: 23}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/players/my_checkins.templ`, Line: 46, Col: 23}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 		if templ_7745c5c3_Err != nil {

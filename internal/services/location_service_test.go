@@ -5,14 +5,15 @@ import (
 	"testing"
 
 	"github.com/google/uuid"
-	"github.com/nathanhollows/Rapua/internal/models"
+	internalModels "github.com/nathanhollows/Rapua/internal/models"
 	"github.com/nathanhollows/Rapua/internal/repositories"
 	"github.com/nathanhollows/Rapua/internal/services"
+	"github.com/nathanhollows/Rapua/models"
 	"github.com/stretchr/testify/assert"
 )
 
 func setupLocationService(t *testing.T) (services.LocationService, func()) {
-	cleanup := models.SetupTestDB(t)
+	cleanup := internalModels.SetupTestDB(t)
 	clueRepo := repositories.NewClueRepository()
 	locationService := services.NewLocationService(clueRepo)
 	return locationService, cleanup
@@ -43,7 +44,7 @@ func TestLocationService_LoadCluesForLocation(t *testing.T) {
 	clueRepo.Save(ctx, clue2)
 
 	// Create location and load clues
-	location := &models.Location{ID: locationID}
+	location := &internalModels.Location{ID: locationID}
 	err := locationService.LoadCluesForLocation(ctx, location)
 
 	assert.NoError(t, err, "expected no error when loading clues for location")

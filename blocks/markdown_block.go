@@ -3,7 +3,7 @@ package blocks
 import (
 	"encoding/json"
 
-	"github.com/nathanhollows/Rapua/internal/models"
+	"github.com/nathanhollows/Rapua/models"
 )
 
 type MarkdownBlock struct {

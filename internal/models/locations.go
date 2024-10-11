@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/nathanhollows/Rapua/models"
 	"github.com/nathanhollows/Rapua/pkg/db"
 	"github.com/uptrace/bun"
 )
@@ -27,11 +28,11 @@ type Location struct {
 	Completion   CompletionMethod `bun:",type:int" json:"completion"`
 	Points       int              `bun:"," json:"points"`
 
-	Clues    []Clue          `bun:"rel:has-many,join:id=location_id" json:"clues"`
+	Clues    []models.Clue   `bun:"rel:has-many,join:id=location_id" json:"clues"`
 	Instance Instance        `bun:"rel:has-one,join:instance_id=id" json:"instance"`
 	Marker   Marker          `bun:"rel:has-one,join:marker_id=code" json:"marker"`
 	Content  LocationContent `bun:"rel:has-one,join:content_id=id" json:"content"`
-	Blocks   []Block         `bun:"rel:has-many,join:id=location_id" json:"blocks"`
+	Blocks   []models.Block  `bun:"rel:has-many,join:id=location_id" json:"blocks"`
 }
 
 type Locations []Location
