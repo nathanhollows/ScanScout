@@ -7,10 +7,8 @@ import (
 
 	"github.com/go-chi/chi"
 	"github.com/nathanhollows/Rapua/internal/flash"
-	"github.com/nathanhollows/Rapua/internal/handlers"
 	"github.com/nathanhollows/Rapua/internal/models"
 	"github.com/nathanhollows/Rapua/internal/services"
-	"github.com/nathanhollows/Rapua/internal/sessions"
 	templates "github.com/nathanhollows/Rapua/internal/templates/players"
 )
 
@@ -89,40 +87,40 @@ func (h *PlayerHandler) CheckInPost(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *PlayerHandler) CheckOut(w http.ResponseWriter, r *http.Request) {
-	data := handlers.TemplateData(r)
 	code := chi.URLParam(r, "code")
 	code = strings.ToUpper(code)
 
-	teamCode := ""
-	session, _ := sessions.Get(r, "scanscout")
-	tcode := session.Values["team"]
-	if tcode != nil {
-		teamCode = strings.ToUpper(tcode.(string))
+	team, err := h.getTeamFromContext(r.Context())
+	if err == nil {
+		if team.MustScanOut != "" {
+			err := team.LoadBlockingLocation(r.Context())
+			if err != nil {
+				h.Logger.Error("CheckIn: loading blocking location", "err", err)
+				flash.NewError("Something went wrong. Please try again.").Save(w, r)
+				http.Redirect(w, r, r.Header.Get("/next"), http.StatusFound)
+				return
+			}
+		}
 	}
 
-	team, err := h.GameplayService.GetTeamByCode(r.Context(), teamCode)
-	if err != nil {
-		flash.NewWarning("Please double check the code and try again.").
-			SetTitle("Team code not found").Save(w, r)
-		http.Redirect(w, r, "/play", http.StatusFound)
+	response := h.GameplayService.GetMarkerByCode(r.Context(), code)
+	if response.Error != nil {
+		h.redirect(w, r, "/404")
 		return
 	}
-	team.LoadBlockingLocation(r.Context())
 
-	data["team"] = team
-
-	if team.MustScanOut == "" {
-		flash.NewDefault("You don't need to scan out.").
-			SetTitle("You're all set!").Save(w, r)
-		data["blocked"] = true
-	} else if team.BlockingLocation.MarkerID != code {
-		flash.NewWarning(fmt.Sprintf("You need to scan out at %s.", team.BlockingLocation.Name)).
-			SetTitle("You are scanned in elsewhere.").Save(w, r)
-		data["blocked"] = true
+	marker, ok := response.Data["marker"].(*models.Marker)
+	if !ok {
+		h.redirect(w, r, "/404")
+		return
 	}
 
-	data["messages"] = flash.Get(w, r)
-	handlers.Render(w, data, handlers.PlayerDir, "scanout")
+	c := templates.CheckOut(*marker, team.Code, team.BlockingLocation)
+	err = templates.Layout(c, "Check Out: "+marker.Name).Render(r.Context(), w)
+	if err != nil {
+		h.Logger.Error("rendering checkin", "error", err.Error())
+	}
+
 }
 
 func (h *PlayerHandler) CheckOutPost(w http.ResponseWriter, r *http.Request) {
