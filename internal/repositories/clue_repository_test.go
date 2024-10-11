@@ -65,21 +65,21 @@ func TestClueRepository_FindCluesByLocation(t *testing.T) {
 
 	locationID := "location-1"
 	clue1 := &models.Clue{
-		ID:         uuid.New().String(),
 		InstanceID: "instance-1",
 		LocationID: locationID,
 		Content:    "Clue 1",
 	}
 	clue2 := &models.Clue{
-		ID:         uuid.New().String(),
 		InstanceID: "instance-2",
 		LocationID: locationID,
 		Content:    "Clue 2",
 	}
 
 	// Save clues first
-	repo.Save(ctx, clue1)
-	repo.Save(ctx, clue2)
+	err := repo.Save(ctx, clue1)
+	assert.NoError(t, err, "expected no error when saving clue 1")
+	err = repo.Save(ctx, clue2)
+	assert.NoError(t, err, "expected no error when saving clue 2")
 
 	clues, err := repo.FindCluesByLocation(ctx, locationID)
 	assert.NoError(t, err, "expected no error when finding clues by location")

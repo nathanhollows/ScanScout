@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/google/uuid"
 	"github.com/nathanhollows/Rapua/models"
 	"github.com/nathanhollows/Rapua/pkg/db"
 )
@@ -26,8 +27,16 @@ func NewClueRepository() ClueRepository {
 
 // Save saves or updates a clue in the database
 func (r *clueRepository) Save(ctx context.Context, c *models.Clue) error {
+	if c.InstanceID == "" || c.LocationID == "" {
+		return fmt.Errorf("instance ID and location ID must be set")
+	}
 	var err error
 	if c.ID == "" {
+		id, err := uuid.NewRandom()
+		if err != nil {
+			return fmt.Errorf("generating UUID: %w", err)
+		}
+		c.ID = id.String()
 		_, err = db.DB.NewInsert().Model(c).Exec(ctx)
 	} else {
 		_, err = db.DB.NewUpdate().Model(c).WherePK().Exec(ctx)
