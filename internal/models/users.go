@@ -12,18 +12,6 @@ import (
 type User struct {
 	baseModel
 
-	ID               string       `bun:",unique,pk,type:varchar(36)" json:"id"`
-	Name             string       `bun:",type:varchar(255)" json:"name"`
-	Email            string       `bun:",unique,pk" json:"email"`
-	EmailVerified    bool         `bun:",type:boolean" json:"email_verified"`
-	EmailToken       string       `bun:",type:varchar(36)" json:"email_token"`
-	EmailTokenExpiry sql.NullTime `bun:",nullzero" json:"email_token_expiry"`
-	Password         string       `bun:",type:varchar(255)" json:"password"`
-	Provider         string       `bun:",type:varchar(255)" json:"provider"`
-
-	Instances         Instances `bun:"rel:has-many,join:id=user_id" json:"instances"`
-	CurrentInstanceID string    `bun:",type:varchar(36)" json:"current_instance_id"`
-	CurrentInstance   Instance  `bun:"rel:has-one,join:current_instance_id=id" json:"current_instance"`
 }
 
 type Users []*User
@@ -104,4 +92,16 @@ func hashAndSalt(password string) string {
 	}
 
 	return string(hash)
+	ID               string       `bun:"id,unique,pk,type:varchar(36)"`
+	Name             string       `bun:"name,type:varchar(255)"`
+	Email            string       `bun:"email,unique,pk"`
+	EmailVerified    bool         `bun:"email_verified,type:boolean"`
+	EmailToken       string       `bun:"email_token,type:varchar(36)"`
+	EmailTokenExpiry sql.NullTime `bun:"email_token_expiry,nullzero"`
+	Password         string       `bun:"password,type:varchar(255)"`
+	Provider         string       `bun:"provider,type:varchar(255)"`
+
+	Instances         Instances `bun:"rel:has-many,join:id=user_id"`
+	CurrentInstanceID string    `bun:"current_instance_id,type:varchar(36)"`
+	CurrentInstance   Instance  `bun:"rel:has-one,join:current_instance_id=id"`
 }

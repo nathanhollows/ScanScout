@@ -3,8 +3,8 @@ package models
 type Clue struct {
 	baseModel
 
-	ID         string `bun:",pk,type:varchar(36)" json:"id"`
-	InstanceID string `bun:",notnull" json:"instance_id"`
-	LocationID string `bun:",notnull" json:"location_id"`
-	Content    string `bun:",type:text" json:"content"`
+	ID         string `bun:"id,pk,type:varchar(36)"`
+	InstanceID string `bun:"instance_id,notnull"`
+	LocationID string `bun:"location_id,notnull"`
+	Content    string `bun:"content,type:text"`
 }
