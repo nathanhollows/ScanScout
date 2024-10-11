@@ -75,7 +75,7 @@ func (b *PasswordBlock) ValidatePlayerInput(state *models.TeamBlockState, input 
 		if err != nil {
 			return fmt.Errorf("Error saving player data")
 		}
-		return fmt.Errorf("Incorrect password")
+		return nil
 	}
 
 	// Correct password, update state to complete
