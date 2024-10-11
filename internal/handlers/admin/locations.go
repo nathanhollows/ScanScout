@@ -112,7 +112,11 @@ func (h *AdminHandler) LocationEdit(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	location.LoadClues(r.Context())
+	err = h.LocationService.LoadCluesForLocation(r.Context(), location)
+	if err != nil {
+		h.handleError(w, r, "LocationEdit: loading clues", "Error loading clues", "error", err, "instance_id", user.CurrentInstanceID, "location_id", location.ID)
+		return
+	}
 
 	c := templates.EditLocation(*location, user.CurrentInstance.Settings, blocks)
 	err = templates.Layout(c, *user, "Locations", "Edit Location").Render(r.Context(), w)

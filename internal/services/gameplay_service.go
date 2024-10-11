@@ -32,10 +32,14 @@ type GameplayService interface {
 	ValidateAndUpdateBlockState(ctx context.Context, block blocks.Block, state *models.TeamBlockState, data map[string]string) error
 }
 
-type gameplayService struct{}
+type gameplayService struct {
+	LocationService LocationService
+}
 
 func NewGameplayService() GameplayService {
-	return &gameplayService{}
+	return &gameplayService{
+		LocationService: NewLocationService(repositories.NewClueRepository()),
+	}
 }
 
 // GetGameStatus returns the current status of the game
@@ -268,14 +272,16 @@ func (s *gameplayService) loadClues(ctx context.Context, team *models.Team, loca
 	response = ServiceResponse{}
 	response.Data = make(map[string]interface{})
 
-	for i := range locations {
-		(locations)[i].LoadClues(ctx)
+	err := s.LocationService.LoadCluesForLocations(ctx, &locations)
+	if err != nil {
+		response.Error = fmt.Errorf("loading clues for locations: %w", err)
+		return response
 	}
 
 	// Create a seed for the random clue
 	seed := team.Code
 	h := fnv.New64a()
-	_, err := h.Write([]byte(seed))
+	_, err = h.Write([]byte(seed))
 	if err != nil {
 		response.Error = fmt.Errorf("creating seed for random clue: %w", err)
 		return response

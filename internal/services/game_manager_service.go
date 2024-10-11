@@ -14,14 +14,19 @@ import (
 	"github.com/nathanhollows/Rapua/internal/flash"
 	"github.com/nathanhollows/Rapua/internal/helpers"
 	"github.com/nathanhollows/Rapua/internal/models"
+	"github.com/nathanhollows/Rapua/internal/repositories"
 	"github.com/nathanhollows/Rapua/pkg/db"
 	"github.com/uptrace/bun"
 )
 
-type GameManagerService struct{}
+type GameManagerService struct {
+	LocationService LocationService
+}
 
 func NewGameManagerService() *GameManagerService {
-	return &GameManagerService{}
+	return &GameManagerService{
+		LocationService: NewLocationService(repositories.NewClueRepository()),
+	}
 }
 
 func (s *GameManagerService) CreateInstance(ctx context.Context, name string, user *models.User) (response ServiceResponse) {
@@ -600,7 +605,10 @@ func (s *GameManagerService) ReorderLocations(ctx context.Context, user *models.
 // The clues are passed as a slice of strings and the IDs are passed as a slice of strings
 // There may be new clues, updated clues, or deleted clues
 func (s *GameManagerService) UpdateClues(ctx context.Context, location *models.Location, clues []string, ids []string) error {
-	location.LoadClues(ctx)
+	err := s.LocationService.LoadCluesForLocation(ctx, location)
+	if err != nil {
+		return fmt.Errorf("loading clues for location: %w", err)
+	}
 
 	// Loop through the clues and update them
 	for i, clue := range clues {
