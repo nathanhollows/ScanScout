@@ -52,8 +52,8 @@ func setupRouter(
 
 	// Static files
 	workDir, _ := os.Getwd()
-	filesDir := filesystem.Myfs{Dir: http.Dir(filepath.Join(workDir, "web/static"))}
-	filesystem.FileServer(router, "/assets", filesDir)
+	filesDir := filesystem.Myfs{Dir: http.Dir(filepath.Join(workDir, "static"))}
+	filesystem.FileServer(router, "/static", filesDir)
 
 	return router
 }

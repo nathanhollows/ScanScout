@@ -144,14 +144,14 @@ var funcs = template.FuncMap{
 	"static": func(filename string) string {
 		filename = strings.TrimPrefix(filename, "/")
 		// get last modified time
-		file, err := os.Stat("assets/" + filename)
+		file, err := os.Stat("static/" + filename)
 
 		if err != nil {
-			return "/assets/" + filename
+			return "/static/" + filename
 		}
 
 		modifiedtime := file.ModTime()
-		return "/assets/" + filename + "?v=" + modifiedtime.Format("20060102150405")
+		return "/static/" + filename + "?v=" + modifiedtime.Format("20060102150405")
 	},
 	// Convert a float to a duration and present it in a human readable format
 	"toDuration": func(seconds float64) string {

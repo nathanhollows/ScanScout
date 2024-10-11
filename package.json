@@ -8,8 +8,8 @@
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "tailwindcss build -o web/static/css/tailwind.css",
-    "watch": "tailwindcss build -o web/static/css/tailwind.css --watch"
+    "build": "tailwindcss build -o static/css/tailwind.css",
+    "watch": "tailwindcss build -o static/css/tailwind.css --watch"
   },
   "github": "nathanhollows/Rapua",
   "author": "Nathan Hollows",
