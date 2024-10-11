@@ -1,6 +1,6 @@
 module github.com/nathanhollows/Rapua
 
-go 1.22.5
+go 1.22.7
 
 require (
 	github.com/a-h/templ v0.2.747
