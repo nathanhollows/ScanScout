@@ -63,7 +63,7 @@ func (b *ChecklistBlock) UpdateBlockData(data map[string]string) error {
 }
 
 // Validation and Points Calculation
-func (b *ChecklistBlock) RequiresValidation() bool { return false }
+func (b *ChecklistBlock) RequiresValidation() bool { return true }
 
 func (b *ChecklistBlock) ValidatePlayerInput(state *models.TeamBlockState, input map[string]string) error {
 	// Parse player data from the existing state
