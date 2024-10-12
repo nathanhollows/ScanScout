@@ -495,6 +495,19 @@ templ EditLocation(location models.Location, settings models.InstanceSettings, c
 		</div>
 	</dialog>
 	<script>
+
+document.querySelector("#blocks").addEventListener("htmx:afterSettle", (event) => {
+    // Select the last .block-edit-btn inside #blocks
+    const blocks = document.querySelectorAll("#blocks .block-edit-btn");
+    const lastBlockEditBtn = blocks[blocks.length - 1];
+
+    // Check if the element exists
+    if (lastBlockEditBtn) {
+        // Trigger a click event on the last .block-edit-btn
+        htmx.trigger(lastBlockEditBtn, "click");
+    }
+    
+});
   function previewMD(e) {
 	var checkBox = e.target;
 	var id = e.target.dataset.block;
