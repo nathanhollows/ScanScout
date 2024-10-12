@@ -36,8 +36,8 @@ func (b *MarkdownBlock) ParseData() error {
 	return json.Unmarshal(b.Data, b)
 }
 
-func (b *MarkdownBlock) UpdateBlockData(data map[string]string) error {
-	b.Content = data["content"]
+func (b *MarkdownBlock) UpdateBlockData(data map[string][]string) error {
+	b.Content = data["content"][0]
 	return nil
 }
 
@@ -47,7 +47,7 @@ func (b *MarkdownBlock) RequiresValidation() bool {
 	return false
 }
 
-func (b *MarkdownBlock) ValidatePlayerInput(state *models.TeamBlockState, input map[string]string) error {
+func (b *MarkdownBlock) ValidatePlayerInput(state *models.TeamBlockState, input map[string][]string) error {
 	// No validation required for MarkdownBlock; mark as complete
 	state.IsComplete = true
 	return nil
