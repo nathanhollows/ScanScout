@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/google/uuid"
 	"github.com/nathanhollows/Rapua/models"
 )
 
@@ -17,6 +18,21 @@ type ChecklistItem struct {
 	ID          string `json:"id"`
 	Description string `json:"description"`
 	Checked     bool   `json:"checked"`
+}
+
+func (c ChecklistItem) IsChecked(playerData json.RawMessage) bool {
+	var player checklistPlayerData
+	if err := json.Unmarshal(playerData, &player); err != nil {
+		return false
+	}
+
+	for _, item := range player.CheckedItems {
+		if item == c.ID {
+			return true
+		}
+	}
+
+	return false
 }
 
 // Unexported struct for storing player progress data in a block
@@ -57,15 +73,41 @@ func (b *ChecklistBlock) ParseData() error {
 	return json.Unmarshal(b.Data, b)
 }
 
-	b.Content = data["content"]
 func (b *ChecklistBlock) UpdateBlockData(data map[string][]string) error {
+	// Update content
+	if content, exists := data["content"]; exists && len(content) > 0 {
+		b.Content = content[0]
+	}
+
+	// Update checklist items
+	itemDescriptions := data["checklist-items"]
+	itemIDs := data["checklist-item-ids"]
+
+	updatedList := make([]ChecklistItem, 0, len(itemDescriptions))
+	for i, desc := range itemDescriptions {
+		var id string
+		if i < len(itemIDs) && itemIDs[i] != "" {
+			id = itemIDs[i]
+		} else {
+			uuid, err := uuid.NewRandom()
+			if err != nil {
+				return fmt.Errorf("failed to generate UUID: %w", err)
+			}
+			id = uuid.String()
+		}
+		updatedList = append(updatedList, ChecklistItem{
+			ID:          id,
+			Description: desc,
+		})
+	}
+	b.List = updatedList
 	return nil
 }
 
 // Validation and Points Calculation
 func (b *ChecklistBlock) RequiresValidation() bool { return true }
 
-func (b *ChecklistBlock) ValidatePlayerInput(state *models.TeamBlockState, input map[string]string) error {
+func (b *ChecklistBlock) ValidatePlayerInput(state *models.TeamBlockState, input map[string][]string) error {
 	// Parse player data from the existing state
 	var playerData checklistPlayerData
 	if state.PlayerData != nil {
@@ -76,18 +118,11 @@ func (b *ChecklistBlock) ValidatePlayerInput(state *models.TeamBlockState, input
 	}
 
 	// Update checked items based on the player's input
-	for itemID, checked := range input {
-		if checked == "true" {
-			// Only add unique items to CheckedItems
-			itemAlreadyChecked := false
-			for _, existingID := range playerData.CheckedItems {
-				if existingID == itemID {
-					itemAlreadyChecked = true
-					break
-				}
-			}
-			if !itemAlreadyChecked {
-				playerData.CheckedItems = append(playerData.CheckedItems, itemID)
+	playerData.CheckedItems = []string{}
+	for _, item := range b.List {
+		for _, inputItem := range input["checklist-item-ids"] {
+			if item.ID == inputItem {
+				playerData.CheckedItems = append(playerData.CheckedItems, item.ID)
 			}
 		}
 	}
@@ -100,24 +135,13 @@ func (b *ChecklistBlock) ValidatePlayerInput(state *models.TeamBlockState, input
 	state.PlayerData = newPlayerData
 
 	// Mark the state as complete if all items are checked
-	allChecked := true
-	for _, item := range b.List {
-		itemChecked := false
-		for _, checkedID := range playerData.CheckedItems {
-			if item.ID == checkedID {
-				itemChecked = true
-				break
-			}
-		}
-		if !itemChecked {
-			allChecked = false
-			break
-		}
-	}
-
+	allChecked := len(playerData.CheckedItems) == len(b.List)
 	if allChecked {
 		state.IsComplete = true
 		state.PointsAwarded = b.Points
+	} else {
+		state.IsComplete = false
+		state.PointsAwarded = 0
 	}
 
 	return nil

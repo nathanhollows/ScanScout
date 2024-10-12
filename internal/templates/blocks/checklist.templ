@@ -25,22 +25,38 @@ templ checklistPlayer(settings internalModels.InstanceSettings, block blocks.Che
 			<form
 				hx-post={ fmt.Sprint("/blocks/validate") }
 				hx-target={ fmt.Sprintf("#block-%s", block.ID) }
+				hx-trigger="change"
 			>
 				<input type="hidden" name="block" value={ block.ID }/>
-				<div class="checklist w-full flex flex-col gap-1">
+				<div
+					if data.IsComplete {
+						class="checklist w-full flex flex-col gap-1 text-success"
+					} else {
+						class="checklist w-full flex flex-col gap-1"
+					}
+				>
 					for _, item := range block.List {
 						<div class="form-control">
 							<label class="label cursor-pointer flex gap-3 justify-start items-start">
 								<input
 									id={ fmt.Sprintf("checklist-%s-%s", block.ID, item.ID) }
-									name={ fmt.Sprintf("checklist-item-%s", item.ID) }
+									name="checklist-item-ids"
 									type="checkbox"
-									class="checkbox checkbox-primary mt-1"
-									if data.IsComplete || item.Checked {
+									value={ item.ID }
+									autoComplete="off"
+									if data.IsComplete {
+										disabled
+										class="checkbox checkbox-success mt-1"
+									} else {
+										class="checkbox checkbox-primary mt-1"
+									}
+									if item.IsChecked(data.PlayerData) || data.IsComplete {
 										checked
 									}
 								/>
-								<span>{ item.Description }</span>
+								<div class="checklist-label">
+									@templ.Raw(stringToMarkdown(item.Description))
+								</div>
 							</label>
 						</div>
 					}
@@ -48,6 +64,14 @@ templ checklistPlayer(settings internalModels.InstanceSettings, block blocks.Che
 			</form>
 		</div>
 	</div>
+	<style>
+		.checklist-label p {
+			margin: 0;
+		}
+		.checklist-label strong {
+			color: inherit;
+		}
+	</style>
 }
 
 templ checklistAdmin(settings internalModels.InstanceSettings, block blocks.ChecklistBlock) {
@@ -98,21 +122,35 @@ templ checklistAdmin(settings internalModels.InstanceSettings, block blocks.Chec
 		</label>
 		<div class="form-control w-full my-5">
 			<label class="label font-bold">Checklist Items</label>
-			<div class="checklist-admin">
+			<div class="checklist-admin" id="checklist-items">
+				<button class="btn btn-outline btn-sm mt-2" type="button" onclick="addChecklistItem(event)">
+					Add Item
+				</button>
 				for _, item := range block.List {
-					<label class="input-group my-2">
+					<div class="join checklist-item my-2 flex items-center" data-item-id={ item.ID }>
 						<input
 							type="text"
-							name={ fmt.Sprintf("checklist-item-%s", item.ID) }
-							class="input input-bordered w-full"
+							name="checklist-items"
+							class="input input-bordered w-full join-item"
 							value={ item.Description }
 							placeholder="Checklist item description..."
 						/>
-					</label>
+						<input
+							type="hidden"
+							name="checklist-item-ids"
+							value={ item.ID }
+						/>
+						<button type="button" class="btn join-item" onclick="removeChecklistItem(event)">
+							<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-trash-2 w-4 h-4"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path><line x1="10" x2="10" y1="11" y2="17"></line><line x1="14" x2="14" y1="11" y2="17"></line></svg>
+						</button>
+						<button type="button" class="btn join-item" onclick="moveChecklistItemUp(event)">
+							<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-move-up w-4 h-4"><path d="M8 6L12 2L16 6"></path><path d="M12 2V22"></path></svg>
+						</button>
+						<button type="button" class="btn join-item" onclick="moveChecklistItemDown(event)">
+							<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-move-down w-4 h-4"><path d="M8 18L12 22L16 18"></path><path d="M12 2V22"></path></svg>
+						</button>
+					</div>
 				}
-				<button class="btn btn-outline btn-sm mt-2" onclick="addChecklistItem(event)">
-					Add Item
-				</button>
 			</div>
 		</div>
 		<div class="modal-action">
@@ -128,4 +166,51 @@ templ checklistAdmin(settings internalModels.InstanceSettings, block blocks.Chec
 			>Save</button>
 		</div>
 	</form>
+	<script>
+function addChecklistItem(event) {
+    event.preventDefault();
+    const checklistContainer = document.getElementById('checklist-items');
+    const newItem = document.createElement('div');
+    newItem.classList.add('checklist-item', 'my-2', 'flex', 'items-center', 'gap-2');
+    newItem.innerHTML = `
+        <label class="input-group w-full">
+            <input
+                type="text"
+                name="checklist-items"
+                class="input input-bordered w-full"
+                placeholder="Checklist item description..."
+            />
+        </label>
+		<input type="hidden" name="checklist-item-ids" value="" />
+        <button type="button" class="btn btn-outline" onclick="removeChecklistItem(event)">Remove</button>
+        <button type="button" class="btn btn-outline" onclick="moveChecklistItemUp(event)">↑</button>
+        <button type="button" class="btn btn-outline" onclick="moveChecklistItemDown(event)">↓</button>
+    `;
+    checklistContainer.appendChild(newItem);
+}
+
+function removeChecklistItem(event) {
+    event.preventDefault();
+    const item = event.target.closest('.checklist-item');
+    item.remove();
+}
+
+function moveChecklistItemUp(event) {
+    event.preventDefault();
+    const item = event.target.closest('.checklist-item');
+    const previousItem = item.previousElementSibling;
+    if (previousItem && previousItem.classList.contains('checklist-item')) {
+        item.parentNode.insertBefore(item, previousItem);
+    }
+}
+
+function moveChecklistItemDown(event) {
+    event.preventDefault();
+    const item = event.target.closest('.checklist-item');
+    const nextItem = item.nextElementSibling;
+    if (nextItem && nextItem.classList.contains('checklist-item')) {
+        item.parentNode.insertBefore(nextItem, item);
+    }
+}
+</script>
 }

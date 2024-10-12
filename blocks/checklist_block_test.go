@@ -48,12 +48,21 @@ func TestChecklistBlock_ParseData(t *testing.T) {
 
 func TestChecklistBlock_UpdateBlockData(t *testing.T) {
 	block := ChecklistBlock{}
-	data := map[string]string{
-		"content": "Updated Content",
+	data := map[string][]string{
+		"content":            {"Updated Content"},
+		"checklist-items":    {"Get Milk", "Get Eggs", "Get Bread"},
+		"checklist-item-ids": {"", "", "existing-id"},
 	}
 	err := block.UpdateBlockData(data)
 	require.NoError(t, err)
 	assert.Equal(t, "Updated Content", block.Content)
+	assert.Len(t, block.List, 3)
+	assert.NotEmpty(t, block.List[0].ID) // ID should be generated
+	assert.Equal(t, "Get Milk", block.List[0].Description)
+	assert.NotEmpty(t, block.List[1].ID) // ID should be generated
+	assert.Equal(t, "Get Eggs", block.List[1].Description)
+	assert.Equal(t, "existing-id", block.List[2].ID) // Preserved ID
+	assert.Equal(t, "Get Bread", block.List[2].Description)
 }
 
 func TestChecklistBlock_ValidatePlayerInput(t *testing.T) {
@@ -75,8 +84,8 @@ func TestChecklistBlock_ValidatePlayerInput(t *testing.T) {
 	}
 
 	// Validate player input where only "item-1" is checked
-	input := map[string]string{
-		"item-1": "true",
+	input := map[string][]string{
+		"checklist-item-ids": {"item-1"}, // "item-1" is checked
 	}
 	err := block.ValidatePlayerInput(state, input)
 	require.NoError(t, err)
@@ -90,14 +99,15 @@ func TestChecklistBlock_ValidatePlayerInput(t *testing.T) {
 	assert.Equal(t, 0, state.PointsAwarded)
 
 	// Validate player input where "item-2" is also checked, completing the checklist
-	input = map[string]string{
-		"item-2": "true",
+	input = map[string][]string{
+		"checklist-item-ids": {"item-1", "item-2"}, // "item-1" and "item-2" are checked
 	}
 	err = block.ValidatePlayerInput(state, input)
 	require.NoError(t, err)
 
 	err = json.Unmarshal(state.PlayerData, &playerData)
 	require.NoError(t, err)
+	assert.Contains(t, playerData.CheckedItems, "item-1")
 	assert.Contains(t, playerData.CheckedItems, "item-2")
 	assert.True(t, state.IsComplete)
 	assert.Equal(t, 10, state.PointsAwarded)
