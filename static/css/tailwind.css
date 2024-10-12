@@ -1389,6 +1389,11 @@ html {
     border-color: var(--fallback-p,oklch(var(--p)/var(--tw-border-opacity)));
   }
 
+  .checkbox-success:hover {
+    --tw-border-opacity: 1;
+    border-color: var(--fallback-su,oklch(var(--su)/var(--tw-border-opacity)));
+  }
+
   .label a:hover {
     --tw-text-opacity: 1;
     color: var(--fallback-bc,oklch(var(--bc)/var(--tw-text-opacity)));
@@ -3016,6 +3021,27 @@ html {
   color: var(--fallback-pc,oklch(var(--pc)/var(--tw-text-opacity)));
 }
 
+.checkbox-success {
+  --chkbg: var(--fallback-su,oklch(var(--su)/1));
+  --chkfg: var(--fallback-suc,oklch(var(--suc)/1));
+  --tw-border-opacity: 1;
+  border-color: var(--fallback-su,oklch(var(--su)/var(--tw-border-opacity)));
+}
+
+.checkbox-success:focus-visible {
+  outline-color: var(--fallback-su,oklch(var(--su)/1));
+}
+
+.checkbox-success:checked,
+    .checkbox-success[aria-checked="true"] {
+  --tw-border-opacity: 1;
+  border-color: var(--fallback-su,oklch(var(--su)/var(--tw-border-opacity)));
+  --tw-bg-opacity: 1;
+  background-color: var(--fallback-su,oklch(var(--su)/var(--tw-bg-opacity)));
+  --tw-text-opacity: 1;
+  color: var(--fallback-suc,oklch(var(--suc)/var(--tw-text-opacity)));
+}
+
 @keyframes checkmark {
   0% {
     background-position-y: 5px;
@@ -3530,12 +3556,6 @@ details.collapse summary::-webkit-details-marker {
   background-color: var(--fallback-bc,oklch(var(--bc)/var(--tw-bg-opacity)));
 }
 
-.progress-success::-moz-progress-bar {
-  border-radius: var(--rounded-box, 1rem);
-  --tw-bg-opacity: 1;
-  background-color: var(--fallback-su,oklch(var(--su)/var(--tw-bg-opacity)));
-}
-
 .progress:indeterminate {
   --progress-color: var(--fallback-bc,oklch(var(--bc)/1));
   background-image: repeating-linear-gradient(
@@ -3550,10 +3570,6 @@ details.collapse summary::-webkit-details-marker {
   animation: progress-loading 5s ease-in-out infinite;
 }
 
-.progress-success:indeterminate {
-  --progress-color: var(--fallback-su,oklch(var(--su)/1));
-}
-
 .progress::-webkit-progress-bar {
   border-radius: var(--rounded-box, 1rem);
   background-color: transparent;
@@ -3563,11 +3579,6 @@ details.collapse summary::-webkit-details-marker {
   border-radius: var(--rounded-box, 1rem);
   --tw-bg-opacity: 1;
   background-color: var(--fallback-bc,oklch(var(--bc)/var(--tw-bg-opacity)));
-}
-
-.progress-success::-webkit-progress-value {
-  --tw-bg-opacity: 1;
-  background-color: var(--fallback-su,oklch(var(--su)/var(--tw-bg-opacity)));
 }
 
 .progress:indeterminate::-moz-progress-bar {
@@ -5294,6 +5305,40 @@ details.collapse summary::-webkit-details-marker {
 
 .transform {
   transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
+}
+
+@keyframes wobble {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+
+  15% {
+    transform: translate3d(-25%, 0, 0) rotate3d(0, 0, 1, -5deg);
+  }
+
+  30% {
+    transform: translate3d(20%, 0, 0) rotate3d(0, 0, 1, 3deg);
+  }
+
+  45% {
+    transform: translate3d(-15%, 0, 0) rotate3d(0, 0, 1, -3deg);
+  }
+
+  60% {
+    transform: translate3d(10%, 0, 0) rotate3d(0, 0, 1, 2deg);
+  }
+
+  75% {
+    transform: translate3d(-5%, 0, 0) rotate3d(0, 0, 1, -1deg);
+  }
+
+  to {
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+.animate-\[wobble_1s_ease-in-out\] {
+  animation: wobble 1s ease-in-out;
 }
 
 .cursor-help {
