@@ -47,10 +47,10 @@ func (b *PasswordBlock) ParseData() error {
 	return json.Unmarshal(b.Data, b)
 }
 
-func (b *PasswordBlock) UpdateBlockData(data map[string]string) error {
-	b.Content = data["content"]
-	b.Password = data["block-passphrase"]
-	b.Fuzzy = data["fuzzy"] == "on"
+func (b *PasswordBlock) UpdateBlockData(data map[string][]string) error {
+	b.Content = data["content"][0]
+	b.Password = data["block-passphrase"][0]
+	b.Fuzzy = data["fuzzy"][0] == "on"
 	return nil
 }
 
@@ -58,7 +58,7 @@ func (b *PasswordBlock) UpdateBlockData(data map[string]string) error {
 
 func (b *PasswordBlock) RequiresValidation() bool { return true }
 
-func (b *PasswordBlock) ValidatePlayerInput(state *models.TeamBlockState, input map[string]string) error {
+func (b *PasswordBlock) ValidatePlayerInput(state *models.TeamBlockState, input map[string][]string) error {
 	var err error
 	newPlayerData := passwordBlockData{}
 	if state.PlayerData != nil {
@@ -67,9 +67,9 @@ func (b *PasswordBlock) ValidatePlayerInput(state *models.TeamBlockState, input 
 
 	// Increment the number of attempts and save guesses
 	newPlayerData.Attempts++
-	newPlayerData.Guesses = append(newPlayerData.Guesses, input["password"])
+	newPlayerData.Guesses = append(newPlayerData.Guesses, input["password"][0])
 
-	if input["password"] != b.Password {
+	if input["password"][0] != b.Password {
 		// Incorrect password, save player data and return an error
 		state.PlayerData, err = json.Marshal(newPlayerData)
 		if err != nil {

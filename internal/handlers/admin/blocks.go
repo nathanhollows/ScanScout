@@ -65,9 +65,9 @@ func (h *AdminHandler) BlockEditPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	data := make(map[string]string)
+	data := make(map[string][]string)
 	for key, value := range r.Form {
-		data[key] = value[0]
+		data[key] = value
 	}
 
 	err = h.BlockService.UpdateBlock(r.Context(), &block, data)

@@ -57,8 +57,8 @@ func (b *ChecklistBlock) ParseData() error {
 	return json.Unmarshal(b.Data, b)
 }
 
-func (b *ChecklistBlock) UpdateBlockData(data map[string]string) error {
 	b.Content = data["content"]
+func (b *ChecklistBlock) UpdateBlockData(data map[string][]string) error {
 	return nil
 }
 

@@ -23,12 +23,12 @@ func (h *PlayerHandler) ValidateBlock(w http.ResponseWriter, r *http.Request) {
 	}
 
 	r.ParseForm()
-	data := make(map[string]string)
+	data := make(map[string][]string)
 	for key, value := range r.Form {
-		data[key] = value[0]
+		data[key] = value
 	}
 
-	block, state, err := h.BlockService.GetBlockWithStateByBlockIDAndTeamCode(r.Context(), data["block"], team.Code)
+	block, state, err := h.BlockService.GetBlockWithStateByBlockIDAndTeamCode(r.Context(), data["block"][0], team.Code)
 	if err != nil {
 		h.handleError(w, r, fmt.Errorf("validateBlock: getting block with state: %v", err).Error(), "Something went wrong!")
 		return
@@ -46,11 +46,10 @@ func (h *PlayerHandler) ValidateBlock(w http.ResponseWriter, r *http.Request) {
 
 	err = h.GameplayService.ValidateAndUpdateBlockState(r.Context(), block, &state, data)
 	if err != nil {
-		h.handleError(w, r, fmt.Errorf("validateBlock: validating block: %v", err).Error(), "Something went wrong!")
-		return
+		h.Logger.Error("validateBlock: validating and updating block state", "error", err, "block", block.GetID(), "team", team.Code)
 	}
 
-	err = templates.RenderPlayerView(team.Instance.Settings, block, state).Render(r.Context(), w)
+	err = templates.RenderPlayerUpdate(team.Instance.Settings, block, state).Render(r.Context(), w)
 	if err != nil {
 		h.handleError(w, r, fmt.Errorf("validateBlock: rendering template: %v", err).Error(), "Something went wrong!")
 		return

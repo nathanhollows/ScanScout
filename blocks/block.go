@@ -21,11 +21,11 @@ type Block interface {
 
 	// Data Operations
 	ParseData() error
-	UpdateBlockData(data map[string]string) error
+	UpdateBlockData(data map[string][]string) error
 
 	// Validation and Points Calculation
 	RequiresValidation() bool
-	ValidatePlayerInput(state *models.TeamBlockState, input map[string]string) error
+	ValidatePlayerInput(state *models.TeamBlockState, input map[string][]string) error
 	CalculatePoints(input map[string]string) (int, error)
 }
 

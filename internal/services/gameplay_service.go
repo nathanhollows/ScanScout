@@ -30,7 +30,7 @@ type GameplayService interface {
 	CheckIn(ctx context.Context, team *internalModels.Team, locationCode string) ServiceResponse
 	CheckOut(ctx context.Context, team *internalModels.Team, locationCode string) ServiceResponse
 	CheckValidLocation(ctx context.Context, team *internalModels.Team, locationCode string) *ServiceResponse
-	ValidateAndUpdateBlockState(ctx context.Context, block blocks.Block, state *models.TeamBlockState, data map[string]string) error
+	ValidateAndUpdateBlockState(ctx context.Context, block blocks.Block, state *models.TeamBlockState, data map[string][]string) error
 }
 
 type gameplayService struct {
@@ -306,7 +306,7 @@ func (s *gameplayService) loadClues(ctx context.Context, team *internalModels.Te
 	return response
 }
 
-func (s *gameplayService) ValidateAndUpdateBlockState(ctx context.Context, block blocks.Block, state *models.TeamBlockState, data map[string]string) error {
+func (s *gameplayService) ValidateAndUpdateBlockState(ctx context.Context, block blocks.Block, state *models.TeamBlockState, data map[string][]string) error {
 	blockStateRepo := repositories.NewBlockStateRepository()
 
 	// Check if the block is already complete

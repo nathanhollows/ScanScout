@@ -44,8 +44,8 @@ func TestMarkdownBlock_ParseData(t *testing.T) {
 
 func TestMarkdownBlock_UpdateBlockData(t *testing.T) {
 	block := MarkdownBlock{}
-	data := map[string]string{
-		"content": "Updated Content",
+	data := map[string][]string{
+		"content": {"Updated Content"},
 	}
 	err := block.UpdateBlockData(data)
 	require.NoError(t, err)
@@ -66,7 +66,7 @@ func TestMarkdownBlock_ValidatePlayerInput(t *testing.T) {
 		PointsAwarded: 0,
 	}
 
-	input := map[string]string{}
+	input := map[string][]string{}
 	err := block.ValidatePlayerInput(state, input)
 	require.NoError(t, err)
 

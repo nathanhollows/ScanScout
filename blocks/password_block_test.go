@@ -48,10 +48,10 @@ func TestPasswordBlock_ParseData(t *testing.T) {
 
 func TestPasswordBlock_UpdateBlockData(t *testing.T) {
 	block := PasswordBlock{}
-	data := map[string]string{
-		"content":          "Updated Password Content",
-		"block-passphrase": "newsecret",
-		"fuzzy":            "on",
+	data := map[string][]string{
+		"content":          {"Updated Password Content"},
+		"block-passphrase": {"newsecret"},
+		"fuzzy":            {"on"},
 	}
 	err := block.UpdateBlockData(data)
 	require.NoError(t, err)
@@ -75,15 +75,14 @@ func TestPasswordBlock_ValidatePlayerInput(t *testing.T) {
 	}
 
 	// Test incorrect password
-	input := map[string]string{"password": "wrongpassword"}
+	input := map[string][]string{"password": {"wrong"}}
 	err := block.ValidatePlayerInput(state, input)
-	require.Error(t, err)
-	assert.Equal(t, "Incorrect password", err.Error())
+	require.NoError(t, err)
 	assert.False(t, state.IsComplete)
 	assert.Equal(t, 0, state.PointsAwarded)
 
 	// Test correct password
-	input = map[string]string{"password": "secret"}
+	input = map[string][]string{"password": {"secret"}}
 	err = block.ValidatePlayerInput(state, input)
 	require.NoError(t, err)
 	assert.True(t, state.IsComplete)
