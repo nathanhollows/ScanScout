@@ -84,7 +84,7 @@ templ RenderAdminBlock(settings internalModels.InstanceSettings, block blocks.Bl
 		<div class="flex justify-end self-center gap-3 content-center">
 			<button
 				type="button"
-				class="btn btn-secondary btn-xs btn-outline"
+				class="block-edit-btn btn btn-secondary btn-xs btn-outline"
 				hx-get={ fmt.Sprint("/admin/locations/", block.GetLocationID(), "/blocks/", block.GetID(), "/edit") }
 				hx-target="#block_edit_modal"
 				hx-trigger="click"
