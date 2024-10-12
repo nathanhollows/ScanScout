@@ -74,8 +74,8 @@ templ RenderAdminBlock(settings internalModels.InstanceSettings, block blocks.Bl
 						@templ.Raw(block.GetIconSVG())
 					</span>
 					{ block.GetName() }
-					if settings.EnablePoints {
-						<span class="badge badge-sm">10 pts</span>
+					if settings.EnablePoints && block.RequiresValidation() {
+						<span class="badge badge-sm">{ fmt.Sprint(block.GetPoints()) } pts</span>
 					}
 				</h3>
 				{ block.GetDescription() }
