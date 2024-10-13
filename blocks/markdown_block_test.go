@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"testing"
 
-	"github.com/nathanhollows/Rapua/models"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -60,19 +59,15 @@ func TestMarkdownBlock_ValidatePlayerInput(t *testing.T) {
 		Content: "Test Content",
 	}
 
-	state := &models.TeamBlockState{
-		PlayerData:    nil,
-		IsComplete:    false,
-		PointsAwarded: 0,
-	}
+	state := &mockPlayerState{}
 
 	input := map[string][]string{}
-	err := block.ValidatePlayerInput(state, input)
+	newState, err := block.ValidatePlayerInput(state, input)
 	require.NoError(t, err)
 
 	// Assert that state is marked as complete
-	assert.True(t, state.IsComplete)
-	assert.Equal(t, 0, state.PointsAwarded)
+	assert.True(t, newState.IsComplete())
+	assert.Equal(t, 0, newState.GetPointsAwarded())
 }
 
 func TestMarkdownBlock_CalculatePoints(t *testing.T) {
@@ -83,7 +78,7 @@ func TestMarkdownBlock_CalculatePoints(t *testing.T) {
 		Content: "Test Content",
 	}
 
-	input := map[string]string{}
+	input := map[string][]string{}
 	points, err := block.CalculatePoints(input)
 	require.NoError(t, err)
 	assert.Equal(t, 0, points) // MarkdownBlock has no points to calculate

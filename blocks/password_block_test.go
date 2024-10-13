@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"testing"
 
-	"github.com/nathanhollows/Rapua/models"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -68,25 +67,21 @@ func TestPasswordBlock_ValidatePlayerInput(t *testing.T) {
 		Password: "secret",
 	}
 
-	state := &models.TeamBlockState{
-		PlayerData:    nil,
-		IsComplete:    false,
-		PointsAwarded: 0,
-	}
+	state := &mockPlayerState{}
 
 	// Test incorrect password
 	input := map[string][]string{"password": {"wrong"}}
-	err := block.ValidatePlayerInput(state, input)
+	newState, err := block.ValidatePlayerInput(state, input)
 	require.NoError(t, err)
-	assert.False(t, state.IsComplete)
-	assert.Equal(t, 0, state.PointsAwarded)
+	assert.False(t, newState.IsComplete())
+	assert.Equal(t, 0, newState.GetPointsAwarded())
 
 	// Test correct password
 	input = map[string][]string{"password": {"secret"}}
-	err = block.ValidatePlayerInput(state, input)
+	newState, err = block.ValidatePlayerInput(state, input)
 	require.NoError(t, err)
-	assert.True(t, state.IsComplete)
-	assert.Equal(t, 10, state.PointsAwarded)
+	assert.True(t, newState.IsComplete())
+	assert.Equal(t, 10, newState.GetPointsAwarded())
 }
 
 func TestPasswordBlock_CalculatePoints(t *testing.T) {
@@ -96,7 +91,7 @@ func TestPasswordBlock_CalculatePoints(t *testing.T) {
 		},
 	}
 
-	input := map[string]string{"password": "any"}
+	input := map[string][]string{"password": {"any"}}
 	points, err := block.CalculatePoints(input)
 	require.NoError(t, err)
 	assert.Equal(t, 10, points)

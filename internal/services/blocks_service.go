@@ -15,11 +15,11 @@ type BlockService interface {
 	// GetByLocationID fetches all content blocks for a location
 	GetByLocationID(ctx context.Context, locationID string) (blocks.Blocks, error)
 	NewBlock(ctx context.Context, locationID string, blockType string) (blocks.Block, error)
-	UpdateBlock(ctx context.Context, block *blocks.Block, data map[string][]string) error
+	UpdateBlock(ctx context.Context, block blocks.Block, data map[string][]string) (blocks.Block, error)
 	DeleteBlock(ctx context.Context, blockID string) error
 	ReorderBlocks(ctx context.Context, locationID string, blockIDs []string) error
-	GetBlocksWithStateByLocationIDAndTeamCode(ctx context.Context, locationID, teamCode string) ([]blocks.Block, map[string]models.TeamBlockState, error)
-	GetBlockWithStateByBlockIDAndTeamCode(ctx context.Context, blockID, teamCode string) (blocks.Block, models.TeamBlockState, error)
+	GetBlocksWithStateByLocationIDAndTeamCode(ctx context.Context, locationID, teamCode string) ([]blocks.Block, map[string]blocks.PlayerState, error)
+	GetBlockWithStateByBlockIDAndTeamCode(ctx context.Context, blockID, teamCode string) (blocks.Block, blocks.PlayerState, error)
 }
 
 type blockService struct {
@@ -56,17 +56,20 @@ func (s *blockService) NewBlock(ctx context.Context, locationID string, blockTyp
 	}
 
 	// Store the new block in the repository.
-	err = s.Repo.Create(ctx, &block, locationID)
+	newBlock, err := s.Repo.Create(ctx, block, locationID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to store block of type %s: %w", blockType, err)
 	}
 
-	return block, nil
+	return newBlock, nil
 }
 
 // UpdateBlock updates a block
-func (s *blockService) UpdateBlock(ctx context.Context, block *blocks.Block, data map[string][]string) error {
-	(*block).UpdateBlockData(data)
+func (s *blockService) UpdateBlock(ctx context.Context, block blocks.Block, data map[string][]string) (blocks.Block, error) {
+	err := block.UpdateBlockData(data)
+	if err != nil {
+		return nil, fmt.Errorf("updating block data: %w", err)
+	}
 	return s.Repo.Update(ctx, block)
 }
 
@@ -80,38 +83,27 @@ func (s *blockService) ReorderBlocks(ctx context.Context, locationID string, blo
 	return s.Repo.Reorder(ctx, locationID, blockIDs)
 }
 
-func (s *blockService) GetBlocksWithStateByLocationIDAndTeamCode(ctx context.Context, locationID, teamCode string) ([]blocks.Block, map[string]models.TeamBlockState, error) {
-	blocks, states, err := s.Repo.GetBlocksAndStatesByLocationIDAndTeamCode(ctx, locationID, teamCode)
-	if err != nil {
-		return nil, nil, err
-	}
-
-	blockObjects, err := s.convertModelsToBlocks(blocks)
+func (s *blockService) GetBlocksWithStateByLocationIDAndTeamCode(ctx context.Context, locationID, teamCode string) ([]blocks.Block, map[string]blocks.PlayerState, error) {
+	foundBlocks, states, err := s.Repo.GetBlocksAndStatesByLocationIDAndTeamCode(ctx, locationID, teamCode)
 	if err != nil {
 		return nil, nil, err
 	}
 
 	// Create a map for easier lookup of block states by block ID
-	blockStates := make(map[string]models.TeamBlockState)
+	blockStates := make(map[string]blocks.PlayerState, len(states))
 	for _, state := range states {
-		blockStates[state.BlockID] = state
+		blockStates[state.GetBlockID()] = state
 	}
 
-	return blockObjects, blockStates, nil
+	return foundBlocks, blockStates, nil
 }
 
-func (s *blockService) GetBlockWithStateByBlockIDAndTeamCode(ctx context.Context, blockID, teamCode string) (blocks.Block, models.TeamBlockState, error) {
-	blockModel, state, err := s.Repo.GetBlockAndStateByBlockIDAndTeamCode(ctx, blockID, teamCode)
-	if err != nil {
-		return nil, models.TeamBlockState{}, err
+func (s *blockService) GetBlockWithStateByBlockIDAndTeamCode(ctx context.Context, blockID, teamCode string) (blocks.Block, blocks.PlayerState, error) {
+	if blockID == "" || teamCode == "" {
+		return nil, nil, fmt.Errorf("blockID and teamCode must be set, got blockID: %s, teamCode: %s", blockID, teamCode)
 	}
 
-	blockObject, err := s.convertModelToBlock(&blockModel)
-	if err != nil {
-		return nil, models.TeamBlockState{}, err
-	}
-
-	return blockObject, state, nil
+	return s.Repo.GetBlockAndStateByBlockIDAndTeamCode(ctx, blockID, teamCode)
 }
 
 // Convert block to model

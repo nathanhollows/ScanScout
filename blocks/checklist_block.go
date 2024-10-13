@@ -5,7 +5,6 @@ import (
 	"fmt"
 
 	"github.com/google/uuid"
-	"github.com/nathanhollows/Rapua/models"
 )
 
 type ChecklistBlock struct {
@@ -107,13 +106,15 @@ func (b *ChecklistBlock) UpdateBlockData(data map[string][]string) error {
 // Validation and Points Calculation
 func (b *ChecklistBlock) RequiresValidation() bool { return true }
 
-func (b *ChecklistBlock) ValidatePlayerInput(state *models.TeamBlockState, input map[string][]string) error {
+func (b *ChecklistBlock) ValidatePlayerInput(state PlayerState, input map[string][]string) (PlayerState, error) {
+	newState := state
+
 	// Parse player data from the existing state
 	var playerData checklistPlayerData
-	if state.PlayerData != nil {
-		err := json.Unmarshal(state.PlayerData, &playerData)
+	if state.GetPlayerData() != nil {
+		err := json.Unmarshal(state.GetPlayerData(), &playerData)
 		if err != nil {
-			return fmt.Errorf("failed to parse player data: %w", err)
+			return state, fmt.Errorf("failed to parse player data: %w", err)
 		}
 	}
 
@@ -130,28 +131,28 @@ func (b *ChecklistBlock) ValidatePlayerInput(state *models.TeamBlockState, input
 	// Marshal the updated player data back into the state
 	newPlayerData, err := json.Marshal(playerData)
 	if err != nil {
-		return fmt.Errorf("failed to save player data: %w", err)
+		return state, fmt.Errorf("failed to save player data: %w", err)
 	}
-	state.PlayerData = newPlayerData
+	newState.SetPlayerData(newPlayerData)
 
-	// Mark the state as complete if all items are checked
+	// Mark the newState as complete if all items are checked
 	allChecked := len(playerData.CheckedItems) == len(b.List)
 	if allChecked {
-		state.IsComplete = true
-		state.PointsAwarded = b.Points
+		newState.SetComplete(true)
+		newState.SetPointsAwarded(b.Points)
 	} else {
-		state.IsComplete = false
-		state.PointsAwarded = 0
+		newState.SetComplete(false)
+		newState.SetPointsAwarded(0)
 	}
 
-	return nil
+	return newState, nil
 }
 
-func (b *ChecklistBlock) CalculatePoints(input map[string]string) (int, error) {
+func (b *ChecklistBlock) CalculatePoints(input map[string][]string) (int, error) {
 	// For ChecklistBlock, return full points if all items are checked, otherwise 0 points
 	allChecked := true
 	for _, item := range b.List {
-		if input[item.ID] != "true" {
+		if _, exists := input[item.ID]; !exists {
 			allChecked = false
 			break
 		}
@@ -160,12 +161,4 @@ func (b *ChecklistBlock) CalculatePoints(input map[string]string) (int, error) {
 		return b.Points, nil
 	}
 	return 0, nil
-}
-
-// Additional methods for reading from models
-func (b *ChecklistBlock) readFromModel(model models.Block) error {
-	b.ID = model.ID
-	b.LocationID = model.LocationID
-	b.Order = model.Ordering
-	return json.Unmarshal(model.Data, b)
 }

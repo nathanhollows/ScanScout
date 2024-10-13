@@ -4,10 +4,9 @@ import (
 	"fmt"
 	"github.com/nathanhollows/Rapua/blocks"
 	internalModels "github.com/nathanhollows/Rapua/internal/models"
-	"github.com/nathanhollows/Rapua/models"
 )
 
-templ checklistPlayer(settings internalModels.InstanceSettings, block blocks.ChecklistBlock, data models.TeamBlockState) {
+templ checklistPlayer(settings internalModels.InstanceSettings, block blocks.ChecklistBlock, data blocks.PlayerState) {
 	<div
 		id={ fmt.Sprintf("block-%s", block.ID) }
 		class="indicator w-full"
@@ -15,7 +14,7 @@ templ checklistPlayer(settings internalModels.InstanceSettings, block blocks.Che
 		if settings.EnablePoints && block.Points > 0 {
 			<span class="indicator-item indicator-top indicator-center badge badge-info">{ fmt.Sprint(block.GetPoints()) } pts</span>
 		}
-		if data.IsComplete {
+		if data.IsComplete() {
 			<span class="indicator-item indicator-top indicator-right badge badge-success mr-12">Complete</span>
 		} else {
 			<span class="indicator-item indicator-top indicator-right badge badge-primary mr-12">Incomplete</span>
@@ -29,7 +28,7 @@ templ checklistPlayer(settings internalModels.InstanceSettings, block blocks.Che
 			>
 				<input type="hidden" name="block" value={ block.ID }/>
 				<div
-					if data.IsComplete {
+					if data.IsComplete() {
 						class="checklist w-full flex flex-col gap-1 text-success"
 					} else {
 						class="checklist w-full flex flex-col gap-1"
@@ -44,13 +43,13 @@ templ checklistPlayer(settings internalModels.InstanceSettings, block blocks.Che
 									type="checkbox"
 									value={ item.ID }
 									autoComplete="off"
-									if data.IsComplete {
+									if data.IsComplete() {
 										disabled
 										class="checkbox checkbox-success mt-1"
 									} else {
 										class="checkbox checkbox-primary mt-1"
 									}
-									if item.IsChecked(data.PlayerData) || data.IsComplete {
+									if item.IsChecked(data.GetPlayerData()) || data.IsComplete() {
 										checked
 									}
 								/>

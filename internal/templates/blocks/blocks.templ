@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/nathanhollows/Rapua/blocks"
 	internalModels "github.com/nathanhollows/Rapua/internal/models"
-	"github.com/nathanhollows/Rapua/models"
 )
 
 func RenderAdminEdit(settings internalModels.InstanceSettings, block blocks.Block) templ.Component {
@@ -22,32 +21,32 @@ func RenderAdminEdit(settings internalModels.InstanceSettings, block blocks.Bloc
 	return nil
 }
 
-func RenderPlayerView(settings internalModels.InstanceSettings, block blocks.Block, data models.TeamBlockState) templ.Component {
+func RenderPlayerView(settings internalModels.InstanceSettings, block blocks.Block, state blocks.PlayerState) templ.Component {
 	switch block.GetType() {
 	case "markdown":
 		b := block.(*blocks.MarkdownBlock)
 		return markdownPlayer(settings, *b)
 	case "password":
 		b := block.(*blocks.PasswordBlock)
-		return passwordPlayer(settings, *b, data)
+		return passwordPlayer(settings, *b, state)
 	case "checklist":
 		b := block.(*blocks.ChecklistBlock)
-		return checklistPlayer(settings, *b, data)
+		return checklistPlayer(settings, *b, state)
 	}
 	return nil
 }
 
-func RenderPlayerUpdate(settings internalModels.InstanceSettings, block blocks.Block, data models.TeamBlockState) templ.Component {
+func RenderPlayerUpdate(settings internalModels.InstanceSettings, block blocks.Block, state blocks.PlayerState) templ.Component {
 	switch block.GetType() {
 	case "markdown":
 		b := block.(*blocks.MarkdownBlock)
 		return markdownPlayer(settings, *b)
 	case "password":
 		b := block.(*blocks.PasswordBlock)
-		return passwordPlayerUpdate(settings, *b, data)
+		return passwordPlayerUpdate(settings, *b, state)
 	case "checklist":
 		b := block.(*blocks.ChecklistBlock)
-		return checklistPlayer(settings, *b, data)
+		return checklistPlayer(settings, *b, state)
 	}
 	return nil
 }

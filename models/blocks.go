@@ -16,7 +16,6 @@ type Block struct {
 
 type TeamBlockState struct {
 	baseModel
-	ID            string          `bun:"id,pk,notnull"`
 	TeamCode      string          `bun:"team_code,notnull"`
 	BlockID       string          `bun:"block_id,notnull"`
 	IsComplete    bool            `bun:"is_complete,type:bool"`

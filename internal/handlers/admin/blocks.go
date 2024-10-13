@@ -70,7 +70,7 @@ func (h *AdminHandler) BlockEditPost(w http.ResponseWriter, r *http.Request) {
 		data[key] = value
 	}
 
-	err = h.BlockService.UpdateBlock(r.Context(), &block, data)
+	_, err = h.BlockService.UpdateBlock(r.Context(), block, data)
 	if err != nil {
 		h.handleError(w, r, "BlockEditPost: updating block", "Could not update block", "error", err)
 		return

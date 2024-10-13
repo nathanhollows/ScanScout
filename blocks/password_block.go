@@ -3,8 +3,6 @@ package blocks
 import (
 	"encoding/json"
 	"fmt"
-
-	"github.com/nathanhollows/Rapua/models"
 )
 
 type PasswordBlock struct {
@@ -58,11 +56,11 @@ func (b *PasswordBlock) UpdateBlockData(data map[string][]string) error {
 
 func (b *PasswordBlock) RequiresValidation() bool { return true }
 
-func (b *PasswordBlock) ValidatePlayerInput(state *models.TeamBlockState, input map[string][]string) error {
+func (b *PasswordBlock) ValidatePlayerInput(state PlayerState, input map[string][]string) (PlayerState, error) {
 	var err error
 	newPlayerData := passwordBlockData{}
-	if state.PlayerData != nil {
-		json.Unmarshal(state.PlayerData, &newPlayerData)
+	if state.GetPlayerData() != nil {
+		json.Unmarshal(state.GetPlayerData(), &newPlayerData)
 	}
 
 	// Increment the number of attempts and save guesses
@@ -71,23 +69,25 @@ func (b *PasswordBlock) ValidatePlayerInput(state *models.TeamBlockState, input 
 
 	if input["password"][0] != b.Password {
 		// Incorrect password, save player data and return an error
-		state.PlayerData, err = json.Marshal(newPlayerData)
+		playerData, err := json.Marshal(newPlayerData)
 		if err != nil {
-			return fmt.Errorf("Error saving player data")
+			return state, fmt.Errorf("Error saving player data")
 		}
-		return nil
+		state.SetPlayerData(playerData)
+		return state, nil
 	}
 
 	// Correct password, update state to complete
-	state.PlayerData, err = json.Marshal(newPlayerData)
+	playerData, err := json.Marshal(newPlayerData)
 	if err != nil {
-		return fmt.Errorf("Error saving player data")
+		return state, fmt.Errorf("Error saving player data")
 	}
-	state.IsComplete = true
-	state.PointsAwarded = b.Points
-	return nil
+	state.SetPlayerData(playerData)
+	state.SetComplete(true)
+	state.SetPointsAwarded(b.Points)
+	return state, nil
 }
 
-func (b *PasswordBlock) CalculatePoints(input map[string]string) (int, error) {
+func (b *PasswordBlock) CalculatePoints(input map[string][]string) (int, error) {
 	return b.Points, nil
 }

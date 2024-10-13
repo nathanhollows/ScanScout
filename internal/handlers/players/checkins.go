@@ -243,8 +243,7 @@ func (h *PlayerHandler) CheckInView(w http.ResponseWriter, r *http.Request) {
 
 	blocks, blockStates, err := h.BlockService.GetBlocksWithStateByLocationIDAndTeamCode(r.Context(), team.Scans[index].Location.ID, team.Code)
 	if err != nil {
-		flash.NewError("Error loading blocks.").Save(w, r)
-		http.Redirect(w, r, r.Header.Get("referer"), http.StatusFound)
+		h.handleError(w, r, "CheckInView: getting blocks", "Error loading blocks", "error", err, "team", team.Code, "location", locationCode)
 		return
 	}
 

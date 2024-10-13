@@ -34,17 +34,21 @@ func (h *PlayerHandler) ValidateBlock(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if state.IsComplete {
+	if block == nil {
+		h.handleError(w, r, "validateBlock: getting block with state: block is nil", "Block not found")
+		return
+	}
+
+	if state == nil {
+		h.handleError(w, r, "validateBlock: getting block with state: state is nil", "Block state not found")
+		return
+	}
+
+	if state.IsComplete() {
 		h.handleSuccess(w, r, "Block already completed")
 	}
 
-	if state.BlockID == "" {
-		state.BlockID = block.GetID()
-		state.TeamCode = team.Code
-		state.PlayerData = []byte("{}")
-	}
-
-	err = h.GameplayService.ValidateAndUpdateBlockState(r.Context(), block, &state, data)
+	state, err = h.GameplayService.ValidateAndUpdateBlockState(r.Context(), block, state, data)
 	if err != nil {
 		h.Logger.Error("validateBlock: validating and updating block state", "error", err, "block", block.GetID(), "team", team.Code)
 	}

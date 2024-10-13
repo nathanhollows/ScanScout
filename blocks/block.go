@@ -3,9 +3,18 @@ package blocks
 import (
 	"encoding/json"
 	"fmt"
-
-	"github.com/nathanhollows/Rapua/models"
 )
+
+type PlayerState interface {
+	GetBlockID() string
+	GetPlayerID() string
+	GetPlayerData() json.RawMessage
+	SetPlayerData(data json.RawMessage)
+	IsComplete() bool
+	SetComplete(complete bool)
+	GetPointsAwarded() int
+	SetPointsAwarded(points int)
+}
 
 type Block interface {
 	// Basic Attributes Getters
@@ -25,8 +34,8 @@ type Block interface {
 
 	// Validation and Points Calculation
 	RequiresValidation() bool
-	ValidatePlayerInput(state *models.TeamBlockState, input map[string][]string) error
-	CalculatePoints(input map[string]string) (int, error)
+	ValidatePlayerInput(state PlayerState, input map[string][]string) (newState PlayerState, err error)
+	CalculatePoints(input map[string][]string) (int, error)
 }
 
 type Blocks []Block
