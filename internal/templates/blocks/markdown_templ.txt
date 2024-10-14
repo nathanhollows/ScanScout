@@ -2,7 +2,6 @@
 </div>
 <form hx-post=\"
 \" hx-trigger=\"submit\" class=\"modal-box md:w-11/12 max-w-5xl\"><h3 class=\"text-lg font-bold flex flex-row gap-3\">
-Editing 
  block</h3><label for=\"
 \" class=\"form-control w-full my-5\"><div class=\"label\"><span class=\"label-text font-bold\">Markdown Block</span> <label class=\"label-text-alt flex flex-row gap-3\">Preview <input type=\"checkbox\" class=\"toggle toggle-sm md-toggle\" name=\"preview\" class=\"checkbox\" data-block=\"
 \" onclick=\"previewMD(event)\"></label></div><textarea id=\"

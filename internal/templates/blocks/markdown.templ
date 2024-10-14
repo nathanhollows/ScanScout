@@ -20,7 +20,7 @@ templ markdownAdmin(settings models.InstanceSettings, block blocks.MarkdownBlock
 	>
 		<h3 class="text-lg font-bold flex flex-row gap-3">
 			@templ.Raw(block.GetIconSVG())
-			Editing { block.GetName() } block
+			{ block.GetName() } block
 		</h3>
 		<label
 			for={ fmt.Sprintf("md-%s", block.ID) }
