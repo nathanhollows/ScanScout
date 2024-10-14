@@ -320,7 +320,7 @@ func (s *gameplayService) ValidateAndUpdateBlockState(ctx context.Context, block
 		return nil, fmt.Errorf("validating block: %w", err)
 	}
 
-	state, err = blockStateRepo.Save(ctx, state)
+	state, err = blockStateRepo.Update(ctx, state)
 	if err != nil {
 		return nil, fmt.Errorf("saving block state: %w", err)
 	}

@@ -16,8 +16,8 @@ type Block struct {
 
 type TeamBlockState struct {
 	baseModel
-	TeamCode      string          `bun:"team_code,notnull"`
-	BlockID       string          `bun:"block_id,notnull"`
+	TeamCode      string          `bun:"team_code,pk,notnull"`
+	BlockID       string          `bun:"block_id,pk,notnull"`
 	IsComplete    bool            `bun:"is_complete,type:bool"`
 	PointsAwarded int             `bun:"points_awarded,type:int"`
 	PlayerData    json.RawMessage `bun:"player_data,type:jsonb"`

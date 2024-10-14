@@ -15,6 +15,7 @@ type BlockService interface {
 	// GetByLocationID fetches all content blocks for a location
 	GetByLocationID(ctx context.Context, locationID string) (blocks.Blocks, error)
 	NewBlock(ctx context.Context, locationID string, blockType string) (blocks.Block, error)
+	NewBlockState(ctx context.Context, blockID, teamCode string) (blocks.PlayerState, error)
 	UpdateBlock(ctx context.Context, block blocks.Block, data map[string][]string) (blocks.Block, error)
 	DeleteBlock(ctx context.Context, blockID string) error
 	ReorderBlocks(ctx context.Context, locationID string, blockIDs []string) error
@@ -62,6 +63,12 @@ func (s *blockService) NewBlock(ctx context.Context, locationID string, blockTyp
 	}
 
 	return newBlock, nil
+}
+
+// NewBlockState creates a new block state
+func (s *blockService) NewBlockState(ctx context.Context, blockID, teamCode string) (blocks.PlayerState, error) {
+	stateRepo := repositories.NewBlockStateRepository()
+	return stateRepo.NewBlockState(ctx, blockID, teamCode)
 }
 
 // UpdateBlock updates a block

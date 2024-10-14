@@ -34,11 +34,6 @@ func (h *PlayerHandler) ValidateBlock(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if block == nil {
-		h.handleError(w, r, "validateBlock: getting block with state: block is nil", "Block not found")
-		return
-	}
-
 	if state == nil {
 		h.handleError(w, r, "validateBlock: getting block with state: state is nil", "Block state not found")
 		return

@@ -246,24 +246,27 @@ func (r *blockRepository) GetBlockAndStateByBlockIDAndTeamCode(ctx context.Conte
 	stateRepo := NewBlockStateRepository()
 
 	modelBlock := models.Block{}
-	emptyBlock, err := convertModelToBlock(&modelBlock)
-
-	err = db.DB.NewSelect().
+	err := db.DB.NewSelect().
 		Model(&modelBlock).
 		Where("id = ?", blockID).
 		Scan(ctx)
 	if err != nil {
-		return emptyBlock, nil, err
+		return nil, nil, err
 	}
 
 	state, err := stateRepo.GetByBlockAndTeam(ctx, blockID, teamCode)
 	if err != nil && err.Error() != "sql: no rows in result set" {
-		return emptyBlock, nil, err
+		return nil, nil, err
+	} else if err != nil {
+		state, err = stateRepo.NewBlockState(ctx, blockID, teamCode)
+		if err != nil {
+			return nil, nil, err
+		}
 	}
 
 	block, err := convertModelToBlock(&modelBlock)
 	if err != nil {
-		return emptyBlock, nil, err
+		return nil, nil, err
 	}
 
 	return block, state, nil

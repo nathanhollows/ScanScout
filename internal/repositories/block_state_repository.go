@@ -14,9 +14,9 @@ import (
 type BlockStateRepository interface {
 	GetByBlockAndTeam(ctx context.Context, blockID string, teamCode string) (blocks.PlayerState, error)
 	Create(ctx context.Context, state blocks.PlayerState) (blocks.PlayerState, error)
-	Save(ctx context.Context, block blocks.PlayerState) (blocks.PlayerState, error)
 	Update(ctx context.Context, block blocks.PlayerState) (blocks.PlayerState, error)
 	Delete(ctx context.Context, block_id string, team_code string) error
+	NewBlockState(ctx context.Context, blockID, teamCode string) (blocks.PlayerState, error)
 }
 
 type blockStateRepository struct{}
@@ -117,21 +117,6 @@ func (r *blockStateRepository) Create(ctx context.Context, state blocks.PlayerSt
 	return convertModelToPlayerStateData(modelState), nil
 }
 
-// Save modifies an existing team block state in the database
-func (r *blockStateRepository) Save(ctx context.Context, state blocks.PlayerState) (blocks.PlayerState, error) {
-	if state.GetBlockID() == "" || state.GetPlayerID() == "" {
-		return nil, fmt.Errorf("block_id and team_code must be set")
-	}
-
-	modelState := convertPlayerStateToModelData(state)
-
-	_, err := db.DB.NewInsert().
-		Model(&modelState).
-		Exec(ctx)
-
-	return state, err
-}
-
 // Update modifies an existing team block state in the database
 func (r *blockStateRepository) Update(ctx context.Context, state blocks.PlayerState) (blocks.PlayerState, error) {
 	modelState := convertPlayerStateToModelData(state)
@@ -163,4 +148,16 @@ func (r *blockStateRepository) Delete(ctx context.Context, block_id string, team
 		return err
 	}
 	return nil
+}
+
+// NewBlockState creates a new block state
+func (r *blockStateRepository) NewBlockState(ctx context.Context, blockID, teamCode string) (blocks.PlayerState, error) {
+	state := &PlayerStateData{
+		blockID:       blockID,
+		playerID:      teamCode,
+		playerData:    nil,
+		isComplete:    false,
+		pointsAwarded: 0,
+	}
+	return r.Create(ctx, state)
 }
