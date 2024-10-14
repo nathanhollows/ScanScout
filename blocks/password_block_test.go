@@ -46,6 +46,7 @@ func TestPasswordBlock_ParseData(t *testing.T) {
 }
 
 func TestPasswordBlock_UpdateBlockData(t *testing.T) {
+	// Update all fields
 	block := PasswordBlock{}
 	data := map[string][]string{
 		"content":          {"Updated Password Content"},
@@ -57,6 +58,18 @@ func TestPasswordBlock_UpdateBlockData(t *testing.T) {
 	assert.Equal(t, "Updated Password Content", block.Content)
 	assert.Equal(t, "newsecret", block.Password)
 	assert.True(t, block.Fuzzy)
+
+	// Update without fuzzy
+	block = PasswordBlock{}
+	data = map[string][]string{
+		"content":          {"Updated Password Content"},
+		"block-passphrase": {"newsecret"},
+	}
+	err = block.UpdateBlockData(data)
+	require.NoError(t, err)
+	assert.Equal(t, "Updated Password Content", block.Content)
+	assert.Equal(t, "newsecret", block.Password)
+	assert.False(t, block.Fuzzy)
 }
 
 func TestPasswordBlock_ValidatePlayerInput(t *testing.T) {
