@@ -114,7 +114,7 @@ templ checklistAdmin(settings internalModels.InstanceSettings, block blocks.Chec
 			<textarea
 				id={ fmt.Sprintf("md-%s", block.ID) }
 				name="content"
-				rows="4"
+				rows="2"
 				class="textarea textarea-bordered w-full font-mono"
 				placeholder="Markdown content here..."
 			>{ block.Content }</textarea>
@@ -131,36 +131,46 @@ templ checklistAdmin(settings internalModels.InstanceSettings, block blocks.Chec
 			</div>
 		</label>
 		<div class="form-control w-full my-5">
-			<label class="label font-bold">Checklist Items</label>
-			<div class="checklist-admin" id="checklist-items">
-				<button class="btn btn-outline btn-sm mt-2" type="button" onclick="addChecklistItem(event)">
+			<div class="label font-bold flex justify-between">
+				Checklist Items
+				<button class="btn btn-outline btn-sm my-2" type="button" onclick="addChecklistItem(event)">
+					<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-list-plus w-5 h-5"><path d="M11 12H3"></path><path d="M16 6H3"></path><path d="M16 18H3"></path><path d="M18 9v6"></path><path d="M21 12h-6"></path></svg>
 					Add Item
 				</button>
-				for _, item := range block.List {
-					<div class="join checklist-item my-2 flex items-center" data-item-id={ item.ID }>
-						<input
-							type="text"
-							name="checklist-items"
-							class="input input-bordered w-full join-item"
-							value={ item.Description }
-							placeholder="Checklist item description..."
-						/>
-						<input
-							type="hidden"
-							name="checklist-item-ids"
-							value={ item.ID }
-						/>
-						<button type="button" class="btn join-item" onclick="removeChecklistItem(event)">
-							<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-trash-2 w-4 h-4"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path><line x1="10" x2="10" y1="11" y2="17"></line><line x1="14" x2="14" y1="11" y2="17"></line></svg>
-						</button>
-						<button type="button" class="btn join-item" onclick="moveChecklistItemUp(event)">
-							<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-move-up w-4 h-4"><path d="M8 6L12 2L16 6"></path><path d="M12 2V22"></path></svg>
-						</button>
-						<button type="button" class="btn join-item" onclick="moveChecklistItemDown(event)">
-							<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-move-down w-4 h-4"><path d="M8 18L12 22L16 18"></path><path d="M12 2V22"></path></svg>
-						</button>
-					</div>
-				}
+			</div>
+			<div class="checklist-admin" id="checklist-items">
+				<div class="flex flex-col gap-2">
+					for _, item := range block.List {
+						<label class="checklist-item input input-bordered flex flex-row items-top gap-2 h-auto" data-item-id={ item.ID }>
+							<textarea
+								name="checklist-items"
+								class="w-full textarea hover:border-0 hover:outline-0 focus:border-0 focus:outline-0 border-0 outline-0 pr-20"
+								rows="2"
+								value={ item.Description }
+								placeholder="Checklist item description..."
+								autoComplete="off"
+							>
+								{ item.Description }
+							</textarea>
+							<input
+								type="hidden"
+								name="checklist-item-ids"
+								value={ item.ID }
+							/>
+							<span class="join mt-2">
+								<button type="button" class="btn btn-xs join-item tooltip" data-tip="Move up" onclick="moveChecklistItemUp(event)">
+									<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-move-up w-3 h-3"><path d="M8 6L12 2L16 6"></path><path d="M12 2V22"></path></svg>
+								</button>
+								<button type="button" class="btn btn-xs join-item tooltip" data-tip="Move down" onclick="moveChecklistItemDown(event)">
+									<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-move-down w-3 h-3"><path d="M8 18L12 22L16 18"></path><path d="M12 2V22"></path></svg>
+								</button>
+								<button type="button" class="btn btn-xs join-item hover:btn-error tooltip" data-tip="Delete" onclick="removeChecklistItem(event)">
+									<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-trash-2 w-3 h-3"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path><line x1="10" x2="10" y1="11" y2="17"></line><line x1="14" x2="14" y1="11" y2="17"></line></svg>
+								</button>
+							</span>
+						</label>
+					}
+				</div>
 			</div>
 		</div>
 		<div class="modal-action">
