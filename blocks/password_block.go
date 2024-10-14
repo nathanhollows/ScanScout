@@ -3,6 +3,7 @@ package blocks
 import (
 	"encoding/json"
 	"fmt"
+	"strconv"
 )
 
 type PasswordBlock struct {
@@ -46,6 +47,15 @@ func (b *PasswordBlock) ParseData() error {
 }
 
 func (b *PasswordBlock) UpdateBlockData(input map[string][]string) error {
+	// Points
+	if input["points"] != nil {
+		points, err := strconv.Atoi(input["points"][0])
+		if err != nil {
+			return fmt.Errorf("points must be an integer")
+		}
+		b.Points = points
+	}
+	// Content and Password
 	if input["content"] == nil || input["block-passphrase"] == nil {
 		return fmt.Errorf("content and block-passphrase are required fields")
 	}

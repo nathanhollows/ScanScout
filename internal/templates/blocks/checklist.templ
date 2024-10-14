@@ -82,6 +82,17 @@ templ checklistAdmin(settings internalModels.InstanceSettings, block blocks.Chec
 			@templ.Raw(block.GetIconSVG())
 			Updating { block.GetName() } block
 		</h3>
+		if settings.EnablePoints {
+			<label class="form-control w-full">
+				<div class="label">
+					<span class="label-text font-bold">Points</span>
+				</div>
+				<label class="input input-bordered flex items-center gap-2">
+					<input name="points" type="number" class="grow" placeholder="Search" value={ fmt.Sprint(block.Points) }/>
+					<span class="badge badge-info tooltip tooltip-left" data-tip="Set to 0 to disable">Optional</span>
+				</label>
+			</label>
+		}
 		<label
 			for={ fmt.Sprintf("md-%s", block.ID) }
 			class="form-control w-full my-5"

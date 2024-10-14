@@ -3,6 +3,7 @@ package blocks
 import (
 	"encoding/json"
 	"fmt"
+	"strconv"
 
 	"github.com/google/uuid"
 )
@@ -73,6 +74,14 @@ func (b *ChecklistBlock) ParseData() error {
 }
 
 func (b *ChecklistBlock) UpdateBlockData(input map[string][]string) error {
+	// Points
+	if input["points"] != nil {
+		points, err := strconv.Atoi(input["points"][0])
+		if err != nil {
+			return fmt.Errorf("points must be an integer")
+		}
+		b.Points = points
+	}
 	// Update content
 	if content, exists := input["content"]; exists && len(content) > 0 {
 		b.Content = content[0]
@@ -84,6 +93,9 @@ func (b *ChecklistBlock) UpdateBlockData(input map[string][]string) error {
 
 	updatedList := make([]ChecklistItem, 0, len(itemDescriptions))
 	for i, desc := range itemDescriptions {
+		if desc == "" {
+			continue
+		}
 		var id string
 		if i < len(itemIDs) && itemIDs[i] != "" {
 			id = itemIDs[i]
