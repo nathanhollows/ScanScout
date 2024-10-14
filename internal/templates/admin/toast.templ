@@ -51,7 +51,7 @@ templ Toast(messages ...flash.Message) {
       const progressElement = alertElement.querySelector('.alert-progress');
       if (!progressElement) return;
 
-	  let duration = 10; // seconds
+	  let duration = 5; // seconds
 
       let remainingTime = duration; // seconds
       const updateInterval = 100; // milliseconds
@@ -64,7 +64,12 @@ templ Toast(messages ...flash.Message) {
 
         if (remainingTime < 0) {
           clearInterval(timer);
-          alertElement.remove(); // Remove the alert once the timer finishes
+		  // Fade out the alert
+		  alertElement.style.transition = 'opacity 0.2s';
+		  alertElement.style.opacity = 0;
+		  setTimeout(() => {
+			alertElement.remove(); // Remove the alert once the timer finishes
+		  }, 200);
         }
       };
 
