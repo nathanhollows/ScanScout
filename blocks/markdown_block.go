@@ -34,8 +34,10 @@ func (b *MarkdownBlock) ParseData() error {
 	return json.Unmarshal(b.Data, b)
 }
 
-func (b *MarkdownBlock) UpdateBlockData(data map[string][]string) error {
-	b.Content = data["content"][0]
+func (b *MarkdownBlock) UpdateBlockData(input map[string][]string) error {
+	if content, exists := input["content"]; exists && len(content) > 0 {
+		b.Content = content[0]
+	}
 	return nil
 }
 

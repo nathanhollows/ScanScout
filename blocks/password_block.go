@@ -45,10 +45,15 @@ func (b *PasswordBlock) ParseData() error {
 	return json.Unmarshal(b.Data, b)
 }
 
-func (b *PasswordBlock) UpdateBlockData(data map[string][]string) error {
-	b.Content = data["content"][0]
-	b.Password = data["block-passphrase"][0]
-	b.Fuzzy = data["fuzzy"][0] == "on"
+func (b *PasswordBlock) UpdateBlockData(input map[string][]string) error {
+	if input["content"] == nil || input["block-passphrase"] == nil {
+		return fmt.Errorf("content and block-passphrase are required fields")
+	}
+	b.Content = input["content"][0]
+	b.Password = input["block-passphrase"][0]
+	if input["fuzzy"] != nil {
+		b.Fuzzy = input["fuzzy"][0] == "on"
+	}
 	return nil
 }
 
@@ -57,6 +62,10 @@ func (b *PasswordBlock) UpdateBlockData(data map[string][]string) error {
 func (b *PasswordBlock) RequiresValidation() bool { return true }
 
 func (b *PasswordBlock) ValidatePlayerInput(state PlayerState, input map[string][]string) (PlayerState, error) {
+	if input["password"] == nil {
+		return state, fmt.Errorf("password is a required field")
+	}
+
 	var err error
 	newPlayerData := passwordBlockData{}
 	if state.GetPlayerData() != nil {

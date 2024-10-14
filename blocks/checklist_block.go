@@ -72,15 +72,15 @@ func (b *ChecklistBlock) ParseData() error {
 	return json.Unmarshal(b.Data, b)
 }
 
-func (b *ChecklistBlock) UpdateBlockData(data map[string][]string) error {
+func (b *ChecklistBlock) UpdateBlockData(input map[string][]string) error {
 	// Update content
-	if content, exists := data["content"]; exists && len(content) > 0 {
+	if content, exists := input["content"]; exists && len(content) > 0 {
 		b.Content = content[0]
 	}
 
 	// Update checklist items
-	itemDescriptions := data["checklist-items"]
-	itemIDs := data["checklist-item-ids"]
+	itemDescriptions := input["checklist-items"]
+	itemIDs := input["checklist-item-ids"]
 
 	updatedList := make([]ChecklistItem, 0, len(itemDescriptions))
 	for i, desc := range itemDescriptions {
