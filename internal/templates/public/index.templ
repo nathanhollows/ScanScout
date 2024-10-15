@@ -1,28 +1,31 @@
 package templates
 
 templ Index() {
+	<form class="max-w-md mx-auto space-y-6" hx-post="/play" hx-swap="none">
+		<div class="mx-auto rounded-full p-2 bg-accent flex items-center justify-between w-min shadow-xl">
+			<span class="text-lg font-bold text-info-content px-6 text-nowrap">Join a game</span>
+			<label class="input flex items-center gap-2 rounded-full pr-2">
+				<input
+					id="team"
+					name="team"
+					type="text"
+					class="rounded-full font-mono uppercase tracking-widest w-36 input-lg pl-2"
+					placeholder="Team Code"
+					maxlength="9"
+				/>
+				<button class="btn btn-neutral btn-sm rounded-full gap-0 pr-2 mr-6">
+					Join
+					<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-right w-5 h-5 "><path d="m9 18 6-6-6-6"></path></svg>
+				</button>
+			</label>
+		</div>
+	</form>
 	<!-- Main Content -->
 	<main class="container mx-auto p-8">
 		<!-- Start Playing Section -->
 		<section class="text-center mb-12">
 			<h1 class="text-4xl font-bold mb-4">Welcome to Rapua</h1>
 			<p class="text-lg mb-6">Exploration and learning through gameplay</p>
-			<form class="max-w-md mx-auto space-y-6" hx-post="/play" hx-swap="none">
-				<p class="text-center text-3xl pb-3"></p>
-				<div>
-					<label class="form-control w-full" for="team">
-						<div class="label font-bold">
-							<span class="label-text">Team code</span>
-						</div>
-						<input id="team" name="team" type="text" placeholder="RAPUA" class="input input-bordered input-lg w-full text-2xl font-mono text-center uppercase tracking-widest"/>
-					</label>
-				</div>
-				<div>
-					<button type="submit" class="btn btn-primary w-full">
-						Start Playing
-					</button>
-				</div>
-			</form>
 		</section>
 		<!-- Features Section -->
 		<section id="features" class="mb-12">
