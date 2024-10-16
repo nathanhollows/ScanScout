@@ -5,9 +5,7 @@ import (
 	"github.com/nathanhollows/Rapua/internal/flash"
 	"github.com/nathanhollows/Rapua/internal/models"
 	"github.com/uptrace/bun/schema"
-	"math"
 	"sort"
-	"time"
 )
 
 templ ActivityTracker(user models.User) {
@@ -78,22 +76,28 @@ templ ActivityTracker(user models.User) {
 									data-lat={ fmt.Sprint(location.Marker.Lat) }
 									data-lng={ fmt.Sprint(location.Marker.Lng) }
 								>{ location.Marker.Name }</a>
-								if user.CurrentInstance.Settings.CompletionMethod == models.CheckInAndOut {
-									<span
-										class="tooltip flex space-x-2 tooltip-left md:tooltip-top"
-										data-tip={ fmt.Sprint(location.CurrentCount) + " currently visiting, " + fmt.Sprint(location.TotalVisits) + " scans total" }
-									>
-										<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-scan-face"><path d="M3 7V5a2 2 0 0 1 2-2h2"></path> <path d="M17 3h2a2 2 0 0 1 2 2v2"></path> <path d="M21 17v2a2 2 0 0 1-2 2h-2"></path> <path d="M7 21H5a2 2 0 0 1-2-2v-2"></path> <path d="M8 14s1.5 2 4 2 4-2 4-2"></path> <path d="M9 9h.01"></path> <path d="M15 9h.01"></path> </svg>
-										<strong>{ fmt.Sprint(location.CurrentCount) }</strong> /
-										<strong>{ fmt.Sprint(location.TotalVisits) }</strong>
-										if location.AvgDuration > 0 {
-											<p class="flex flex-row space-x-3 text-center">
-												<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-timer"><line x1="10" x2="14" y1="2" y2="2"></line> <line x1="12" x2="15" y1="14" y2="11"></line> <circle cx="12" cy="14" r="8"></circle> </svg>
-												<span>{ fmt.Sprintf("%s", time.Duration(math.Round(location.AvgDuration) * 1e9  )) } </span>
-											</p>
-										}
-									</span>
-								}
+								<span
+									if location.TotalVisits - location.CurrentCount > 0 {
+										class="tooltip flex space-x-2 tooltip-left text-sm md:tooltip-top"
+									} else {
+										class="tooltip flex space-x-2 tooltip-left text-sm md:tooltip-top opacity-50"
+									}
+									data-tip="Completed check-ins"
+								>
+									<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-map-pin-check-inside w-5 h-5"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"></path><path d="m9 10 2 2 4-4"></path></svg>
+									<strong>{ fmt.Sprint(location.TotalVisits - location.CurrentCount) }</strong>
+								</span>
+								<span
+									if location.CurrentCount > 0 {
+										class="tooltip flex space-x-2 tooltip-left text-sm md:tooltip-top"
+									} else {
+										class="tooltip flex space-x-2 tooltip-left text-sm md:tooltip-top opacity-50"
+									}
+									data-tip="Current check-ins"
+								>
+									<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-map-pin w-5 h-5"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"></path><circle cx="12" cy="10" r="3"></circle></svg>
+									<strong>{ fmt.Sprint(location.CurrentCount) }</strong>
+								</span>
 							</div>
 						</div>
 					}
@@ -475,6 +479,9 @@ templ TeamActivity(settings models.InstanceSettings, team models.Team, notificat
 				<ul>
 					for _, scan := range team.Scans {
 						<li>
+							if scan.MustScanOut {
+								<span class="badge badge-info">Current</span>
+							}
 							<span>
 								{ scan.Location.Name }
 							</span>
