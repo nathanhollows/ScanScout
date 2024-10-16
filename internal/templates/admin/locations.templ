@@ -660,11 +660,13 @@ templ locationScript() {
   }
 
   // Add listener to #blocks for new blocks
+  if (document.getElementById("blocks")) {
   document.getElementById("blocks").addEventListener("htmx:afterSwap", function(event) {
 	  for (const element of document.querySelectorAll('.block-delete')) {
 		element.addEventListener('click', confirmDeleteBlock);
 	  }
   });
+  }
 
   initializeMap();
 
