@@ -144,7 +144,8 @@ templ ActivityTracker(user models.User) {
       container: 'map-activity',
       style: style,
       center: coords,
-      zoom: zoom
+      zoom: zoom,
+	  cooperativeGestures: true,
     });
 
     // Find and loop through .location-name elements to create markers
