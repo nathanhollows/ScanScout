@@ -69,25 +69,25 @@ func TestNotificationService_SendNotificationToAll(t *testing.T) {
 
 	tests := []struct {
 		name    string
-		teams   models.Teams
+		teams   []models.Team
 		content string
 		wantErr bool
 	}{
 		{
 			name:    "Valid Notification",
-			teams:   models.Teams{{Code: "team1"}, {Code: "team2"}},
+			teams:   []models.Team{{Code: "team1"}, {Code: "team2"}},
 			content: "This is a test notification",
 			wantErr: false,
 		},
 		{
 			name:    "No Teams",
-			teams:   models.Teams{},
+			teams:   []models.Team{},
 			content: "This is a test notification",
 			wantErr: true,
 		},
 		{
 			name:    "Empty Content",
-			teams:   models.Teams{{Code: "team1"}, {Code: "team2"}},
+			teams:   []models.Team{{Code: "team1"}, {Code: "team2"}},
 			content: "",
 			wantErr: true,
 		},

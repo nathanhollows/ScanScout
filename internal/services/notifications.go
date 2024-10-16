@@ -9,7 +9,7 @@ import (
 
 type NotificationService interface {
 	SendNotification(ctx context.Context, teamCode string, content string) (models.Notification, error)
-	SendNotificationToAll(ctx context.Context, team models.Teams, content string) error
+	SendNotificationToAll(ctx context.Context, team []models.Team, content string) error
 	GetNotifications(ctx context.Context, teamCode string) (models.Notifications, error)
 	DismissNotification(ctx context.Context, notificationID string) error
 }
@@ -31,7 +31,7 @@ func (s *notificationService) SendNotification(ctx context.Context, teamCode str
 }
 
 // SendNotificationToAll sends a notification to all teams
-func (s *notificationService) SendNotificationToAll(ctx context.Context, team models.Teams, content string) error {
+func (s *notificationService) SendNotificationToAll(ctx context.Context, team []models.Team, content string) error {
 	if len(team) == 0 {
 		return fmt.Errorf("no teams to send notification to")
 	}

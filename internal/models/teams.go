@@ -30,8 +30,6 @@ type Team struct {
 	Blocks           []models.TeamBlockState `bun:"rel:has-many,join:code=team_code" json:"blocks"`
 }
 
-type Teams []Team
-
 // Delete removes the team from the database
 func (t *Team) Delete(ctx context.Context) error {
 	_, err := db.DB.NewDelete().Model(t).WherePK().Exec(ctx)
@@ -45,8 +43,8 @@ func (t *Team) Update(ctx context.Context) error {
 }
 
 // FindAll returns all teams
-func FindAllTeams(ctx context.Context, instanceID string) (Teams, error) {
-	var teams Teams
+func FindAllTeams(ctx context.Context, instanceID string) ([]Team, error) {
+	var teams []Team
 	err := db.DB.NewSelect().
 		Model(&teams).
 		Where("team.instance_id = ?", instanceID).
@@ -155,7 +153,7 @@ func (t *Team) SuggestNextLocations(ctx context.Context, limit int) *Locations {
 
 // AddTeams adds the given number of teams
 func AddTeams(ctx context.Context, instanceID string, count int) error {
-	teams := make(Teams, count)
+	teams := make([]Team, count)
 	for i := 0; i < count; i++ {
 		teams[i] = Team{
 			Code:       helpers.NewCode(4),
@@ -175,7 +173,7 @@ func TeamActivityOverview(ctx context.Context, instanceID string) ([]map[string]
 	}
 
 	// Query all teams which have visited a location
-	var teams Teams
+	var teams []Team
 	err = db.DB.NewSelect().Model(&teams).
 		Relation("Scans").
 		Order("team.code ASC").

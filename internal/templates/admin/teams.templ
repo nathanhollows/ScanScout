@@ -2,7 +2,7 @@ package templates
 
 import "github.com/nathanhollows/Rapua/internal/models"
 
-templ TeamsList(teams models.Teams) {
+templ TeamsList(teams []models.Team) {
 	<!-- Show alert if there are no teams -->
 	<div
 		id="teams-none-alert"
@@ -28,7 +28,7 @@ templ TeamsList(teams models.Teams) {
 	}
 }
 
-templ Teams(teams models.Teams) {
+templ Teams(teams []models.Team) {
 	<div class="flex flex-col gap-3 md:flex-row justify-between items-center w-full p-5">
 		<h1 class="text-2xl font-bold">
 			Teams

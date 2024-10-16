@@ -157,7 +157,7 @@ func (s *GameManagerService) DuplicateInstance(ctx context.Context, user *intern
 	return response
 }
 
-func (s *GameManagerService) LoadTeams(ctx context.Context, teams *internalModels.Teams) error {
+func (s *GameManagerService) LoadTeams(ctx context.Context, teams *[]internalModels.Team) error {
 	for i := range *teams {
 		err := (*teams)[i].LoadScans(ctx)
 		if err != nil {
@@ -216,7 +216,7 @@ func (s *GameManagerService) AddTeams(ctx context.Context, instanceID string, co
 		return response
 	}
 
-	teams := make(internalModels.Teams, count)
+	teams := make([]internalModels.Team, count)
 	for i := 0; i < count; i++ {
 		teams[i] = internalModels.Team{
 			Code:       helpers.NewCode(4),

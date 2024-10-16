@@ -42,7 +42,7 @@ func (h *AdminHandler) TeamsAdd(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	teams := response.Data["teams"].(models.Teams)
+	teams := response.Data["teams"].([]models.Team)
 	err = admin.TeamsList(teams).Render(r.Context(), w)
 	if err != nil {
 		h.Logger.Error("TeamsAdd rendering teams list", "error", err.Error(), "instance_id", user.CurrentInstanceID)

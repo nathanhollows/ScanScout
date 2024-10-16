@@ -282,7 +282,7 @@ func teamModal() templ.Component {
 	})
 }
 
-func ActivityTeamsTable(locations models.Locations, teams models.Teams) templ.Component {
+func ActivityTeamsTable(locations models.Locations, teams []models.Team) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
@@ -405,13 +405,13 @@ func ActivityTeamsTable(locations models.Locations, teams models.Teams) templ.Co
 
 // teamLocationMatrix returns a matrix of team locations [teamCode][locatinStatus]
 // ● for visiting, ✔ for visited, blank for not visited
-func teamLocationMatrix(locations models.Locations, teams models.Teams) [][]string {
+func teamLocationMatrix(locations models.Locations, teams []models.Team) [][]string {
 	matrix := make([][]string, len(teams))
 	for i := range matrix {
 		matrix[i] = make([]string, len(locations)+1)
 	}
 	// Sort teams by code
-	teams = func(teams models.Teams) models.Teams {
+	teams = func(teams []models.Team) []models.Team {
 		sort.Slice(teams, func(i, j int) bool {
 			return teams[i].Code < teams[j].Code
 		})
