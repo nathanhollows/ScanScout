@@ -11,13 +11,14 @@ import (
 type Scan struct {
 	baseModel
 
-	InstanceID  string    `bun:",notnull" json:"instance_id"`
-	TeamID      string    `bun:",pk,type:string" json:"team_id"`
-	LocationID  string    `bun:",pk,type:string" json:"location_id"`
-	TimeIn      time.Time `bun:",type:datetime" json:"time_in"`
-	TimeOut     time.Time `bun:",type:datetime" json:"time_out"`
-	MustScanOut bool      `bun:"" json:"must_scan_out"`
-	Points      int       `bun:"," json:"points"`
+	InstanceID      string    `bun:"instance_id,notnull"`
+	TeamID          string    `bun:"team_id,pk,type:string"`
+	LocationID      string    `bun:"location_id,pk,type:string"`
+	TimeIn          time.Time `bun:"time_in,type:datetime"`
+	TimeOut         time.Time `bun:"time_out,type:datetime"`
+	MustScanOut     bool      `bun:"must_scan_out"`
+	Points          int       `bun:"points,"`
+	BlocksCompleted bool      `bun:"blocks_completed,type:int"`
 
 	Location Location `bun:"rel:has-one,join:location_id=id" json:"location"`
 }
