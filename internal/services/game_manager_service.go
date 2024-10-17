@@ -21,14 +21,14 @@ import (
 )
 
 type GameManagerService struct {
-	LocationService LocationService
-	UserService     UserService
+	locationService LocationService
+	userService     UserService
 }
 
-func NewGameManagerService() *GameManagerService {
-	return &GameManagerService{
-		LocationService: NewLocationService(repositories.NewClueRepository()),
-		UserService:     NewUserService(repositories.NewUserRepository()),
+func NewGameManagerService() GameManagerService {
+	return GameManagerService{
+		locationService: NewLocationService(repositories.NewClueRepository()),
+		userService:     NewUserService(repositories.NewUserRepository()),
 	}
 }
 
@@ -53,7 +53,7 @@ func (s *GameManagerService) CreateInstance(ctx context.Context, name string, us
 	}
 
 	user.CurrentInstanceID = instance.ID
-	err := s.UserService.UpdateUser(ctx, user)
+	err := s.userService.UpdateUser(ctx, user)
 	if err != nil {
 		response.AddFlashMessage(*flash.NewError("Error updating user"))
 		response.Error = fmt.Errorf("updating user: %w", err)
@@ -81,7 +81,10 @@ func (s *GameManagerService) SwitchInstance(ctx context.Context, user *internalM
 	}
 
 	user.CurrentInstanceID = instance.ID
-	err = s.UserService.UpdateUser(ctx, user)
+	if s.userService == nil {
+		return nil, errors.New("user service is nil")
+	}
+	err = s.userService.UpdateUser(ctx, user)
 	if err != nil {
 		return nil, fmt.Errorf("updating user: %w", err)
 	}
@@ -190,7 +193,7 @@ func (s *GameManagerService) DeleteInstance(ctx context.Context, user *internalM
 
 	if user.CurrentInstanceID == instance.ID {
 		user.CurrentInstanceID = ""
-		err := s.UserService.UpdateUser(ctx, user)
+		err := s.userService.UpdateUser(ctx, user)
 		if err != nil {
 			response.AddFlashMessage(*flash.NewError("Error updating user"))
 			response.Error = fmt.Errorf("updating user: %w", err)
@@ -613,7 +616,7 @@ func (s *GameManagerService) ReorderLocations(ctx context.Context, user *interna
 func (s *GameManagerService) UpdateClues(ctx context.Context, location *internalModels.Location, clues []string, ids []string) error {
 	clueRepo := repositories.NewClueRepository()
 
-	err := s.LocationService.LoadCluesForLocation(ctx, location)
+	err := s.locationService.LoadCluesForLocation(ctx, location)
 	if err != nil {
 		return fmt.Errorf("loading clues for location: %w", err)
 	}

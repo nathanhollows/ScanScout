@@ -15,7 +15,7 @@ import (
 
 type AdminHandler struct {
 	Logger              *slog.Logger
-	GameManagerService  *services.GameManagerService
+	GameManagerService  services.GameManagerService
 	NotificationService services.NotificationService
 	UserServices        services.UserServices
 	AssetGenerator      services.AssetGenerator
@@ -23,7 +23,7 @@ type AdminHandler struct {
 	BlockService        services.BlockService
 }
 
-func NewAdminHandler(logger *slog.Logger, gs *services.GameManagerService, ns services.NotificationService, us services.UserServices) *AdminHandler {
+func NewAdminHandler(logger *slog.Logger, gs services.GameManagerService, ns services.NotificationService, us services.UserServices) *AdminHandler {
 	return &AdminHandler{
 		Logger:              logger,
 		GameManagerService:  gs,

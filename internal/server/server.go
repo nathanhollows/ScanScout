@@ -20,7 +20,7 @@ var server *http.Server
 
 func Start(logger *slog.Logger) {
 	gameplayService := services.NewGameplayService()
-	gameManagerService := &services.GameManagerService{}
+	gameManagerService := services.NewGameManagerService()
 	notificationService := services.NewNotificationService()
 
 	router = setupRouter(logger, gameplayService, gameManagerService, notificationService)
