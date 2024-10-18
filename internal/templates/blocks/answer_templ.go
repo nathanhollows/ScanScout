@@ -14,7 +14,7 @@ import (
 	internalModels "github.com/nathanhollows/Rapua/internal/models"
 )
 
-func passwordPlayer(settings internalModels.InstanceSettings, block blocks.PasswordBlock, data blocks.PlayerState) templ.Component {
+func answerPlayer(settings internalModels.InstanceSettings, block blocks.AnswerBlock, data blocks.PlayerState) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
@@ -39,7 +39,7 @@ func passwordPlayer(settings internalModels.InstanceSettings, block blocks.Passw
 		var templ_7745c5c3_Var2 string
 		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("block-%s", block.ID))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/blocks/password.templ`, Line: 11, Col: 40}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/blocks/answer.templ`, Line: 11, Col: 40}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 		if templ_7745c5c3_Err != nil {
@@ -57,7 +57,7 @@ func passwordPlayer(settings internalModels.InstanceSettings, block blocks.Passw
 			var templ_7745c5c3_Var3 string
 			templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprint(block.GetPoints()))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/blocks/password.templ`, Line: 15, Col: 111}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/blocks/answer.templ`, Line: 15, Col: 111}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 			if templ_7745c5c3_Err != nil {
@@ -83,7 +83,7 @@ func passwordPlayer(settings internalModels.InstanceSettings, block blocks.Passw
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templ.Raw(stringToMarkdown(block.Content)).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = templ.Raw(stringToMarkdown(block.Prompt)).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -94,7 +94,7 @@ func passwordPlayer(settings internalModels.InstanceSettings, block blocks.Passw
 		var templ_7745c5c3_Var4 string
 		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprint("/blocks/validate"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/blocks/password.templ`, Line: 25, Col: 44}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/blocks/answer.templ`, Line: 25, Col: 44}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 		if templ_7745c5c3_Err != nil {
@@ -107,7 +107,7 @@ func passwordPlayer(settings internalModels.InstanceSettings, block blocks.Passw
 		var templ_7745c5c3_Var5 string
 		templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(block.ID)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/blocks/password.templ`, Line: 28, Col: 54}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/blocks/answer.templ`, Line: 28, Col: 54}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 		if templ_7745c5c3_Err != nil {
@@ -118,9 +118,9 @@ func passwordPlayer(settings internalModels.InstanceSettings, block blocks.Passw
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var6 string
-		templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("password-%s", block.ID))
+		templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("answer-%s", block.ID))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/blocks/password.templ`, Line: 30, Col: 47}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/blocks/answer.templ`, Line: 30, Col: 45}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 		if templ_7745c5c3_Err != nil {
@@ -141,9 +141,9 @@ func passwordPlayer(settings internalModels.InstanceSettings, block blocks.Passw
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var7 string
-			templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("password-%s", block.ID))
+			templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("answer-%s", block.ID))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/blocks/password.templ`, Line: 40, Col: 49}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/blocks/answer.templ`, Line: 40, Col: 47}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 			if templ_7745c5c3_Err != nil {
@@ -162,7 +162,7 @@ func passwordPlayer(settings internalModels.InstanceSettings, block blocks.Passw
 	})
 }
 
-func passwordPlayerUpdate(settings internalModels.InstanceSettings, block blocks.PasswordBlock, data blocks.PlayerState) templ.Component {
+func answerPlayerUpdate(settings internalModels.InstanceSettings, block blocks.AnswerBlock, data blocks.PlayerState) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
@@ -187,7 +187,7 @@ func passwordPlayerUpdate(settings internalModels.InstanceSettings, block blocks
 		var templ_7745c5c3_Var9 string
 		templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("block-%s", block.ID))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/blocks/password.templ`, Line: 64, Col: 40}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/blocks/answer.templ`, Line: 64, Col: 40}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 		if templ_7745c5c3_Err != nil {
@@ -205,7 +205,7 @@ func passwordPlayerUpdate(settings internalModels.InstanceSettings, block blocks
 			var templ_7745c5c3_Var10 string
 			templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprint(block.GetPoints()))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/blocks/password.templ`, Line: 69, Col: 111}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/blocks/answer.templ`, Line: 69, Col: 111}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
 			if templ_7745c5c3_Err != nil {
@@ -231,7 +231,7 @@ func passwordPlayerUpdate(settings internalModels.InstanceSettings, block blocks
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templ.Raw(stringToMarkdown(block.Content)).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = templ.Raw(stringToMarkdown(block.Prompt)).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -242,7 +242,7 @@ func passwordPlayerUpdate(settings internalModels.InstanceSettings, block blocks
 		var templ_7745c5c3_Var11 string
 		templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprint("/blocks/validate"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/blocks/password.templ`, Line: 79, Col: 44}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/blocks/answer.templ`, Line: 79, Col: 44}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
 		if templ_7745c5c3_Err != nil {
@@ -255,7 +255,7 @@ func passwordPlayerUpdate(settings internalModels.InstanceSettings, block blocks
 		var templ_7745c5c3_Var12 string
 		templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(block.ID)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/blocks/password.templ`, Line: 82, Col: 54}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/blocks/answer.templ`, Line: 82, Col: 54}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
 		if templ_7745c5c3_Err != nil {
@@ -266,9 +266,9 @@ func passwordPlayerUpdate(settings internalModels.InstanceSettings, block blocks
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var13 string
-		templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("password-%s", block.ID))
+		templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("answer-%s", block.ID))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/blocks/password.templ`, Line: 84, Col: 47}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/blocks/answer.templ`, Line: 84, Col: 45}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var13))
 		if templ_7745c5c3_Err != nil {
@@ -289,9 +289,9 @@ func passwordPlayerUpdate(settings internalModels.InstanceSettings, block blocks
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var14 string
-			templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("password-%s", block.ID))
+			templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("answer-%s", block.ID))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/blocks/password.templ`, Line: 94, Col: 49}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/blocks/answer.templ`, Line: 94, Col: 47}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var14))
 			if templ_7745c5c3_Err != nil {
@@ -310,7 +310,7 @@ func passwordPlayerUpdate(settings internalModels.InstanceSettings, block blocks
 	})
 }
 
-func passwordAdmin(settings internalModels.InstanceSettings, block blocks.PasswordBlock) templ.Component {
+func answerAdmin(settings internalModels.InstanceSettings, block blocks.AnswerBlock) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
@@ -335,7 +335,7 @@ func passwordAdmin(settings internalModels.InstanceSettings, block blocks.Passwo
 		var templ_7745c5c3_Var16 string
 		templ_7745c5c3_Var16, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprint("/admin/locations/", block.LocationID, "/blocks/", block.ID, "/update"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/blocks/password.templ`, Line: 118, Col: 94}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/blocks/answer.templ`, Line: 118, Col: 94}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var16))
 		if templ_7745c5c3_Err != nil {
@@ -352,7 +352,7 @@ func passwordAdmin(settings internalModels.InstanceSettings, block blocks.Passwo
 		var templ_7745c5c3_Var17 string
 		templ_7745c5c3_Var17, templ_7745c5c3_Err = templ.JoinStringErrs(block.GetName())
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/blocks/password.templ`, Line: 123, Col: 20}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/blocks/answer.templ`, Line: 123, Col: 20}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var17))
 		if templ_7745c5c3_Err != nil {
@@ -370,7 +370,7 @@ func passwordAdmin(settings internalModels.InstanceSettings, block blocks.Passwo
 			var templ_7745c5c3_Var18 string
 			templ_7745c5c3_Var18, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprint(block.Points))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/blocks/password.templ`, Line: 131, Col: 106}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/blocks/answer.templ`, Line: 131, Col: 106}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var18))
 			if templ_7745c5c3_Err != nil {
@@ -388,7 +388,7 @@ func passwordAdmin(settings internalModels.InstanceSettings, block blocks.Passwo
 		var templ_7745c5c3_Var19 string
 		templ_7745c5c3_Var19, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("md-%s", block.ID))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/blocks/password.templ`, Line: 137, Col: 39}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/blocks/answer.templ`, Line: 137, Col: 39}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var19))
 		if templ_7745c5c3_Err != nil {
@@ -401,7 +401,7 @@ func passwordAdmin(settings internalModels.InstanceSettings, block blocks.Passwo
 		var templ_7745c5c3_Var20 string
 		templ_7745c5c3_Var20, templ_7745c5c3_Err = templ.JoinStringErrs(block.ID)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/blocks/password.templ`, Line: 149, Col: 27}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/blocks/answer.templ`, Line: 149, Col: 27}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var20))
 		if templ_7745c5c3_Err != nil {
@@ -414,7 +414,7 @@ func passwordAdmin(settings internalModels.InstanceSettings, block blocks.Passwo
 		var templ_7745c5c3_Var21 string
 		templ_7745c5c3_Var21, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("md-%s", block.ID))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/blocks/password.templ`, Line: 155, Col: 39}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/blocks/answer.templ`, Line: 155, Col: 39}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var21))
 		if templ_7745c5c3_Err != nil {
@@ -425,9 +425,9 @@ func passwordAdmin(settings internalModels.InstanceSettings, block blocks.Passwo
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var22 string
-		templ_7745c5c3_Var22, templ_7745c5c3_Err = templ.JoinStringErrs(block.Content)
+		templ_7745c5c3_Var22, templ_7745c5c3_Err = templ.JoinStringErrs(block.Prompt)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/blocks/password.templ`, Line: 160, Col: 19}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/blocks/answer.templ`, Line: 160, Col: 18}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var22))
 		if templ_7745c5c3_Err != nil {
@@ -440,7 +440,7 @@ func passwordAdmin(settings internalModels.InstanceSettings, block blocks.Passwo
 		var templ_7745c5c3_Var23 string
 		templ_7745c5c3_Var23, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("preview-md-%s", block.ID))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/blocks/password.templ`, Line: 162, Col: 47}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/blocks/answer.templ`, Line: 162, Col: 47}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var23))
 		if templ_7745c5c3_Err != nil {
@@ -450,22 +450,38 @@ func passwordAdmin(settings internalModels.InstanceSettings, block blocks.Passwo
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		if block.Fuzzy {
-			templ_7745c5c3_Err = templ.WriteWatchModeString(templ_7745c5c3_Buffer, 42)
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
+		var templ_7745c5c3_Var24 string
+		templ_7745c5c3_Var24, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("answer-%s", block.ID))
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/blocks/answer.templ`, Line: 174, Col: 43}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var24))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templ.WriteWatchModeString(templ_7745c5c3_Buffer, 42)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var25 string
+		templ_7745c5c3_Var25, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("answer-%s", block.ID))
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/blocks/answer.templ`, Line: 181, Col: 43}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var25))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
 		}
 		templ_7745c5c3_Err = templ.WriteWatchModeString(templ_7745c5c3_Buffer, 43)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var24 string
-		templ_7745c5c3_Var24, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("password-%s", block.ID))
+		var templ_7745c5c3_Var26 string
+		templ_7745c5c3_Var26, templ_7745c5c3_Err = templ.JoinStringErrs(block.Answer)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/blocks/password.templ`, Line: 187, Col: 45}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/blocks/answer.templ`, Line: 186, Col: 24}
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var24))
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var26))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -473,27 +489,11 @@ func passwordAdmin(settings internalModels.InstanceSettings, block blocks.Passwo
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var25 string
-		templ_7745c5c3_Var25, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("password-%s", block.ID))
-		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/blocks/password.templ`, Line: 194, Col: 45}
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var25))
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templ.WriteWatchModeString(templ_7745c5c3_Buffer, 45)
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		var templ_7745c5c3_Var26 string
-		templ_7745c5c3_Var26, templ_7745c5c3_Err = templ.JoinStringErrs(block.Password)
-		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/blocks/password.templ`, Line: 199, Col: 26}
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var26))
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
+		if block.Fuzzy {
+			templ_7745c5c3_Err = templ.WriteWatchModeString(templ_7745c5c3_Buffer, 45)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
 		}
 		templ_7745c5c3_Err = templ.WriteWatchModeString(templ_7745c5c3_Buffer, 46)
 		if templ_7745c5c3_Err != nil {

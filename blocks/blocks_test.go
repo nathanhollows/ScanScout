@@ -27,20 +27,20 @@ func TestCreateFromBaseBlock(t *testing.T) {
 		assert.Equal(t, 10, block.GetPoints())
 	})
 
-	t.Run("creates PasswordBlock from base block", func(t *testing.T) {
+	t.Run("creates AnswerBlock from base block", func(t *testing.T) {
 		baseBlock := blocks.BaseBlock{
 			ID:         "2",
 			LocationID: "loc2",
-			Type:       "password",
-			Data:       json.RawMessage(`{"password": "secret"}`),
+			Type:       "answer",
+			Data:       json.RawMessage(`{"answer": "secret"}`),
 			Order:      2,
 			Points:     20,
 		}
 
 		block, err := blocks.CreateFromBaseBlock(baseBlock)
 		assert.NoError(t, err)
-		assert.IsType(t, &blocks.PasswordBlock{}, block)
-		assert.Equal(t, "password", block.GetType())
+		assert.IsType(t, &blocks.AnswerBlock{}, block)
+		assert.Equal(t, "answer", block.GetType())
 		assert.Equal(t, "2", block.GetID())
 		assert.Equal(t, 20, block.GetPoints())
 	})
@@ -67,7 +67,7 @@ func TestGetRegisteredBlocks(t *testing.T) {
 		blocklist := blocks.GetRegisteredBlocks()
 		assert.Len(t, blocklist, 3)
 		assert.IsType(t, &blocks.MarkdownBlock{}, blocklist[0])
-		assert.IsType(t, &blocks.PasswordBlock{}, blocklist[1])
+		assert.IsType(t, &blocks.AnswerBlock{}, blocklist[1])
 		assert.IsType(t, &blocks.ChecklistBlock{}, blocklist[2])
 	})
 }

@@ -19,9 +19,9 @@ func RenderAdminEdit(settings internalModels.InstanceSettings, block blocks.Bloc
 	case "markdown":
 		b := block.(*blocks.MarkdownBlock)
 		return markdownAdmin(settings, *b)
-	case "password":
-		b := block.(*blocks.PasswordBlock)
-		return passwordAdmin(settings, *b)
+	case "answer":
+		b := block.(*blocks.AnswerBlock)
+		return answerAdmin(settings, *b)
 	case "checklist":
 		b := block.(*blocks.ChecklistBlock)
 		return checklistAdmin(settings, *b)
@@ -34,9 +34,9 @@ func RenderPlayerView(settings internalModels.InstanceSettings, block blocks.Blo
 	case "markdown":
 		b := block.(*blocks.MarkdownBlock)
 		return markdownPlayer(settings, *b)
-	case "password":
-		b := block.(*blocks.PasswordBlock)
-		return passwordPlayer(settings, *b, state)
+	case "answer":
+		b := block.(*blocks.AnswerBlock)
+		return answerPlayer(settings, *b, state)
 	case "checklist":
 		b := block.(*blocks.ChecklistBlock)
 		return checklistPlayer(settings, *b, state)
@@ -49,9 +49,9 @@ func RenderPlayerUpdate(settings internalModels.InstanceSettings, block blocks.B
 	case "markdown":
 		b := block.(*blocks.MarkdownBlock)
 		return markdownPlayer(settings, *b)
-	case "password":
-		b := block.(*blocks.PasswordBlock)
-		return passwordPlayerUpdate(settings, *b, state)
+	case "answer":
+		b := block.(*blocks.AnswerBlock)
+		return answerPlayerUpdate(settings, *b, state)
 	case "checklist":
 		b := block.(*blocks.ChecklistBlock)
 		return checklistPlayer(settings, *b, state)

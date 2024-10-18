@@ -51,7 +51,7 @@ type BaseBlock struct {
 
 var registeredBlocks = Blocks{
 	&MarkdownBlock{},
-	&PasswordBlock{},
+	&AnswerBlock{},
 	&ChecklistBlock{},
 	// &APIBlock{},
 }
@@ -64,8 +64,8 @@ func CreateFromBaseBlock(baseBlock BaseBlock) (Block, error) {
 	switch baseBlock.Type {
 	case "markdown":
 		return NewMarkdownBlock(baseBlock), nil
-	case "password":
-		return NewPasswordBlock(baseBlock), nil
+	case "answer":
+		return NewAnswerBlock(baseBlock), nil
 	case "checklist":
 		return NewChecklistBlock(baseBlock), nil
 	default:
@@ -80,8 +80,8 @@ func NewMarkdownBlock(base BaseBlock) *MarkdownBlock {
 	}
 }
 
-func NewPasswordBlock(base BaseBlock) *PasswordBlock {
-	return &PasswordBlock{
+func NewAnswerBlock(base BaseBlock) *AnswerBlock {
+	return &AnswerBlock{
 		BaseBlock: base,
 	}
 }

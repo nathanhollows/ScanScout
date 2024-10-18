@@ -48,6 +48,10 @@ func (h *PlayerHandler) ValidateBlock(w http.ResponseWriter, r *http.Request) {
 		h.Logger.Error("validateBlock: validating and updating block state", "error", err, "block", block.GetID(), "team", team.Code)
 	}
 
+	if state.IsComplete() {
+		// err := h.GameplayService.UpdateCheckinStatus(r.Context(), team, state)
+	}
+
 	err = templates.RenderPlayerUpdate(team.Instance.Settings, block, state).Render(r.Context(), w)
 	if err != nil {
 		h.handleError(w, r, fmt.Errorf("validateBlock: rendering template: %v", err).Error(), "Something went wrong!")
