@@ -31,7 +31,10 @@ func NewAdminHandler(logger *slog.Logger, gs services.GameManagerService, ns ser
 		UserServices:        us,
 		AssetGenerator:      services.NewAssetGenerator(),
 		LocationService:     services.NewLocationService(repositories.NewClueRepository()),
-		BlockService:        services.NewBlockService(repositories.NewBlockRepository()),
+		BlockService: services.NewBlockService(
+			repositories.NewBlockRepository(),
+			repositories.NewBlockStateRepository(),
+		),
 	}
 }
 

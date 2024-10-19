@@ -12,8 +12,10 @@ type UserServices struct {
 
 func NewUserServices(repo repositories.UserRepository) *UserServices {
 	return &UserServices{
-		AuthService:  NewAuthService(repo),
-		UserService:  NewUserService(repo),
-		BlockService: NewBlockService(repositories.NewBlockRepository()),
+		AuthService: NewAuthService(repo),
+		UserService: NewUserService(repo),
+		BlockService: NewBlockService(repositories.NewBlockRepository(),
+			repositories.NewBlockStateRepository(),
+		),
 	}
 }

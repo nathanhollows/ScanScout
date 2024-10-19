@@ -40,6 +40,11 @@ func (h *PlayerHandler) Play(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		h.Logger.Error("Home: rendering template", "error", err)
 	}
+
+	// Destroy the session now
+	session.Options.MaxAge = -1
+	session.Save(r, w)
+
 	return
 
 }

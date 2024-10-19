@@ -26,19 +26,29 @@ type GameplayService interface {
 	GetMarkerByCode(ctx context.Context, locationCode string) *ServiceResponse
 	StartPlaying(ctx context.Context, teamCode, customTeamName string) *ServiceResponse
 	SuggestNextLocations(ctx context.Context, team *models.Team, limit int) ServiceResponse
+	// CheckIn checks a team in at a location
+	// It also manages the points and mustScanOut fields
+	// As well as checking if any blocks must be completed
 	CheckIn(ctx context.Context, team *models.Team, locationCode string) ServiceResponse
 	CheckOut(ctx context.Context, team *models.Team, locationCode string) ServiceResponse
 	CheckValidLocation(ctx context.Context, team *models.Team, locationCode string) *ServiceResponse
-	ValidateAndUpdateBlockState(ctx context.Context, block blocks.Block, state blocks.PlayerState, data map[string][]string) (blocks.PlayerState, error)
+	ValidateAndUpdateBlockState(ctx context.Context, team models.Team, data map[string][]string) (blocks.PlayerState, blocks.Block, error)
 }
 
 type gameplayService struct {
 	LocationService LocationService
+	TeamService     TeamService
+	BlockService    BlockService
 }
 
 func NewGameplayService() GameplayService {
 	return &gameplayService{
 		LocationService: NewLocationService(repositories.NewClueRepository()),
+		TeamService:     NewTeamService(repositories.NewTeamRepository()),
+		BlockService: NewBlockService(
+			repositories.NewBlockRepository(),
+			repositories.NewBlockStateRepository(),
+		),
 	}
 }
 
@@ -131,7 +141,19 @@ func (s *gameplayService) SuggestNextLocations(ctx context.Context, team *models
 func (s *gameplayService) CheckIn(ctx context.Context, team *models.Team, locationCode string) (response ServiceResponse) {
 	response = ServiceResponse{}
 
-	location, err := models.FindLocationByInstanceAndCode(ctx, team.InstanceID, locationCode)
+	// A team may not check in if they must check out at a different location
+	if team.MustScanOut != "" && locationCode != team.MustScanOut {
+		err := team.LoadBlockingLocation(ctx)
+		if err != nil {
+			response.Error = fmt.Errorf("loading blocking location: %w", err)
+			return response
+		}
+		response.Error = ErrAlreadyCheckedIn
+		return response
+	}
+
+	// Find the location
+	location, err := s.LocationService.FindLocationByInstanceAndCode(ctx, team.InstanceID, locationCode)
 	if err != nil {
 		msg := flash.NewWarning("Please double check the code and try again.").SetTitle("Location code not found")
 		response.AddFlashMessage(msg)
@@ -139,19 +161,7 @@ func (s *gameplayService) CheckIn(ctx context.Context, team *models.Team, locati
 		return response
 	}
 
-	if team.MustScanOut != "" {
-		if locationCode != team.MustScanOut {
-			err := team.LoadBlockingLocation(ctx)
-			if err != nil {
-				response.Error = fmt.Errorf("loading blocking location: %w", err)
-				return response
-			}
-			response.Error = ErrAlreadyCheckedIn
-			return response
-		}
-	}
-
-	// Check if the team has already scanned in
+	// A team may not check in if they have previously checked in at this location
 	scanned := false
 	team.LoadScans(ctx)
 	for _, s := range team.Scans {
@@ -165,21 +175,46 @@ func (s *gameplayService) CheckIn(ctx context.Context, team *models.Team, locati
 		return response
 	}
 
-	// Check if the location is valid for the team to check in
+	// The location must be valid for the team to check in
 	valid := s.CheckValidLocation(ctx, team, locationCode)
 	if valid.Error != nil {
 		response.Error = fmt.Errorf("check valid location: %w", valid.Error)
 		return response
 	}
 
-	// Log the CheckIn
+	// Check if any blocks require validation (e.g. a checklist)
+	validationRequired, err := s.BlockService.CheckValidationRequiredForLocation(ctx, location.ID)
+	if err != nil {
+		msg := flash.NewError("Something went wrong. Please try again.")
+		response.AddFlashMessage(*msg)
+		err := fmt.Errorf("checking if validation is required: %w", err)
+		response.Error = fmt.Errorf("checking if validation is required: %w", err)
+		return response
+	}
+
+	// Log the check in
 	mustCheckOut := team.Instance.Settings.CompletionMethod == models.CheckInAndOut
-	_, err = location.LogCheckIn(ctx, *team, mustCheckOut)
+	_, err = s.LocationService.LogCheckIn(ctx, team, location, mustCheckOut, validationRequired)
 	if err != nil {
 		msg := flash.NewWarning("Please double check the code and try again.").SetTitle("Couldn't scan in.")
 		response.AddFlashMessage(msg)
 		err := fmt.Errorf("logging scan: %w", err)
 		response.Error = fmt.Errorf("logging scan: %w", err)
+		return response
+	}
+
+	// Points are only added if the team does not need to scan out
+	// If the team must check out, the location is saved to the team
+	if mustCheckOut {
+		team.MustScanOut = location.ID
+	} else {
+		team.Points += location.Points
+	}
+	err = s.TeamService.Update(ctx, team)
+	if err != nil {
+		msg := flash.NewError("Something went wrong. Please try again.")
+		response.AddFlashMessage(*msg)
+		response.Error = fmt.Errorf("updating team: %w", err)
 		return response
 	}
 
@@ -305,25 +340,35 @@ func (s *gameplayService) loadClues(ctx context.Context, team *models.Team, loca
 	return response
 }
 
-func (s *gameplayService) ValidateAndUpdateBlockState(ctx context.Context, block blocks.Block, state blocks.PlayerState, data map[string][]string) (blocks.PlayerState, error) {
-	var err error
-	blockStateRepo := repositories.NewBlockStateRepository()
+func (s *gameplayService) ValidateAndUpdateBlockState(ctx context.Context, team models.Team, data map[string][]string) (blocks.PlayerState, blocks.Block, error) {
+	blockID := data["block"][0]
+	if blockID == "" {
+		return nil, nil, fmt.Errorf("blockID must be set")
+	}
 
-	// No action required if the block is already complete
+	block, state, err := s.BlockService.GetBlockWithStateByBlockIDAndTeamCode(ctx, blockID, team.Code)
+	if err != nil {
+		return nil, nil, fmt.Errorf("getting block with state: %w", err)
+	}
+
+	if state == nil {
+		return nil, nil, fmt.Errorf("block state not found")
+	}
+
 	if state.IsComplete() {
-		return state, nil
+		return state, block, nil
 	}
 
 	// Validate the block
 	state, err = block.ValidatePlayerInput(state, data)
 	if err != nil {
-		return nil, fmt.Errorf("validating block: %w", err)
+		return nil, nil, fmt.Errorf("validating block: %w", err)
 	}
 
-	state, err = blockStateRepo.Update(ctx, state)
+	state, err = s.BlockService.UpdateState(ctx, state)
 	if err != nil {
-		return nil, fmt.Errorf("saving block state: %w", err)
+		return nil, nil, fmt.Errorf("updating block state: %w", err)
 	}
 
-	return state, nil
+	return state, block, nil
 }
