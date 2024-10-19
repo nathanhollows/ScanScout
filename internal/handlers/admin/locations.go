@@ -101,7 +101,8 @@ func (h *AdminHandler) LocationEdit(w http.ResponseWriter, r *http.Request) {
 
 	location, err := models.FindLocationByInstanceAndCode(r.Context(), user.CurrentInstanceID, code)
 	if err != nil {
-		h.handleError(w, r, "LocationEdit: finding location", "Error finding location", "error", err, "instance_id", user.CurrentInstanceID, "location_code", code)
+		h.Logger.Error("LocationEdit: finding location", "error", err, "instance_id", user.CurrentInstanceID, "location_code", code)
+		h.redirect(w, r, "/admin/locations")
 		return
 	}
 
