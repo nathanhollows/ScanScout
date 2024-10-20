@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/nathanhollows/Rapua/db"
 	"github.com/nathanhollows/Rapua/internal/models"
-	"github.com/nathanhollows/Rapua/pkg/db"
 )
 
 type CheckInRepository interface {

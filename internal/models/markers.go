@@ -4,8 +4,8 @@ import (
 	"context"
 	"strings"
 
+	"github.com/nathanhollows/Rapua/db"
 	"github.com/nathanhollows/Rapua/internal/helpers"
-	"github.com/nathanhollows/Rapua/pkg/db"
 )
 
 type Marker struct {

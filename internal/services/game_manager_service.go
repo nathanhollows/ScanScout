@@ -11,12 +11,12 @@ import (
 	"strings"
 	"time"
 
+	"github.com/nathanhollows/Rapua/db"
 	"github.com/nathanhollows/Rapua/internal/flash"
 	"github.com/nathanhollows/Rapua/internal/helpers"
 	internalModels "github.com/nathanhollows/Rapua/internal/models"
 	"github.com/nathanhollows/Rapua/internal/repositories"
 	"github.com/nathanhollows/Rapua/models"
-	"github.com/nathanhollows/Rapua/pkg/db"
 	"github.com/uptrace/bun"
 )
 

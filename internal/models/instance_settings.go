@@ -3,7 +3,7 @@ package models
 import (
 	"context"
 
-	"github.com/nathanhollows/Rapua/pkg/db"
+	"github.com/nathanhollows/Rapua/db"
 )
 
 type InstanceSettings struct {

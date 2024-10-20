@@ -7,7 +7,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/nathanhollows/Rapua/internal/models"
 	"github.com/nathanhollows/Rapua/internal/repositories"
-	"github.com/nathanhollows/Rapua/pkg/security"
+	"github.com/nathanhollows/Rapua/security"
 )
 
 // ErrPasswordsDoNotMatch is returned when the passwords do not match

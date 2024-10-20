@@ -7,9 +7,9 @@ import (
 	"math/rand"
 	"strings"
 
+	"github.com/nathanhollows/Rapua/db"
 	"github.com/nathanhollows/Rapua/internal/helpers"
 	"github.com/nathanhollows/Rapua/models"
-	"github.com/nathanhollows/Rapua/pkg/db"
 	"github.com/uptrace/bun"
 )
 

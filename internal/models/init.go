@@ -6,8 +6,8 @@ import (
 	"log/slog"
 	"time"
 
+	"github.com/nathanhollows/Rapua/db"
 	"github.com/nathanhollows/Rapua/models"
-	"github.com/nathanhollows/Rapua/pkg/db"
 )
 
 func CreateTables(logger *slog.Logger) {

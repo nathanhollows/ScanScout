@@ -5,8 +5,8 @@ import (
 	"fmt"
 
 	"github.com/google/uuid"
+	"github.com/nathanhollows/Rapua/db"
 	"github.com/nathanhollows/Rapua/models"
-	"github.com/nathanhollows/Rapua/pkg/db"
 )
 
 type ClueRepository interface {

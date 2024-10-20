@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/nathanhollows/Rapua/db"
 	"github.com/nathanhollows/Rapua/internal/models"
-	"github.com/nathanhollows/Rapua/pkg/db"
 	"github.com/uptrace/bun"
 )
 

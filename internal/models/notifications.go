@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	"github.com/google/uuid"
-	"github.com/nathanhollows/Rapua/pkg/db"
+	"github.com/nathanhollows/Rapua/db"
 )
 
 type Notification struct {

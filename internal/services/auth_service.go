@@ -14,7 +14,7 @@ import (
 	"github.com/nathanhollows/Rapua/internal/models"
 	"github.com/nathanhollows/Rapua/internal/repositories"
 	"github.com/nathanhollows/Rapua/internal/sessions"
-	"github.com/nathanhollows/Rapua/pkg/security"
+	"github.com/nathanhollows/Rapua/security"
 )
 
 var (

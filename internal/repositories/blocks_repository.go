@@ -5,8 +5,8 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/nathanhollows/Rapua/blocks"
+	"github.com/nathanhollows/Rapua/db"
 	"github.com/nathanhollows/Rapua/models"
-	"github.com/nathanhollows/Rapua/pkg/db"
 )
 
 type BlockRepository interface {

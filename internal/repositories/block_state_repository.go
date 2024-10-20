@@ -7,8 +7,8 @@ import (
 	"time"
 
 	"github.com/nathanhollows/Rapua/blocks"
+	"github.com/nathanhollows/Rapua/db"
 	"github.com/nathanhollows/Rapua/models"
-	"github.com/nathanhollows/Rapua/pkg/db"
 )
 
 type BlockStateRepository interface {
