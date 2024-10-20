@@ -34,10 +34,6 @@ func (h *PlayerHandler) ValidateBlock(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if state.IsComplete() {
-		h.handleSuccess(w, r, "Block already completed")
-	}
-
 	err = templates.RenderPlayerUpdate(team.Instance.Settings, block, state).Render(r.Context(), w)
 	if err != nil {
 		h.handleError(w, r, fmt.Errorf("validateBlock: rendering template: %v", err).Error(), "Something went wrong!")
