@@ -7,10 +7,10 @@ import (
 	"os"
 
 	"github.com/joho/godotenv"
+	"github.com/nathanhollows/Rapua/db"
 	"github.com/nathanhollows/Rapua/internal/models"
 	"github.com/nathanhollows/Rapua/internal/server"
 	"github.com/nathanhollows/Rapua/internal/sessions"
-	"github.com/nathanhollows/Rapua/pkg/db"
 )
 
 func main() {

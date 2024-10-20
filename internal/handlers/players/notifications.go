@@ -5,13 +5,10 @@ import (
 
 	"github.com/go-chi/chi"
 	"github.com/nathanhollows/Rapua/internal/flash"
-	"github.com/nathanhollows/Rapua/internal/handlers"
 )
 
 // DismissNotificationPost dismisses a message
 func (h *PlayerHandler) DismissNotificationPost(w http.ResponseWriter, r *http.Request) {
-	handlers.SetDefaultHeaders(w)
-
 	notificationID := chi.URLParam(r, "ID")
 	err := h.NotificationService.DismissNotification(r.Context(), notificationID)
 

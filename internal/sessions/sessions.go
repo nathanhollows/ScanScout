@@ -15,6 +15,11 @@ import (
 
 var store sessions.Store
 
+const (
+	adminSession  = "admin"
+	playerSession = "scanscout"
+)
+
 func Start() {
 	store = sessions.NewCookieStore([]byte(os.Getenv("SESSION_KEY")))
 
@@ -36,13 +41,37 @@ func Start() {
 }
 
 // Get returns a session for the given request
+func GetAdmin(r *http.Request) (*sessions.Session, error) {
+	return store.Get(r, adminSession)
+}
+
+// Get returns a session for the given request
+func GetPlayer(r *http.Request) (*sessions.Session, error) {
+	return store.Get(r, playerSession)
+}
+
+// Get returns a session for the given request
 func Get(r *http.Request, name string) (*sessions.Session, error) {
 	return store.Get(r, name)
 }
 
-// New session for the given request and user
-func New(r *http.Request, user models.User) (*sessions.Session, error) {
-	session, err := store.Get(r, "admin")
+// NewFromTeam session for the given request and team
+func NewFromTeam(r *http.Request, team models.Team) (*sessions.Session, error) {
+	session, err := store.Get(r, playerSession)
+	if err != nil {
+		return nil, err
+	}
+
+	session.Values["team"] = team.Code
+	session.Options.Secure = true
+	session.Options.SameSite = http.SameSiteStrictMode
+
+	return session, nil
+}
+
+// NewFromUser session for the given request and user
+func NewFromUser(r *http.Request, user models.User) (*sessions.Session, error) {
+	session, err := store.Get(r, adminSession)
 	if err != nil {
 		return nil, err
 	}

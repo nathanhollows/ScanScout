@@ -49,7 +49,7 @@ func (h *PublicHandler) LoginPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	session, err := sessions.New(r, *user)
+	session, err := sessions.NewFromUser(r, *user)
 	if err != nil {
 		h.Logger.Error("creating session", "err", err)
 		w.WriteHeader(http.StatusInternalServerError)
@@ -200,7 +200,7 @@ func (h *PublicHandler) AuthCallback(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	session, err := sessions.New(r, *user)
+	session, err := sessions.NewFromUser(r, *user)
 	if err != nil {
 		h.Logger.Error("creating session", "err", err)
 		w.WriteHeader(http.StatusInternalServerError)

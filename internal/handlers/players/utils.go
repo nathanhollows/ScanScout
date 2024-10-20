@@ -6,23 +6,39 @@ import (
 	"log/slog"
 	"net/http"
 
+	"github.com/gorilla/sessions"
 	"github.com/nathanhollows/Rapua/internal/contextkeys"
+	"github.com/nathanhollows/Rapua/internal/flash"
 	"github.com/nathanhollows/Rapua/internal/models"
+	"github.com/nathanhollows/Rapua/internal/repositories"
 	"github.com/nathanhollows/Rapua/internal/services"
+	templates "github.com/nathanhollows/Rapua/internal/templates/players"
 )
 
 type PlayerHandler struct {
 	Logger              *slog.Logger
-	GameplayService     *services.GameplayService
+	GameplayService     services.GameplayService
 	NotificationService services.NotificationService
+	BlockService        services.BlockService
+	TeamService         services.TeamService
 }
 
-func NewPlayerHandler(logger *slog.Logger, gs *services.GameplayService, ns services.NotificationService) *PlayerHandler {
+func NewPlayerHandler(logger *slog.Logger, gs services.GameplayService, ns services.NotificationService) *PlayerHandler {
 	return &PlayerHandler{
 		Logger:              logger,
 		GameplayService:     gs,
 		NotificationService: ns,
+		BlockService:        services.NewBlockService(repositories.NewBlockRepository(), repositories.NewBlockStateRepository()),
+		TeamService:         services.NewTeamService(repositories.NewTeamRepository()),
 	}
+}
+
+// getTeamIfExists retrieves a team by its code if present.
+func (h *PlayerHandler) getTeamIfExists(ctx context.Context, teamCode interface{}) (*models.Team, error) {
+	if teamCode == nil {
+		return nil, nil
+	}
+	return h.GameplayService.GetTeamByCode(ctx, teamCode.(string))
 }
 
 // GetTeamFromContext retrieves the team from the context
@@ -41,11 +57,32 @@ func (h PlayerHandler) getTeamFromContext(ctx context.Context) (*models.Team, er
 }
 
 // redirect is a helper function to redirect the user to a new page
-// It accounts for htmx requests and redirects the user to the referer
+// It accounts for htmx requests
 func (h PlayerHandler) redirect(w http.ResponseWriter, r *http.Request, path string) {
 	if r.Header.Get("HX-Request") == "true" {
 		w.Header().Set("HX-Redirect", path)
 		return
 	}
 	http.Redirect(w, r, path, http.StatusFound)
+}
+
+// invalidateSession invalidates the current session.
+func invalidateSession(session *sessions.Session, r *http.Request, w http.ResponseWriter) {
+	session.Options.MaxAge = -1
+	session.Save(r, w)
+}
+
+func (h *PlayerHandler) handleError(w http.ResponseWriter, r *http.Request, logMsg string, flashMsg string, params ...interface{}) {
+	h.Logger.Error(logMsg, params...)
+	err := templates.Toast(*flash.NewError(flashMsg)).Render(r.Context(), w)
+	if err != nil {
+		h.Logger.Error(logMsg+" - rendering template", "error", err)
+	}
+}
+
+func (h *PlayerHandler) handleSuccess(w http.ResponseWriter, r *http.Request, flashMsg string) {
+	err := templates.Toast(*flash.NewSuccess(flashMsg)).Render(r.Context(), w)
+	if err != nil {
+		h.Logger.Error("rendering success template", "error", err)
+	}
 }

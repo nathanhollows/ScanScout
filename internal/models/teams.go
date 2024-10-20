@@ -7,28 +7,28 @@ import (
 	"math/rand"
 	"strings"
 
+	"github.com/nathanhollows/Rapua/db"
 	"github.com/nathanhollows/Rapua/internal/helpers"
-	"github.com/nathanhollows/Rapua/pkg/db"
+	"github.com/nathanhollows/Rapua/models"
 	"github.com/uptrace/bun"
 )
 
 type Team struct {
 	baseModel
 
-	Code        string `bun:",unique,pk" json:"code"`
-	Name        string `bun:"," json:"name"`
-	InstanceID  string `bun:",notnull" json:"instance_id"`
-	HasStarted  bool   `bun:",default:false" json:"has_started"`
-	MustScanOut string `bun:"" json:"must_scan_out"`
-	Points      int    `bun:"," json:"points"`
+	Code         string `bun:"code,unique,pk"`
+	Name         string `bun:"name,"`
+	InstanceID   string `bun:"instance_id,notnull"`
+	HasStarted   bool   `bun:"has_started,default:false"`
+	MustCheckOut string `bun:"must_scan_out"`
+	Points       int    `bun:"points,"`
 
-	Instance         Instance      `bun:"rel:has-one,join:instance_id=id" json:"instance"`
-	Scans            Scans         `bun:"rel:has-many,join:code=team_id" json:"scans"`
-	BlockingLocation Location      `bun:"rel:has-one,join:must_scan_out=marker_id,join:instance_id=instance_id" json:"blocking_location"`
-	Messages         Notifications `bun:"rel:has-many,join:code=team_code" json:"messages"`
+	Instance         Instance                `bun:"rel:has-one,join:instance_id=id"`
+	CheckIns         []CheckIn               `bun:"rel:has-many,join:code=team_code"`
+	BlockingLocation Location                `bun:"rel:has-one,join:must_scan_out=marker_id,join:instance_id=instance_id"`
+	Messages         []Notification          `bun:"rel:has-many,join:code=team_code"`
+	Blocks           []models.TeamBlockState `bun:"rel:has-many,join:code=team_code"`
 }
-
-type Teams []Team
 
 // Delete removes the team from the database
 func (t *Team) Delete(ctx context.Context) error {
@@ -43,8 +43,8 @@ func (t *Team) Update(ctx context.Context) error {
 }
 
 // FindAll returns all teams
-func FindAllTeams(ctx context.Context, instanceID string) (Teams, error) {
-	var teams Teams
+func FindAllTeams(ctx context.Context, instanceID string) ([]Team, error) {
+	var teams []Team
 	err := db.DB.NewSelect().
 		Model(&teams).
 		Where("team.instance_id = ?", instanceID).
@@ -89,7 +89,7 @@ func FindTeamByCodeAndInstance(ctx context.Context, code, instance string) (*Tea
 
 // HasVisited returns true if the team has visited the given location
 func (t *Team) HasVisited(location *Location) bool {
-	for _, s := range t.Scans {
+	for _, s := range t.CheckIns {
 		if s.LocationID == location.ID {
 			return true
 		}
@@ -102,8 +102,8 @@ func (t *Team) SuggestNextLocations(ctx context.Context, limit int) *Locations {
 	var locations Locations
 
 	// Get the list of locations the team has already visited
-	visited := make([]string, len(t.Scans))
-	for i, s := range t.Scans {
+	visited := make([]string, len(t.CheckIns))
+	for i, s := range t.CheckIns {
 		visited[i] = s.LocationID
 	}
 
@@ -153,7 +153,7 @@ func (t *Team) SuggestNextLocations(ctx context.Context, limit int) *Locations {
 
 // AddTeams adds the given number of teams
 func AddTeams(ctx context.Context, instanceID string, count int) error {
-	teams := make(Teams, count)
+	teams := make([]Team, count)
 	for i := 0; i < count; i++ {
 		teams[i] = Team{
 			Code:       helpers.NewCode(4),
@@ -173,7 +173,7 @@ func TeamActivityOverview(ctx context.Context, instanceID string) ([]map[string]
 	}
 
 	// Query all teams which have visited a location
-	var teams Teams
+	var teams []Team
 	err = db.DB.NewSelect().Model(&teams).
 		Relation("Scans").
 		Order("team.code ASC").
@@ -190,7 +190,7 @@ func TeamActivityOverview(ctx context.Context, instanceID string) ([]map[string]
 	// If TimeIn is not set, the duration is 0
 	count := 0
 	for _, team := range teams {
-		if len(team.Scans) > 0 {
+		if len(team.CheckIns) > 0 {
 			count++
 		}
 	}
@@ -212,7 +212,7 @@ func TeamActivityOverview(ctx context.Context, instanceID string) ([]map[string]
 			activity[count]["locations"].([]map[string]interface{})[j]["time_in"] = ""
 			activity[count]["locations"].([]map[string]interface{})[j]["time_out"] = ""
 		}
-		for _, scan := range team.Scans {
+		for _, scan := range team.CheckIns {
 			for j, instanceLocation := range instanceLocations {
 				if scan.LocationID == instanceLocation.Marker.Code {
 					activity[count]["locations"].([]map[string]interface{})[j]["visited"] = true
@@ -236,70 +236,10 @@ func TeamActivityOverview(ctx context.Context, instanceID string) ([]map[string]
 func (t *Team) GetVisitedLocations(ctx context.Context) ([]*Location, error) {
 	var locations []*Location
 	err := db.DB.NewSelect().Model(&locations).
-		Where("marker_id in (SELECT location_id FROM scans WHERE team_id = ?)", t.Code).
+		Where("marker_id in (SELECT location_id FROM scans WHERE team_code = ?)", t.Code).
 		Scan(ctx)
 	if err != nil {
 		return nil, err
 	}
 	return locations, nil
-}
-
-// LoadInstance loads the instance for the team
-func (t *Team) LoadInstance(ctx context.Context) error {
-	if t.InstanceID == "" || t.Instance.ID != "" {
-		return nil
-	}
-	err := db.DB.NewSelect().Model(&t.Instance).
-		Where("id = ?", t.InstanceID).
-		Relation("Settings").
-		Scan(ctx)
-	if err != nil {
-		return fmt.Errorf("LoadInstance: %v", err)
-	}
-	return nil
-}
-
-// LoadScans loads the scans for the team
-func (t *Team) LoadScans(ctx context.Context) error {
-	// Only load the scans if they are not already loaded
-	if len(t.Scans) == 0 {
-		err := db.DB.NewSelect().Model(&t.Scans).
-			Where("team_id = ?", t.Code).
-			Relation("Location").
-			Relation("Location.Content").
-			Order("time_in DESC").
-			Scan(ctx)
-		if err != nil {
-			return fmt.Errorf("LoadScans: %v", err)
-		}
-	}
-	return nil
-}
-
-// LoadBlockingLocation loads the blocking location for the team
-func (t *Team) LoadBlockingLocation(ctx context.Context) error {
-	if t.MustScanOut == "" || t.BlockingLocation.ID != "" {
-		return nil
-	}
-	err := db.DB.NewSelect().Model(&t.BlockingLocation).
-		Where("ID = ?", t.MustScanOut).
-		Scan(ctx)
-	if err != nil {
-		return fmt.Errorf("LoadBlockingLocation: %v", err)
-	}
-	return nil
-}
-
-// LoadNotifications loads the notifications for the team
-func (t *Team) LoadNotifications(ctx context.Context) error {
-	if len(t.Messages) == 0 {
-		err := db.DB.NewSelect().Model(&t.Messages).
-			Where("team_code = ? AND dismissed = false", t.Code).
-			Order("created_at DESC").
-			Scan(ctx)
-		if err != nil {
-			return fmt.Errorf("LoadNotifications: %v", err)
-		}
-	}
-	return nil
 }

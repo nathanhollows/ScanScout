@@ -3,19 +3,19 @@ package models
 import (
 	"context"
 
-	"github.com/nathanhollows/Rapua/pkg/db"
+	"github.com/nathanhollows/Rapua/db"
 )
 
 type InstanceSettings struct {
-	InstanceID        string           `bun:",pk,type:varchar(36)" json:"instance_id"`
-	NavigationMode    NavigationMode   `bun:",type:int" json:"navigation_mode"`
-	NavigationMethod  NavigationMethod `bun:",type:int" json:"navigation_method"`
-	MaxNextLocations  int              `bun:",type:int,default:3" json:"max_next_locations"`
-	CompletionMethod  CompletionMethod `bun:",type:int" json:"completion_method"`
-	ShowTeamCount     bool             `bun:",type:bool" json:"show_team_count"`
-	EnablePoints      bool             `bun:",type:bool" json:"enable_points"`
-	EnableBonusPoints bool             `bun:",type:bool" json:"enable_bonus_points"`
-	ShowLeaderboard   bool             `bun:",type:bool" json:"show_leaderboard"`
+	InstanceID        string           `bun:"instance_id,pk,type:varchar(36)"`
+	NavigationMode    NavigationMode   `bun:"navigation_mode,type:int"`
+	NavigationMethod  NavigationMethod `bun:"navigation_method,type:int"`
+	MaxNextLocations  int              `bun:"max_next_locations,type:int,default:3"`
+	CompletionMethod  CompletionMethod `bun:"completion_method,type:int"`
+	ShowTeamCount     bool             `bun:"show_team_count,type:bool"`
+	EnablePoints      bool             `bun:"enable_points,type:bool"`
+	EnableBonusPoints bool             `bun:"enable_bonus_points,type:bool"`
+	ShowLeaderboard   bool             `bun:"show_leaderboard,type:bool"`
 }
 
 // Save saves the instance settings to the database

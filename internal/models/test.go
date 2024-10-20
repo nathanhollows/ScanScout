@@ -5,7 +5,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/nathanhollows/Rapua/pkg/db"
+	"github.com/nathanhollows/Rapua/db"
 )
 
 func SetupTestDB(t *testing.T) (cleanup func()) {

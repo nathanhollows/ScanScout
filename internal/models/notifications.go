@@ -5,20 +5,18 @@ import (
 	"fmt"
 
 	"github.com/google/uuid"
-	"github.com/nathanhollows/Rapua/pkg/db"
+	"github.com/nathanhollows/Rapua/db"
 )
 
 type Notification struct {
 	baseModel
 
-	ID        string `bun:",pk,notnull" json:"id"`
-	Content   string `bun:",type:varchar(255)" json:"content"`
-	Type      string `bun:",type:varchar(255)" json:"type"`
-	TeamCode  string `bun:",type:varchar(36)" json:"team_code"`
-	Dismissed bool   `bun:",type:bool" json:"dismissed"`
+	ID        string `bun:"id,pk,notnull"`
+	Content   string `bun:"content,type:varchar(255)"`
+	Type      string `bun:"type,type:varchar(255)"`
+	TeamCode  string `bun:"team_code,type:varchar(36)"`
+	Dismissed bool   `bun:"dismissed,type:bool"`
 }
-
-type Notifications []*Notification
 
 // Save saves a notification
 func (n *Notification) Save(ctx context.Context) error {
@@ -27,7 +25,7 @@ func (n *Notification) Save(ctx context.Context) error {
 		return fmt.Errorf("message is required")
 	}
 	if n.TeamCode == "" {
-		return fmt.Errorf("team_id is required")
+		return fmt.Errorf("team_code is required")
 	}
 
 	// Generate a new ID if one doesn't exist
@@ -76,8 +74,8 @@ func FindNotificationByID(ctx context.Context, id string) (*Notification, error)
 }
 
 // FindNotificationsByTeamCode finds notifications by team code
-func FindNotificationsByTeamCode(ctx context.Context, teamCode string) (Notifications, error) {
-	var notifications Notifications
+func FindNotificationsByTeamCode(ctx context.Context, teamCode string) ([]Notification, error) {
+	var notifications []Notification
 	err := db.DB.NewSelect().Model(&notifications).Where("team_code = ? AND NOT dismissed", teamCode).Scan(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("FindNotificationsByTeamCode: %w", err)

@@ -14,7 +14,7 @@ import (
 	"github.com/nathanhollows/Rapua/internal/models"
 	"github.com/nathanhollows/Rapua/internal/repositories"
 	"github.com/nathanhollows/Rapua/internal/sessions"
-	"github.com/nathanhollows/Rapua/pkg/security"
+	"github.com/nathanhollows/Rapua/security"
 )
 
 var (
@@ -130,7 +130,7 @@ func (s *authService) CreateUserWithOAuth(ctx context.Context, user goth.User) (
 		Provider: user.Provider,
 	}
 
-	err := s.userRepository.CreateUser(ctx, &newUser)
+	err := s.userRepository.Create(ctx, &newUser)
 	if err != nil {
 		return nil, fmt.Errorf("creating user: %w", err)
 	}
@@ -167,7 +167,7 @@ func (s *authService) VerifyEmail(ctx context.Context, user *models.User, token 
 	user.EmailToken = ""
 	user.EmailTokenExpiry = sql.NullTime{}
 
-	err := s.userRepository.UpdateUser(ctx, user)
+	err := s.userRepository.Update(ctx, user)
 	if err != nil {
 		return fmt.Errorf("updating user: %w", err)
 	}
@@ -190,19 +190,15 @@ func (s *authService) SendEmailVerification(ctx context.Context, user *models.Us
 		Valid: true,
 	}
 
-	err := s.userRepository.UpdateUser(ctx, user)
+	err := s.userRepository.Update(ctx, user)
 	if err != nil {
 		return fmt.Errorf("updating user: %w", err)
 	}
 
-	fmt.Println("Sending verification email to:", user.Email)
-	res, err := s.emailService.SendVerificationEmail(ctx, *user)
+	_, err = s.emailService.SendVerificationEmail(ctx, *user)
 	if err != nil {
 		return fmt.Errorf("sending verification email: %w", err)
 	}
-
-	fmt.Println("Email sent to:", user.Email)
-	fmt.Println("Email response:", res)
 
 	// Send email
 	return nil

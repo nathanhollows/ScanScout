@@ -8,6 +8,8 @@ import (
 
 // NotFound shows the not found page
 func (h *PublicHandler) NotFound(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "text/html")
+
 	c := templates.NotFound()
 	err := templates.PublicLayout(c, "Not Found").Render(r.Context(), w)
 

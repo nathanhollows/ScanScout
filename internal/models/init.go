@@ -6,19 +6,21 @@ import (
 	"log/slog"
 	"time"
 
-	"github.com/nathanhollows/Rapua/pkg/db"
+	"github.com/nathanhollows/Rapua/db"
+	"github.com/nathanhollows/Rapua/models"
 )
 
 func CreateTables(logger *slog.Logger) {
 	var models = []interface{}{
 		(*Notification)(nil),
 		(*InstanceSettings)(nil),
+		(*models.Block)(nil),
+		(*models.TeamBlockState)(nil),
 		(*Location)(nil),
-		(*Clue)(nil),
-		(*LocationContent)(nil),
+		(*models.Clue)(nil),
 		(*Team)(nil),
 		(*Marker)(nil),
-		(*Scan)(nil),
+		(*CheckIn)(nil),
 		(*Instance)(nil),
 		(*User)(nil),
 	}
@@ -32,7 +34,7 @@ func CreateTables(logger *slog.Logger) {
 }
 
 type baseModel struct {
-	CreatedAt time.Time `bun:",nullzero,notnull,default:current_timestamp" json:"created_at"`
-	UpdatedAt time.Time `bun:",nullzero,notnull,default:current_timestamp" json:"updated_at"`
-	DeletedAt time.Time `bun:",soft_delete,nullzero" json:"-"`
+	CreatedAt time.Time `bun:",nullzero,notnull,default:current_timestamp"`
+	UpdatedAt time.Time `bun:",nullzero,notnull,default:current_timestamp"`
+	DeletedAt time.Time `bun:",soft_delete,nullzero"`
 }

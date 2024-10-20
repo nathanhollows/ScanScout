@@ -3,7 +3,6 @@ package handlers
 import (
 	"net/http"
 
-	"github.com/nathanhollows/Rapua/internal/flash"
 	admin "github.com/nathanhollows/Rapua/internal/templates/admin"
 )
 
@@ -25,10 +24,7 @@ func (h *AdminHandler) ExperiencePost(w http.ResponseWriter, r *http.Request) {
 
 	if err := r.ParseForm(); err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		err := admin.Toast(*flash.NewError("Error parsing form")).Render(r.Context(), w)
-		if err != nil {
-			h.Logger.Error("rendering toast", "error", err.Error())
-		}
+		h.handleError(w, r, "Error parsing form", "Error parsing form", "error", err)
 		return
 	}
 
@@ -36,11 +32,7 @@ func (h *AdminHandler) ExperiencePost(w http.ResponseWriter, r *http.Request) {
 	response := h.GameManagerService.UpdateSettings(r.Context(), &user.CurrentInstance.Settings, r.Form)
 	if response.Error != nil {
 		w.WriteHeader(http.StatusExpectationFailed)
-		h.Logger.Error("updating instance settings", "err", response.Error.Error())
-		err := admin.Toast(response.FlashMessages...).Render(r.Context(), w)
-		if err != nil {
-			h.Logger.Error("rendering toast", "error", err.Error())
-		}
+		h.handleError(w, r, "updating instance settings", "Error updating instance settings", "error", response.Error)
 		return
 	}
 

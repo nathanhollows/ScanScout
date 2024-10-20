@@ -136,7 +136,6 @@ templ mapScript() {
 		lng = parseFloat(locations[i].dataset.lng);
 		if (lat !== 0 && lng !== 0) {
 			coords = [lng, lat];
-			zoom = 16;
 			break;
 		}
 	}
@@ -164,7 +163,8 @@ templ mapScript() {
       container: 'map-next',
       style: style,
       center: coords,
-      zoom: zoom
+      zoom: zoom,
+	  cooperativeGestures: true,
     });
 
     // Find and loop through .location-name elements to create markers
@@ -186,12 +186,14 @@ templ mapScript() {
     markerArray.forEach(marker => marker.addTo(map));
 
     // Fit the map to the bounds of the markers
-    const bounds = new mapboxgl.LngLatBounds();
-    markerArray.forEach(marker => {
-      bounds.extend(marker.getLngLat());
-    });
+	if (markerArray.length > 1) {
+		const bounds = new mapboxgl.LngLatBounds();
+		markerArray.forEach(marker => {
+		  bounds.extend(marker.getLngLat());
+		});
 
-    map.fitBounds(bounds, { padding: 50 });
+		map.fitBounds(bounds, { padding: 50 });
+	}
   }
 
   // Initialize the map on page load

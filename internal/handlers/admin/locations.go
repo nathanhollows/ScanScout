@@ -35,39 +35,32 @@ func (h *AdminHandler) LocationNew(w http.ResponseWriter, r *http.Request) {
 
 // LocationNewPost handles creating a new location
 func (h *AdminHandler) LocationNewPost(w http.ResponseWriter, r *http.Request) {
+	user := h.UserFromContext(r.Context())
+
 	err := r.ParseForm()
 	if err != nil {
-		flash.NewError("Error parsing form").Save(w, r)
-		http.Redirect(w, r, "/admin/locations/new", http.StatusSeeOther)
+		h.handleError(w, r, "LocationNewPost: parsing form", "Error parsing form", "error", err, "instance_id", user.CurrentInstanceID)
 		return
 	}
 
-	user := h.UserFromContext(r.Context())
-
-	name := r.FormValue("name")
-	content := r.FormValue("content")
-	criteriaID := r.FormValue("criteria")
-	lat := r.FormValue("latitude")
-	lng := r.FormValue("longitude")
-
-	response := h.GameManagerService.CreateLocation(r.Context(), user, name, content, criteriaID, lat, lng)
-	for _, message := range response.FlashMessages {
-		message.Save(w, r)
+	data := make(map[string]string)
+	for key, value := range r.Form {
+		data[key] = value[0]
 	}
+
+	response := h.GameManagerService.CreateLocation(r.Context(), user, data)
 	if response.Error != nil {
-		h.Logger.Error("creating location", "error", response.Error.Error())
-		http.Redirect(w, r, r.Header.Get("referer"), http.StatusSeeOther)
+		h.handleError(w, r, "LocationNewPost: creating location", "Error creating location", "error", response.Error, "instance_id", user.CurrentInstanceID)
 		return
 	}
 
 	location, ok := response.Data["location"].(*models.Location)
 	if !ok {
-		h.Logger.Error("creating location", "error", "location not returned")
-		http.Redirect(w, r, r.Header.Get("referer"), http.StatusSeeOther)
+		h.handleError(w, r, "LocationNewPost: creating location", "Error creating location", "error", "location not returned", "instance_id", user.CurrentInstanceID)
 		return
 	}
 
-	http.Redirect(w, r, "/admin/locations/"+location.MarkerID, http.StatusSeeOther)
+	h.redirect(w, r, "/admin/locations/"+location.MarkerID)
 }
 
 // ReorderLocations handles reordering locations
@@ -80,25 +73,23 @@ func (h *AdminHandler) ReorderLocations(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
+	user := h.UserFromContext(r.Context())
+
 	err := r.ParseForm()
 	if err != nil {
-		h.Logger.Error("reordering locations", "error", err.Error())
-		http.Error(w, "Error parsing form", http.StatusInternalServerError)
+		h.handleError(w, r, "ReorderLocations: parsing form", "Error parsing form", "error", err, "instance_id", user.CurrentInstanceID)
 		return
 	}
-
-	user := h.UserFromContext(r.Context())
 
 	locations := r.Form["location"]
 	response := h.GameManagerService.ReorderLocations(r.Context(), user, locations)
 	// Discard the flash messages since this is invoked via HTMX
 	if response.Error != nil {
-		h.Logger.Error("reordering locations", "error", response.Error.Error())
-		http.Error(w, response.Error.Error(), http.StatusInternalServerError)
+		h.handleError(w, r, "ReorderLocations: reordering locations", "Error reordering locations", "error", response.Error, "instance_id", user.CurrentInstanceID)
 		return
 	}
 
-	http.Error(w, "Reordered locations", http.StatusOK)
+	h.handleSuccess(w, r, "Order updated")
 }
 
 // LocationEdit shows the form to edit a location
@@ -110,15 +101,25 @@ func (h *AdminHandler) LocationEdit(w http.ResponseWriter, r *http.Request) {
 
 	location, err := models.FindLocationByInstanceAndCode(r.Context(), user.CurrentInstanceID, code)
 	if err != nil {
-		h.Logger.Error("finding location", "error", err.Error())
-		flash.NewError("Location could not be found").Save(w, r)
-		http.Redirect(w, r, "/admin/locations", http.StatusSeeOther)
+		h.Logger.Error("LocationEdit: finding location", "error", err, "instance_id", user.CurrentInstanceID, "location_code", code)
+		h.redirect(w, r, "/admin/locations")
 		return
 	}
 
-	location.LoadClues(r.Context())
+	blocks, err := h.BlockService.GetByLocationID(r.Context(), location.ID)
+	if err != nil {
+		h.Logger.Error("LocationEdit: getting blocks", "error", err, "instance_id", user.CurrentInstanceID, "location_id", location.ID)
+		h.redirect(w, r, "/admin/locations")
+		return
+	}
 
-	c := templates.EditLocation(*location, user.CurrentInstance.Settings)
+	err = h.LocationService.LoadCluesForLocation(r.Context(), location)
+	if err != nil {
+		h.handleError(w, r, "LocationEdit: loading clues", "Error loading clues", "error", err, "instance_id", user.CurrentInstanceID, "location_id", location.ID)
+		return
+	}
+
+	c := templates.EditLocation(*location, user.CurrentInstance.Settings, blocks)
 	err = templates.Layout(c, *user, "Locations", "Edit Location").Render(r.Context(), w)
 }
 
