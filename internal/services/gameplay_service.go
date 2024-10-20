@@ -36,6 +36,7 @@ type GameplayService interface {
 }
 
 type gameplayService struct {
+	CheckInService  CheckInService
 	LocationService LocationService
 	TeamService     TeamService
 	BlockService    BlockService
@@ -43,6 +44,7 @@ type gameplayService struct {
 
 func NewGameplayService() GameplayService {
 	return &gameplayService{
+		CheckInService:  NewCheckInService(),
 		LocationService: NewLocationService(repositories.NewClueRepository()),
 		TeamService:     NewTeamService(repositories.NewTeamRepository()),
 		BlockService: NewBlockService(
@@ -58,7 +60,7 @@ func (s *gameplayService) CheckGameStatus(ctx context.Context, team *models.Team
 	response.Data = make(map[string]interface{})
 
 	// Load the instance
-	err := team.LoadInstance(ctx)
+	err := s.TeamService.LoadRelation(ctx, team, "Instance")
 	if err != nil {
 		response.Error = fmt.Errorf("loading instance: %w", err)
 		return response
@@ -120,6 +122,17 @@ func (s *gameplayService) StartPlaying(ctx context.Context, teamCode, customTeam
 }
 
 func (s *gameplayService) SuggestNextLocations(ctx context.Context, team *models.Team, limit int) ServiceResponse {
+	// Populate the team with the necessary data
+	err := s.TeamService.LoadRelations(ctx, team)
+	if err != nil {
+		return ServiceResponse{Error: fmt.Errorf("loading relations: %w", err)}
+	}
+
+	err = team.Instance.LoadLocations(ctx)
+	if err != nil {
+		return ServiceResponse{Error: fmt.Errorf("loading locations: %w", err)}
+	}
+
 	// Suggest the next locations for the team
 	navigationService := NewNavigationService()
 	response := navigationService.DetermineNextLocations(ctx, team)
@@ -143,7 +156,7 @@ func (s *gameplayService) CheckIn(ctx context.Context, team *models.Team, locati
 
 	// A team may not check in if they must check out at a different location
 	if team.MustScanOut != "" && locationCode != team.MustScanOut {
-		err := team.LoadBlockingLocation(ctx)
+		err := s.TeamService.LoadRelation(ctx, team, "BlockingLocation")
 		if err != nil {
 			response.Error = fmt.Errorf("loading blocking location: %w", err)
 			return response
@@ -163,7 +176,11 @@ func (s *gameplayService) CheckIn(ctx context.Context, team *models.Team, locati
 
 	// A team may not check in if they have previously checked in at this location
 	scanned := false
-	team.LoadScans(ctx)
+	err = s.TeamService.LoadRelation(ctx, team, "Scans")
+	if err != nil {
+		response.Error = fmt.Errorf("loading scans: %w", err)
+		return response
+	}
 	for _, s := range team.Scans {
 		if s.LocationID == location.ID {
 			scanned = true
@@ -194,12 +211,20 @@ func (s *gameplayService) CheckIn(ctx context.Context, team *models.Team, locati
 
 	// Log the check in
 	mustCheckOut := team.Instance.Settings.CompletionMethod == models.CheckInAndOut
-	_, err = s.LocationService.LogCheckIn(ctx, team, location, mustCheckOut, validationRequired)
+	_, err = s.CheckInService.LogCheckIn(ctx, *team, *location, mustCheckOut, validationRequired)
 	if err != nil {
 		msg := flash.NewWarning("Please double check the code and try again.").SetTitle("Couldn't scan in.")
 		response.AddFlashMessage(msg)
 		err := fmt.Errorf("logging scan: %w", err)
 		response.Error = fmt.Errorf("logging scan: %w", err)
+		return response
+	}
+
+	err = s.LocationService.IncrementVisitorStats(ctx, location)
+	if err != nil {
+		msg := flash.NewError("Something went wrong. Please try again.")
+		response.AddFlashMessage(*msg)
+		response.Error = fmt.Errorf("incrementing visitor stats: %w", err)
 		return response
 	}
 
@@ -227,7 +252,7 @@ func (s *gameplayService) CheckIn(ctx context.Context, team *models.Team, locati
 func (s *gameplayService) CheckOut(ctx context.Context, team *models.Team, locationCode string) (response ServiceResponse) {
 	response = ServiceResponse{}
 
-	location, err := models.FindLocationByInstanceAndCode(ctx, team.InstanceID, locationCode)
+	location, err := s.LocationService.FindLocationByInstanceAndCode(ctx, team.InstanceID, locationCode)
 	if err != nil {
 		msg := flash.NewWarning("Please double check the code and try again.").SetTitle("Location code not found")
 		response.AddFlashMessage(msg)
@@ -235,7 +260,7 @@ func (s *gameplayService) CheckOut(ctx context.Context, team *models.Team, locat
 		return response
 	}
 
-	err = team.LoadBlockingLocation(ctx)
+	err = s.TeamService.LoadRelations(ctx, team)
 	if err != nil {
 		msg := flash.NewError("Something went wrong. Please try again.")
 		response.AddFlashMessage(*msg)
@@ -281,7 +306,7 @@ func (s *gameplayService) CheckValidLocation(ctx context.Context, team *models.T
 	response = &ServiceResponse{}
 	NavigationService := NewNavigationService()
 
-	err := team.LoadInstance(ctx)
+	err := s.TeamService.LoadRelation(ctx, team, "Instance")
 	if err != nil {
 		response.Error = fmt.Errorf("loading instance on team: %w", err)
 		return response
@@ -355,6 +380,8 @@ func (s *gameplayService) ValidateAndUpdateBlockState(ctx context.Context, team 
 		return nil, nil, fmt.Errorf("block state not found")
 	}
 
+	// Returning early here prevents the block from being updated
+	// And points from being added to the team multiple times
 	if state.IsComplete() {
 		return state, block, nil
 	}
@@ -368,6 +395,30 @@ func (s *gameplayService) ValidateAndUpdateBlockState(ctx context.Context, team 
 	state, err = s.BlockService.UpdateState(ctx, state)
 	if err != nil {
 		return nil, nil, fmt.Errorf("updating block state: %w", err)
+	}
+
+	// Assign points on completion
+	if !state.IsComplete() {
+		return state, block, nil
+	}
+	err = s.TeamService.AwardPoints(ctx, &team, block.GetPoints(), fmt.Sprint("Completed block ", block.GetName()))
+	if err != nil {
+		return nil, nil, fmt.Errorf("awarding points: %w", err)
+	}
+
+	// Update the check in all blocks have been completed
+	unfinishedCheckIn, err := s.BlockService.CheckValidationRequiredForCheckIn(ctx, block.GetLocationID(), team.Code)
+	if err != nil {
+		return nil, nil, fmt.Errorf("checking if validation is required: %w", err)
+	}
+
+	if unfinishedCheckIn {
+		return state, block, nil
+	}
+
+	err = s.CheckInService.CompleteBlocks(ctx, team.Code, block.GetLocationID())
+	if err != nil {
+		return nil, nil, fmt.Errorf("completing blocks: %w", err)
 	}
 
 	return state, block, nil

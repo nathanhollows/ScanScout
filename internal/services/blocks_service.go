@@ -23,6 +23,8 @@ type BlockService interface {
 	GetBlockWithStateByBlockIDAndTeamCode(ctx context.Context, blockID, teamCode string) (blocks.Block, blocks.PlayerState, error)
 	// CheckValidationRequiredForLocation checks if any blocks in a location require validation
 	CheckValidationRequiredForLocation(ctx context.Context, locationID string) (bool, error)
+	// CheckValidationRequiredForCheckIn checks if any blocks still require validation for a check in
+	CheckValidationRequiredForCheckIn(ctx context.Context, locationID, teamCode string) (bool, error)
 	// UpdateState updates the player state for a block
 	UpdateState(ctx context.Context, state blocks.PlayerState) (blocks.PlayerState, error)
 }
@@ -173,6 +175,28 @@ func (s *blockService) CheckValidationRequiredForLocation(ctx context.Context, l
 
 	for _, block := range blocks {
 		if block.RequiresValidation() {
+			return true, nil
+		}
+	}
+
+	return false, nil
+}
+
+// CheckValidationRequiredForCheckIn checks if any blocks still require validation for a check in
+func (s *blockService) CheckValidationRequiredForCheckIn(ctx context.Context, locationID, teamCode string) (bool, error) {
+	blocks, state, err := s.GetBlocksWithStateByLocationIDAndTeamCode(ctx, locationID, teamCode)
+	if err != nil {
+		return false, err
+	}
+
+	for _, block := range blocks {
+		if block.RequiresValidation() {
+			if state[block.GetID()] == nil {
+				return true, nil
+			}
+			if state[block.GetID()].IsComplete() {
+				continue
+			}
 			return true, nil
 		}
 	}

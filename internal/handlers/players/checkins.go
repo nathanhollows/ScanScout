@@ -20,7 +20,7 @@ func (h *PlayerHandler) CheckIn(w http.ResponseWriter, r *http.Request) {
 	team, err := h.getTeamFromContext(r.Context())
 	if err == nil {
 		if team.MustScanOut != "" {
-			err := team.LoadBlockingLocation(r.Context())
+			err := h.TeamService.LoadRelation(r.Context(), team, "BlockingLocation")
 			if err != nil {
 				h.Logger.Error("CheckIn: loading blocking location", "err", err)
 				flash.NewError("Something went wrong. Please try again.").Save(w, r)
@@ -93,7 +93,7 @@ func (h *PlayerHandler) CheckOut(w http.ResponseWriter, r *http.Request) {
 	team, err := h.getTeamFromContext(r.Context())
 	if err == nil {
 		if team.MustScanOut != "" {
-			err := team.LoadBlockingLocation(r.Context())
+			err := h.TeamService.LoadRelation(r.Context(), team, "BlockingLocation")
 			if err != nil {
 				h.Logger.Error("CheckIn: loading blocking location", "err", err)
 				flash.NewError("Something went wrong. Please try again.").Save(w, r)
@@ -161,18 +161,12 @@ func (h *PlayerHandler) MyCheckins(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = team.LoadScans(r.Context())
+	err = h.TeamService.LoadRelations(r.Context(), team)
 	if err != nil {
 		flash.NewError("Error loading check ins.").Save(w, r)
 		h.Logger.Error("loading check ins", "error", err.Error())
 		http.Redirect(w, r, r.Header.Get("referer"), http.StatusFound)
 		return
-	}
-
-	err = team.LoadBlockingLocation(r.Context())
-	if err != nil {
-		// We don't want to stop the user from seeing their check-ins if the blocking location can't be loaded
-		h.Logger.Error("loading blocking location", "error", err.Error())
 	}
 
 	if len(team.Scans) == 0 {
@@ -205,10 +199,9 @@ func (h *PlayerHandler) CheckInView(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = team.LoadBlockingLocation(r.Context())
+	err = h.TeamService.LoadRelations(r.Context(), team)
 	if err != nil {
-		flash.NewError("Error loading blocking location.").Save(w, r)
-		h.Logger.Error("loading blocking location", "error", err.Error())
+		flash.NewError("Error loading locations.").Save(w, r)
 		http.Redirect(w, r, r.Header.Get("referer"), http.StatusFound)
 		return
 	}
@@ -217,13 +210,6 @@ func (h *PlayerHandler) CheckInView(w http.ResponseWriter, r *http.Request) {
 		if team.BlockingLocation.MarkerID != locationCode {
 			flash.NewDefault("You are currently checked into "+team.BlockingLocation.Name).Save(w, r)
 		}
-	}
-
-	err = team.LoadScans(r.Context())
-	if err != nil {
-		flash.NewError("Error loading locations.").Save(w, r)
-		http.Redirect(w, r, r.Header.Get("referer"), http.StatusFound)
-		return
 	}
 
 	// Get the index of the location in the team's scans

@@ -23,12 +23,14 @@ import (
 type GameManagerService struct {
 	locationService LocationService
 	userService     UserService
+	teamService     TeamService
 }
 
 func NewGameManagerService() GameManagerService {
 	return GameManagerService{
 		locationService: NewLocationService(repositories.NewClueRepository()),
 		userService:     NewUserService(repositories.NewUserRepository()),
+		teamService:     NewTeamService(repositories.NewTeamRepository()),
 	}
 }
 
@@ -152,7 +154,7 @@ func (s *GameManagerService) DuplicateInstance(ctx context.Context, user *intern
 
 func (s *GameManagerService) LoadTeams(ctx context.Context, teams *[]internalModels.Team) error {
 	for i := range *teams {
-		err := (*teams)[i].LoadScans(ctx)
+		err := s.teamService.LoadRelation(ctx, &(*teams)[i], "Scans")
 		if err != nil {
 			return err
 		}

@@ -45,24 +45,6 @@ func (s *NavigationService) DetermineNextLocations(ctx context.Context, team *mo
 	response := ServiceResponse{}
 	response.Data = make(map[string]interface{})
 
-	err := team.LoadScans(ctx)
-	if err != nil {
-		response.Error = fmt.Errorf("getOrderedLocations load scans: %w", err)
-		return response
-	}
-
-	err = team.LoadInstance(ctx)
-	if err != nil {
-		response.Error = fmt.Errorf("getOrderedLocations load instance: %w", err)
-		return response
-	}
-
-	err = team.Instance.LoadLocations(ctx)
-	if err != nil {
-		response.Error = fmt.Errorf("getOrderedLocations load locations: %w", err)
-		return response
-	}
-
 	// Check if the team has visited all locations
 	if len(team.Scans) == len(team.Instance.Locations) {
 		response.Error = errors.New("all locations visited")

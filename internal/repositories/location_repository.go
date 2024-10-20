@@ -3,7 +3,6 @@ package repositories
 import (
 	"context"
 	"fmt"
-	"time"
 
 	"github.com/google/uuid"
 	"github.com/nathanhollows/Rapua/internal/models"
@@ -18,8 +17,6 @@ type LocationRepository interface {
 	Update(ctx context.Context, location *models.Location) error
 	// Save saves or updates a location
 	Save(ctx context.Context, location *models.Location) error
-	// LogCheckIn logs a check in for a team at a location
-	LogCheckIn(ctx context.Context, team *models.Team, location *models.Location, mustCheckOut bool, validationRequired bool) (models.Scan, error)
 }
 
 type locationRepository struct{}
@@ -64,29 +61,4 @@ func (r *locationRepository) Save(ctx context.Context, location *models.Location
 		return err
 	}
 	return r.Update(ctx, location)
-}
-
-// LogCheckIn logs a check in for a team at a location
-func (r *locationRepository) LogCheckIn(ctx context.Context, team *models.Team, location *models.Location, mustCheckOut bool, validationRequired bool) (models.Scan, error) {
-	scan := &models.Scan{
-		TeamID:          team.Code,
-		LocationID:      location.ID,
-		TimeIn:          time.Now().UTC(),
-		MustScanOut:     mustCheckOut,
-		Points:          location.Points,
-		BlocksCompleted: !validationRequired,
-	}
-	err := scan.Save(ctx)
-	if err != nil {
-		return models.Scan{}, fmt.Errorf("saving scan: %w", err)
-	}
-
-	location.CurrentCount++
-	location.TotalVisits++
-	err = r.Save(ctx, location)
-	if err != nil {
-		return models.Scan{}, fmt.Errorf("saving location: %w", err)
-	}
-
-	return *scan, nil
 }

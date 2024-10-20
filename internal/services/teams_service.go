@@ -16,6 +16,12 @@ type TeamService interface {
 	Delete(ctx context.Context, teamCode string) error
 	// AddTeams adds teams to the database
 	AddTeams(ctx context.Context, instanceID string, count int) error
+	// AwardPoints awards points to a team
+	AwardPoints(ctx context.Context, team *models.Team, points int, reason string) error
+	// LoadRelations loads relations for a team
+	LoadRelation(ctx context.Context, team *models.Team, relation string) error
+	// LoadRelations loads all relations for a team
+	LoadRelations(ctx context.Context, team *models.Team) error
 }
 
 type teamService struct {
@@ -94,4 +100,34 @@ func min(a, b int) int {
 		return a
 	}
 	return b
+}
+
+// AwardPoints awards points to a team
+func (s *teamService) AwardPoints(ctx context.Context, team *models.Team, points int, _ string) error {
+	team.Points += points
+	return s.teamRepo.Update(ctx, team)
+}
+
+// LoadRelations loads relations for a team
+func (s *teamService) LoadRelation(ctx context.Context, team *models.Team, relation string) error {
+	switch relation {
+	case "Instance":
+		return s.teamRepo.LoadInstance(ctx, team)
+	case "Scans":
+		return s.teamRepo.LoadScans(ctx, team)
+	case "BlockingLocation":
+		return s.teamRepo.LoadBlockingLocation(ctx, team)
+	default:
+		return errors.New("unknown relation")
+	}
+}
+
+// LoadRelations loads all relations for a team
+func (s *teamService) LoadRelations(ctx context.Context, team *models.Team) error {
+	err := s.teamRepo.LoadRelations(ctx, team)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

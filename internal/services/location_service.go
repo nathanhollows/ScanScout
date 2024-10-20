@@ -14,7 +14,7 @@ type LocationService interface {
 	FindLocationByInstanceAndCode(ctx context.Context, instanceID string, code string) (*models.Location, error)
 	LoadCluesForLocation(ctx context.Context, location *models.Location) error
 	LoadCluesForLocations(ctx context.Context, locations *models.Locations) error
-	LogCheckIn(ctx context.Context, team *models.Team, location *models.Location, mustCheckOut bool, validationRequired bool) (models.Scan, error)
+	IncrementVisitorStats(ctx context.Context, location *models.Location) error
 }
 
 type locationService struct {
@@ -72,12 +72,9 @@ func (s locationService) LoadCluesForLocations(ctx context.Context, locations *m
 	return nil
 }
 
-// LogCheckIn logs a check in for a team at a location
-func (s locationService) LogCheckIn(ctx context.Context, team *models.Team, location *models.Location, mustCheckOut bool, validationRequired bool) (models.Scan, error) {
-	scan, err := s.locationRepo.LogCheckIn(ctx, team, location, mustCheckOut, validationRequired)
-	if err != nil {
-		return models.Scan{}, fmt.Errorf("logging check in: %w", err)
-	}
-
-	return scan, nil
+// Update visitor stats for a location
+func (s locationService) IncrementVisitorStats(ctx context.Context, location *models.Location) error {
+	location.CurrentCount++
+	location.TotalVisits++
+	return s.locationRepo.Update(ctx, location)
 }

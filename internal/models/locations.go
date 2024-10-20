@@ -109,36 +109,9 @@ func FindOrderedLocations(ctx context.Context, team *Team) (*Locations, error) {
 	return nil, nil
 }
 
-// LogCheckIn creates a new scan entry for the location
-// This function does not check if the team is allowed to scan in
-func (l *Location) LogCheckIn(ctx context.Context, team Team, mustCheckOut bool) (scan *Scan, err error) {
-	l.CurrentCount++
-	l.TotalVisits++
-	l.Save(ctx)
-
-	scan = &Scan{
-		TeamID:      team.Code,
-		LocationID:  l.ID,
-		TimeIn:      time.Now().UTC(),
-		MustScanOut: mustCheckOut,
-		Points:      l.Points,
-	}
-	scan.Save(ctx)
-
-	if mustCheckOut {
-		team.MustScanOut = l.ID
-		team.Points += l.Points
-		team.Update(ctx)
-	}
-
-	return scan, nil
-}
-
 func (l *Location) LogScanOut(ctx context.Context, team *Team) error {
-	// Find the scan
-	err := team.LoadScans(ctx)
-	if err != nil {
-		return fmt.Errorf("loading scans: %w", err)
+	if len(team.Scans) == 0 {
+		return fmt.Errorf("no scans found/loaded for team")
 	}
 
 	var scan *Scan
