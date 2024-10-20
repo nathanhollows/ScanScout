@@ -14,17 +14,17 @@ import (
 type Instance struct {
 	baseModel
 
-	ID        string       `bun:",pk,type:varchar(36)" json:"id"`
-	Name      string       `bun:",type:varchar(255)" json:"name"`
-	UserID    string       `bun:",type:varchar(36)" json:"user_id"`
-	StartTime bun.NullTime `bun:",nullzero" json:"start_time"`
-	EndTime   bun.NullTime `bun:",nullzero" json:"end_time"`
-	Status    GameStatus   `bun:"-" json:"status"`
+	ID        string       `bun:"id,pk,type:varchar(36)"`
+	Name      string       `bun:"name,type:varchar(255)"`
+	UserID    string       `bun:"user_id,type:varchar(36)"`
+	StartTime bun.NullTime `bun:"start_time,nullzero"`
+	EndTime   bun.NullTime `bun:"end_time,nullzero"`
+	Status    GameStatus   `bun:"-"`
 
-	Teams     []Team           `bun:"rel:has-many,join:id=instance_id" json:"teams"`
-	Locations Locations        `bun:"rel:has-many,join:id=instance_id" json:"instance_locations"`
-	Scans     []Scan           `bun:"rel:has-many,join:id=instance_id" json:"scans"`
-	Settings  InstanceSettings `bun:"rel:has-one,join:id=instance_id" json:"settings"`
+	Teams     []Team           `bun:"rel:has-many,join:id=instance_id"`
+	Locations Locations        `bun:"rel:has-many,join:id=instance_id"`
+	Scans     []Scan           `bun:"rel:has-many,join:id=instance_id"`
+	Settings  InstanceSettings `bun:"rel:has-one,join:id=instance_id"`
 }
 
 func (i *Instance) Save(ctx context.Context) error {

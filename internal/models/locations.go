@@ -15,23 +15,23 @@ import (
 type Location struct {
 	baseModel
 
-	ID           string           `bun:",pk,notnull" json:"id"`
-	Name         string           `bun:",type:varchar(255)" json:"name"`
-	InstanceID   string           `bun:",notnull" json:"instance_id"`
-	MarkerID     string           `bun:",notnull" json:"marker_id"`
-	ContentID    string           `bun:",notnull" json:"content_id"`
-	Criteria     string           `bun:",type:varchar(255)" json:"criteria"`
-	Order        int              `bun:",type:int" json:"order"`
-	TotalVisits  int              `bun:",type:int" json:"total_visits"`
-	CurrentCount int              `bun:",type:int" json:"current_count"`
-	AvgDuration  float64          `bun:",type:float" json:"avg_duration"`
-	Completion   CompletionMethod `bun:",type:int" json:"completion"`
-	Points       int              `bun:"," json:"points"`
+	ID           string           `bun:"id,pk,notnull"`
+	Name         string           `bun:"name,type:varchar(255)"`
+	InstanceID   string           `bun:"instance_id,notnull"`
+	MarkerID     string           `bun:"marker_id,notnull"`
+	ContentID    string           `bun:"content_id,notnull"`
+	Criteria     string           `bun:"criteria,type:varchar(255)"`
+	Order        int              `bun:"order,type:int"`
+	TotalVisits  int              `bun:"total_visits,type:int"`
+	CurrentCount int              `bun:"current_count,type:int"`
+	AvgDuration  float64          `bun:"avg_duration,type:float"`
+	Completion   CompletionMethod `bun:"completion,type:int"`
+	Points       int              `bun:"points,"`
 
-	Clues    []models.Clue  `bun:"rel:has-many,join:id=location_id" json:"clues"`
-	Instance Instance       `bun:"rel:has-one,join:instance_id=id" json:"instance"`
-	Marker   Marker         `bun:"rel:has-one,join:marker_id=code" json:"marker"`
-	Blocks   []models.Block `bun:"rel:has-many,join:id=location_id" json:"blocks"`
+	Clues    []models.Clue  `bun:"rel:has-many,join:id=location_id"`
+	Instance Instance       `bun:"rel:has-one,join:instance_id=id"`
+	Marker   Marker         `bun:"rel:has-one,join:marker_id=code"`
+	Blocks   []models.Block `bun:"rel:has-many,join:id=location_id"`
 }
 
 type Locations []Location

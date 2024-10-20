@@ -9,15 +9,15 @@ import (
 type Event struct {
 	baseModel
 
-	ID         string `bun:",pk,type:varchar(36)" json:"id"`
-	InstanceID string `bun:",notnull" json:"instance_id"`
-	Type       string `bun:",type:varchar(255)" json:"type"`
-	LocationID string `bun:",notnull" json:"location_id"`
-	Points     int    `bun:",notnull" json:"points"`
-	Active     bool   `bun:",notnull" json:"active"`
+	ID         string `bun:"id,pk,type:varchar(36)"`
+	InstanceID string `bun:"instance_id,notnull"`
+	Type       string `bun:"type,type:varchar(255)"`
+	LocationID string `bun:"location_id,notnull"`
+	Points     int    `bun:"points,notnull"`
+	Active     bool   `bun:"active,notnull"`
 
-	Instance Instance `bun:"rel:has-one,join:instance_id=id" json:"instance"`
-	Location Location `bun:"rel:has-one,join:location_id=id" json:"location"`
+	Instance Instance `bun:"rel:has-one,join:instance_id=id"`
+	Location Location `bun:"rel:has-one,join:location_id=id"`
 }
 
 // Save saves or updates an event
