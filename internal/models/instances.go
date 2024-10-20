@@ -23,7 +23,7 @@ type Instance struct {
 
 	Teams     []Team           `bun:"rel:has-many,join:id=instance_id" json:"teams"`
 	Locations Locations        `bun:"rel:has-many,join:id=instance_id" json:"instance_locations"`
-	Scans     Scans            `bun:"rel:has-many,join:id=instance_id" json:"scans"`
+	Scans     []Scan           `bun:"rel:has-many,join:id=instance_id" json:"scans"`
 	Settings  InstanceSettings `bun:"rel:has-one,join:id=instance_id" json:"settings"`
 }
 

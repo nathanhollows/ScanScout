@@ -20,10 +20,8 @@ type Scan struct {
 	Points          int       `bun:"points,"`
 	BlocksCompleted bool      `bun:"blocks_completed,type:int"`
 
-	Location Location `bun:"rel:has-one,join:location_id=id" json:"location"`
+	Location Location `bun:"rel:has-one,join:location_id=id"`
 }
-
-type Scans []Scan
 
 // Save saves or updates a scan
 func (s *Scan) Save(ctx context.Context) error {
