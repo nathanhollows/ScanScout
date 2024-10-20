@@ -10,7 +10,7 @@ import (
 type NotificationService interface {
 	SendNotification(ctx context.Context, teamCode string, content string) (models.Notification, error)
 	SendNotificationToAll(ctx context.Context, team []models.Team, content string) error
-	GetNotifications(ctx context.Context, teamCode string) (models.Notifications, error)
+	GetNotifications(ctx context.Context, teamCode string) ([]models.Notification, error)
 	DismissNotification(ctx context.Context, notificationID string) error
 }
 
@@ -50,7 +50,7 @@ func (s *notificationService) SendNotificationToAll(ctx context.Context, team []
 }
 
 // GetNotifications retrieves all notifications for a team
-func (s *notificationService) GetNotifications(ctx context.Context, teamCode string) (models.Notifications, error) {
+func (s *notificationService) GetNotifications(ctx context.Context, teamCode string) ([]models.Notification, error) {
 	return models.FindNotificationsByTeamCode(ctx, teamCode)
 }
 

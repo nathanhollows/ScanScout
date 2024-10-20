@@ -2,7 +2,6 @@ package models
 
 import (
 	"context"
-	"strings"
 	"time"
 
 	"github.com/nathanhollows/Rapua/pkg/db"
@@ -38,18 +37,4 @@ func (s *Scan) Save(ctx context.Context) error {
 func (s *Scan) Delete(ctx context.Context) error {
 	_, err := db.DB.NewDelete().Model(s).WherePK().Exec(ctx)
 	return err
-}
-
-// FindScan finds a scan by team and location
-func FindScan(ctx context.Context, teamCode, locationCode string) (*Scan, error) {
-	teamCode = strings.ToUpper(teamCode)
-	locationCode = strings.ToUpper(locationCode)
-	var scan Scan
-	err := db.DB.NewSelect().Model(&scan).Where("team_id = ?", teamCode).Where("location_id = ?", locationCode).Scan(ctx)
-	return &scan, err
-}
-
-// String returns a string representation of a scan
-func (s *Scan) String() string {
-	return s.TeamID + " " + s.LocationID
 }

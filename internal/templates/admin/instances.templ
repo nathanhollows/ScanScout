@@ -5,7 +5,7 @@ import (
 	"github.com/nathanhollows/Rapua/internal/models"
 )
 
-templ Instances(instances models.Instances, currentInstance models.Instance) {
+templ Instances(instances []models.Instance, currentInstance models.Instance) {
 	<div class="flex flex-row justify-between items-center w-full p-5">
 		<h1 class="text-2xl font-bold">Instances</h1>
 		<button

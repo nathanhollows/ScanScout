@@ -33,8 +33,7 @@ func NewLocationService(clueRepo repositories.ClueRepository) LocationService {
 func (s locationService) FindLocationByInstanceAndCode(ctx context.Context, instanceID string, code string) (*models.Location, error) {
 	location, err := s.locationRepo.FindLocationByInstanceAndCode(ctx, instanceID, code)
 	if err != nil {
-		fmt.Errorf("finding location by instance and code: %v", err)
-		return nil, err
+		return nil, fmt.Errorf("finding location by instance and code: %v", err)
 	}
 	return location, nil
 }

@@ -443,7 +443,7 @@ templ scheduleButton(scheduled bool, t schema.NullTime) {
 	}
 }
 
-templ TeamActivity(settings models.InstanceSettings, team models.Team, notifications models.Notifications, nextLocations models.Locations) {
+templ TeamActivity(settings models.InstanceSettings, team models.Team, notifications []models.Notification, nextLocations models.Locations) {
 	<h3 class="text-lg font-bold">
 		{ team.Code }
 		if team.Name != "" {

@@ -124,18 +124,8 @@ func (s *GameManagerService) DuplicateInstance(ctx context.Context, user *intern
 
 	// Copy locations
 	for _, location := range locations {
-		newContent := &internalModels.LocationContent{
-			Content: location.Content.Content,
-		}
-		if err := newContent.Save(ctx); err != nil {
-			response.AddFlashMessage(*flash.NewError("Error saving location content: " + location.Name))
-			response.Error = fmt.Errorf("saving location content: %w", err)
-			return response
-		}
-
 		newLocation := &internalModels.Location{
 			Name:       location.Name,
-			ContentID:  newContent.ID,
 			InstanceID: newInstance.ID,
 			MarkerID:   location.MarkerID,
 		}
@@ -263,7 +253,6 @@ func (s *GameManagerService) SaveLocation(ctx context.Context, location *interna
 func (s *GameManagerService) CreateLocation(ctx context.Context, user *internalModels.User, data map[string]string) (response *ServiceResponse) {
 
 	name := data["name"]
-	content := data["content"]
 	lat := data["latitude"]
 	lng := data["longitude"]
 
@@ -272,17 +261,6 @@ func (s *GameManagerService) CreateLocation(ctx context.Context, user *internalM
 		Name:       name,
 		InstanceID: user.CurrentInstanceID,
 	}
-
-	locationContent := internalModels.LocationContent{
-		Content: content,
-	}
-
-	if err := locationContent.Save(ctx); err != nil {
-		response.AddFlashMessage(*flash.NewError("Error saving location content: " + err.Error()))
-		response.Error = err
-		return response
-	}
-	location.ContentID = locationContent.ID
 
 	var latFloat, lngFloat float64
 	var err error
@@ -322,13 +300,6 @@ func (s *GameManagerService) CreateLocation(ctx context.Context, user *internalM
 }
 
 func (s *GameManagerService) UpdateLocation(ctx context.Context, location *internalModels.Location, newName, newContent, lat, lng string, points int) error {
-	if newContent != "" {
-		location.Content.Content = newContent
-		if err := location.Content.Save(ctx); err != nil {
-			return err
-		}
-	}
-
 	location.Points = points
 
 	marker := location.Marker

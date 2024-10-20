@@ -21,8 +21,6 @@ type Marker struct {
 	Locations    Locations `bun:"rel:has-many,join:code=marker_id" json:"locations"`
 }
 
-type Markers []*Marker
-
 // Save saves or updates a location
 func (l *Marker) Save(ctx context.Context) error {
 	insert := false

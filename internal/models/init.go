@@ -18,7 +18,6 @@ func CreateTables(logger *slog.Logger) {
 		(*models.TeamBlockState)(nil),
 		(*Location)(nil),
 		(*models.Clue)(nil),
-		(*LocationContent)(nil),
 		(*Team)(nil),
 		(*Marker)(nil),
 		(*Scan)(nil),

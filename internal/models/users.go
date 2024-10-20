@@ -16,7 +16,7 @@ type User struct {
 	Password         string       `bun:"password,type:varchar(255)"`
 	Provider         string       `bun:"provider,type:varchar(255)"`
 
-	Instances         Instances `bun:"rel:has-many,join:id=user_id"`
-	CurrentInstanceID string    `bun:"current_instance_id,type:varchar(36)"`
-	CurrentInstance   Instance  `bun:"rel:has-one,join:current_instance_id=id"`
+	Instances         []Instance `bun:"rel:has-many,join:id=user_id"`
+	CurrentInstanceID string     `bun:"current_instance_id,type:varchar(36)"`
+	CurrentInstance   Instance   `bun:"rel:has-one,join:current_instance_id=id"`
 }

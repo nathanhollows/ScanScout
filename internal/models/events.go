@@ -20,8 +20,6 @@ type Event struct {
 	Location Location `bun:"rel:has-one,join:location_id=id" json:"location"`
 }
 
-type Events []Event
-
 // Save saves or updates an event
 func (e *Event) Save(ctx context.Context) error {
 	var err error

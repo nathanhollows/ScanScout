@@ -18,8 +18,6 @@ type Notification struct {
 	Dismissed bool   `bun:",type:bool" json:"dismissed"`
 }
 
-type Notifications []*Notification
-
 // Save saves a notification
 func (n *Notification) Save(ctx context.Context) error {
 	// Validate the notification
@@ -76,8 +74,8 @@ func FindNotificationByID(ctx context.Context, id string) (*Notification, error)
 }
 
 // FindNotificationsByTeamCode finds notifications by team code
-func FindNotificationsByTeamCode(ctx context.Context, teamCode string) (Notifications, error) {
-	var notifications Notifications
+func FindNotificationsByTeamCode(ctx context.Context, teamCode string) ([]Notification, error) {
+	var notifications []Notification
 	err := db.DB.NewSelect().Model(&notifications).Where("team_code = ? AND NOT dismissed", teamCode).Scan(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("FindNotificationsByTeamCode: %w", err)

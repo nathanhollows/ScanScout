@@ -27,8 +27,6 @@ type Instance struct {
 	Settings  InstanceSettings `bun:"rel:has-one,join:id=instance_id" json:"settings"`
 }
 
-type Instances []Instance
-
 func (i *Instance) Save(ctx context.Context) error {
 	if i.ID == "" {
 		i.ID = uuid.New().String()
@@ -82,8 +80,8 @@ func (i *Instance) Delete(ctx context.Context) error {
 }
 
 // FindAllInstances finds all instances
-func FindAllInstances(ctx context.Context, userID string) (Instances, error) {
-	instances := Instances{}
+func FindAllInstances(ctx context.Context, userID string) ([]Instance, error) {
+	instances := []Instance{}
 	err := db.DB.NewSelect().Model(&instances).Where("user_id = ?", userID).Scan(ctx)
 	if err != nil {
 		return nil, err

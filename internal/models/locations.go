@@ -28,11 +28,10 @@ type Location struct {
 	Completion   CompletionMethod `bun:",type:int" json:"completion"`
 	Points       int              `bun:"," json:"points"`
 
-	Clues    []models.Clue   `bun:"rel:has-many,join:id=location_id" json:"clues"`
-	Instance Instance        `bun:"rel:has-one,join:instance_id=id" json:"instance"`
-	Marker   Marker          `bun:"rel:has-one,join:marker_id=code" json:"marker"`
-	Content  LocationContent `bun:"rel:has-one,join:content_id=id" json:"content"`
-	Blocks   []models.Block  `bun:"rel:has-many,join:id=location_id" json:"blocks"`
+	Clues    []models.Clue  `bun:"rel:has-many,join:id=location_id" json:"clues"`
+	Instance Instance       `bun:"rel:has-one,join:instance_id=id" json:"instance"`
+	Marker   Marker         `bun:"rel:has-one,join:marker_id=code" json:"marker"`
+	Blocks   []models.Block `bun:"rel:has-many,join:id=location_id" json:"blocks"`
 }
 
 type Locations []Location
@@ -51,15 +50,8 @@ func (i *Location) Save(ctx context.Context) error {
 }
 
 // Delete removes the location from the database
-// This will also delete the location content
 func (i *Location) Delete(ctx context.Context) error {
-	// Delete the location content
-	err := i.Content.Delete(ctx)
-	if err != nil {
-		return err
-	}
-
-	_, err = db.DB.NewDelete().Model(i).WherePK().Exec(ctx)
+	_, err := db.DB.NewDelete().Model(i).WherePK().Exec(ctx)
 	return err
 }
 
@@ -72,7 +64,6 @@ func FindLocationByInstanceAndCode(ctx context.Context, instance, code string) (
 		Where("marker_id = ?", code).
 		Where("instance_id = ?", instance).
 		Relation("Marker").
-		Relation("Content").
 		Scan(ctx)
 	return &location, err
 }
@@ -95,7 +86,6 @@ func FindAllLocations(ctx context.Context, instanceID string) (Locations, error)
 		Model(&instanceLocations).
 		Where("location.instance_id = ?", instanceID).
 		Relation("Marker").
-		Relation("Content").
 		Order("location.order ASC").
 		Scan(ctx)
 	return instanceLocations, err
@@ -109,7 +99,6 @@ func FindInstanceLocationByLocationAndInstance(ctx context.Context, locationCode
 		Where("location.marker_id = ?", locationCode).
 		Where("location.instance_id = ?", instanceID).
 		Relation("Marker").
-		Relation("Content").
 		Scan(ctx)
 	return &instanceLocation, err
 }
