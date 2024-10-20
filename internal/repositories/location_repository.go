@@ -11,6 +11,8 @@ import (
 )
 
 type LocationRepository interface {
+	// FindLocation finds a location by ID
+	FindLocation(ctx context.Context, locationID string) (*models.Location, error)
 	FindLocationByInstanceAndCode(ctx context.Context, instanceID string, code string) (*models.Location, error)
 	// Update updates a location in the database
 	Update(ctx context.Context, location *models.Location) error
@@ -25,6 +27,16 @@ type locationRepository struct{}
 // NewClueRepository creates a new ClueRepository
 func NewLocationRepository() LocationRepository {
 	return &locationRepository{}
+}
+
+// FindLocation finds a location by ID
+func (r *locationRepository) FindLocation(ctx context.Context, locationID string) (*models.Location, error) {
+	var location models.Location
+	err := db.DB.NewSelect().Model(&location).Where("id = ?", locationID).Scan(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("finding location: %w", err)
+	}
+	return &location, nil
 }
 
 // FindLocationByInstanceAndCode finds a location by instance and code

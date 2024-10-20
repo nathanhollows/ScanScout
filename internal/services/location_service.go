@@ -10,6 +10,7 @@ import (
 )
 
 type LocationService interface {
+	FindLocation(ctx context.Context, locationID string) (*models.Location, error)
 	FindLocationByInstanceAndCode(ctx context.Context, instanceID string, code string) (*models.Location, error)
 	LoadCluesForLocation(ctx context.Context, location *models.Location) error
 	LoadCluesForLocations(ctx context.Context, locations *models.Locations) error
@@ -27,6 +28,15 @@ func NewLocationService(clueRepo repositories.ClueRepository) LocationService {
 		clueRepo:     clueRepo,
 		locationRepo: repositories.NewLocationRepository(),
 	}
+}
+
+// FindLocation finds a location by ID
+func (s locationService) FindLocation(ctx context.Context, locationID string) (*models.Location, error) {
+	location, err := s.locationRepo.FindLocation(ctx, locationID)
+	if err != nil {
+		return nil, fmt.Errorf("finding location: %v", err)
+	}
+	return location, nil
 }
 
 // FindLocationByInstanceAndCode finds a location by instance and code
