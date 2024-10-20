@@ -11,17 +11,23 @@ import (
 type CheckInService interface {
 	// CompleteBlocks marks all blocks for a location as complete
 	CompleteBlocks(ctx context.Context, teamCode string, locationID string) error
-	// LogCheckIn logs a check in for a team at a location
-	LogCheckIn(ctx context.Context, team models.Team, location models.Location, mustCheckOut bool, validationRequired bool) (models.CheckIn, error)
+	// CheckIn logs a check in for a team at a location
+	CheckIn(ctx context.Context, team models.Team, location models.Location, mustCheckOut bool, validationRequired bool) (models.CheckIn, error)
+	// CheckOut logs a check out for a team at a location
+	CheckOut(ctx context.Context, team *models.Team, location *models.Location) (models.CheckIn, error)
 }
 
 type checkInService struct {
-	checkInRepo repositories.CheckInRepository
+	checkInRepo  repositories.CheckInRepository
+	teamRepo     repositories.TeamRepository
+	locationRepo repositories.LocationRepository
 }
 
 func NewCheckInService() CheckInService {
 	return &checkInService{
-		checkInRepo: repositories.NewCheckInRepository(),
+		checkInRepo:  repositories.NewCheckInRepository(),
+		teamRepo:     repositories.NewTeamRepository(),
+		locationRepo: repositories.NewLocationRepository(),
 	}
 }
 
@@ -46,11 +52,39 @@ func (s *checkInService) CompleteBlocks(ctx context.Context, teamCode string, lo
 
 }
 
-// LogCheckIn logs a check in for a team at a location
-func (s *checkInService) LogCheckIn(ctx context.Context, team models.Team, location models.Location, mustCheckOut bool, validationRequired bool) (models.CheckIn, error) {
+// CheckIn logs a check in for a team at a location
+func (s *checkInService) CheckIn(ctx context.Context, team models.Team, location models.Location, mustCheckOut bool, validationRequired bool) (models.CheckIn, error) {
 	scan, err := s.checkInRepo.LogCheckIn(ctx, team, location, mustCheckOut, validationRequired)
 	if err != nil {
 		return models.CheckIn{}, fmt.Errorf("logging check in: %w", err)
 	}
+	return scan, nil
+}
+
+// CheckOut logs a check out for a team at a location
+func (s *checkInService) CheckOut(ctx context.Context, team *models.Team, location *models.Location) (models.CheckIn, error) {
+	scan, err := s.checkInRepo.CheckOut(ctx, team, location)
+	if err != nil {
+		return models.CheckIn{}, fmt.Errorf("checking out: %w", err)
+	}
+
+	// Update location statistics
+	location.AvgDuration =
+		(location.AvgDuration*float64(location.TotalVisits) +
+			scan.TimeOut.Sub(scan.TimeIn).Seconds()) /
+			float64(location.TotalVisits+1)
+	location.CurrentCount--
+	err = s.locationRepo.Update(ctx, location)
+	if err != nil {
+		return models.CheckIn{}, fmt.Errorf("updating location: %w", err)
+	}
+
+	// Update team
+	team.MustCheckOut = ""
+	err = s.teamRepo.Update(ctx, team)
+	if err != nil {
+		return models.CheckIn{}, fmt.Errorf("updating team: %w", err)
+	}
+
 	return scan, nil
 }

@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 	"strings"
@@ -96,8 +97,8 @@ func (h *PlayerHandler) CheckOut(w http.ResponseWriter, r *http.Request) {
 			err := h.TeamService.LoadRelation(r.Context(), team, "BlockingLocation")
 			if err != nil {
 				h.Logger.Error("CheckIn: loading blocking location", "err", err)
-				flash.NewError("Something went wrong. Please try again.").Save(w, r)
-				http.Redirect(w, r, r.Header.Get("/next"), http.StatusFound)
+				// TODO: render error page
+				h.redirect(w, r, "/404")
 				return
 			}
 		}
@@ -133,24 +134,31 @@ func (h *PlayerHandler) CheckOutPost(w http.ResponseWriter, r *http.Request) {
 
 	team, err := h.GameplayService.GetTeamByCode(r.Context(), teamCode)
 	if err != nil {
-		flash.NewWarning("Please double check the team code and try again.").
-			SetTitle("Team code not found").Save(w, r)
-		http.Redirect(w, r, "/checkouts/"+locationCode, http.StatusFound)
+		h.handleError(w, r, "CheckOutPost: getting team by code", "Error checking out. Please double check your team code.", "error", err, "team", teamCode)
 		return
 	}
 
-	response := h.GameplayService.CheckOut(r.Context(), team, locationCode)
-	for _, msg := range response.FlashMessages {
-		msg.Save(w, r)
-	}
-	if response.Error != nil {
-		h.Logger.Error("checking out team", "err", response.Error.Error(), "team", team.Code, "location", locationCode)
-		http.Redirect(w, r, r.Header.Get("referer"), http.StatusFound)
+	err = h.GameplayService.CheckOut(r.Context(), team, locationCode)
+	if err != nil {
+		if errors.Is(err, services.ErrLocationNotFound) {
+			templates.Toast(*flash.NewError("Location not found. Please double check the code and try again.")).Render(r.Context(), w)
+			return
+		} else if errors.Is(err, services.ErrUnecessaryCheckOut) {
+			templates.Toast(*flash.NewInfo("You are not checked in here.")).Render(r.Context(), w)
+			return
+		} else if errors.Is(err, services.ErrTeamNotAllowedToCheckOut) {
+			templates.Toast(*flash.NewError("You are not checked in here.")).Render(r.Context(), w)
+			return
+		} else if errors.Is(err, services.ErrUnfinishedCheckIn) {
+			templates.Toast(*flash.NewError("You must complete all activities before checking out.")).Render(r.Context(), w)
+			return
+		} else {
+			h.handleError(w, r, "CheckOutPost: checking out", "Error checking out", "error", err, "team", team.Code, "location", locationCode)
+		}
 		return
 	}
 
-	flash.NewSuccess("You have checked out.").Save(w, r)
-	http.Redirect(w, r, "/next", http.StatusFound)
+	h.redirect(w, r, "/next")
 }
 
 // MyCheckins shows the found locations page
@@ -177,9 +185,6 @@ func (h *PlayerHandler) MyCheckins(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/next", http.StatusFound)
 		return
 	}
-
-	// TODO: Handle notifications
-	// notifications, _ := h.NotificationService.GetNotifications(r.Context(), team.Code)
 
 	c := templates.MyCheckins(*team)
 	err = templates.Layout(c, "My Check-ins").Render(r.Context(), w)

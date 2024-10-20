@@ -2,14 +2,11 @@ package models
 
 import (
 	"context"
-	"fmt"
 	"strings"
-	"time"
 
 	"github.com/google/uuid"
 	"github.com/nathanhollows/Rapua/models"
 	"github.com/nathanhollows/Rapua/pkg/db"
-	"github.com/uptrace/bun"
 )
 
 type Location struct {
@@ -68,17 +65,6 @@ func FindLocationByInstanceAndCode(ctx context.Context, instance, code string) (
 	return &location, err
 }
 
-// FindLocationsByCodes returns a list of locations by code
-func FindLocationsByCodes(ctx context.Context, instanceID string, codes []string) (Locations, error) {
-	var locations Locations
-	err := db.DB.NewSelect().
-		Model(&locations).
-		Where("marker_id in (?)", bun.In(codes)).
-		Where("instance_id = ?", instanceID).
-		Scan(ctx)
-	return locations, err
-}
-
 // FindAll returns all locations
 func FindAllLocations(ctx context.Context, instanceID string) (Locations, error) {
 	var instanceLocations Locations
@@ -89,58 +75,4 @@ func FindAllLocations(ctx context.Context, instanceID string) (Locations, error)
 		Order("location.order ASC").
 		Scan(ctx)
 	return instanceLocations, err
-}
-
-// FindInstanceLocationByLocationAndInstance finds an instance location by location and instance
-func FindInstanceLocationByLocationAndInstance(ctx context.Context, locationCode, instanceID string) (*Location, error) {
-	var instanceLocation Location
-	err := db.DB.NewSelect().
-		Model(&instanceLocation).
-		Where("location.marker_id = ?", locationCode).
-		Where("location.instance_id = ?", instanceID).
-		Relation("Marker").
-		Scan(ctx)
-	return &instanceLocation, err
-}
-
-// FindOrderedLocations returns locations in a specific order
-func FindOrderedLocations(ctx context.Context, team *Team) (*Locations, error) {
-	// Implement logic to return locations in the order defined by admin
-	return nil, nil
-}
-
-func (l *Location) LogScanOut(ctx context.Context, team *Team) error {
-	if len(team.CheckIns) == 0 {
-		return fmt.Errorf("no scans found/loaded for team")
-	}
-
-	var scan *CheckIn
-	for i := range team.CheckIns {
-		if team.CheckIns[i].LocationID == l.ID {
-			scan = &team.CheckIns[i]
-			break
-		}
-	}
-
-	if scan == nil {
-		return fmt.Errorf("scan not found")
-	}
-
-	// Check if the team must scan out
-	scan.TimeOut = time.Now().UTC()
-	scan.MustCheckOut = false
-	scan.Save(ctx)
-
-	// Update the location stats
-	l.AvgDuration =
-		(l.AvgDuration*float64(l.TotalVisits) +
-			scan.TimeOut.Sub(scan.TimeIn).Seconds()) /
-			float64(l.TotalVisits+1)
-	l.CurrentCount--
-	l.Save(ctx)
-
-	team.MustCheckOut = ""
-	team.Update(ctx)
-
-	return nil
 }

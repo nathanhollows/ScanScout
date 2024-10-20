@@ -13,6 +13,7 @@ type CheckInRepository interface {
 	FindCheckInByTeamAndLocation(ctx context.Context, teamCode string, locationID string) (*models.CheckIn, error)
 	Update(ctx context.Context, checkIn *models.CheckIn) error
 	LogCheckIn(ctx context.Context, team models.Team, location models.Location, mustCheckOut bool, validationRequired bool) (models.CheckIn, error)
+	CheckOut(ctx context.Context, team *models.Team, location *models.Location) (models.CheckIn, error)
 }
 
 type checkInRepository struct{}
@@ -51,4 +52,40 @@ func (r *checkInRepository) LogCheckIn(ctx context.Context, team models.Team, lo
 	}
 
 	return *scan, nil
+}
+
+// CheckOut logs a check out for a team at a location
+func (r *checkInRepository) CheckOut(ctx context.Context, team *models.Team, location *models.Location) (models.CheckIn, error) {
+	if team == nil {
+		return models.CheckIn{}, fmt.Errorf("team is required")
+	}
+
+	if location == nil {
+		return models.CheckIn{}, fmt.Errorf("location is required")
+	}
+
+	if len(team.CheckIns) == 0 {
+		return models.CheckIn{}, fmt.Errorf("no check ins found for team")
+	}
+
+	var checkIn *models.CheckIn
+	for i := range team.CheckIns {
+		if team.CheckIns[i].LocationID == location.ID {
+			checkIn = &team.CheckIns[i]
+			break
+		}
+	}
+
+	if checkIn == nil {
+		return models.CheckIn{}, fmt.Errorf("check in not found")
+	}
+
+	checkIn.TimeOut = time.Now().UTC()
+	checkIn.MustCheckOut = false
+	err := r.Update(ctx, checkIn)
+	if err != nil {
+		return models.CheckIn{}, fmt.Errorf("updating check in: %w", err)
+	}
+
+	return *checkIn, nil
 }

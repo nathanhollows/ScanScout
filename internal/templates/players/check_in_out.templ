@@ -90,16 +90,24 @@ templ CheckOut(marker models.Marker, teamCode string, blocking models.Location) 
 		<div class="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
 			<form
 				class="space-y-6"
-				method="post"
+				hx-post={ fmt.Sprint("/o/", marker.Code) }
+				hx-swap="none"
 			>
 				<div>
 					<p class="text-center text-3xl pb-3">{ marker.Name }</p>
 				</div>
 				<div>
-					<label
-						class="form-control w-full"
-						for="team"
-					>
+					if blocking.ID != "" && blocking.MarkerID != marker.Code {
+						<div role="alert" class="alert alert- mb-5 border-2">
+							<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="stroke-current shrink-0 w-6 h-6">
+								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+							</svg>
+							<span>
+								You need to check out from <strong>{ marker.Name }</strong> first.
+							</span>
+						</div>
+					}
+					<label class="form-control w-full" for="team">
 						<div class="label font-bold">
 							<span class="label-text">Team code</span>
 						</div>

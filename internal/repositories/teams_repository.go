@@ -95,11 +95,11 @@ func isUniqueConstraintError(err error) bool {
 }
 
 func (r *teamRepository) LoadInstance(ctx context.Context, team *models.Team) error {
-	if team.InstanceID == "" || team.Instance.ID != "" {
-		return nil
-	}
 	return db.DB.NewSelect().
 		Model(&team.Instance).
+		Relation("Locations").
+		Relation("Locations.Marker").
+		Relation("Settings").
 		Where("id = ?", team.InstanceID).
 		WherePK().
 		Scan(ctx)

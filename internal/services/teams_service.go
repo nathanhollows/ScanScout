@@ -108,7 +108,7 @@ func (s *teamService) AwardPoints(ctx context.Context, team *models.Team, points
 	return s.teamRepo.Update(ctx, team)
 }
 
-// LoadRelations loads relations for a team
+// LoadRelation loads the specified relation for a team
 func (s *teamService) LoadRelation(ctx context.Context, team *models.Team, relation string) error {
 	switch relation {
 	case "Instance":
