@@ -46,7 +46,7 @@ func (s *NavigationService) DetermineNextLocations(ctx context.Context, team *mo
 	response.Data = make(map[string]interface{})
 
 	// Check if the team has visited all locations
-	if len(team.Scans) == len(team.Instance.Locations) {
+	if len(team.CheckIns) == len(team.Instance.Locations) {
 		response.Error = errors.New("all locations visited")
 		response.AddFlashMessage(*flash.NewInfo("You have visited all locations!"))
 		return response
@@ -73,7 +73,7 @@ func (s *NavigationService) getUnvisitedLocations(_ context.Context, team *model
 	// Find the next location
 	for _, location := range team.Instance.Locations {
 		found := false
-		for _, scan := range team.Scans {
+		for _, scan := range team.CheckIns {
 			if scan.LocationID == location.ID {
 				found = true
 				continue

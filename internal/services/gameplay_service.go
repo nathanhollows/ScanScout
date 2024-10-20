@@ -155,7 +155,7 @@ func (s *gameplayService) CheckIn(ctx context.Context, team *models.Team, locati
 	response = ServiceResponse{}
 
 	// A team may not check in if they must check out at a different location
-	if team.MustScanOut != "" && locationCode != team.MustScanOut {
+	if team.MustCheckOut != "" && locationCode != team.MustCheckOut {
 		err := s.TeamService.LoadRelation(ctx, team, "BlockingLocation")
 		if err != nil {
 			response.Error = fmt.Errorf("loading blocking location: %w", err)
@@ -181,7 +181,7 @@ func (s *gameplayService) CheckIn(ctx context.Context, team *models.Team, locati
 		response.Error = fmt.Errorf("loading scans: %w", err)
 		return response
 	}
-	for _, s := range team.Scans {
+	for _, s := range team.CheckIns {
 		if s.LocationID == location.ID {
 			scanned = true
 			break
@@ -231,7 +231,7 @@ func (s *gameplayService) CheckIn(ctx context.Context, team *models.Team, locati
 	// Points are only added if the team does not need to scan out
 	// If the team must check out, the location is saved to the team
 	if mustCheckOut {
-		team.MustScanOut = location.ID
+		team.MustCheckOut = location.ID
 	} else {
 		team.Points += location.Points
 	}
@@ -269,11 +269,11 @@ func (s *gameplayService) CheckOut(ctx context.Context, team *models.Team, locat
 	}
 
 	// Check if the team must scan out
-	if team.MustScanOut == "" {
+	if team.MustCheckOut == "" {
 		msg := flash.NewDefault("You don't need to scan out.")
 		response.AddFlashMessage(*msg)
 		return response
-	} else if team.MustScanOut != location.ID {
+	} else if team.MustCheckOut != location.ID {
 		msg := flash.NewWarning("You need to scan out at " + team.BlockingLocation.Name + ".")
 		response.AddFlashMessage(*msg)
 		return response
@@ -289,7 +289,7 @@ func (s *gameplayService) CheckOut(ctx context.Context, team *models.Team, locat
 	}
 
 	// Clear the mustScanOut field
-	team.MustScanOut = ""
+	team.MustCheckOut = ""
 	err = team.Update(ctx)
 	if err != nil {
 		msg := flash.NewError("Something went wrong. Please try again.")

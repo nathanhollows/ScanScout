@@ -12,7 +12,7 @@ type CheckInService interface {
 	// CompleteBlocks marks all blocks for a location as complete
 	CompleteBlocks(ctx context.Context, teamCode string, locationID string) error
 	// LogCheckIn logs a check in for a team at a location
-	LogCheckIn(ctx context.Context, team models.Team, location models.Location, mustCheckOut bool, validationRequired bool) (models.Scan, error)
+	LogCheckIn(ctx context.Context, team models.Team, location models.Location, mustCheckOut bool, validationRequired bool) (models.CheckIn, error)
 }
 
 type checkInService struct {
@@ -47,10 +47,10 @@ func (s *checkInService) CompleteBlocks(ctx context.Context, teamCode string, lo
 }
 
 // LogCheckIn logs a check in for a team at a location
-func (s *checkInService) LogCheckIn(ctx context.Context, team models.Team, location models.Location, mustCheckOut bool, validationRequired bool) (models.Scan, error) {
+func (s *checkInService) LogCheckIn(ctx context.Context, team models.Team, location models.Location, mustCheckOut bool, validationRequired bool) (models.CheckIn, error) {
 	scan, err := s.checkInRepo.LogCheckIn(ctx, team, location, mustCheckOut, validationRequired)
 	if err != nil {
-		return models.Scan{}, fmt.Errorf("logging check in: %w", err)
+		return models.CheckIn{}, fmt.Errorf("logging check in: %w", err)
 	}
 	return scan, nil
 }

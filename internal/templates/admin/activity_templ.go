@@ -423,11 +423,11 @@ func teamLocationMatrix(locations models.Locations, teams []models.Team) [][]str
 		}
 		matrix[i][0] = team.Code
 		for j, location := range locations {
-			if team.MustScanOut == location.ID {
+			if team.MustCheckOut == location.ID {
 				matrix[i][j+1] = "●"
 				continue
 			}
-			for _, visit := range team.Scans {
+			for _, visit := range team.CheckIns {
 				if visit.LocationID == location.ID {
 					matrix[i][j+1] = "✔"
 					break
@@ -676,17 +676,17 @@ func TeamActivity(settings models.InstanceSettings, team models.Team, notificati
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		if len(team.Scans) > 0 {
+		if len(team.CheckIns) > 0 {
 			templ_7745c5c3_Err = templ.WriteWatchModeString(templ_7745c5c3_Buffer, 62)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			for _, scan := range team.Scans {
+			for _, scan := range team.CheckIns {
 				templ_7745c5c3_Err = templ.WriteWatchModeString(templ_7745c5c3_Buffer, 63)
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				if scan.MustScanOut {
+				if scan.MustCheckOut {
 					templ_7745c5c3_Err = templ.WriteWatchModeString(templ_7745c5c3_Buffer, 64)
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err

@@ -20,7 +20,7 @@ func CreateTables(logger *slog.Logger) {
 		(*models.Clue)(nil),
 		(*Team)(nil),
 		(*Marker)(nil),
-		(*Scan)(nil),
+		(*CheckIn)(nil),
 		(*Instance)(nil),
 		(*User)(nil),
 	}

@@ -7,7 +7,7 @@ import (
 	"github.com/nathanhollows/Rapua/pkg/db"
 )
 
-type Scan struct {
+type CheckIn struct {
 	baseModel
 
 	InstanceID      string    `bun:"instance_id,notnull"`
@@ -15,7 +15,7 @@ type Scan struct {
 	LocationID      string    `bun:"location_id,pk,type:string"`
 	TimeIn          time.Time `bun:"time_in,type:datetime"`
 	TimeOut         time.Time `bun:"time_out,type:datetime"`
-	MustScanOut     bool      `bun:"must_scan_out"`
+	MustCheckOut    bool      `bun:"must_check_out"`
 	Points          int       `bun:"points,"`
 	BlocksCompleted bool      `bun:"blocks_completed,type:int"`
 
@@ -23,7 +23,7 @@ type Scan struct {
 }
 
 // Save saves or updates a scan
-func (s *Scan) Save(ctx context.Context) error {
+func (s *CheckIn) Save(ctx context.Context) error {
 	var err error
 	if s.CreatedAt.IsZero() {
 		_, err = db.DB.NewInsert().Model(s).Exec(ctx)
@@ -34,7 +34,7 @@ func (s *Scan) Save(ctx context.Context) error {
 }
 
 // Delete removes the scan from the database
-func (s *Scan) Delete(ctx context.Context) error {
+func (s *CheckIn) Delete(ctx context.Context) error {
 	_, err := db.DB.NewDelete().Model(s).WherePK().Exec(ctx)
 	return err
 }

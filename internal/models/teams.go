@@ -16,15 +16,15 @@ import (
 type Team struct {
 	baseModel
 
-	Code        string `bun:"code,unique,pk"`
-	Name        string `bun:"name,"`
-	InstanceID  string `bun:"instance_id,notnull"`
-	HasStarted  bool   `bun:"has_started,default:false"`
-	MustScanOut string `bun:"must_scan_out"`
-	Points      int    `bun:"points,"`
+	Code         string `bun:"code,unique,pk"`
+	Name         string `bun:"name,"`
+	InstanceID   string `bun:"instance_id,notnull"`
+	HasStarted   bool   `bun:"has_started,default:false"`
+	MustCheckOut string `bun:"must_scan_out"`
+	Points       int    `bun:"points,"`
 
 	Instance         Instance                `bun:"rel:has-one,join:instance_id=id"`
-	Scans            []Scan                  `bun:"rel:has-many,join:code=team_code"`
+	CheckIns         []CheckIn               `bun:"rel:has-many,join:code=team_code"`
 	BlockingLocation Location                `bun:"rel:has-one,join:must_scan_out=marker_id,join:instance_id=instance_id"`
 	Messages         []Notification          `bun:"rel:has-many,join:code=team_code"`
 	Blocks           []models.TeamBlockState `bun:"rel:has-many,join:code=team_code"`
@@ -89,7 +89,7 @@ func FindTeamByCodeAndInstance(ctx context.Context, code, instance string) (*Tea
 
 // HasVisited returns true if the team has visited the given location
 func (t *Team) HasVisited(location *Location) bool {
-	for _, s := range t.Scans {
+	for _, s := range t.CheckIns {
 		if s.LocationID == location.ID {
 			return true
 		}
@@ -102,8 +102,8 @@ func (t *Team) SuggestNextLocations(ctx context.Context, limit int) *Locations {
 	var locations Locations
 
 	// Get the list of locations the team has already visited
-	visited := make([]string, len(t.Scans))
-	for i, s := range t.Scans {
+	visited := make([]string, len(t.CheckIns))
+	for i, s := range t.CheckIns {
 		visited[i] = s.LocationID
 	}
 
@@ -190,7 +190,7 @@ func TeamActivityOverview(ctx context.Context, instanceID string) ([]map[string]
 	// If TimeIn is not set, the duration is 0
 	count := 0
 	for _, team := range teams {
-		if len(team.Scans) > 0 {
+		if len(team.CheckIns) > 0 {
 			count++
 		}
 	}
@@ -212,7 +212,7 @@ func TeamActivityOverview(ctx context.Context, instanceID string) ([]map[string]
 			activity[count]["locations"].([]map[string]interface{})[j]["time_in"] = ""
 			activity[count]["locations"].([]map[string]interface{})[j]["time_out"] = ""
 		}
-		for _, scan := range team.Scans {
+		for _, scan := range team.CheckIns {
 			for j, instanceLocation := range instanceLocations {
 				if scan.LocationID == instanceLocation.Marker.Code {
 					activity[count]["locations"].([]map[string]interface{})[j]["visited"] = true

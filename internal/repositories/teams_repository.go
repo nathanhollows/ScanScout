@@ -107,8 +107,8 @@ func (r *teamRepository) LoadInstance(ctx context.Context, team *models.Team) er
 
 func (r *teamRepository) LoadScans(ctx context.Context, team *models.Team) error {
 	// Only load the scans if they are not already loaded
-	if len(team.Scans) == 0 {
-		err := db.DB.NewSelect().Model(&team.Scans).
+	if len(team.CheckIns) == 0 {
+		err := db.DB.NewSelect().Model(&team.CheckIns).
 			Where("team_code = ?", team.Code).
 			Relation("Location").
 			Order("time_in DESC").
@@ -121,11 +121,11 @@ func (r *teamRepository) LoadScans(ctx context.Context, team *models.Team) error
 }
 
 func (r *teamRepository) LoadBlockingLocation(ctx context.Context, team *models.Team) error {
-	if team.MustScanOut == "" || team.BlockingLocation.ID != "" {
+	if team.MustCheckOut == "" || team.BlockingLocation.ID != "" {
 		return nil
 	}
 	err := db.DB.NewSelect().Model(&team.BlockingLocation).
-		Where("ID = ?", team.MustScanOut).
+		Where("ID = ?", team.MustCheckOut).
 		Scan(ctx)
 	if err != nil {
 		return fmt.Errorf("LoadBlockingLocation: %v", err)

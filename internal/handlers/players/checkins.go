@@ -19,7 +19,7 @@ func (h *PlayerHandler) CheckIn(w http.ResponseWriter, r *http.Request) {
 
 	team, err := h.getTeamFromContext(r.Context())
 	if err == nil {
-		if team.MustScanOut != "" {
+		if team.MustCheckOut != "" {
 			err := h.TeamService.LoadRelation(r.Context(), team, "BlockingLocation")
 			if err != nil {
 				h.Logger.Error("CheckIn: loading blocking location", "err", err)
@@ -92,7 +92,7 @@ func (h *PlayerHandler) CheckOut(w http.ResponseWriter, r *http.Request) {
 
 	team, err := h.getTeamFromContext(r.Context())
 	if err == nil {
-		if team.MustScanOut != "" {
+		if team.MustCheckOut != "" {
 			err := h.TeamService.LoadRelation(r.Context(), team, "BlockingLocation")
 			if err != nil {
 				h.Logger.Error("CheckIn: loading blocking location", "err", err)
@@ -169,7 +169,7 @@ func (h *PlayerHandler) MyCheckins(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if len(team.Scans) == 0 {
+	if len(team.CheckIns) == 0 {
 		flash.Message{
 			Style:   flash.Default,
 			Message: "You haven't checked in anywhere yet.",
@@ -206,7 +206,7 @@ func (h *PlayerHandler) CheckInView(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if team.MustScanOut != "" {
+	if team.MustCheckOut != "" {
 		if team.BlockingLocation.MarkerID != locationCode {
 			flash.NewDefault("You are currently checked into "+team.BlockingLocation.Name).Save(w, r)
 		}
@@ -214,7 +214,7 @@ func (h *PlayerHandler) CheckInView(w http.ResponseWriter, r *http.Request) {
 
 	// Get the index of the location in the team's scans
 	index := -1
-	for i, scan := range team.Scans {
+	for i, scan := range team.CheckIns {
 		if scan.Location.MarkerID == locationCode {
 			index = i
 			break
@@ -227,14 +227,14 @@ func (h *PlayerHandler) CheckInView(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	blocks, blockStates, err := h.BlockService.GetBlocksWithStateByLocationIDAndTeamCode(r.Context(), team.Scans[index].Location.ID, team.Code)
+	blocks, blockStates, err := h.BlockService.GetBlocksWithStateByLocationIDAndTeamCode(r.Context(), team.CheckIns[index].Location.ID, team.Code)
 	if err != nil {
 		h.handleError(w, r, "CheckInView: getting blocks", "Error loading blocks", "error", err, "team", team.Code, "location", locationCode)
 		return
 	}
 
-	c := templates.CheckInView(team.Instance.Settings, team.Scans[index], blocks, blockStates)
-	err = templates.Layout(c, team.Scans[index].Location.Name).Render(r.Context(), w)
+	c := templates.CheckInView(team.Instance.Settings, team.CheckIns[index], blocks, blockStates)
+	err = templates.Layout(c, team.CheckIns[index].Location.Name).Render(r.Context(), w)
 	if err != nil {
 		h.Logger.Error("rendering checkin view", "error", err.Error())
 	}

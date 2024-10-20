@@ -110,14 +110,14 @@ func FindOrderedLocations(ctx context.Context, team *Team) (*Locations, error) {
 }
 
 func (l *Location) LogScanOut(ctx context.Context, team *Team) error {
-	if len(team.Scans) == 0 {
+	if len(team.CheckIns) == 0 {
 		return fmt.Errorf("no scans found/loaded for team")
 	}
 
-	var scan *Scan
-	for i := range team.Scans {
-		if team.Scans[i].LocationID == l.ID {
-			scan = &team.Scans[i]
+	var scan *CheckIn
+	for i := range team.CheckIns {
+		if team.CheckIns[i].LocationID == l.ID {
+			scan = &team.CheckIns[i]
 			break
 		}
 	}
@@ -128,7 +128,7 @@ func (l *Location) LogScanOut(ctx context.Context, team *Team) error {
 
 	// Check if the team must scan out
 	scan.TimeOut = time.Now().UTC()
-	scan.MustScanOut = false
+	scan.MustCheckOut = false
 	scan.Save(ctx)
 
 	// Update the location stats
@@ -139,7 +139,7 @@ func (l *Location) LogScanOut(ctx context.Context, team *Team) error {
 	l.CurrentCount--
 	l.Save(ctx)
 
-	team.MustScanOut = ""
+	team.MustCheckOut = ""
 	team.Update(ctx)
 
 	return nil

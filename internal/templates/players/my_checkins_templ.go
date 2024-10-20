@@ -37,7 +37,7 @@ func MyCheckins(team internalModels.Team) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		if len(team.Scans) > 0 && team.Scans[0].MustScanOut && team.Scans[0].BlocksCompleted {
+		if len(team.CheckIns) > 0 && team.CheckIns[0].MustCheckOut && team.CheckIns[0].BlocksCompleted {
 			templ_7745c5c3_Err = templ.WriteWatchModeString(templ_7745c5c3_Buffer, 2)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
@@ -47,7 +47,7 @@ func MyCheckins(team internalModels.Team) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		for _, scan := range team.Scans {
+		for _, scan := range team.CheckIns {
 			templ_7745c5c3_Err = templ.WriteWatchModeString(templ_7745c5c3_Buffer, 4)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
@@ -117,7 +117,7 @@ func MyCheckins(team internalModels.Team) templ.Component {
 	})
 }
 
-func CheckInView(settings internalModels.InstanceSettings, scan internalModels.Scan, blocks blocks.Blocks, states map[string]blocks.PlayerState) templ.Component {
+func CheckInView(settings internalModels.InstanceSettings, scan internalModels.CheckIn, blocks blocks.Blocks, states map[string]blocks.PlayerState) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)

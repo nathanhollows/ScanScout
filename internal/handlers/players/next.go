@@ -14,7 +14,7 @@ func (h *PlayerHandler) Next(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if team.MustScanOut != "" {
+	if team.MustCheckOut != "" {
 		h.redirect(w, r, "/checkins")
 		return
 	}
