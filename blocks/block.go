@@ -52,6 +52,7 @@ type BaseBlock struct {
 var registeredBlocks = Blocks{
 	&MarkdownBlock{},
 	&AnswerBlock{},
+	&PincodeBlock{},
 	&ChecklistBlock{},
 	// &APIBlock{},
 }
@@ -66,6 +67,8 @@ func CreateFromBaseBlock(baseBlock BaseBlock) (Block, error) {
 		return NewMarkdownBlock(baseBlock), nil
 	case "answer":
 		return NewAnswerBlock(baseBlock), nil
+	case "pincode":
+		return NewPincodeBlock(baseBlock), nil
 	case "checklist":
 		return NewChecklistBlock(baseBlock), nil
 	default:
@@ -82,6 +85,12 @@ func NewMarkdownBlock(base BaseBlock) *MarkdownBlock {
 
 func NewAnswerBlock(base BaseBlock) *AnswerBlock {
 	return &AnswerBlock{
+		BaseBlock: base,
+	}
+}
+
+func NewPincodeBlock(base BaseBlock) *PincodeBlock {
+	return &PincodeBlock{
 		BaseBlock: base,
 	}
 }

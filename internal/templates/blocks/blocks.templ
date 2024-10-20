@@ -14,6 +14,9 @@ func RenderAdminEdit(settings internalModels.InstanceSettings, block blocks.Bloc
 	case "answer":
 		b := block.(*blocks.AnswerBlock)
 		return answerAdmin(settings, *b)
+	case "pincode":
+		b := block.(*blocks.PincodeBlock)
+		return pincodeAdmin(settings, *b)
 	case "checklist":
 		b := block.(*blocks.ChecklistBlock)
 		return checklistAdmin(settings, *b)
@@ -29,6 +32,9 @@ func RenderPlayerView(settings internalModels.InstanceSettings, block blocks.Blo
 	case "answer":
 		b := block.(*blocks.AnswerBlock)
 		return answerPlayer(settings, *b, state)
+	case "pincode":
+		b := block.(*blocks.PincodeBlock)
+		return pincodePlayer(settings, *b, state)
 	case "checklist":
 		b := block.(*blocks.ChecklistBlock)
 		return checklistPlayer(settings, *b, state)
@@ -44,6 +50,9 @@ func RenderPlayerUpdate(settings internalModels.InstanceSettings, block blocks.B
 	case "answer":
 		b := block.(*blocks.AnswerBlock)
 		return answerPlayerUpdate(settings, *b, state)
+	case "pincode":
+		b := block.(*blocks.PincodeBlock)
+		return pincodePlayerUpdate(settings, *b, state)
 	case "checklist":
 		b := block.(*blocks.ChecklistBlock)
 		return checklistPlayer(settings, *b, state)
