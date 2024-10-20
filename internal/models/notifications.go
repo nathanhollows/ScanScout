@@ -25,7 +25,7 @@ func (n *Notification) Save(ctx context.Context) error {
 		return fmt.Errorf("message is required")
 	}
 	if n.TeamCode == "" {
-		return fmt.Errorf("team_id is required")
+		return fmt.Errorf("team_code is required")
 	}
 
 	// Generate a new ID if one doesn't exist

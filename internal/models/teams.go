@@ -24,7 +24,7 @@ type Team struct {
 	Points      int    `bun:"points,"`
 
 	Instance         Instance                `bun:"rel:has-one,join:instance_id=id"`
-	Scans            []Scan                  `bun:"rel:has-many,join:code=team_id"`
+	Scans            []Scan                  `bun:"rel:has-many,join:code=team_code"`
 	BlockingLocation Location                `bun:"rel:has-one,join:must_scan_out=marker_id,join:instance_id=instance_id"`
 	Messages         []Notification          `bun:"rel:has-many,join:code=team_code"`
 	Blocks           []models.TeamBlockState `bun:"rel:has-many,join:code=team_code"`
@@ -236,7 +236,7 @@ func TeamActivityOverview(ctx context.Context, instanceID string) ([]map[string]
 func (t *Team) GetVisitedLocations(ctx context.Context) ([]*Location, error) {
 	var locations []*Location
 	err := db.DB.NewSelect().Model(&locations).
-		Where("marker_id in (SELECT location_id FROM scans WHERE team_id = ?)", t.Code).
+		Where("marker_id in (SELECT location_id FROM scans WHERE team_code = ?)", t.Code).
 		Scan(ctx)
 	if err != nil {
 		return nil, err
@@ -264,7 +264,7 @@ func (t *Team) LoadScans(ctx context.Context) error {
 	// Only load the scans if they are not already loaded
 	if len(t.Scans) == 0 {
 		err := db.DB.NewSelect().Model(&t.Scans).
-			Where("team_id = ?", t.Code).
+			Where("team_code = ?", t.Code).
 			Relation("Location").
 			Order("time_in DESC").
 			Scan(ctx)
