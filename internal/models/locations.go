@@ -48,6 +48,7 @@ func (i *Location) Save(ctx context.Context) error {
 
 // Delete removes the location from the database
 func (i *Location) Delete(ctx context.Context) error {
+	// Should delete all related clues and blocks and scans
 	_, err := db.DB.NewDelete().Model(i).WherePK().Exec(ctx)
 	return err
 }

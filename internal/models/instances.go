@@ -23,7 +23,6 @@ type Instance struct {
 
 	Teams     []Team           `bun:"rel:has-many,join:id=instance_id"`
 	Locations Locations        `bun:"rel:has-many,join:id=instance_id"`
-	Scans     []CheckIn        `bun:"rel:has-many,join:id=instance_id"`
 	Settings  InstanceSettings `bun:"rel:has-one,join:id=instance_id"`
 }
 
@@ -64,29 +63,11 @@ func (i *Instance) Delete(ctx context.Context) error {
 		}
 	}
 
-	// Delete scans
-	for _, scan := range i.Scans {
-		err := scan.Delete(ctx)
-		if err != nil {
-			return err
-		}
-	}
-
 	_, err := db.DB.NewDelete().Model(i).WherePK().Exec(ctx)
 	if err != nil {
 		return err
 	}
 	return nil
-}
-
-// FindAllInstances finds all instances
-func FindAllInstances(ctx context.Context, userID string) ([]Instance, error) {
-	instances := []Instance{}
-	err := db.DB.NewSelect().Model(&instances).Where("user_id = ?", userID).Scan(ctx)
-	if err != nil {
-		return nil, err
-	}
-	return instances, nil
 }
 
 // FindInstanceByID finds an instance by ID

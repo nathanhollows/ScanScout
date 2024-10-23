@@ -8,7 +8,6 @@ import (
 	"strings"
 
 	"github.com/nathanhollows/Rapua/db"
-	"github.com/nathanhollows/Rapua/internal/helpers"
 	"github.com/nathanhollows/Rapua/models"
 	"github.com/uptrace/bun"
 )
@@ -149,19 +148,6 @@ func (t *Team) SuggestNextLocations(ctx context.Context, limit int) *Locations {
 	}
 
 	return &locations
-}
-
-// AddTeams adds the given number of teams
-func AddTeams(ctx context.Context, instanceID string, count int) error {
-	teams := make([]Team, count)
-	for i := 0; i < count; i++ {
-		teams[i] = Team{
-			Code:       helpers.NewCode(4),
-			InstanceID: instanceID,
-		}
-	}
-	_, err := db.DB.NewInsert().Model(&teams).Exec(ctx)
-	return err
 }
 
 // TeamActivityOverview returns a list of teams and their activity

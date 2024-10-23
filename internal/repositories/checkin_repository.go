@@ -46,7 +46,12 @@ func (r *checkInRepository) LogCheckIn(ctx context.Context, team models.Team, lo
 		Points:          location.Points,
 		BlocksCompleted: !validationRequired,
 	}
-	err := scan.Save(ctx)
+	var err error
+	if scan.CreatedAt.IsZero() {
+		_, err = db.DB.NewInsert().Model(scan).Exec(ctx)
+	} else {
+		_, err = db.DB.NewUpdate().Model(scan).WherePK().Exec(ctx)
+	}
 	if err != nil {
 		return models.CheckIn{}, fmt.Errorf("saving scan: %w", err)
 	}
