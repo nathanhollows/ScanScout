@@ -14,11 +14,6 @@ func (h *PlayerHandler) Next(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if team.MustCheckOut != "" {
-		h.redirect(w, r, "/checkins")
-		return
-	}
-
 	response := h.GameplayService.SuggestNextLocations(r.Context(), team, 3)
 	for _, message := range response.FlashMessages {
 		message.Save(w, r)

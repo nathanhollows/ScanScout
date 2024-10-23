@@ -177,15 +177,6 @@ func (h *PlayerHandler) MyCheckins(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if len(team.CheckIns) == 0 {
-		flash.Message{
-			Style:   flash.Default,
-			Message: "You haven't checked in anywhere yet.",
-		}.Save(w, r)
-		http.Redirect(w, r, "/next", http.StatusFound)
-		return
-	}
-
 	c := templates.MyCheckins(*team)
 	err = templates.Layout(c, "My Check-ins").Render(r.Context(), w)
 	if err != nil {

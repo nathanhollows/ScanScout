@@ -15,12 +15,20 @@ templ MyCheckins(team internalModels.Team) {
 		</h2>
 	</div>
 	<div class="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
+		if len(team.CheckIns) == 0 {
+			<div role="alert" class="alert">
+				<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-alert w-5 h-5 text-info"><circle cx="12" cy="12" r="10"></circle><line x1="12" x2="12" y1="8" y2="12"></line><line x1="12" x2="12.01" y1="16" y2="16"></line></svg>
+				<span>
+					Nothing to show yet. <a href="/next" hx-boost="true" class="link">Check in at your first location to get started.</a>
+				</span>
+			</div>
+		}
 		<div class="w-full indicator">
-			if len(team.Scans) > 0 && team.Scans[0].MustScanOut && team.Scans[0].BlocksCompleted {
+			if len(team.CheckIns) > 0 && team.CheckIns[0].MustCheckOut && team.CheckIns[0].BlocksCompleted {
 				<span class="indicator-item indicator-top indicator-center badge badge-primary">Ready to check out</span>
 			}
 			<div class="w-full join join-vertical">
-				for _, scan := range team.Scans {
+				for _, scan := range team.CheckIns {
 					<a
 						href={ templ.SafeURL(fmt.Sprint("/checkins/", scan.Location.MarkerID)) }
 						hx-boost="true"
@@ -50,7 +58,7 @@ templ MyCheckins(team internalModels.Team) {
 	</div>
 }
 
-templ CheckInView(settings internalModels.InstanceSettings, scan internalModels.Scan, blocks blocks.Blocks, states map[string]blocks.PlayerState) {
+templ CheckInView(settings internalModels.InstanceSettings, scan internalModels.CheckIn, blocks blocks.Blocks, states map[string]blocks.PlayerState) {
 	<div class="sm:mx-auto sm:w-full sm:max-w-sm">
 		<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-map-pin-check-inside w-16 h-16 m-auto"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"></path><path d="m9 10 2 2 4-4"></path></svg>
 		<h2 class="mt-5 text-center text-2xl font-bold leading-9 tracking-tight">
