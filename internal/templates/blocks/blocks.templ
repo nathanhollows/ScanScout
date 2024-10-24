@@ -20,6 +20,9 @@ func RenderAdminEdit(settings internalModels.InstanceSettings, block blocks.Bloc
 	case "checklist":
 		b := block.(*blocks.ChecklistBlock)
 		return checklistAdmin(settings, *b)
+	case "youtube":
+		b := block.(*blocks.YoutubeBlock)
+		return youtubeAdmin(settings, *b)
 	}
 	return nil
 }
@@ -38,6 +41,9 @@ func RenderPlayerView(settings internalModels.InstanceSettings, block blocks.Blo
 	case "checklist":
 		b := block.(*blocks.ChecklistBlock)
 		return checklistPlayer(settings, *b, state)
+	case "youtube":
+		b := block.(*blocks.YoutubeBlock)
+		return youtubePlayer(settings, *b)
 	}
 	return nil
 }
@@ -56,6 +62,9 @@ func RenderPlayerUpdate(settings internalModels.InstanceSettings, block blocks.B
 	case "checklist":
 		b := block.(*blocks.ChecklistBlock)
 		return checklistPlayer(settings, *b, state)
+	case "youtube":
+		b := block.(*blocks.YoutubeBlock)
+		return youtubePlayer(settings, *b)
 	}
 	return nil
 }

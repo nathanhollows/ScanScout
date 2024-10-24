@@ -54,6 +54,7 @@ var registeredBlocks = Blocks{
 	&AnswerBlock{},
 	&PincodeBlock{},
 	&ChecklistBlock{},
+	&YoutubeBlock{},
 	// &APIBlock{},
 }
 
@@ -71,6 +72,8 @@ func CreateFromBaseBlock(baseBlock BaseBlock) (Block, error) {
 		return NewPincodeBlock(baseBlock), nil
 	case "checklist":
 		return NewChecklistBlock(baseBlock), nil
+	case "youtube":
+		return NewYoutubeBlock(baseBlock), nil
 	default:
 		return nil, fmt.Errorf("block type %s not found", baseBlock.Type)
 	}
@@ -97,6 +100,12 @@ func NewPincodeBlock(base BaseBlock) *PincodeBlock {
 
 func NewChecklistBlock(base BaseBlock) *ChecklistBlock {
 	return &ChecklistBlock{
+		BaseBlock: base,
+	}
+}
+
+func NewYoutubeBlock(base BaseBlock) *YoutubeBlock {
+	return &YoutubeBlock{
 		BaseBlock: base,
 	}
 }

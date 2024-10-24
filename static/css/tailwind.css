@@ -6585,6 +6585,10 @@ details.collapse summary::-webkit-details-marker {
   color: var(--fallback-wa,oklch(var(--wa)/var(--tw-text-opacity)));
 }
 
+.text-base-content\/70 {
+  color: var(--fallback-bc,oklch(var(--bc)/0.7));
+}
+
 .no-underline {
   text-decoration-line: none;
 }
