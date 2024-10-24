@@ -66,14 +66,15 @@ func (s *notificationService) SendNotificationToAllTeams(ctx context.Context, in
 
 // GetNotifications retrieves all notifications for a team
 func (s *notificationService) GetNotifications(ctx context.Context, teamCode string) ([]models.Notification, error) {
-	return models.FindNotificationsByTeamCode(ctx, teamCode)
+	return s.notificationRepository.FindByTeamCode(ctx, teamCode)
 }
 
 // DismissNotification marks a notification as dismissed
 func (s *notificationService) DismissNotification(ctx context.Context, notificationID string) error {
-	notification, err := models.FindNotificationByID(ctx, notificationID)
+	notification, err := s.notificationRepository.FindByID(ctx, notificationID)
 	if err != nil {
 		return err
 	}
-	return notification.Dismiss(ctx)
+	notification.Dismissed = true
+	return s.notificationRepository.Update(ctx, &notification)
 }
