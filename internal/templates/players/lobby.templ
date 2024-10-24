@@ -22,7 +22,7 @@ templ Lobby(team models.Team) {
 		switch team.Instance.GetStatus() {
 			case models.Closed:
 				<div class="alert alert-warning">
-					The game is currently closed.
+					This game is currently closed.
 				</div>
 			case models.Scheduled:
 				<div class="alert">
