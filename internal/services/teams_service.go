@@ -18,10 +18,12 @@ type TeamService interface {
 	AddTeams(ctx context.Context, instanceID string, count int) error
 	// AwardPoints awards points to a team
 	AwardPoints(ctx context.Context, team *models.Team, points int, reason string) error
-	// LoadRelations loads relations for a team
+	// LoadRelation loads relations for a team
 	LoadRelation(ctx context.Context, team *models.Team, relation string) error
 	// LoadRelations loads all relations for a team
 	LoadRelations(ctx context.Context, team *models.Team) error
+	// FindTeamByCode returns a team by code
+	FindTeamByCode(ctx context.Context, code string) (*models.Team, error)
 }
 
 type teamService struct {
@@ -114,7 +116,7 @@ func (s *teamService) LoadRelation(ctx context.Context, team *models.Team, relat
 	case "Instance":
 		return s.teamRepo.LoadInstance(ctx, team)
 	case "Scans":
-		return s.teamRepo.LoadScans(ctx, team)
+		return s.teamRepo.LoadCheckIns(ctx, team)
 	case "BlockingLocation":
 		return s.teamRepo.LoadBlockingLocation(ctx, team)
 	default:
@@ -130,4 +132,9 @@ func (s *teamService) LoadRelations(ctx context.Context, team *models.Team) erro
 	}
 
 	return nil
+}
+
+// FindTeamByCode returns a team by code
+func (s *teamService) FindTeamByCode(ctx context.Context, code string) (*models.Team, error) {
+	return s.teamRepo.FindTeamByCode(ctx, code)
 }

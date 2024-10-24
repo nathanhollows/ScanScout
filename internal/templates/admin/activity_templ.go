@@ -282,7 +282,7 @@ func teamModal() templ.Component {
 	})
 }
 
-func ActivityTeamsTable(locations models.Locations, teams []models.Team) templ.Component {
+func ActivityTeamsTable(locations []models.Location, teams []models.Team) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
@@ -405,7 +405,7 @@ func ActivityTeamsTable(locations models.Locations, teams []models.Team) templ.C
 
 // teamLocationMatrix returns a matrix of team locations [teamCode][locatinStatus]
 // ● for visiting, ✔ for visited, blank for not visited
-func teamLocationMatrix(locations models.Locations, teams []models.Team) [][]string {
+func teamLocationMatrix(locations []models.Location, teams []models.Team) [][]string {
 	matrix := make([][]string, len(teams))
 	for i := range matrix {
 		matrix[i] = make([]string, len(locations)+1)
@@ -559,7 +559,7 @@ func scheduleButton(scheduled bool, t schema.NullTime) templ.Component {
 	})
 }
 
-func TeamActivity(settings models.InstanceSettings, team models.Team, notifications []models.Notification, nextLocations models.Locations) templ.Component {
+func TeamActivity(settings models.InstanceSettings, team models.Team, notifications []models.Notification, nextLocations []models.Location) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)

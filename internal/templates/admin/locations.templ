@@ -7,7 +7,7 @@ import (
 	bTemplates "github.com/nathanhollows/Rapua/internal/templates/blocks"
 )
 
-templ LocationsIndex(settings models.InstanceSettings, locations models.Locations) {
+templ LocationsIndex(settings models.InstanceSettings, locations []models.Location) {
 	<!-- Header -->
 	<div class="flex flex-col gap-3 md:flex-row justify-between items-center w-full p-5">
 		<h1 class="text-2xl font-bold">
@@ -356,6 +356,60 @@ templ EditLocation(location models.Location, settings models.InstanceSettings, c
 							<input type="hidden" name="points" value={ fmt.Sprint(location.Points) }/>
 						}
 					</div>
+					<!-- Clues -->
+					if settings.NavigationMethod == models.ShowClues {
+						<div class="divider mt-5 mb-10">
+							<span class="flex gap-1 items-center">
+								<span class="font-bold">Clues</span>
+								<div class="dropdown dropdown-end">
+									<div tabindex="0" role="button" class="btn btn-circle btn-ghost btn-xs text-info">
+										<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-alert w-4 h-4 text-info"><circle cx="12" cy="12" r="10"></circle><line x1="12" x2="12" y1="8" y2="12"></line><line x1="12" x2="12.01" y1="16" y2="16"></line></svg>
+									</div>
+									<div
+										tabindex="0"
+										class="card compact dropdown-content bg-base-200 rounded-box z-[1] w-64 shadow"
+									>
+										<div tabindex="0" class="card-body">
+											<h2 class="card-title">Clues</h2>
+											<p class="text-wrap">Each team is shown one randomly selected clue.</p>
+										</div>
+									</div>
+								</div>
+							</span>
+						</div>
+						<div>
+							<div class="prose my-5 mx-3">
+								<blockquote class="mb-0">
+									<div class="flex gap-3 justify-end">
+										<textarea
+											id="clue"
+											name="clues"
+											class="textarea textarea-bordered w-full"
+											placeholder="Enter a clue"
+										></textarea>
+										<button type="submit" class="btn btn-primary">Add</button>
+									</div>
+								</blockquote>
+							</div>
+							for _, clue := range location.Clues {
+								<div class="prose my-5 mx-3">
+									<blockquote class="mb-0">
+										<div class="flex gap-3 justify-end">
+											{ clue.Content }
+											<button type="button" class="btn btn-xs btn-ghost" onclick="this.previousElementSibling.classList.toggle('hidden')">
+												<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-pencil w-4 h-4"><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"></path><path d="m15 5 4 4"></path></svg>
+												Edit
+											</button>
+											<button type="button" class="btn btn-xs btn-ghost text-error" onclick="this.closest('div').remove()">
+												<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-delete w-4 h-4"><path d="M10 5a2 2 0 0 0-1.344.519l-6.328 5.74a1 1 0 0 0 0 1.481l6.328 5.741A2 2 0 0 0 10 19h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2z"></path><path d="m12 9 6 6"></path><path d="m18 9-6 6"></path></svg>
+												Delete
+											</button>
+										</div>
+									</blockquote>
+								</div>
+							}
+						</div>
+					}
 					<!-- Blocks -->
 					<div class="divider mt-5 mb-10">
 						<div class="dropdown">
@@ -365,7 +419,7 @@ templ EditLocation(location models.Location, settings models.InstanceSettings, c
 									Add a Block
 								</div>
 							</div>
-							<div tabindex="0" class="dropdown-content card bg-base-100 border shadow-xl w-80 -ml-24 mt-3 z-50">
+							<div tabindex="0" class="dropdown-content card bg-base-100 border border-base-content/20 shadow-lg w-80 -ml-24 mt-3 z-50">
 								<div class="card-body">
 									<h2 class="card-title mb-3">Add a Block</h2>
 									<div class="grid grid-cols-2 grid-flow-row gap-5">
@@ -373,13 +427,13 @@ templ EditLocation(location models.Location, settings models.InstanceSettings, c
 											<div class="indicator w-full">
 												if   block.RequiresValidation() {
 													<span
-														class="indicator-item indicator-top indicator-center badge badge-outline bg-base-100"
+														class="indicator-item indicator-top indicator-center badge badge-outline border-base-content/30 bg-base-100"
 													>
 														Interactive
 													</span>
 												}
 												<div
-													class="btn btn-outline h-auto p-3 tooltip flex flex-col gap-1 items-center rounded-md w-full"
+													class="btn btn-outline border-base-content/30 h-auto p-3 tooltip flex flex-col gap-1 items-center rounded-md w-full"
 													data-tip={ block.GetDescription() }
 													hx-post={ fmt.Sprint("/admin/locations/", location.ID, "/blocks/new/", block.GetType()) }
 													hx-target="#blocks"
@@ -407,7 +461,7 @@ templ EditLocation(location models.Location, settings models.InstanceSettings, c
 					</div>
 				</div>
 				<!-- Sidebar -->
-				<div class="flex flex-col">
+				<aside class="flex flex-col">
 					<!-- Map -->
 					<div id="map-container" class="relative w-full aspect-square md:w-[35vw] lg:w-96 rounded-lg shadow-lg mt-5">
 						<div id="map" class="map w-full h-full rounded-lg"></div>
@@ -433,34 +487,7 @@ templ EditLocation(location models.Location, settings models.InstanceSettings, c
 					<input type="hidden" name="code" value={ location.Marker.Code }/>
 					<input type="hidden" name="latitude" value={ floatToString(location.Marker.Lat) }/>
 					<input type="hidden" name="longitude" value={ floatToString(location.Marker.Lng) }/>
-					if settings.NavigationMethod == models.ShowClues {
-						<!-- Clues -->
-						<div class="label">
-							<span class="label-text font-bold flex gap-3 items-center">
-								Clues
-							</span>
-						</div>
-						<div>
-							for _, clue := range location.Clues {
-								<div class="prose my-5 mx-3">
-									<blockquote class="mb-0">
-										<div class="flex gap-3 justify-end">
-											{ clue.Content }
-											<button type="button" class="btn btn-xs btn-ghost" onclick="this.previousElementSibling.classList.toggle('hidden')">
-												<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-pencil w-4 h-4"><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"></path><path d="m15 5 4 4"></path></svg>
-												Edit
-											</button>
-											<button type="button" class="btn btn-xs btn-ghost text-error" onclick="this.closest('div').remove()">
-												<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-delete w-4 h-4"><path d="M10 5a2 2 0 0 0-1.344.519l-6.328 5.74a1 1 0 0 0 0 1.481l6.328 5.741A2 2 0 0 0 10 19h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2z"></path><path d="m12 9 6 6"></path><path d="m18 9-6 6"></path></svg>
-												Delete
-											</button>
-										</div>
-									</blockquote>
-								</div>
-							}
-						</div>
-					}
-				</div>
+				</aside>
 			</div>
 		</div>
 	</form>

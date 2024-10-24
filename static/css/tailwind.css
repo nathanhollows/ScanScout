@@ -6088,6 +6088,10 @@ details.collapse summary::-webkit-details-marker {
   overflow-y: scroll;
 }
 
+.text-wrap {
+  text-wrap: wrap;
+}
+
 .text-nowrap {
   text-wrap: nowrap;
 }
@@ -6188,6 +6192,10 @@ details.collapse summary::-webkit-details-marker {
 
 .border-base-content\/10 {
   border-color: var(--fallback-bc,oklch(var(--bc)/0.1));
+}
+
+.border-base-content\/20 {
+  border-color: var(--fallback-bc,oklch(var(--bc)/0.2));
 }
 
 .bg-accent {

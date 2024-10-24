@@ -228,7 +228,7 @@ func (s *GameManagerService) AddTeams(ctx context.Context, instanceID string, co
 	return response
 }
 
-func (s *GameManagerService) GetAllLocations(ctx context.Context, instanceID string) (internalModels.Locations, error) {
+func (s *GameManagerService) GetAllLocations(ctx context.Context, instanceID string) ([]internalModels.Location, error) {
 	return internalModels.FindAllLocations(ctx, instanceID)
 }
 

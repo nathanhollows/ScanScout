@@ -31,8 +31,6 @@ type Location struct {
 	Blocks   []models.Block `bun:"rel:has-many,join:id=location_id"`
 }
 
-type Locations []Location
-
 // Save saves or updates an instance location
 func (i *Location) Save(ctx context.Context) error {
 	var err error
@@ -67,8 +65,8 @@ func FindLocationByInstanceAndCode(ctx context.Context, instance, code string) (
 }
 
 // FindAll returns all locations
-func FindAllLocations(ctx context.Context, instanceID string) (Locations, error) {
-	var instanceLocations Locations
+func FindAllLocations(ctx context.Context, instanceID string) ([]Location, error) {
+	var instanceLocations []Location
 	err := db.DB.NewSelect().
 		Model(&instanceLocations).
 		Where("location.instance_id = ?", instanceID).

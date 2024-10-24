@@ -22,6 +22,7 @@ var (
 	ErrUnfinishedCheckIn        = errors.New("unfinished check in")
 	ErrAlreadyCheckedIn         = errors.New("player has already scanned in")
 	ErrUnecessaryCheckOut       = errors.New("player does not need to scan out")
+	ErrInstanceSettingsNotFound = errors.New("instance settings not found")
 )
 
 type GameplayService interface {
@@ -29,21 +30,22 @@ type GameplayService interface {
 	GetTeamByCode(ctx context.Context, teamCode string) (*models.Team, error)
 	GetMarkerByCode(ctx context.Context, locationCode string) *ServiceResponse
 	StartPlaying(ctx context.Context, teamCode, customTeamName string) *ServiceResponse
-	SuggestNextLocations(ctx context.Context, team *models.Team, limit int) ServiceResponse
+	SuggestNextLocations(ctx context.Context, team *models.Team, limit int) ([]models.Location, error)
 	// CheckIn checks a team in at a location
 	// It also manages the points and mustScanOut fields
 	// As well as checking if any blocks must be completed
 	CheckIn(ctx context.Context, team *models.Team, locationCode string) ServiceResponse
 	CheckOut(ctx context.Context, team *models.Team, locationCode string) error
-	CheckValidLocation(ctx context.Context, team *models.Team, locationCode string) *ServiceResponse
+	CheckValidLocation(ctx context.Context, team *models.Team, locationCode string) (bool, error)
 	ValidateAndUpdateBlockState(ctx context.Context, team models.Team, data map[string][]string) (blocks.PlayerState, blocks.Block, error)
 }
 
 type gameplayService struct {
-	CheckInService  CheckInService
-	LocationService LocationService
-	TeamService     TeamService
-	BlockService    BlockService
+	CheckInService    CheckInService
+	LocationService   LocationService
+	TeamService       TeamService
+	BlockService      BlockService
+	NavigationService NavigationService
 }
 
 func NewGameplayService() GameplayService {
@@ -55,6 +57,7 @@ func NewGameplayService() GameplayService {
 			repositories.NewBlockRepository(),
 			repositories.NewBlockStateRepository(),
 		),
+		NavigationService: NewNavigationService(),
 	}
 }
 
@@ -77,7 +80,7 @@ func (s *gameplayService) CheckGameStatus(ctx context.Context, team *models.Team
 
 func (s *gameplayService) GetTeamByCode(ctx context.Context, teamCode string) (*models.Team, error) {
 	teamCode = strings.TrimSpace(strings.ToUpper(teamCode))
-	team, err := models.FindTeamByCode(ctx, teamCode)
+	team, err := s.TeamService.FindTeamByCode(ctx, teamCode)
 	if err != nil {
 		return nil, fmt.Errorf("GetTeamStatus: %w", err)
 	}
@@ -102,7 +105,7 @@ func (s *gameplayService) StartPlaying(ctx context.Context, teamCode, customTeam
 	response = &ServiceResponse{}
 	response.Data = make(map[string]interface{})
 
-	team, err := models.FindTeamByCode(ctx, teamCode)
+	team, err := s.TeamService.FindTeamByCode(ctx, teamCode)
 	if err != nil {
 		response.Error = fmt.Errorf("StartPlaying find team: %w", err)
 		response.AddFlashMessage(*flash.NewError("Team not found. Please double check the code and try again."))
@@ -126,34 +129,20 @@ func (s *gameplayService) StartPlaying(ctx context.Context, teamCode, customTeam
 	return response
 }
 
-func (s *gameplayService) SuggestNextLocations(ctx context.Context, team *models.Team, limit int) ServiceResponse {
+func (s *gameplayService) SuggestNextLocations(ctx context.Context, team *models.Team, limit int) ([]models.Location, error) {
 	// Populate the team with the necessary data
 	err := s.TeamService.LoadRelations(ctx, team)
 	if err != nil {
-		return ServiceResponse{Error: fmt.Errorf("loading relations: %w", err)}
-	}
-
-	err = team.Instance.LoadLocations(ctx)
-	if err != nil {
-		return ServiceResponse{Error: fmt.Errorf("loading locations: %w", err)}
+		return nil, fmt.Errorf("loading relations: %w", err)
 	}
 
 	// Suggest the next locations for the team
-	navigationService := NewNavigationService()
-	response := navigationService.DetermineNextLocations(ctx, team)
-	if response.Error != nil {
-		response.Error = fmt.Errorf("suggesting next locations: %w", response.Error)
+	locations, err := s.NavigationService.DetermineNextLocations(ctx, team)
+	if err != nil {
+		return nil, fmt.Errorf("determining next locations: %w", err)
 	}
 
-	// Load clues for each location if necessary
-	if team.Instance.Settings.NavigationMethod == models.ShowClues {
-		response = s.loadClues(ctx, team, response.Data["nextLocations"].(models.Locations))
-		if response.Error != nil {
-			response.Error = fmt.Errorf("loading clues: %w", response.Error)
-		}
-	}
-
-	return response
+	return locations, nil
 }
 
 func (s *gameplayService) CheckIn(ctx context.Context, team *models.Team, locationCode string) (response ServiceResponse) {
@@ -195,9 +184,15 @@ func (s *gameplayService) CheckIn(ctx context.Context, team *models.Team, locati
 	}
 
 	// The location must be valid for the team to check in
-	valid := s.CheckValidLocation(ctx, team, locationCode)
-	if valid.Error != nil {
-		response.Error = fmt.Errorf("check valid location: %w", valid.Error)
+	valid, err := s.CheckValidLocation(ctx, team, locationCode)
+	if err != nil {
+		response.Error = fmt.Errorf("check valid location: %w", err)
+		return response
+	}
+	if !valid {
+		msg := flash.NewWarning("Please double check the code and try again.").SetTitle("Location code not found")
+		response.AddFlashMessage(msg)
+		response.Error = fmt.Errorf("location not valid for team")
 		return response
 	}
 
@@ -290,37 +285,30 @@ func (s *gameplayService) CheckOut(ctx context.Context, team *models.Team, locat
 }
 
 // CheckLocation checks if the location is valid for the team to check in
-func (s *gameplayService) CheckValidLocation(ctx context.Context, team *models.Team, locationCode string) (response *ServiceResponse) {
-	response = &ServiceResponse{}
-	NavigationService := NewNavigationService()
-
+func (s *gameplayService) CheckValidLocation(ctx context.Context, team *models.Team, locationCode string) (bool, error) {
 	if team.Instance.ID == "" {
-		response.Error = fmt.Errorf("team instance not loaded")
-		return response
+		return false, ErrInstanceNotFound
 	}
 
 	if team.Instance.Settings.InstanceID == "" {
-		response.Error = fmt.Errorf("instance settings not loaded")
-		return response
+		return false, ErrInstanceSettingsNotFound
 	}
 
 	if len(team.Instance.Locations) == 0 {
-		response.Error = fmt.Errorf("instance locations not loaded")
-		return response
+		return false, ErrLocationNotFound
 	}
 
-	resp := NavigationService.CheckValidLocation(ctx, team, &team.Instance.Settings, locationCode)
-	if resp.Error != nil {
-		response.Error = fmt.Errorf("checking if code matches valid locations: %w", resp.Error)
-		return response
+	valid, err := s.NavigationService.CheckValidLocation(ctx, team, &team.Instance.Settings, locationCode)
+	if err != nil {
+		return false, fmt.Errorf("checking if location is valid: %w", err)
 	}
 
-	return response
+	return valid, nil
 }
 
 // loadClues loads the clues for the current location
 // By default, it will only show one clue per location
-func (s *gameplayService) loadClues(ctx context.Context, team *models.Team, locations models.Locations) (response ServiceResponse) {
+func (s *gameplayService) loadClues(ctx context.Context, team *models.Team, locations []models.Location) (response ServiceResponse) {
 	response = ServiceResponse{}
 	response.Data = make(map[string]interface{})
 

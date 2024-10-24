@@ -19,7 +19,7 @@ type Marker struct {
 	CurrentCount int     `bun:"current_count,type:int"`
 	AvgDuration  float64 `bun:"avg_duration,type:float"`
 
-	Locations Locations `bun:"rel:has-many,join:code=marker_id"`
+	Locations []Location `bun:"rel:has-many,join:code=marker_id"`
 }
 
 // Save saves or updates a location

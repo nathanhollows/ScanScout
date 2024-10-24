@@ -13,7 +13,7 @@ type LocationService interface {
 	FindLocation(ctx context.Context, locationID string) (*models.Location, error)
 	FindLocationByInstanceAndCode(ctx context.Context, instanceID string, code string) (*models.Location, error)
 	LoadCluesForLocation(ctx context.Context, location *models.Location) error
-	LoadCluesForLocations(ctx context.Context, locations *models.Locations) error
+	LoadCluesForLocations(ctx context.Context, locations *[]models.Location) error
 	IncrementVisitorStats(ctx context.Context, location *models.Location) error
 }
 
@@ -62,7 +62,7 @@ func (s locationService) LoadCluesForLocation(ctx context.Context, location *mod
 }
 
 // LoadCluesForLocations loads the clues for all given locations if they are not already loaded
-func (s locationService) LoadCluesForLocations(ctx context.Context, locations *models.Locations) error {
+func (s locationService) LoadCluesForLocations(ctx context.Context, locations *[]models.Location) error {
 	for i := range *locations {
 		err := s.LoadCluesForLocation(ctx, &(*locations)[i])
 		if err != nil {

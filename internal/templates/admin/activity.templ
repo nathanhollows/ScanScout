@@ -196,7 +196,7 @@ templ teamModal() {
 	</script>
 }
 
-templ ActivityTeamsTable(locations models.Locations, teams []models.Team) {
+templ ActivityTeamsTable(locations []models.Location, teams []models.Team) {
 	<table
 		id="team-activity"
 		class="table table-sm w-full mt-5 md:mt-0 h-auto self-start"
@@ -260,7 +260,7 @@ templ ActivityTeamsTable(locations models.Locations, teams []models.Team) {
 
 // teamLocationMatrix returns a matrix of team locations [teamCode][locatinStatus]
 // ● for visiting, ✔ for visited, blank for not visited
-func teamLocationMatrix(locations models.Locations, teams []models.Team) [][]string {
+func teamLocationMatrix(locations []models.Location, teams []models.Team) [][]string {
 	matrix := make([][]string, len(teams))
 	for i := range matrix {
 		matrix[i] = make([]string, len(locations)+1)
@@ -278,11 +278,11 @@ func teamLocationMatrix(locations models.Locations, teams []models.Team) [][]str
 		}
 		matrix[i][0] = team.Code
 		for j, location := range locations {
-			if team.MustScanOut == location.ID {
+			if team.MustCheckOut == location.ID {
 				matrix[i][j+1] = "●"
 				continue
 			}
-			for _, visit := range team.Scans {
+			for _, visit := range team.CheckIns {
 				if visit.LocationID == location.ID {
 					matrix[i][j+1] = "✔"
 					break
@@ -443,7 +443,7 @@ templ scheduleButton(scheduled bool, t schema.NullTime) {
 	}
 }
 
-templ TeamActivity(settings models.InstanceSettings, team models.Team, notifications []models.Notification, nextLocations models.Locations) {
+templ TeamActivity(settings models.InstanceSettings, team models.Team, notifications []models.Notification, nextLocations []models.Location) {
 	<h3 class="text-lg font-bold">
 		{ team.Code }
 		if team.Name != "" {
@@ -475,12 +475,12 @@ templ TeamActivity(settings models.InstanceSettings, team models.Team, notificat
 	<!-- Check-ins -->
 	<div class="w-full">
 		<p class="py-3 font-bold">Check-ins</p>
-		if len(team.Scans) > 0 {
+		if len(team.CheckIns) > 0 {
 			<div class="prose">
 				<ul>
-					for _, scan := range team.Scans {
+					for _, scan := range team.CheckIns {
 						<li>
-							if scan.MustScanOut {
+							if scan.MustCheckOut {
 								<span class="badge badge-info">Current</span>
 							}
 							<span>
