@@ -48,15 +48,9 @@ func (h *AdminHandler) LocationNewPost(w http.ResponseWriter, r *http.Request) {
 		data[key] = value[0]
 	}
 
-	response := h.GameManagerService.CreateLocation(r.Context(), user, data)
-	if response.Error != nil {
-		h.handleError(w, r, "LocationNewPost: creating location", "Error creating location", "error", response.Error, "instance_id", user.CurrentInstanceID)
-		return
-	}
-
-	location, ok := response.Data["location"].(*models.Location)
-	if !ok {
-		h.handleError(w, r, "LocationNewPost: creating location", "Error creating location", "error", "location not returned", "instance_id", user.CurrentInstanceID)
+	location, err := h.GameManagerService.CreateLocation(r.Context(), user, data)
+	if err != nil {
+		h.handleError(w, r, "LocationNewPost: creating location", "Error creating location", "error", err, "instance_id", user.CurrentInstanceID)
 		return
 	}
 

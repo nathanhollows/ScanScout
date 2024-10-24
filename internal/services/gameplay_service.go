@@ -46,6 +46,7 @@ type gameplayService struct {
 	TeamService       TeamService
 	BlockService      BlockService
 	NavigationService NavigationService
+	MarkerRepository  repositories.MarkerRepository
 }
 
 func NewGameplayService() GameplayService {
@@ -58,6 +59,7 @@ func NewGameplayService() GameplayService {
 			repositories.NewBlockStateRepository(),
 		),
 		NavigationService: NewNavigationService(),
+		MarkerRepository:  repositories.NewMarkerRepository(),
 	}
 }
 
@@ -92,7 +94,7 @@ func (s *gameplayService) GetMarkerByCode(ctx context.Context, locationCode stri
 	response.Data = make(map[string]interface{})
 
 	locationCode = strings.TrimSpace(strings.ToUpper(locationCode))
-	marker, err := models.FindMarkerByCode(ctx, locationCode)
+	marker, err := s.MarkerRepository.FindByCode(ctx, locationCode)
 	if err != nil {
 		response.Error = fmt.Errorf("GetLocationByCode finding marker: %w", err)
 		return response

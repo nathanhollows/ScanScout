@@ -15,11 +15,16 @@ type LocationService interface {
 	LoadCluesForLocation(ctx context.Context, location *models.Location) error
 	LoadCluesForLocations(ctx context.Context, locations *[]models.Location) error
 	IncrementVisitorStats(ctx context.Context, location *models.Location) error
+	UpdateCoords(ctx context.Context, location *models.Location, lat, lng float64) error
+	UpdateName(ctx context.Context, location *models.Location, name string) error
+	CreateLocation(ctx context.Context, instanceID, name string, lat, lng float64) (models.Location, error)
+	CreateMarker(ctx context.Context, name string, lat, lng float64) (models.Marker, error)
 }
 
 type locationService struct {
 	locationRepo repositories.LocationRepository
 	clueRepo     repositories.ClueRepository
+	markerRepo   repositories.MarkerRepository
 }
 
 // NewLocationService creates a new instance of LocationService
@@ -27,6 +32,7 @@ func NewLocationService(clueRepo repositories.ClueRepository) LocationService {
 	return locationService{
 		clueRepo:     clueRepo,
 		locationRepo: repositories.NewLocationRepository(),
+		markerRepo:   repositories.NewMarkerRepository(),
 	}
 }
 
@@ -77,4 +83,52 @@ func (s locationService) IncrementVisitorStats(ctx context.Context, location *mo
 	location.CurrentCount++
 	location.TotalVisits++
 	return s.locationRepo.Update(ctx, location)
+}
+
+// UpdateCoords updates the coordinates for a location
+func (s locationService) UpdateCoords(ctx context.Context, location *models.Location, lat, lng float64) error {
+	location.Marker.Lat = lat
+	location.Marker.Lng = lng
+	return s.markerRepo.Update(ctx, &location.Marker)
+}
+
+// UpdateName updates the name of a location
+func (s locationService) UpdateName(ctx context.Context, location *models.Location, name string) error {
+	location.Name = name
+	return s.locationRepo.Update(ctx, location)
+}
+
+// CreateLocation creates a new location
+func (s locationService) CreateLocation(ctx context.Context, instanceID, name string, lat, lng float64) (models.Location, error) {
+	// Create the marker
+	marker, err := s.CreateMarker(ctx, name, lat, lng)
+	if err != nil {
+		return models.Location{}, fmt.Errorf("creating marker: %v", err)
+	}
+
+	location := models.Location{
+		Name:       name,
+		InstanceID: instanceID,
+		MarkerID:   marker.Code,
+	}
+	err = s.locationRepo.Save(ctx, &location)
+	if err != nil {
+		return models.Location{}, fmt.Errorf("saving location: %v", err)
+	}
+
+	return location, nil
+}
+
+// CreateMarker creates a new marker
+func (s locationService) CreateMarker(ctx context.Context, name string, lat, lng float64) (models.Marker, error) {
+	marker := models.Marker{
+		Name: name,
+		Lat:  lat,
+		Lng:  lng,
+	}
+	err := s.markerRepo.Save(ctx, &marker)
+	if err != nil {
+		return models.Marker{}, fmt.Errorf("saving marker: %v", err)
+	}
+	return marker, nil
 }

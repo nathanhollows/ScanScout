@@ -24,6 +24,7 @@ type GameManagerService struct {
 	locationService LocationService
 	userService     UserService
 	teamService     TeamService
+	markerRepo      repositories.MarkerRepository
 }
 
 func NewGameManagerService() GameManagerService {
@@ -31,6 +32,7 @@ func NewGameManagerService() GameManagerService {
 		locationService: NewLocationService(repositories.NewClueRepository()),
 		userService:     NewUserService(repositories.NewUserRepository()),
 		teamService:     NewTeamService(repositories.NewTeamRepository()),
+		markerRepo:      repositories.NewMarkerRepository(),
 	}
 }
 
@@ -243,68 +245,53 @@ func (s *GameManagerService) GetTeamActivityOverview(ctx context.Context, instan
 }
 
 func (s *GameManagerService) SaveLocation(ctx context.Context, location *internalModels.Location, lat, lng, name string) error {
-	if lat != "" && lng != "" {
-		latFloat, err := strconv.ParseFloat(lat, 64)
-		if err != nil {
-			return err
-		}
-		lngFloat, err := strconv.ParseFloat(lng, 64)
-		if err != nil {
-			return err
-		}
-		location.Marker.SetCoords(latFloat, lngFloat)
-		location.Marker.Save(ctx)
+	if lat == "" || lng == "" {
+		return errors.New("latitude and longitude are required")
 	}
-	return location.Save(ctx)
+
+	latFloat, err := strconv.ParseFloat(lat, 64)
+	if err != nil {
+		return err
+	}
+	lngFloat, err := strconv.ParseFloat(lng, 64)
+	if err != nil {
+		return err
+	}
+
+	err = s.locationService.UpdateCoords(ctx, location, latFloat, lngFloat)
+	if err != nil {
+		return fmt.Errorf("updating location coordinates: %w", err)
+	}
+
+	err = s.locationService.UpdateName(ctx, location, name)
+	if err != nil {
+		return fmt.Errorf("updating location name: %w", err)
+	}
+
+	return nil
 }
 
-func (s *GameManagerService) CreateLocation(ctx context.Context, user *internalModels.User, data map[string]string) (response *ServiceResponse) {
+func (s *GameManagerService) CreateLocation(ctx context.Context, user *internalModels.User, data map[string]string) (internalModels.Location, error) {
 
 	name := data["name"]
 	lat := data["latitude"]
 	lng := data["longitude"]
-
-	response = &ServiceResponse{}
-	location := &internalModels.Location{
-		Name:       name,
-		InstanceID: user.CurrentInstanceID,
-	}
 
 	var latFloat, lngFloat float64
 	var err error
 	if lat != "" && lng != "" {
 		latFloat, err = strconv.ParseFloat(lat, 64)
 		if err != nil {
-			response.AddFlashMessage(*flash.NewError("Something went wrong parsing coordinates. Please try again."))
-			response.Error = err
-			return response
+			return internalModels.Location{}, err
 		}
 		lngFloat, err = strconv.ParseFloat(lng, 64)
 		if err != nil {
-			response.AddFlashMessage(*flash.NewError("Something went wrong parsing coordinates. Please try again."))
-			response.Error = err
-			return response
+			return internalModels.Location{}, err
 		}
 	}
 
-	marker := &internalModels.Marker{
-		Name: name,
-		Lat:  latFloat,
-		Lng:  lngFloat,
-	}
+	return s.locationService.CreateLocation(ctx, user.CurrentInstanceID, name, latFloat, lngFloat)
 
-	if err := marker.Save(ctx); err != nil {
-		response.AddFlashMessage(*flash.NewError("Error saving marker. Please try editing the location again."))
-		response.Error = err
-		return response
-	}
-	location.MarkerID = marker.Code
-	location.Save(ctx)
-
-	response.AddFlashMessage(*flash.NewSuccess("Location added!"))
-	response.Data = make(map[string]interface{})
-	response.Data["location"] = location
-	return response
 }
 
 func (s *GameManagerService) UpdateLocation(ctx context.Context, location *internalModels.Location, newName, newContent, lat, lng string, points int) error {
@@ -328,22 +315,14 @@ func (s *GameManagerService) UpdateLocation(ctx context.Context, location *inter
 		}
 
 		if shared {
-			// Create a new marker since it's shared
-			newMarker := &internalModels.Marker{
-				Name: marker.Name, // Keep the same name
-				Lat:  latFloat,
-				Lng:  lngFloat,
-			}
-			if err := newMarker.Save(ctx); err != nil {
+			newMarker, err := s.locationService.CreateMarker(ctx, newName, latFloat, lngFloat)
+			if err != nil {
 				return err
 			}
 			location.MarkerID = newMarker.Code
 		} else {
-			// Update existing marker's coordinates and name
-			marker.Lat = latFloat
-			marker.Lng = lngFloat
-			marker.Name = newName // Update the marker name if not shared
-			if err := marker.Save(ctx); err != nil {
+			err := s.markerRepo.UpdateCoords(ctx, &marker, latFloat, lngFloat)
+			if err != nil {
 				return err
 			}
 		}
