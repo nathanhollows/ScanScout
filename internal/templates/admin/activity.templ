@@ -87,17 +87,19 @@ templ ActivityTracker(instance models.Instance) {
 									<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-map-pin-check-inside w-5 h-5"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"></path><path d="m9 10 2 2 4-4"></path></svg>
 									<strong>{ fmt.Sprint(location.TotalVisits - location.CurrentCount) }</strong>
 								</span>
-								<span
-									if location.CurrentCount > 0 {
-										class="tooltip flex space-x-2 tooltip-left text-sm md:tooltip-top"
-									} else {
-										class="tooltip flex space-x-2 tooltip-left text-sm md:tooltip-top opacity-50"
-									}
-									data-tip="Current check-ins"
-								>
-									<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-map-pin w-5 h-5"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"></path><circle cx="12" cy="10" r="3"></circle></svg>
-									<strong>{ fmt.Sprint(location.CurrentCount) }</strong>
-								</span>
+								if instance.Settings.CompletionMethod == models.CheckInAndOut {
+									<span
+										if location.CurrentCount > 0 {
+											class="tooltip flex space-x-2 tooltip-left text-sm md:tooltip-top"
+										} else {
+											class="tooltip flex space-x-2 tooltip-left text-sm md:tooltip-top opacity-50"
+										}
+										data-tip="Current check-ins"
+									>
+										<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-map-pin w-5 h-5"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"></path><circle cx="12" cy="10" r="3"></circle></svg>
+										<strong>{ fmt.Sprint(location.CurrentCount) }</strong>
+									</span>
+								}
 							</div>
 						</div>
 					}
