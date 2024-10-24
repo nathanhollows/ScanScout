@@ -3,9 +3,6 @@ package models
 import (
 	"context"
 	"fmt"
-	"hash/fnv"
-	"math/rand"
-	"strings"
 
 	"github.com/nathanhollows/Rapua/db"
 	"github.com/nathanhollows/Rapua/models"
@@ -29,18 +26,6 @@ type Team struct {
 	Blocks           []models.TeamBlockState `bun:"rel:has-many,join:code=team_code"`
 }
 
-// Delete removes the team from the database
-func (t *Team) Delete(ctx context.Context) error {
-	_, err := db.DB.NewDelete().Model(t).WherePK().Exec(ctx)
-	return fmt.Errorf("Delete: %v", err)
-}
-
-// Updates the team into the database
-func (t *Team) Update(ctx context.Context) error {
-	_, err := db.DB.NewUpdate().Model(t).WherePK().Exec(ctx)
-	return err
-}
-
 // FindAll returns all teams
 func FindAllTeams(ctx context.Context, instanceID string) ([]Team, error) {
 	var teams []Team
@@ -56,98 +41,6 @@ func FindAllTeams(ctx context.Context, instanceID string) ([]Team, error) {
 		return teams, fmt.Errorf("FindAllTeams: %w", err)
 	}
 	return teams, nil
-}
-
-// FindTeamByCode returns a team by code
-func FindTeamByCode(ctx context.Context, code string) (*Team, error) {
-	code = strings.ToUpper(code)
-	var team Team
-	err := db.DB.NewSelect().Model(&team).Where("team.code = ?", code).
-		Relation("BlockingLocation").
-		Relation("Instance").
-		Relation("Instance.Settings").
-		Limit(1).Scan(ctx)
-	if err != nil {
-		return &team, fmt.Errorf("FindTeamByCode: %v", err)
-	}
-	return &team, nil
-}
-
-// FindTeamByCodeAndInstance returns a team by code
-func FindTeamByCodeAndInstance(ctx context.Context, code, instance string) (*Team, error) {
-	code = strings.ToUpper(code)
-	var team Team
-	err := db.DB.NewSelect().Model(&team).Where("team.code = ? and team.instance_id = ?", code, instance).
-		Relation("BlockingLocation").
-		Relation("Scans", func(q *bun.SelectQuery) *bun.SelectQuery {
-			return q.Where("instance_id = ?", instance).Order("name ASC")
-		}).
-		Limit(1).Scan(ctx)
-	return &team, fmt.Errorf("FindTeamByCodeAndInstance: %v", err)
-}
-
-// HasVisited returns true if the team has visited the given location
-func (t *Team) HasVisited(location *Location) bool {
-	for _, s := range t.CheckIns {
-		if s.LocationID == location.ID {
-			return true
-		}
-	}
-	return false
-}
-
-// SuggestNextLocation returns the next location to scan in
-func (t *Team) SuggestNextLocations(ctx context.Context, limit int) *Locations {
-	var locations Locations
-
-	// Get the list of locations the team has already visited
-	visited := make([]string, len(t.CheckIns))
-	for i, s := range t.CheckIns {
-		visited[i] = s.LocationID
-	}
-
-	var err error
-	if len(visited) != 0 {
-		// Get the list of locations the team must visit
-		err = db.DB.NewSelect().Model(&locations).
-			Where("location.instance_id = ?", t.InstanceID).
-			Where("location.code NOT IN (?)", bun.In(visited)).
-			Scan(ctx)
-	} else {
-		err = db.DB.NewSelect().Model(&locations).
-			Where("location.instance_id = ?", t.InstanceID).
-			Scan(ctx)
-	}
-	if err != nil {
-		return nil
-	}
-
-	seed := t.Code + fmt.Sprintf("%v", visited)
-	h := fnv.New64a()
-	_, err = h.Write([]byte(seed))
-	if err != nil {
-		return nil
-	}
-
-	rand.New(rand.NewSource(int64(h.Sum64()))).Shuffle(len(locations), func(i, j int) {
-		locations[i], locations[j] = locations[j], locations[i]
-	})
-
-	// Limit the number of locations
-	if len(locations) > limit {
-		locations = locations[:limit]
-	}
-
-	// Order the locations by CurrentCount
-	for i := 0; i < len(locations); i++ {
-		for j := i + 1; j < len(locations); j++ {
-			if locations[i].CurrentCount > locations[j].CurrentCount {
-				locations[i], locations[j] = locations[j], locations[i]
-			}
-		}
-	}
-
-	return &locations
 }
 
 // TeamActivityOverview returns a list of teams and their activity
@@ -216,16 +109,4 @@ func TeamActivityOverview(ctx context.Context, instanceID string) ([]map[string]
 	}
 
 	return activity, err
-}
-
-// GetVisitedLocations returns locations visited by the team
-func (t *Team) GetVisitedLocations(ctx context.Context) ([]*Location, error) {
-	var locations []*Location
-	err := db.DB.NewSelect().Model(&locations).
-		Where("marker_id in (SELECT location_id FROM scans WHERE team_code = ?)", t.Code).
-		Scan(ctx)
-	if err != nil {
-		return nil, err
-	}
-	return locations, nil
 }

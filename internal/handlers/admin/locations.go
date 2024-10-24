@@ -184,7 +184,7 @@ func (h *AdminHandler) LocationEditPost(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	err = h.GameManagerService.UpdateClues(r.Context(), location, r.Form["clues[]"], r.Form["clue_ids[]"])
+	err = h.GameManagerService.UpdateClues(r.Context(), location, r.Form["clues"], r.Form["clue_ids"])
 	if err != nil {
 		h.Logger.Error("LocationEditPost: updating clues", "error", err)
 		err := templates.Toast(*flash.NewError("Error saving clues")).Render(r.Context(), w)

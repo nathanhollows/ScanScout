@@ -4,7 +4,6 @@ import (
 	"net/http"
 
 	"github.com/go-chi/chi"
-	"github.com/nathanhollows/Rapua/internal/models"
 	"github.com/nathanhollows/Rapua/internal/services"
 	templates "github.com/nathanhollows/Rapua/internal/templates/admin"
 )
@@ -62,9 +61,9 @@ func (h *AdminHandler) TeamActivity(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	response := gameplayService.SuggestNextLocations(r.Context(), team, user.CurrentInstance.Settings.MaxNextLocations)
-	if response.Error != nil {
-		h.handleError(w, r, "TeamActivity: getting next locations", "Error getting next locations", "Could not load data", response.Error)
+	locations, err := gameplayService.SuggestNextLocations(r.Context(), team, user.CurrentInstance.Settings.MaxNextLocations)
+	if err != nil {
+		h.handleError(w, r, "TeamActivity: getting next locations", "Error getting next locations", "Could not load data", err)
 		return
 	}
 
@@ -74,14 +73,7 @@ func (h *AdminHandler) TeamActivity(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var nextLocations models.Locations
-	if response.Data["nextLocations"] == nil {
-		nextLocations = models.Locations{}
-	} else {
-		nextLocations = response.Data["nextLocations"].(models.Locations)
-	}
-
-	err = templates.TeamActivity(user.CurrentInstance.Settings, *team, notifications, nextLocations).Render(r.Context(), w)
+	err = templates.TeamActivity(user.CurrentInstance.Settings, *team, notifications, locations).Render(r.Context(), w)
 	if err != nil {
 		h.Logger.Error("TeamActivity: rendering template", "error", err)
 	}

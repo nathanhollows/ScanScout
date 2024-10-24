@@ -47,13 +47,14 @@ func (i *Instance) Update(ctx context.Context) error {
 
 // Deleting an instance will cascade delete all teams, locations, and scans
 func (i *Instance) Delete(ctx context.Context) error {
-	// Delete teams
-	for _, team := range i.Teams {
-		err := team.Delete(ctx)
-		if err != nil {
-			return err
-		}
-	}
+	// TODO: Implement this in a repository transaction
+	// // Delete teams
+	// for _, team := range i.Teams {
+	// 	err := team.Delete(ctx)
+	// 	if err != nil {
+	// 		return err
+	// 	}
+	// }
 
 	// Delete locations
 	for _, location := range i.Locations {

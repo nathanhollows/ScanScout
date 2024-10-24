@@ -20,12 +20,14 @@ type TeamRepository interface {
 	FindAll(ctx context.Context, instanceID string) ([]models.Team, error)
 	// FindAllWithScans returns all teams for an instance with scans
 	FindAllWithScans(ctx context.Context, instanceID string) ([]models.Team, error)
+	// FindTeamByCode returns a team by code
+	FindTeamByCode(ctx context.Context, code string) (*models.Team, error)
 	// AddTeams adds teams to the database
 	InsertBatch(ctx context.Context, teams []models.Team) error
 	// LoadInstance loads the instance for a team
 	LoadInstance(ctx context.Context, team *models.Team) error
-	// LoadScans loads the scans for a team
-	LoadScans(ctx context.Context, team *models.Team) error
+	// LoadCheckIns loads the scans for a team
+	LoadCheckIns(ctx context.Context, team *models.Team) error
 	// LoadBlockingLocation loads the blocking location for a team
 	LoadBlockingLocation(ctx context.Context, team *models.Team) error
 	// // LoadNotifications loads the notifications for a team
@@ -80,6 +82,23 @@ func (r *teamRepository) FindAllWithScans(ctx context.Context, instanceID string
 	return teams, nil
 }
 
+// FindTeamByCode returns a team by code
+func (r *teamRepository) FindTeamByCode(ctx context.Context, code string) (*models.Team, error) {
+	code = strings.ToUpper(code)
+	var team models.Team
+	err := db.DB.NewSelect().Model(&team).Where("team.code = ?", code).
+		Relation("Instance").
+		Relation("BlockingLocation").
+		Relation("CheckIns", func(q *bun.SelectQuery) *bun.SelectQuery {
+			return q.Order("name ASC")
+		}).
+		Limit(1).Scan(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("FindTeamByCode: %v", err)
+	}
+	return &team, nil
+}
+
 // InsertBatch inserts a batch of teams and returns an error if there's a unique constraint conflict
 func (r *teamRepository) InsertBatch(ctx context.Context, teams []models.Team) error {
 	_, err := db.DB.NewInsert().Model(&teams).Exec(ctx)
@@ -105,17 +124,15 @@ func (r *teamRepository) LoadInstance(ctx context.Context, team *models.Team) er
 		Scan(ctx)
 }
 
-func (r *teamRepository) LoadScans(ctx context.Context, team *models.Team) error {
+func (r *teamRepository) LoadCheckIns(ctx context.Context, team *models.Team) error {
 	// Only load the scans if they are not already loaded
-	if len(team.CheckIns) == 0 {
-		err := db.DB.NewSelect().Model(&team.CheckIns).
-			Where("team_code = ?", team.Code).
-			Relation("Location").
-			Order("time_in DESC").
-			Scan(ctx)
-		if err != nil {
-			return fmt.Errorf("LoadScans: %v", err)
-		}
+	err := db.DB.NewSelect().Model(&team.CheckIns).
+		Where("team_code = ?", team.Code).
+		Relation("Location").
+		Order("time_in DESC").
+		Scan(ctx)
+	if err != nil {
+		return fmt.Errorf("LoadCheckIns: %v", err)
 	}
 	return nil
 }
@@ -139,7 +156,7 @@ func (r *teamRepository) LoadRelations(ctx context.Context, team *models.Team) e
 		return err
 	}
 
-	err = r.LoadScans(ctx, team)
+	err = r.LoadCheckIns(ctx, team)
 	if err != nil {
 		return err
 	}
