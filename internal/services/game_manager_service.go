@@ -25,6 +25,7 @@ type GameManagerService struct {
 	userService     UserService
 	teamService     TeamService
 	markerRepo      repositories.MarkerRepository
+	clueRepo        repositories.ClueRepository
 }
 
 func NewGameManagerService() GameManagerService {
@@ -33,6 +34,7 @@ func NewGameManagerService() GameManagerService {
 		userService:     NewUserService(repositories.NewUserRepository()),
 		teamService:     NewTeamService(repositories.NewTeamRepository()),
 		markerRepo:      repositories.NewMarkerRepository(),
+		clueRepo:        repositories.NewClueRepository(),
 	}
 }
 
@@ -128,12 +130,8 @@ func (s *GameManagerService) DuplicateInstance(ctx context.Context, user *intern
 
 	// Copy locations
 	for _, location := range locations {
-		newLocation := &internalModels.Location{
-			Name:       location.Name,
-			InstanceID: newInstance.ID,
-			MarkerID:   location.MarkerID,
-		}
-		if err := newLocation.Save(ctx); err != nil {
+		_, err := s.locationService.DuplicateLocation(ctx, &location, newInstance.ID)
+		if err != nil {
 			response.AddFlashMessage(*flash.NewError("Error saving location: " + location.Name))
 			response.Error = fmt.Errorf("saving location: %w", err)
 			return response
@@ -572,8 +570,6 @@ func (s *GameManagerService) ReorderLocations(ctx context.Context, user *interna
 // The clues are passed as a slice of strings and the IDs are passed as a slice of strings
 // There may be new clues, updated clues, or deleted clues
 func (s *GameManagerService) UpdateClues(ctx context.Context, location *internalModels.Location, clues []string, ids []string) error {
-	clueRepo := repositories.NewClueRepository()
-
 	err := s.locationService.LoadCluesForLocation(ctx, location)
 	if err != nil {
 		return fmt.Errorf("loading clues for location: %w", err)
@@ -584,7 +580,7 @@ func (s *GameManagerService) UpdateClues(ctx context.Context, location *internal
 		if i < len(ids) {
 			// Delete any empty clues
 			if clue == "" {
-				err := clueRepo.Delete(ctx, &location.Clues[i])
+				err := s.clueRepo.Delete(ctx, &location.Clues[i])
 				if err != nil {
 					return fmt.Errorf("deleting clue: %w", err)
 				}
@@ -593,7 +589,7 @@ func (s *GameManagerService) UpdateClues(ctx context.Context, location *internal
 
 			// Update existing clue
 			location.Clues[i].Content = clue
-			err := clueRepo.Save(ctx, &location.Clues[i])
+			err := s.clueRepo.Save(ctx, &location.Clues[i])
 			if err != nil {
 				return fmt.Errorf("saving clue: %w", err)
 			}
@@ -611,7 +607,7 @@ func (s *GameManagerService) UpdateClues(ctx context.Context, location *internal
 			LocationID: location.ID,
 			Content:    clue,
 		}
-		err := clueRepo.Save(ctx, newClue)
+		err := s.clueRepo.Save(ctx, newClue)
 		if err != nil {
 			return fmt.Errorf("saving new clue: %w", err)
 		}
@@ -619,7 +615,7 @@ func (s *GameManagerService) UpdateClues(ctx context.Context, location *internal
 
 	// Delete any remaining clues
 	for i := len(clues); i < len(location.Clues); i++ {
-		err := clueRepo.Delete(ctx, &location.Clues[i])
+		err := s.clueRepo.Delete(ctx, &location.Clues[i])
 		if err != nil {
 			return fmt.Errorf("deleting clue: %w", err)
 		}

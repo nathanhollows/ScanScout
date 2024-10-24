@@ -19,6 +19,7 @@ type LocationService interface {
 	UpdateName(ctx context.Context, location *models.Location, name string) error
 	CreateLocation(ctx context.Context, instanceID, name string, lat, lng float64) (models.Location, error)
 	CreateMarker(ctx context.Context, name string, lat, lng float64) (models.Marker, error)
+	DuplicateLocation(ctx context.Context, location *models.Location, newInstanceID string) (models.Location, error)
 }
 
 type locationService struct {
@@ -131,4 +132,16 @@ func (s locationService) CreateMarker(ctx context.Context, name string, lat, lng
 		return models.Marker{}, fmt.Errorf("saving marker: %v", err)
 	}
 	return marker, nil
+}
+
+// DuplicateLocation duplicates a location
+func (s locationService) DuplicateLocation(ctx context.Context, location *models.Location, newInstanceID string) (models.Location, error) {
+	newLocation := *location
+	newLocation.ID = ""
+	newLocation.InstanceID = newInstanceID
+	err := s.locationRepo.Save(ctx, &newLocation)
+	if err != nil {
+		return models.Location{}, fmt.Errorf("saving location: %v", err)
+	}
+	return newLocation, nil
 }
