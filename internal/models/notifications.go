@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/google/uuid"
 	"github.com/nathanhollows/Rapua/db"
 )
 
@@ -16,29 +15,6 @@ type Notification struct {
 	Type      string `bun:"type,type:varchar(255)"`
 	TeamCode  string `bun:"team_code,type:varchar(36)"`
 	Dismissed bool   `bun:"dismissed,type:bool"`
-}
-
-// Save saves a notification
-func (n *Notification) Save(ctx context.Context) error {
-	// Validate the notification
-	if n.Content == "" {
-		return fmt.Errorf("message is required")
-	}
-	if n.TeamCode == "" {
-		return fmt.Errorf("team_code is required")
-	}
-
-	// Generate a new ID if one doesn't exist
-	if n.ID == "" {
-		n.ID = uuid.New().String()
-	}
-
-	// Save the notification
-	_, err := db.DB.NewInsert().Model(n).Exec(ctx)
-	if err != nil {
-		return err
-	}
-	return nil
 }
 
 // Update updates a notification

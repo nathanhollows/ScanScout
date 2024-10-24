@@ -2,11 +2,9 @@ package models
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/nathanhollows/Rapua/db"
 	"github.com/nathanhollows/Rapua/models"
-	"github.com/uptrace/bun"
 )
 
 type Team struct {
@@ -24,23 +22,6 @@ type Team struct {
 	BlockingLocation Location                `bun:"rel:has-one,join:must_scan_out=marker_id,join:instance_id=instance_id"`
 	Messages         []Notification          `bun:"rel:has-many,join:code=team_code"`
 	Blocks           []models.TeamBlockState `bun:"rel:has-many,join:code=team_code"`
-}
-
-// FindAll returns all teams
-func FindAllTeams(ctx context.Context, instanceID string) ([]Team, error) {
-	var teams []Team
-	err := db.DB.NewSelect().
-		Model(&teams).
-		Where("team.instance_id = ?", instanceID).
-		// Add the scans in the relation order by location_id
-		Relation("Scans", func(q *bun.SelectQuery) *bun.SelectQuery {
-			return q.Order("location_id ASC")
-		}).
-		Scan(ctx)
-	if err != nil {
-		return teams, fmt.Errorf("FindAllTeams: %w", err)
-	}
-	return teams, nil
 }
 
 // TeamActivityOverview returns a list of teams and their activity

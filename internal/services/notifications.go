@@ -5,19 +5,26 @@ import (
 	"fmt"
 
 	"github.com/nathanhollows/Rapua/internal/models"
+	"github.com/nathanhollows/Rapua/internal/repositories"
 )
 
 type NotificationService interface {
 	SendNotification(ctx context.Context, teamCode string, content string) (models.Notification, error)
-	SendNotificationToAll(ctx context.Context, team []models.Team, content string) error
+	SendNotificationToAllTeams(ctx context.Context, instanceID string, content string) error
 	GetNotifications(ctx context.Context, teamCode string) ([]models.Notification, error)
 	DismissNotification(ctx context.Context, notificationID string) error
 }
 
-type notificationService struct{}
+type notificationService struct {
+	teamRepository         repositories.TeamRepository
+	notificationRepository repositories.NotificationRepository
+}
 
 func NewNotificationService() NotificationService {
-	return &notificationService{}
+	return &notificationService{
+		teamRepository:         repositories.NewTeamRepository(),
+		notificationRepository: repositories.NewNotificationRepository(),
+	}
 }
 
 // SendNotification sends a notification to a team
@@ -26,21 +33,29 @@ func (s *notificationService) SendNotification(ctx context.Context, teamCode str
 		TeamCode: teamCode,
 		Content:  content,
 	}
-	err := notification.Save(ctx)
+
+	err := s.notificationRepository.Save(ctx, &notification)
 	return notification, err
 }
 
-// SendNotificationToAll sends a notification to all teams
-func (s *notificationService) SendNotificationToAll(ctx context.Context, team []models.Team, content string) error {
-	if len(team) == 0 {
+// SendNotificationToAllTeams sends a notification to all teams
+func (s *notificationService) SendNotificationToAllTeams(ctx context.Context, instanceID string, content string) error {
+	teams, err := s.teamRepository.FindAll(ctx, instanceID)
+	if err != nil {
+		return fmt.Errorf("error finding teams: %w", err)
+	}
+
+	if len(teams) == 0 {
 		return fmt.Errorf("no teams to send notification to")
 	}
+
 	if content == "" {
 		return fmt.Errorf("content cannot be empty")
 	}
-	for _, t := range team {
-		if t.HasStarted {
-			_, err := s.SendNotification(ctx, t.Code, content)
+
+	for _, team := range teams {
+		if team.HasStarted {
+			_, err := s.SendNotification(ctx, team.Code, content)
 			if err != nil {
 				return err
 			}
