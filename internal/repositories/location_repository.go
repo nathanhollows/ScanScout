@@ -12,7 +12,10 @@ import (
 type LocationRepository interface {
 	// FindLocation finds a location by ID
 	FindLocation(ctx context.Context, locationID string) (*models.Location, error)
+	// FindLocationByInstanceAndCode finds a location by instance and code
 	FindLocationByInstanceAndCode(ctx context.Context, instanceID string, code string) (*models.Location, error)
+	// Find all locations for an instance
+	FindAllLocations(ctx context.Context, instanceID string) ([]models.Location, error)
 	// Update updates a location in the database
 	Update(ctx context.Context, location *models.Location) error
 	// Save saves or updates a location
@@ -44,6 +47,16 @@ func (r *locationRepository) FindLocationByInstanceAndCode(ctx context.Context, 
 		return nil, fmt.Errorf("finding location by instance and code: %w", err)
 	}
 	return &location, nil
+}
+
+// Find all locations for an instance
+func (r *locationRepository) FindAllLocations(ctx context.Context, instanceID string) ([]models.Location, error) {
+	var locations []models.Location
+	err := db.DB.NewSelect().Model(&locations).Where("instance_id = ?", instanceID).Scan(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("finding all locations: %w", err)
+	}
+	return locations, nil
 }
 
 // Update updates a location in the database

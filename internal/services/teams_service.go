@@ -3,6 +3,7 @@ package services
 import (
 	"context"
 	"errors"
+	"time"
 
 	"github.com/nathanhollows/Rapua/internal/helpers"
 	"github.com/nathanhollows/Rapua/internal/models"
@@ -24,6 +25,8 @@ type TeamService interface {
 	LoadRelations(ctx context.Context, team *models.Team) error
 	// FindTeamByCode returns a team by code
 	FindTeamByCode(ctx context.Context, code string) (*models.Team, error)
+	// GetTeamActivityOverview returns a list of teams and their activity
+	GetTeamActivityOverview(ctx context.Context, instanceID string, locations []models.Location) ([]TeamActivity, error)
 }
 
 type teamService struct {
@@ -37,6 +40,20 @@ func NewTeamService(tr repositories.TeamRepository) TeamService {
 		teamRepo:  tr,
 		batchSize: 100,
 	}
+}
+
+type TeamActivity struct {
+	Team      models.Team
+	Locations []LocationActivity
+}
+
+type LocationActivity struct {
+	Location models.Location
+	Visited  bool
+	Visiting bool
+	Duration float64
+	TimeIn   time.Time
+	TimeOut  time.Time
 }
 
 // Update updates a team in the database
@@ -137,4 +154,58 @@ func (s *teamService) LoadRelations(ctx context.Context, team *models.Team) erro
 // FindTeamByCode returns a team by code
 func (s *teamService) FindTeamByCode(ctx context.Context, code string) (*models.Team, error) {
 	return s.teamRepo.FindTeamByCode(ctx, code)
+}
+
+// GetTeamActivityOverview returns a list of teams and their activity
+func (s *teamService) GetTeamActivityOverview(ctx context.Context, instanceID string, locations []models.Location) ([]TeamActivity, error) {
+	teams, err := s.teamRepo.FindAll(ctx, instanceID)
+	if err != nil {
+		return nil, err
+	}
+
+	var activity []TeamActivity
+
+	for _, team := range teams {
+		if !team.HasStarted {
+			continue
+		}
+
+		teamActivity := TeamActivity{
+			Team:      team,
+			Locations: make([]LocationActivity, len(locations)),
+		}
+
+		for i, location := range locations {
+			locationActivity := LocationActivity{
+				Location: location,
+				Visited:  false,
+				Visiting: false,
+				Duration: 0,
+				TimeIn:   time.Time{},
+				TimeOut:  time.Time{},
+			}
+
+			// Check if the team has visited the location
+			for _, checkin := range team.CheckIns {
+				if checkin.LocationID == location.Marker.Code {
+					locationActivity.Visited = true
+					locationActivity.TimeIn = checkin.TimeIn
+					if checkin.TimeOut.IsZero() {
+						locationActivity.Visiting = true
+					} else {
+						locationActivity.TimeOut = checkin.TimeOut
+						locationActivity.Duration = checkin.TimeOut.Sub(checkin.TimeIn).Seconds()
+					}
+					break
+				}
+			}
+
+			teamActivity.Locations[i] = locationActivity
+
+		}
+
+		activity = append(activity, teamActivity)
+	}
+
+	return activity, nil
 }

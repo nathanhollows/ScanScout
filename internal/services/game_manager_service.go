@@ -232,8 +232,14 @@ func (s *GameManagerService) GetAllLocations(ctx context.Context, instanceID str
 	return internalModels.FindAllLocations(ctx, instanceID)
 }
 
-func (s *GameManagerService) GetTeamActivityOverview(ctx context.Context, instanceID string) ([]map[string]interface{}, error) {
-	return internalModels.TeamActivityOverview(ctx, instanceID)
+func (s *GameManagerService) GetTeamActivityOverview(ctx context.Context, instanceID string) ([]TeamActivity, error) {
+	locationRepository := repositories.NewLocationRepository()
+	locations, err := locationRepository.FindAllLocations(ctx, instanceID)
+	if err != nil {
+		return nil, fmt.Errorf("finding all locations: %w", err)
+	}
+
+	return s.teamService.GetTeamActivityOverview(ctx, instanceID, locations)
 }
 
 func (s *GameManagerService) SaveLocation(ctx context.Context, location *internalModels.Location, lat, lng, name string) error {
