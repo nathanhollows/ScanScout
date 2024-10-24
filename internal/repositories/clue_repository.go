@@ -14,6 +14,8 @@ type ClueRepository interface {
 	Save(ctx context.Context, c *models.Clue) error
 	// Delete removes the clue from the database
 	Delete(ctx context.Context, c *models.Clue) error
+	// DeleteByLocationID removes all clues for a location
+	DeleteByLocationID(ctx context.Context, locationID string) error
 	// FindCluesByLocation returns all clues for a given location
 	FindCluesByLocation(ctx context.Context, locationID string) ([]models.Clue, error)
 }
@@ -47,6 +49,12 @@ func (r *clueRepository) Save(ctx context.Context, c *models.Clue) error {
 // Delete removes the clue from the database
 func (r *clueRepository) Delete(ctx context.Context, c *models.Clue) error {
 	_, err := db.DB.NewDelete().Model(c).WherePK().Exec(ctx)
+	return err
+}
+
+// DeleteByLocationID removes all clues for a location
+func (r *clueRepository) DeleteByLocationID(ctx context.Context, locationID string) error {
+	_, err := db.DB.NewDelete().Model(&models.Clue{}).Where("location_id = ?", locationID).Exec(ctx)
 	return err
 }
 

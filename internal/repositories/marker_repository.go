@@ -14,6 +14,8 @@ type MarkerRepository interface {
 	Save(ctx context.Context, marker *models.Marker) error
 	// Update a marker in the database
 	Update(ctx context.Context, marker *models.Marker) error
+	// Delete
+	Delete(ctx context.Context, code string) error
 	FindByCode(ctx context.Context, code string) (*models.Marker, error)
 	UpdateCoords(ctx context.Context, marker *models.Marker, lat, lng float64) error
 }
@@ -39,6 +41,12 @@ func (r *markerRepository) Save(ctx context.Context, marker *models.Marker) erro
 // Update updates a marker in the database
 func (r *markerRepository) Update(ctx context.Context, marker *models.Marker) error {
 	_, err := db.DB.NewUpdate().Model(marker).WherePK().Exec(ctx)
+	return err
+}
+
+// Delete deletes a marker from the database
+func (r *markerRepository) Delete(ctx context.Context, markerCode string) error {
+	_, err := db.DB.NewDelete().Model(&models.Marker{Code: markerCode}).WherePK().Exec(ctx)
 	return err
 }
 

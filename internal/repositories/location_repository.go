@@ -17,12 +17,17 @@ type LocationRepository interface {
 	// Find all locations for an instance
 	FindAllLocations(ctx context.Context, instanceID string) ([]models.Location, error)
 	// Update updates a location in the database
+	// FindLocationsByMarkerID(ctx context.Context, markerID string) ([]models.Location, error)
+	FindLocationsByMarkerID(ctx context.Context, markerID string) ([]models.Location, error)
 	Update(ctx context.Context, location *models.Location) error
 	// Save saves or updates a location
 	Save(ctx context.Context, location *models.Location) error
+	// Delete deletes a location from the database
+	Delete(ctx context.Context, locationID string) error
 }
 
-type locationRepository struct{}
+type locationRepository struct {
+}
 
 // NewClueRepository creates a new ClueRepository
 func NewLocationRepository() LocationRepository {
@@ -59,6 +64,16 @@ func (r *locationRepository) FindAllLocations(ctx context.Context, instanceID st
 	return locations, nil
 }
 
+// FindLocationsByMarkerID finds all locations for a given marker
+func (r *locationRepository) FindLocationsByMarkerID(ctx context.Context, markerID string) ([]models.Location, error) {
+	var locations []models.Location
+	err := db.DB.NewSelect().Model(&locations).Where("marker_id = ?", markerID).Scan(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("finding locations by marker ID: %w", err)
+	}
+	return locations, nil
+}
+
 // Update updates a location in the database
 func (r *locationRepository) Update(ctx context.Context, location *models.Location) error {
 	_, err := db.DB.NewUpdate().Model(location).WherePK().Exec(ctx)
@@ -74,4 +89,13 @@ func (r *locationRepository) Save(ctx context.Context, location *models.Location
 		return err
 	}
 	return r.Update(ctx, location)
+}
+
+// Delete deletes a location from the database
+func (r *locationRepository) Delete(ctx context.Context, locationID string) error {
+	_, err := db.DB.NewDelete().Model(&models.Location{ID: locationID}).WherePK().Exec(ctx)
+	if err != nil {
+		return fmt.Errorf("deleting location: %w", err)
+	}
+	return nil
 }

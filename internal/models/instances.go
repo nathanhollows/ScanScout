@@ -45,32 +45,6 @@ func (i *Instance) Update(ctx context.Context) error {
 	return nil
 }
 
-// Deleting an instance will cascade delete all teams, locations, and scans
-func (i *Instance) Delete(ctx context.Context) error {
-	// TODO: Implement this in a repository transaction
-	// // Delete teams
-	// for _, team := range i.Teams {
-	// 	err := team.Delete(ctx)
-	// 	if err != nil {
-	// 		return err
-	// 	}
-	// }
-
-	// Delete locations
-	for _, location := range i.Locations {
-		err := location.Delete(ctx)
-		if err != nil {
-			return err
-		}
-	}
-
-	_, err := db.DB.NewDelete().Model(i).WherePK().Exec(ctx)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
 // FindInstanceByID finds an instance by ID
 func FindInstanceByID(ctx context.Context, id string) (*Instance, error) {
 	instance := &Instance{}

@@ -44,13 +44,6 @@ func (i *Location) Save(ctx context.Context) error {
 	return err
 }
 
-// Delete removes the location from the database
-func (i *Location) Delete(ctx context.Context) error {
-	// Should delete all related clues and blocks and scans
-	_, err := db.DB.NewDelete().Model(i).WherePK().Exec(ctx)
-	return err
-}
-
 // FindLocationByInstanceAndCode returns a location by code
 func FindLocationByInstanceAndCode(ctx context.Context, instance, code string) (*Location, error) {
 	code = strings.ToUpper(code)

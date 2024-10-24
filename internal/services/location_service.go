@@ -20,12 +20,14 @@ type LocationService interface {
 	CreateLocation(ctx context.Context, instanceID, name string, lat, lng float64) (models.Location, error)
 	CreateMarker(ctx context.Context, name string, lat, lng float64) (models.Marker, error)
 	DuplicateLocation(ctx context.Context, location *models.Location, newInstanceID string) (models.Location, error)
+	DeleteLocation(ctx context.Context, locationID string) error
 }
 
 type locationService struct {
 	locationRepo repositories.LocationRepository
 	clueRepo     repositories.ClueRepository
 	markerRepo   repositories.MarkerRepository
+	blockRepo    repositories.BlockRepository
 }
 
 // NewLocationService creates a new instance of LocationService
@@ -34,6 +36,7 @@ func NewLocationService(clueRepo repositories.ClueRepository) LocationService {
 		clueRepo:     clueRepo,
 		locationRepo: repositories.NewLocationRepository(),
 		markerRepo:   repositories.NewMarkerRepository(),
+		blockRepo:    repositories.NewBlockRepository(),
 	}
 }
 
@@ -144,4 +147,46 @@ func (s locationService) DuplicateLocation(ctx context.Context, location *models
 		return models.Location{}, fmt.Errorf("saving location: %v", err)
 	}
 	return newLocation, nil
+}
+
+// DeleteLocation deletes a location
+// It also deletes all related clues, blocks, and scans
+// If the marker is not used by any other locations, it is also deleted
+func (s locationService) DeleteLocation(ctx context.Context, locationID string) error {
+	location, err := s.locationRepo.FindLocation(ctx, locationID)
+	if err != nil {
+		return fmt.Errorf("finding location: %v", err)
+	}
+
+	// Delete all related clues
+	err = s.clueRepo.DeleteByLocationID(ctx, locationID)
+	if err != nil {
+		return fmt.Errorf("deleting clues: %v", err)
+	}
+
+	// Delete all related blocks
+	err = s.blockRepo.DeleteByLocationID(ctx, locationID)
+	if err != nil {
+		return fmt.Errorf("deleting blocks: %v", err)
+	}
+
+	// Delete the location
+	err = s.locationRepo.Delete(ctx, locationID)
+	if err != nil {
+		return fmt.Errorf("deleting location: %v", err)
+	}
+
+	// Delete the marker if it is not used by any other locations
+	locations, err := s.locationRepo.FindLocationsByMarkerID(ctx, location.MarkerID)
+	if err != nil {
+		return fmt.Errorf("finding locations by marker: %v", err)
+	}
+	if len(locations) == 0 {
+		err = s.markerRepo.Delete(ctx, location.MarkerID)
+		if err != nil {
+			return fmt.Errorf("deleting marker: %v", err)
+		}
+	}
+
+	return nil
 }

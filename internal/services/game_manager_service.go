@@ -26,6 +26,7 @@ type GameManagerService struct {
 	teamService     TeamService
 	markerRepo      repositories.MarkerRepository
 	clueRepo        repositories.ClueRepository
+	instanceRepo    repositories.InstanceRepository
 }
 
 func NewGameManagerService() GameManagerService {
@@ -35,6 +36,7 @@ func NewGameManagerService() GameManagerService {
 		teamService:     NewTeamService(repositories.NewTeamRepository()),
 		markerRepo:      repositories.NewMarkerRepository(),
 		clueRepo:        repositories.NewClueRepository(),
+		instanceRepo:    repositories.NewInstanceRepository(),
 	}
 }
 
@@ -193,7 +195,8 @@ func (s *GameManagerService) DeleteInstance(ctx context.Context, user *internalM
 		}
 	}
 
-	if err := instance.Delete(ctx); err != nil {
+	err = s.instanceRepo.Delete(ctx, instanceID)
+	if err != nil {
 		response.AddFlashMessage(*flash.NewError("Error deleting instance"))
 		response.Error = fmt.Errorf("deleting instance: %w", err)
 		return response
@@ -626,5 +629,5 @@ func (s *GameManagerService) UpdateClues(ctx context.Context, location *internal
 
 // DeleteLocation deletes a location
 func (s *GameManagerService) DeleteLocation(ctx context.Context, location *internalModels.Location) error {
-	return location.Delete(ctx)
+	return s.locationService.DeleteLocation(ctx, location.ID)
 }
