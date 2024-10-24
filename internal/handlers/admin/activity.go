@@ -18,7 +18,7 @@ func (h *AdminHandler) Activity(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	c := templates.ActivityTracker(*user)
+	c := templates.ActivityTracker(user.CurrentInstance)
 	err = templates.Layout(c, *user, "Activity", "Activity").Render(r.Context(), w)
 	if err != nil {
 		h.Logger.Error("Activity: rendering template", "error", err)

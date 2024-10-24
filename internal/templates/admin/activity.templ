@@ -8,18 +8,18 @@ import (
 	"sort"
 )
 
-templ ActivityTracker(user models.User) {
+templ ActivityTracker(instance models.Instance) {
 	<div class="flex flex-col sm:flex-row gap-3 justify-between items-center w-full p-5">
 		<h1 class="text-2xl font-bold">
 			Activity tracker
-			switch user.CurrentInstance.GetStatus() {
+			switch instance.GetStatus() {
 				case models.Active:
 					<span class="badge badge-success">
-						{ user.CurrentInstance.GetStatus().String() }
+						{ instance.GetStatus().String() }
 					</span>
 				case models.Scheduled:
 					<span class="badge badge-warning">
-						{ user.CurrentInstance.GetStatus().String() }
+						{ instance.GetStatus().String() }
 					</span>
 				case models.Closed:
 					<span class="badge badge-outline">
@@ -28,7 +28,7 @@ templ ActivityTracker(user models.User) {
 			}
 		</h1>
 		<div class="flex gap-3">
-			@GameScheduleStatus(user.CurrentInstance)
+			@GameScheduleStatus(instance)
 			<button class="btn btn-secondary" onclick="announcement_modal.showModal()">
 				<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-megaphone"><path d="m3 11 18-5v12L3 14v-3z"></path><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"></path></svg>
 				Announce
@@ -41,7 +41,7 @@ templ ActivityTracker(user models.User) {
 				<div id="map-activity" class="map w-full h-full rounded-lg"></div>
 			</div>
 			<div class="join join-vertical w-full">
-				if len(user.CurrentInstance.Locations) == 0 {
+				if len(instance.Locations) == 0 {
 					<div role="alert" class="alert">
 						<svg
 							xmlns="http://www.w3.org/2000/svg"
@@ -62,8 +62,8 @@ templ ActivityTracker(user models.User) {
 						</div>
 					</div>
 				}
-				if len(user.CurrentInstance.Locations) > 0 {
-					for i, location := range user.CurrentInstance.Locations {
+				if len(instance.Locations) > 0 {
+					for i, location := range instance.Locations {
 						<div
 							class="flex flex-row justify-between items-center space-x-3 bg-base-200 hover:bg-base-300 border-base-300 rounded-lg p-4 join-item"
 						>
@@ -105,10 +105,10 @@ templ ActivityTracker(user models.User) {
 			</div>
 		</div>
 		<div class="overflow-y-auto w-full">
-			@ActivityTeamsTable(user.CurrentInstance.Locations, user.CurrentInstance.Teams)
+			@ActivityTeamsTable(instance.Locations, instance.Teams)
 		</div>
 	</div>
-	@scheduleModal(user.CurrentInstance)
+	@scheduleModal(instance)
 	@announcementModal()
 	@teamModal()
 	<script>
