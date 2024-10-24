@@ -38,7 +38,7 @@ func LobbyMiddleware(teamRepo repositories.TeamRepository, next http.Handler) ht
 		}
 
 		// Redirect to lobby if game is scheduled
-		if team.Instance.GetStatus() == models.Scheduled {
+		if team.Instance.GetStatus() != models.Active {
 			http.Redirect(w, r, "/lobby", http.StatusFound)
 			return
 		}

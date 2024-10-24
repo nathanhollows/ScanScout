@@ -19,40 +19,45 @@ templ Lobby(team models.Team) {
 	</div>
 	<!-- Content -->
 	<div class="sm:mx-auto sm:w-full sm:max-w-sm">
-		if team.Instance.GetStatus() == models.Scheduled {
-			<div class="alert">
-				The game will start in
-				<div
-					id="start-time"
-					data-start={ team.Instance.StartTime.Format("02-Jan-2006 15:04:05") }
-					class="flex gap-1 justify-center"
-				>
-					<div id="days-container">
-						<span class="countdown font-mono font-bold" id="days">
-							<span></span>
-						</span>
-						days
-					</div>
-					<div id="hours-container">
-						<span class="countdown font-mono font-bold" id="hours">
-							<span></span>
-						</span>
-						hours
-					</div>
-					<div>
-						<span class="countdown font-mono font-bold" id="minutes">
-							<span></span>
-						</span>
-						min
-					</div>
-					<div>
-						<span class="countdown font-mono font-bold" id="seconds">
-							<span></span>
-						</span>
-						sec
+		switch team.Instance.GetStatus() {
+			case models.Closed:
+				<div class="alert alert-warning">
+					The game is currently closed.
+				</div>
+			case models.Scheduled:
+				<div class="alert">
+					The game will start in
+					<div
+						id="start-time"
+						data-start={ team.Instance.StartTime.Format("02-Jan-2006 15:04:05") }
+						class="flex gap-1 justify-center"
+					>
+						<div id="days-container">
+							<span class="countdown font-mono font-bold" id="days">
+								<span></span>
+							</span>
+							days
+						</div>
+						<div id="hours-container">
+							<span class="countdown font-mono font-bold" id="hours">
+								<span></span>
+							</span>
+							hours
+						</div>
+						<div>
+							<span class="countdown font-mono font-bold" id="minutes">
+								<span></span>
+							</span>
+							min
+						</div>
+						<div>
+							<span class="countdown font-mono font-bold" id="seconds">
+								<span></span>
+							</span>
+							sec
+						</div>
 					</div>
 				</div>
-			</div>
 		}
 		<div class="prose">
 			<div class="divider mt-12">Instructions</div>
