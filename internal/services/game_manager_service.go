@@ -16,7 +16,6 @@ import (
 	"github.com/nathanhollows/Rapua/internal/helpers"
 	internalModels "github.com/nathanhollows/Rapua/internal/models"
 	"github.com/nathanhollows/Rapua/internal/repositories"
-	"github.com/nathanhollows/Rapua/models"
 	"github.com/uptrace/bun"
 )
 
@@ -295,44 +294,6 @@ func (s *GameManagerService) CreateLocation(ctx context.Context, user *internalM
 
 }
 
-func (s *GameManagerService) UpdateLocation(ctx context.Context, location *internalModels.Location, newName, newContent, lat, lng string, points int) error {
-	location.Points = points
-
-	marker := location.Marker
-	if lat != "" && lng != "" {
-		latFloat, err := strconv.ParseFloat(lat, 64)
-		if err != nil {
-			return err
-		}
-		lngFloat, err := strconv.ParseFloat(lng, 64)
-		if err != nil {
-			return err
-		}
-
-		// Check if the marker is shared
-		shared, err := s.isMarkerShared(ctx, location.MarkerID, location.InstanceID)
-		if err != nil {
-			return err
-		}
-
-		if shared {
-			newMarker, err := s.locationService.CreateMarker(ctx, newName, latFloat, lngFloat)
-			if err != nil {
-				return err
-			}
-			location.MarkerID = newMarker.Code
-		} else {
-			err := s.markerRepo.UpdateCoords(ctx, &marker, latFloat, lngFloat)
-			if err != nil {
-				return err
-			}
-		}
-	}
-
-	location.Name = newName
-	return location.Save(ctx)
-}
-
 func (s *GameManagerService) isMarkerShared(ctx context.Context, markerID, instanceID string) (bool, error) {
 	count, err := db.DB.NewSelect().
 		Model((*internalModels.Location)(nil)).
@@ -567,64 +528,6 @@ func (s *GameManagerService) ReorderLocations(ctx context.Context, user *interna
 
 	response.AddFlashMessage(*flash.NewSuccess("Locations reordered!"))
 	return response
-}
-
-// UpdateClues updates the clues for a location
-// The clues are passed as a slice of strings and the IDs are passed as a slice of strings
-// There may be new clues, updated clues, or deleted clues
-func (s *GameManagerService) UpdateClues(ctx context.Context, location *internalModels.Location, clues []string, ids []string) error {
-	err := s.locationService.LoadCluesForLocation(ctx, location)
-	if err != nil {
-		return fmt.Errorf("loading clues for location: %w", err)
-	}
-
-	// Loop through the clues and update them
-	for i, clue := range clues {
-		if i < len(ids) {
-			// Delete any empty clues
-			if clue == "" {
-				err := s.clueRepo.Delete(ctx, &location.Clues[i])
-				if err != nil {
-					return fmt.Errorf("deleting clue: %w", err)
-				}
-				continue
-			}
-
-			// Update existing clue
-			location.Clues[i].Content = clue
-			err := s.clueRepo.Save(ctx, &location.Clues[i])
-			if err != nil {
-				return fmt.Errorf("saving clue: %w", err)
-			}
-			continue
-		}
-
-		// Skip empty clues
-		if clue == "" {
-			continue
-		}
-
-		// Create new clue
-		newClue := &models.Clue{
-			InstanceID: location.InstanceID,
-			LocationID: location.ID,
-			Content:    clue,
-		}
-		err := s.clueRepo.Save(ctx, newClue)
-		if err != nil {
-			return fmt.Errorf("saving new clue: %w", err)
-		}
-	}
-
-	// Delete any remaining clues
-	for i := len(clues); i < len(location.Clues); i++ {
-		err := s.clueRepo.Delete(ctx, &location.Clues[i])
-		if err != nil {
-			return fmt.Errorf("deleting clue: %w", err)
-		}
-	}
-
-	return nil
 }
 
 // DeleteLocation deletes a location
