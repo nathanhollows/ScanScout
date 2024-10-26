@@ -3,7 +3,6 @@ package services
 import (
 	"context"
 	"fmt"
-	"log/slog"
 
 	"github.com/nathanhollows/Rapua/internal/models"
 	"github.com/nathanhollows/Rapua/internal/repositories"
@@ -14,9 +13,11 @@ type LocationService interface {
 	FindLocationByInstanceAndCode(ctx context.Context, instanceID string, code string) (*models.Location, error)
 	LoadCluesForLocation(ctx context.Context, location *models.Location) error
 	LoadCluesForLocations(ctx context.Context, locations *[]models.Location) error
+	LoadRelations(ctx context.Context, location *models.Location) error
 	IncrementVisitorStats(ctx context.Context, location *models.Location) error
 	UpdateCoords(ctx context.Context, location *models.Location, lat, lng float64) error
 	UpdateName(ctx context.Context, location *models.Location, name string) error
+	UpdateLocation(ctx context.Context, location *models.Location, data LocationUpdateData) error
 	CreateLocation(ctx context.Context, instanceID, name string, lat, lng float64) (models.Location, error)
 	CreateMarker(ctx context.Context, name string, lat, lng float64) (models.Marker, error)
 	DuplicateLocation(ctx context.Context, location *models.Location, newInstanceID string) (models.Location, error)
@@ -63,8 +64,7 @@ func (s locationService) LoadCluesForLocation(ctx context.Context, location *mod
 	if len(location.Clues) == 0 {
 		clues, err := s.clueRepo.FindCluesByLocation(ctx, location.ID)
 		if err != nil {
-			slog.Error("error loading clues for location", "locationID", location.ID, "err", err)
-			return err
+			return fmt.Errorf("finding clues: %v", err)
 		}
 		location.Clues = clues
 	}
@@ -78,6 +78,15 @@ func (s locationService) LoadCluesForLocations(ctx context.Context, locations *[
 		if err != nil {
 			return err
 		}
+	}
+	return nil
+}
+
+// LoadRelations loads the related data for a location
+func (s locationService) LoadRelations(ctx context.Context, location *models.Location) error {
+	err := s.locationRepo.LoadRelations(ctx, location)
+	if err != nil {
+		return fmt.Errorf("loading relations: %v", err)
 	}
 	return nil
 }
@@ -100,6 +109,72 @@ func (s locationService) UpdateCoords(ctx context.Context, location *models.Loca
 func (s locationService) UpdateName(ctx context.Context, location *models.Location, name string) error {
 	location.Name = name
 	return s.locationRepo.Update(ctx, location)
+}
+
+func (s locationService) UpdateLocation(ctx context.Context, location *models.Location, data LocationUpdateData) error {
+	if location.Marker.Code == "" {
+		s.locationRepo.LoadMarker(ctx, location)
+	}
+
+	// Set up the marker data
+	update := false
+
+	if data.Name != "" && data.Name != location.Marker.Name {
+		location.Marker.Name = data.Name
+		update = true
+	}
+
+	if data.Latitude >= -90 && data.Latitude <= 90 && data.Latitude != location.Marker.Lat {
+		location.Marker.Lat = data.Latitude
+		update = true
+	}
+
+	if data.Longitude >= -180 && data.Longitude <= 180 && data.Longitude != location.Marker.Lng {
+		location.Marker.Lng = data.Longitude
+		update = true
+	}
+
+	// To avoid updating markers that other games are using, we need to check if the marker is shared
+	shared, err := s.markerRepo.IsShared(ctx, location.Marker.Code)
+	if err != nil {
+		return fmt.Errorf("checking if marker is shared: %v", err)
+	}
+
+	if shared && update {
+		newMarker, err := s.CreateMarker(ctx, location.Marker.Name, location.Marker.Lat, location.Marker.Lng)
+		if err != nil {
+			return fmt.Errorf("creating new marker: %v", err)
+		}
+		location.MarkerID = newMarker.Code
+	} else if update {
+		err := s.markerRepo.Update(ctx, &location.Marker)
+		if err != nil {
+			return fmt.Errorf("updating marker: %v", err)
+		}
+	}
+
+	// Now that the marker is updated, we can update the location
+	// We'll assume if the marker was updated a new one was created
+
+	if data.Points >= 0 && data.Points != location.Points {
+		location.Points = data.Points
+		update = true
+	}
+
+	if data.Name != "" && data.Name != location.Name {
+		location.Name = data.Name
+		update = true
+	}
+
+	if update {
+		err := s.locationRepo.Update(ctx, location)
+		if err != nil {
+			return fmt.Errorf("updating location: %v", err)
+		}
+	}
+
+	return nil
+
 }
 
 // CreateLocation creates a new location

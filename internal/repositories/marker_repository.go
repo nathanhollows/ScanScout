@@ -18,6 +18,8 @@ type MarkerRepository interface {
 	Delete(ctx context.Context, code string) error
 	FindByCode(ctx context.Context, code string) (*models.Marker, error)
 	UpdateCoords(ctx context.Context, marker *models.Marker, lat, lng float64) error
+	// Is Shared checks if a marker is used by more than one location
+	IsShared(ctx context.Context, code string) (bool, error)
 }
 
 type markerRepository struct{}
@@ -40,7 +42,13 @@ func (r *markerRepository) Save(ctx context.Context, marker *models.Marker) erro
 
 // Update updates a marker in the database
 func (r *markerRepository) Update(ctx context.Context, marker *models.Marker) error {
-	_, err := db.DB.NewUpdate().Model(marker).WherePK().Exec(ctx)
+	_, err := db.DB.
+		NewUpdate().
+		Model(marker).
+		Column("name", "lat", "lng", "total_visits", "current_count", "avg_duration").
+		WherePK("code").
+		Exec(ctx)
+
 	return err
 }
 
@@ -67,4 +75,14 @@ func (r *markerRepository) UpdateCoords(ctx context.Context, marker *models.Mark
 	marker.Lng = lng
 	_, err := db.DB.NewUpdate().Model(marker).WherePK().Column("lat", "lng").Exec(ctx)
 	return err
+}
+
+// IsShared checks if a marker is shared
+func (r *markerRepository) IsShared(ctx context.Context, code string) (bool, error) {
+	var count int
+	count, err := db.DB.NewSelect().Model(&models.Location{}).Where("marker_id = ?", code).Count(ctx)
+	if err != nil {
+		return false, err
+	}
+	return count > 1, nil
 }
