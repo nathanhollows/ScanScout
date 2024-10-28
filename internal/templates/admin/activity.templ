@@ -174,7 +174,8 @@ templ ActivityTracker(instance models.Instance) {
       bounds.extend(marker.getLngLat());
     });
 
-    map.fitBounds(bounds, { padding: 50 });
+	// Disable animation easing for smoother fitBounds
+	map.fitBounds(bounds, { padding: 50, duration: 0 });
   }
 
   // Initialize the map on page load
