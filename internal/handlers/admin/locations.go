@@ -36,7 +36,7 @@ func (h *AdminHandler) Locations(w http.ResponseWriter, r *http.Request) {
 func (h *AdminHandler) LocationNew(w http.ResponseWriter, r *http.Request) {
 	user := h.UserFromContext(r.Context())
 
-	c := templates.AddLocation()
+	c := templates.AddLocation(user.CurrentInstance.Settings)
 	err := templates.Layout(c, *user, "Locations", "New Location").Render(r.Context(), w)
 	if err != nil {
 		h.Logger.Error("LocationNew: rendering template", "error", err)
