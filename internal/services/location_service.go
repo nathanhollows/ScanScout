@@ -18,7 +18,7 @@ type LocationService interface {
 	UpdateCoords(ctx context.Context, location *models.Location, lat, lng float64) error
 	UpdateName(ctx context.Context, location *models.Location, name string) error
 	UpdateLocation(ctx context.Context, location *models.Location, data LocationUpdateData) error
-	CreateLocation(ctx context.Context, instanceID, name string, lat, lng float64) (models.Location, error)
+	CreateLocation(ctx context.Context, instanceID, name string, lat, lng float64, points int) (models.Location, error)
 	CreateMarker(ctx context.Context, name string, lat, lng float64) (models.Marker, error)
 	DuplicateLocation(ctx context.Context, location *models.Location, newInstanceID string) (models.Location, error)
 	DeleteLocation(ctx context.Context, locationID string) error
@@ -178,7 +178,7 @@ func (s locationService) UpdateLocation(ctx context.Context, location *models.Lo
 }
 
 // CreateLocation creates a new location
-func (s locationService) CreateLocation(ctx context.Context, instanceID, name string, lat, lng float64) (models.Location, error) {
+func (s locationService) CreateLocation(ctx context.Context, instanceID, name string, lat, lng float64, points int) (models.Location, error) {
 	// Create the marker
 	marker, err := s.CreateMarker(ctx, name, lat, lng)
 	if err != nil {
@@ -189,6 +189,7 @@ func (s locationService) CreateLocation(ctx context.Context, instanceID, name st
 		Name:       name,
 		InstanceID: instanceID,
 		MarkerID:   marker.Code,
+		Points:     points,
 	}
 	err = s.locationRepo.Save(ctx, &location)
 	if err != nil {

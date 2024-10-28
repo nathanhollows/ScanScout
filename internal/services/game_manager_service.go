@@ -276,6 +276,7 @@ func (s *GameManagerService) CreateLocation(ctx context.Context, user *internalM
 	name := data["name"]
 	lat := data["latitude"]
 	lng := data["longitude"]
+	points := data["points"]
 
 	var latFloat, lngFloat float64
 	var err error
@@ -290,7 +291,15 @@ func (s *GameManagerService) CreateLocation(ctx context.Context, user *internalM
 		}
 	}
 
-	return s.locationService.CreateLocation(ctx, user.CurrentInstanceID, name, latFloat, lngFloat)
+	pointsInt := 10
+	if points != "" {
+		pointsInt, err = strconv.Atoi(points)
+		if err != nil {
+			return internalModels.Location{}, err
+		}
+	}
+
+	return s.locationService.CreateLocation(ctx, user.CurrentInstanceID, name, latFloat, lngFloat, pointsInt)
 
 }
 
