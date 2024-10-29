@@ -8,9 +8,6 @@ templ Payment(email string) {
 			<div class="flex flex-col gap-4 sm:outline dark:outline-base-200  rounded-box sm:shadow-2xl p-6" hx-ext="response-targets">
 				<h1 class="text-3xl font-bold self-center">Payment</h1>
 				<div id="payment-error"></div>
-				<span class="self-center">
-					<strong>Pay What You Want</strong> { `for` } educators. <strong>Fixed price</strong> { `for` } all other users. One-time payment, lifetime access. See <a href="/pricing" class="link">pricing details</a>.
-				</span>
 				<form
 					class="space-y-3"
 					hx-post="/payment"
@@ -33,11 +30,11 @@ templ Payment(email string) {
 									</div>
 									<div
 										tabindex="0"
-										class="card not-prose compact dropdown-content bg-base-100 rounded-box z-[1] w-80 shadow-2xl border border-base-300"
+										class="card not-prose compact dropdown-content bg-base-200 rounded-box z-[1] w-80 shadow-2xl border border-base-300"
 									>
 										<div tabindex="0" class="card-body">
 											<h2 class="card-title">Educator pricing</h2>
-											<p>Someone who teaches, communicates, or shares knowledge (e.g., teachers, museum professionals, science communicators).</p>
+											<p>For educators and science communicators (e.g., teachers, museum professionals, librarians).</p>
 										</div>
 									</div>
 								</div>
