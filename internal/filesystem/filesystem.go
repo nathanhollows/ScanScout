@@ -11,10 +11,23 @@ import (
 )
 
 func init() {
-	// Create static directory if it doesn't exist
-	if _, err := os.Stat("web/static"); os.IsNotExist(err) {
-		os.Mkdir("web", 0755)
-		os.Mkdir("web/static", 0755)
+	folders := []string{
+		"assets/",
+		"assets/codes/",
+		"assets/codes/png/",
+		"assets/codes/svg/",
+		"assets/fonts/",
+		"assets/posters/"}
+
+	for _, folder := range folders {
+		_, err := os.Stat(folder)
+		if err != nil {
+			// Attempt to create the directory
+			err = os.MkdirAll(folder, 0755)
+			if err != nil {
+				panic("Directory '" + folder + "' does not exist and could not be created")
+			}
+		}
 	}
 }
 
