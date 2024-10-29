@@ -79,7 +79,7 @@ func (r *teamRepository) FindAllWithScans(ctx context.Context, instanceID string
 		Model(&teams).
 		Where("team.instance_id = ?", instanceID).
 		// Add the scans in the relation order by location_id
-		Relation("Scans", func(q *bun.SelectQuery) *bun.SelectQuery {
+		Relation("CheckIns", func(q *bun.SelectQuery) *bun.SelectQuery {
 			return q.Order("location_id ASC")
 		}).
 		Scan(ctx)

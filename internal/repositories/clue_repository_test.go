@@ -52,7 +52,7 @@ func TestClueRepository_Delete(t *testing.T) {
 	assert.NoError(t, err, "expected no error when saving clue")
 
 	// Now delete it
-	err = repo.Delete(ctx, clue)
+	err = repo.Delete(ctx, clue.ID)
 	assert.NoError(t, err, "expected no error when deleting clue")
 }
 
