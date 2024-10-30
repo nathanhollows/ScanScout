@@ -5,7 +5,7 @@ import (
 	"strings"
 
 	"github.com/nathanhollows/Rapua/db"
-	"github.com/nathanhollows/Rapua/internal/helpers"
+	"github.com/nathanhollows/Rapua/helpers"
 	"github.com/nathanhollows/Rapua/internal/models"
 )
 

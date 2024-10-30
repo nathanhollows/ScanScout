@@ -7,8 +7,8 @@ import (
 
 	"github.com/go-chi/chi"
 	"github.com/markbates/goth/gothic"
+	"github.com/nathanhollows/Rapua/helpers"
 	"github.com/nathanhollows/Rapua/internal/flash"
-	"github.com/nathanhollows/Rapua/internal/helpers"
 	"github.com/nathanhollows/Rapua/internal/models"
 	"github.com/nathanhollows/Rapua/internal/services"
 	"github.com/nathanhollows/Rapua/internal/sessions"
