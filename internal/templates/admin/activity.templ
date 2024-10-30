@@ -8,18 +8,18 @@ import (
 	"sort"
 )
 
-templ ActivityTracker(user models.User) {
+templ ActivityTracker(instance models.Instance) {
 	<div class="flex flex-col sm:flex-row gap-3 justify-between items-center w-full p-5">
 		<h1 class="text-2xl font-bold">
 			Activity tracker
-			switch user.CurrentInstance.GetStatus() {
+			switch instance.GetStatus() {
 				case models.Active:
 					<span class="badge badge-success">
-						{ user.CurrentInstance.GetStatus().String() }
+						{ instance.GetStatus().String() }
 					</span>
 				case models.Scheduled:
 					<span class="badge badge-warning">
-						{ user.CurrentInstance.GetStatus().String() }
+						{ instance.GetStatus().String() }
 					</span>
 				case models.Closed:
 					<span class="badge badge-outline">
@@ -28,7 +28,7 @@ templ ActivityTracker(user models.User) {
 			}
 		</h1>
 		<div class="flex gap-3">
-			@GameScheduleStatus(user.CurrentInstance)
+			@GameScheduleStatus(instance)
 			<button class="btn btn-secondary" onclick="announcement_modal.showModal()">
 				<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-megaphone"><path d="m3 11 18-5v12L3 14v-3z"></path><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"></path></svg>
 				Announce
@@ -41,7 +41,7 @@ templ ActivityTracker(user models.User) {
 				<div id="map-activity" class="map w-full h-full rounded-lg"></div>
 			</div>
 			<div class="join join-vertical w-full">
-				if len(user.CurrentInstance.Locations) == 0 {
+				if len(instance.Locations) == 0 {
 					<div role="alert" class="alert">
 						<svg
 							xmlns="http://www.w3.org/2000/svg"
@@ -62,8 +62,8 @@ templ ActivityTracker(user models.User) {
 						</div>
 					</div>
 				}
-				if len(user.CurrentInstance.Locations) > 0 {
-					for i, location := range user.CurrentInstance.Locations {
+				if len(instance.Locations) > 0 {
+					for i, location := range instance.Locations {
 						<div
 							class="flex flex-row justify-between items-center space-x-3 bg-base-200 hover:bg-base-300 border-base-300 rounded-lg p-4 join-item"
 						>
@@ -87,17 +87,19 @@ templ ActivityTracker(user models.User) {
 									<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-map-pin-check-inside w-5 h-5"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"></path><path d="m9 10 2 2 4-4"></path></svg>
 									<strong>{ fmt.Sprint(location.TotalVisits - location.CurrentCount) }</strong>
 								</span>
-								<span
-									if location.CurrentCount > 0 {
-										class="tooltip flex space-x-2 tooltip-left text-sm md:tooltip-top"
-									} else {
-										class="tooltip flex space-x-2 tooltip-left text-sm md:tooltip-top opacity-50"
-									}
-									data-tip="Current check-ins"
-								>
-									<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-map-pin w-5 h-5"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"></path><circle cx="12" cy="10" r="3"></circle></svg>
-									<strong>{ fmt.Sprint(location.CurrentCount) }</strong>
-								</span>
+								if instance.Settings.CompletionMethod == models.CheckInAndOut {
+									<span
+										if location.CurrentCount > 0 {
+											class="tooltip flex space-x-2 tooltip-left text-sm md:tooltip-top"
+										} else {
+											class="tooltip flex space-x-2 tooltip-left text-sm md:tooltip-top opacity-50"
+										}
+										data-tip="Current check-ins"
+									>
+										<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-map-pin w-5 h-5"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"></path><circle cx="12" cy="10" r="3"></circle></svg>
+										<strong>{ fmt.Sprint(location.CurrentCount) }</strong>
+									</span>
+								}
 							</div>
 						</div>
 					}
@@ -105,10 +107,10 @@ templ ActivityTracker(user models.User) {
 			</div>
 		</div>
 		<div class="overflow-y-auto w-full">
-			@ActivityTeamsTable(user.CurrentInstance.Locations, user.CurrentInstance.Teams)
+			@ActivityTeamsTable(instance.Locations, instance.Teams)
 		</div>
 	</div>
-	@scheduleModal(user.CurrentInstance)
+	@scheduleModal(instance)
 	@announcementModal()
 	@teamModal()
 	<script>
@@ -172,7 +174,8 @@ templ ActivityTracker(user models.User) {
       bounds.extend(marker.getLngLat());
     });
 
-    map.fitBounds(bounds, { padding: 50 });
+	// Disable animation easing for smoother fitBounds
+	map.fitBounds(bounds, { padding: 50, duration: 0 });
   }
 
   // Initialize the map on page load
@@ -196,7 +199,7 @@ templ teamModal() {
 	</script>
 }
 
-templ ActivityTeamsTable(locations models.Locations, teams []models.Team) {
+templ ActivityTeamsTable(locations []models.Location, teams []models.Team) {
 	<table
 		id="team-activity"
 		class="table table-sm w-full mt-5 md:mt-0 h-auto self-start"
@@ -250,7 +253,7 @@ templ ActivityTeamsTable(locations models.Locations, teams []models.Team) {
 						colspan="100%"
 						class="text-center"
 					>
-						No <a href="/admin/teams" hx-boost="true" class="link">teams</a> to show yet 😢
+						No <a href="/admin/teams" hx-boost="true" class="link" hx-target="body">teams</a> to show yet 😢
 					</th>
 				</tr>
 			}
@@ -260,7 +263,7 @@ templ ActivityTeamsTable(locations models.Locations, teams []models.Team) {
 
 // teamLocationMatrix returns a matrix of team locations [teamCode][locatinStatus]
 // ● for visiting, ✔ for visited, blank for not visited
-func teamLocationMatrix(locations models.Locations, teams []models.Team) [][]string {
+func teamLocationMatrix(locations []models.Location, teams []models.Team) [][]string {
 	matrix := make([][]string, len(teams))
 	for i := range matrix {
 		matrix[i] = make([]string, len(locations)+1)
@@ -278,11 +281,11 @@ func teamLocationMatrix(locations models.Locations, teams []models.Team) [][]str
 		}
 		matrix[i][0] = team.Code
 		for j, location := range locations {
-			if team.MustScanOut == location.ID {
+			if team.MustCheckOut == location.ID {
 				matrix[i][j+1] = "●"
 				continue
 			}
-			for _, visit := range team.Scans {
+			for _, visit := range team.CheckIns {
 				if visit.LocationID == location.ID {
 					matrix[i][j+1] = "✔"
 					break
@@ -443,7 +446,7 @@ templ scheduleButton(scheduled bool, t schema.NullTime) {
 	}
 }
 
-templ TeamActivity(settings models.InstanceSettings, team models.Team, notifications []models.Notification, nextLocations models.Locations) {
+templ TeamActivity(settings models.InstanceSettings, team models.Team, notifications []models.Notification, nextLocations []models.Location) {
 	<h3 class="text-lg font-bold">
 		{ team.Code }
 		if team.Name != "" {
@@ -475,12 +478,12 @@ templ TeamActivity(settings models.InstanceSettings, team models.Team, notificat
 	<!-- Check-ins -->
 	<div class="w-full">
 		<p class="py-3 font-bold">Check-ins</p>
-		if len(team.Scans) > 0 {
+		if len(team.CheckIns) > 0 {
 			<div class="prose">
 				<ul>
-					for _, scan := range team.Scans {
+					for _, scan := range team.CheckIns {
 						<li>
-							if scan.MustScanOut {
+							if scan.MustCheckOut {
 								<span class="badge badge-info">Current</span>
 							}
 							<span>

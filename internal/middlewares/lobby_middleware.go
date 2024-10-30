@@ -7,11 +7,12 @@ import (
 
 	"github.com/nathanhollows/Rapua/internal/contextkeys"
 	"github.com/nathanhollows/Rapua/internal/models"
+	"github.com/nathanhollows/Rapua/internal/repositories"
 	"github.com/nathanhollows/Rapua/internal/sessions"
 )
 
 // LobbyMiddleware redirects to the lobby if the game is scheduled to start
-func LobbyMiddleware(next http.Handler) http.Handler {
+func LobbyMiddleware(teamRepo repositories.TeamRepository, next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// Extract the session
 		session, err := sessions.Get(r, "scanscout")
@@ -29,7 +30,7 @@ func LobbyMiddleware(next http.Handler) http.Handler {
 		}
 
 		// Find the matching team instance
-		team, err := models.FindTeamByCode(r.Context(), teamCode)
+		team, err := teamRepo.FindTeamByCode(r.Context(), teamCode)
 		if err != nil {
 			slog.Error("finding team by code: ", "err", err, "teamCode", teamCode)
 			next.ServeHTTP(w, r)
@@ -37,7 +38,7 @@ func LobbyMiddleware(next http.Handler) http.Handler {
 		}
 
 		// Redirect to lobby if game is scheduled
-		if team.Instance.GetStatus() == models.Scheduled {
+		if team.Instance.GetStatus() != models.Active {
 			http.Redirect(w, r, "/lobby", http.StatusFound)
 			return
 		}

@@ -5,12 +5,13 @@ import (
 	"testing"
 
 	"github.com/nathanhollows/Rapua/internal/models"
+	db "github.com/nathanhollows/Rapua/internal/models"
 	"github.com/nathanhollows/Rapua/internal/repositories"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestTeamRepository_Update(t *testing.T) {
-	cleanup := setup(t)
+	cleanup := db.SetupTestDB(t)
 	defer cleanup()
 
 	repo := repositories.NewTeamRepository()
@@ -22,7 +23,7 @@ func TestTeamRepository_Update(t *testing.T) {
 }
 
 func TestTeamRepository_Delete(t *testing.T) {
-	cleanup := setup(t)
+	cleanup := db.SetupTestDB(t)
 	defer cleanup()
 
 	repo := repositories.NewTeamRepository()
@@ -40,7 +41,7 @@ func TestTeamRepository_Delete(t *testing.T) {
 }
 
 func TestTeamRepository_FindAll(t *testing.T) {
-	cleanup := setup(t)
+	cleanup := db.SetupTestDB(t)
 	defer cleanup()
 
 	repo := repositories.NewTeamRepository()
@@ -53,10 +54,8 @@ func TestTeamRepository_FindAll(t *testing.T) {
 	}
 
 	// Insert teams first
-	for _, team := range sampleTeams {
-		err := repo.Update(ctx, &team)
-		assert.NoError(t, err, "expected no error when saving team")
-	}
+	err := repo.InsertBatch(ctx, sampleTeams)
+	assert.NoError(t, err, "expected no error when saving team")
 
 	teams, err := repo.FindAll(ctx, instanceID)
 	assert.NoError(t, err, "expected no error when finding all teams")
@@ -64,7 +63,7 @@ func TestTeamRepository_FindAll(t *testing.T) {
 }
 
 func TestTeamRepository_FindAllWithScans(t *testing.T) {
-	cleanup := setup(t)
+	cleanup := db.SetupTestDB(t)
 	defer cleanup()
 
 	repo := repositories.NewTeamRepository()
@@ -77,10 +76,9 @@ func TestTeamRepository_FindAllWithScans(t *testing.T) {
 	}
 
 	// Insert teams first
-	for _, team := range sampleTeams {
-		err := repo.Update(ctx, &team)
-		assert.NoError(t, err, "expected no error when saving team")
-	}
+
+	err := repo.InsertBatch(ctx, sampleTeams)
+	assert.NoError(t, err, "expected no error when saving team")
 
 	teams, err := repo.FindAllWithScans(ctx, instanceID)
 	assert.NoError(t, err, "expected no error when finding all teams with scans")
@@ -88,7 +86,7 @@ func TestTeamRepository_FindAllWithScans(t *testing.T) {
 }
 
 func TestTeamRepository_InsertBatch(t *testing.T) {
-	cleanup := setup(t)
+	cleanup := db.SetupTestDB(t)
 	defer cleanup()
 
 	repo := repositories.NewTeamRepository()
@@ -100,7 +98,7 @@ func TestTeamRepository_InsertBatch(t *testing.T) {
 }
 
 func TestTeamRepository_InsertBatch_UniqueConstraintError(t *testing.T) {
-	cleanup := setup(t)
+	cleanup := db.SetupTestDB(t)
 	defer cleanup()
 
 	repo := repositories.NewTeamRepository()
@@ -113,5 +111,5 @@ func TestTeamRepository_InsertBatch_UniqueConstraintError(t *testing.T) {
 	// Insert the same teams again to trigger unique constraint error
 	err = repo.InsertBatch(ctx, sampleTeams)
 	assert.Error(t, err, "expected unique constraint error when inserting duplicate batch of teams")
-	assert.Contains(t, err.Error(), "unique constraint", "expected error message to indicate unique constraint violation")
+	assert.Contains(t, err.Error(), "UNIQUE constraint", "expected error message to indicate unique constraint violation")
 }

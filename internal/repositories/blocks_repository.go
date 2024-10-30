@@ -19,6 +19,8 @@ type BlockRepository interface {
 	Create(ctx context.Context, block blocks.Block, locationID string) (blocks.Block, error)
 	Update(ctx context.Context, block blocks.Block) (blocks.Block, error)
 	Delete(ctx context.Context, blockID string) error
+	// Delete by location ID
+	DeleteByLocationID(ctx context.Context, locationID string) error
 	Reorder(ctx context.Context, locationID string, blockIDs []string) error
 	GetBlocksAndStatesByLocationIDAndTeamCode(ctx context.Context, locationID string, teamCode string) ([]blocks.Block, []blocks.PlayerState, error)
 	GetBlockAndStateByBlockIDAndTeamCode(ctx context.Context, blockID string, teamCode string) (blocks.Block, blocks.PlayerState, error)
@@ -166,6 +168,12 @@ func convertModelToBlock(model *models.Block) (blocks.Block, error) {
 // Delete deletes a block from the database
 func (r *blockRepository) Delete(ctx context.Context, blockID string) error {
 	_, err := db.DB.NewDelete().Model(&models.Block{}).Where("id = ?", blockID).Exec(ctx)
+	return err
+}
+
+// DeleteByLocationID deletes all blocks for a location
+func (r *blockRepository) DeleteByLocationID(ctx context.Context, locationID string) error {
+	_, err := db.DB.NewDelete().Model(&models.Block{}).Where("location_id = ?", locationID).Exec(ctx)
 	return err
 }
 

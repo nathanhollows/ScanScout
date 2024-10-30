@@ -9,6 +9,7 @@ import (
 )
 
 func TestHashPassword(t *testing.T) {
+	t.Parallel()
 	password := "testpassword"
 	hash, err := security.HashPassword(password)
 	require.NoError(t, err, "hashing the password should not produce an error")
@@ -18,6 +19,7 @@ func TestHashPassword(t *testing.T) {
 }
 
 func TestCheckPasswordHash(t *testing.T) {
+	t.Parallel()
 	password := "testpassword"
 	hash, err := security.HashPassword(password)
 	require.NoError(t, err, "hashing the password should not produce an error")
@@ -33,6 +35,7 @@ func TestCheckPasswordHash(t *testing.T) {
 }
 
 func TestHashPasswordError(t *testing.T) {
+	t.Parallel()
 	// Test an empty password, bcrypt will not error on this but it's good practice to ensure non-empty passwords are enforced elsewhere
 	password := ""
 	hash, err := security.HashPassword(password)

@@ -8,20 +8,24 @@
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "tailwindcss build -o static/css/tailwind.css",
-    "watch": "tailwindcss build -o static/css/tailwind.css --watch"
+    "build": "tailwindcss build -o -i ./static/css/main.css.css static/css/tailwind.css",
+    "watch": "tailwindcss build -i ./static/css/main.css -o static/css/tailwind.css --watch"
   },
   "github": "nathanhollows/Rapua",
   "author": "Nathan Hollows",
   "license": "ISC",
   "dependencies": {
     "@tailwindcss/container-queries": "^0.1.1",
-    "commitizen": "^4.3.0",
-    "tailwindcss": "^3.4.1"
+    "commitizen": "^4.3.0"
   },
   "devDependencies": {
     "@tailwindcss/forms": "^0.5.7",
     "@tailwindcss/typography": "^0.5.10",
-    "daisyui": "^4.7.2"
+    "autoprefixer": "^10.4.20",
+    "daisyui": "^4.7.2",
+    "postcss": "^8.4.47",
+    "postcss-cli": "^11.0.0",
+    "postcss-import": "^16.1.0",
+    "tailwindcss": "^3.4.14"
   }
 }

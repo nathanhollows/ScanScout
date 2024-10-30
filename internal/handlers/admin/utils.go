@@ -22,6 +22,7 @@ type AdminHandler struct {
 	LocationService     services.LocationService
 	BlockService        services.BlockService
 	TeamService         services.TeamService
+	ClueService         services.ClueService
 }
 
 func NewAdminHandler(logger *slog.Logger, gs services.GameManagerService, ns services.NotificationService, us services.UserServices) *AdminHandler {
@@ -40,6 +41,10 @@ func NewAdminHandler(logger *slog.Logger, gs services.GameManagerService, ns ser
 		),
 		TeamService: services.NewTeamService(
 			repositories.NewTeamRepository(),
+		),
+		ClueService: services.NewClueService(
+			repositories.NewClueRepository(),
+			repositories.NewLocationRepository(),
 		),
 	}
 }
