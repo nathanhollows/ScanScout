@@ -10,8 +10,8 @@ func TestSanitizeHTML(t *testing.T) {
 	}{
 		{
 			name:  "Valid HTML",
-			input: []byte("<p>Hello, <a href='https://example.com'>World</a></p>"),
-			want:  []byte("<p>Hello, <a href=\"https://example.com\" rel=\"nofollow noopener\" target=\"_blank\">World</a></p>"),
+			input: []byte("Hello <STYLE>.XSS{background-image:url('javascript:alert('XSS')');}</STYLE><A CLASS=XSS></A>World"),
+			want:  []byte("Hello World"),
 		},
 		{
 			name:  "Invalid HTML",

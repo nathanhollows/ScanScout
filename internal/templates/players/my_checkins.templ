@@ -2,12 +2,12 @@ package templates
 
 import (
 	"fmt"
-	"github.com/nathanhollows/Rapua/internal/blocks"
-	templates "github.com/nathanhollows/Rapua/internal/blocks/templates"
-	"github.com/nathanhollows/Rapua/internal/models"
+	"github.com/nathanhollows/Rapua/blocks"
+	internalModels "github.com/nathanhollows/Rapua/internal/models"
+	templates "github.com/nathanhollows/Rapua/internal/templates/blocks"
 )
 
-templ MyCheckins(team models.Team) {
+templ MyCheckins(team internalModels.Team) {
 	<div class="sm:mx-auto sm:w-full sm:max-w-sm">
 		<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-map-pin-check-inside w-16 h-16 m-auto"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"></path><path d="m9 10 2 2 4-4"></path></svg>
 		<h2 class="mt-5 text-center text-2xl font-bold leading-9 tracking-tight">
@@ -15,19 +15,39 @@ templ MyCheckins(team models.Team) {
 		</h2>
 	</div>
 	<div class="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
-		<div class="join join-vertical w-full">
-			for _, scan := range team.Scans {
-				<a
-					href={ templ.SafeURL(fmt.Sprint("/checkins/", scan.Location.MarkerID)) }
-					hx-boost="true"
-					class="flex flex-row justify-between items-center space-x-3 bg-base-200 hover:bg-base-300 border-base-300 rounded-lg p-4 join-item border-y w-full"
-				>
-					{ scan.Location.Name }
-					if team.Instance.Settings.EnablePoints {
-						<span class="badge badge-ghost">{ fmt.Sprint(scan.Points) } pts</span>
-					}
-				</a>
+		if len(team.CheckIns) == 0 {
+			<div role="alert" class="alert">
+				<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-alert w-5 h-5 text-info"><circle cx="12" cy="12" r="10"></circle><line x1="12" x2="12" y1="8" y2="12"></line><line x1="12" x2="12.01" y1="16" y2="16"></line></svg>
+				<span>
+					Nothing to show yet. <a href="/next" hx-boost="true" class="link">Check in at your first location to get started.</a>
+				</span>
+			</div>
+		}
+		<div class="w-full indicator">
+			if len(team.CheckIns) > 0 && team.CheckIns[0].MustCheckOut && team.CheckIns[0].BlocksCompleted {
+				<span class="indicator-item indicator-top indicator-center badge badge-primary">Ready to check out</span>
 			}
+			<div class="w-full join join-vertical">
+				for _, scan := range team.CheckIns {
+					<a
+						href={ templ.SafeURL(fmt.Sprint("/checkins/", scan.Location.MarkerID)) }
+						hx-boost="true"
+						class="flex flex-row justify-between items-center space-x-3 bg-base-200 hover:bg-base-300 p-4 w-full rounded-lg join-item border border-base-300"
+					>
+						<div class="flex items-center">
+							if scan.BlocksCompleted {
+								<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-check-big inline-block mr-2 w-5 h-5"><path d="M21.801 10A10 10 0 1 1 17 3.335"></path><path d="m9 11 3 3L22 4"></path></svg>
+							} else {
+								<div class="w-5 h-5 mr-2"></div>
+							}
+							{ scan.Location.Name }
+						</div>
+						if team.Instance.Settings.EnablePoints {
+							<span class="badge badge-ghost basis-16">{ fmt.Sprint(scan.Points) } pts</span>
+						}
+					</a>
+				}
+			</div>
 		</div>
 		<div class="flex flex-row justify-center mt-12">
 			<a href="/next" class="btn btn-ghost btn-outline" hx-boost="true">
@@ -38,7 +58,7 @@ templ MyCheckins(team models.Team) {
 	</div>
 }
 
-templ CheckInView(settings models.InstanceSettings, scan models.Scan, blocks blocks.Blocks, states map[string]models.TeamBlockState) {
+templ CheckInView(settings internalModels.InstanceSettings, scan internalModels.CheckIn, blocks blocks.Blocks, states map[string]blocks.PlayerState) {
 	<div class="sm:mx-auto sm:w-full sm:max-w-sm">
 		<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-map-pin-check-inside w-16 h-16 m-auto"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"></path><path d="m9 10 2 2 4-4"></path></svg>
 		<h2 class="mt-5 text-center text-2xl font-bold leading-9 tracking-tight">
@@ -49,15 +69,12 @@ templ CheckInView(settings models.InstanceSettings, scan models.Scan, blocks blo
 		for _, block := range blocks {
 			@templates.RenderPlayerView(settings, block, states[block.GetID()])
 		}
-		<div>
-			if scan.MustScanOut {
-				<span class="text-sm">Complete each activity before scanning out.</span>
-			}
-			if len(blocks) > 1 {
-				<progress class="progress progress-success w-full" value="24" max="100"></progress>
-			}
-		</div>
-		<div class="flex flex-row justify-center join mt-12">
+		if settings.CompletionMethod == internalModels.CheckInAndOut {
+			<p class="text-center my-5">
+				<strong>Note:</strong> Remember to check out when you are done!
+			</p>
+		}
+		<div class="flex flex-row justify-center join mt-5">
 			<a href="/checkins" hx-boost="true" class="btn btn-ghost btn-outline join-item">
 				<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-map-pin"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"></path> <circle cx="12" cy="10" r="3"></circle></svg>
 				My Check-ins
@@ -68,4 +85,9 @@ templ CheckInView(settings models.InstanceSettings, scan models.Scan, blocks blo
 			</a>
 		</div>
 	</div>
+	<style>
+		iframe {
+			border-radius: var(--rounded-box, 1rem);
+		}
+	</style>
 }

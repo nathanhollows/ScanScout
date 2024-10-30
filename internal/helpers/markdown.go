@@ -5,7 +5,6 @@ import (
 	"html/template"
 	"log/slog"
 
-	extensions "github.com/nathanhollows/Rapua/internal/extensions/markdown"
 	enclave "github.com/quail-ink/goldmark-enclave"
 	"github.com/yuin/goldmark"
 	"github.com/yuin/goldmark/extension"
@@ -19,7 +18,6 @@ func MarkdownToHTML(s string) (template.HTML, error) {
 		goldmark.WithExtensions(
 			extension.Strikethrough,
 			extension.Linkify,
-			extensions.TaskList,
 			extension.Typographer,
 			enclave.New(
 				&enclave.Config{},

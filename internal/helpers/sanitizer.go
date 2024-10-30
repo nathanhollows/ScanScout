@@ -17,5 +17,5 @@ var p = bluemonday.
 	AllowAttrs("type").Matching(regexp.MustCompile(`\bcheckbox\b`)).OnElements("input")
 
 func SanitizeHTML(input []byte) []byte {
-	return input
+	return p.SanitizeBytes(input)
 }

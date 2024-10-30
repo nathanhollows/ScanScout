@@ -5,7 +5,7 @@ import (
 	"github.com/nathanhollows/Rapua/internal/models"
 )
 
-templ Next(team models.Team, locations models.Locations) {
+templ Next(team models.Team, locations []models.Location) {
 	<div class="sm:mx-auto sm:w-full sm:max-w-sm">
 		<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-compass w-16 h-16 m-auto"><path d="m16.24 7.76-1.804 5.411a2 2 0 0 1-1.265 1.265L7.76 16.24l1.804-5.411a2 2 0 0 1 1.265-1.265z"></path><circle cx="12" cy="12" r="10"></circle></svg>
 		<h2
@@ -33,7 +33,7 @@ templ Next(team models.Team, locations models.Locations) {
 	</div>
 }
 
-templ showMap(locations models.Locations) {
+templ showMap(locations []models.Location) {
 	<p class="text-center pb-5">
 		You may choose any of the following locations. Use the map below to help
 		find where you want to go.
@@ -48,7 +48,7 @@ templ showMap(locations models.Locations) {
 	@mapScript()
 }
 
-templ showMapAndNames(team models.Team, locations models.Locations) {
+templ showMapAndNames(team models.Team, locations []models.Location) {
 	<p class="text-center pb-5">
 		You may choose any of the following locations. Use the map below to help find where you want to go.
 	</p>
@@ -75,7 +75,7 @@ templ showMapAndNames(team models.Team, locations models.Locations) {
 	@mapScript()
 }
 
-templ showNames(team models.Team, locations models.Locations) {
+templ showNames(team models.Team, locations []models.Location) {
 	<p class="text-center pb-5">
 		You may choose any of the following locations. Use the map below to help
 		find where you want to go.
@@ -94,7 +94,7 @@ templ showNames(team models.Team, locations models.Locations) {
 	}
 }
 
-templ showClues(team models.Team, locations models.Locations) {
+templ showClues(team models.Team, locations []models.Location) {
 	<p class="text-center pb-5">
 		Solve a clue to find the next location. 
 		<br/>
@@ -163,7 +163,8 @@ templ mapScript() {
       container: 'map-next',
       style: style,
       center: coords,
-      zoom: zoom
+      zoom: zoom,
+	  cooperativeGestures: true,
     });
 
     // Find and loop through .location-name elements to create markers

@@ -20,7 +20,7 @@ import (
 func setupRouter(
 	logger *slog.Logger,
 	gameplayService services.GameplayService,
-	gameManagerService *services.GameManagerService,
+	gameManagerService services.GameManagerService,
 	notificationService services.NotificationService,
 ) *chi.Mux {
 
@@ -52,14 +52,15 @@ func setupRouter(
 
 	// Static files
 	workDir, _ := os.Getwd()
-	filesDir := filesystem.Myfs{Dir: http.Dir(filepath.Join(workDir, "web/static"))}
-	filesystem.FileServer(router, "/assets", filesDir)
+	filesDir := filesystem.Myfs{Dir: http.Dir(filepath.Join(workDir, "static"))}
+	filesystem.FileServer(router, "/static", filesDir)
 
 	return router
 }
 
 // Setup the player routes
 func setupPlayerRoutes(router chi.Router, playerHandler *players.PlayerHandler) {
+	teamRepo := repositories.NewTeamRepository()
 	// Home route
 	// Takes a GET request to show the home page
 	// Takes a POST request to submit the home page form
@@ -68,44 +69,56 @@ func setupPlayerRoutes(router chi.Router, playerHandler *players.PlayerHandler) 
 
 	// Show the next available locations
 	router.Route("/next", func(r chi.Router) {
-		r.Use(middlewares.TeamMiddleware)
-		r.Use(middlewares.LobbyMiddleware)
+		r.Use(func(next http.Handler) http.Handler {
+			return middlewares.TeamMiddleware(teamRepo,
+				middlewares.LobbyMiddleware(teamRepo, next))
+		})
 		r.Get("/", playerHandler.Next)
 		r.Post("/", playerHandler.Next)
 	})
 
 	router.Route("/blocks", func(r chi.Router) {
-		r.Use(middlewares.TeamMiddleware)
-		r.Use(middlewares.LobbyMiddleware)
+		r.Use(func(next http.Handler) http.Handler {
+			return middlewares.TeamMiddleware(teamRepo,
+				middlewares.LobbyMiddleware(teamRepo, next))
+		})
 		r.Post("/validate", playerHandler.ValidateBlock)
 	})
 
 	// Show the lobby page
 	router.Route("/lobby", func(r chi.Router) {
-		r.Use(middlewares.TeamMiddleware)
+		r.Use(func(next http.Handler) http.Handler {
+			return middlewares.TeamMiddleware(teamRepo, next)
+		})
 		r.Get("/", playerHandler.Lobby)
 	})
 
 	// Check in to a location
 	router.Route("/s", func(r chi.Router) {
-		r.Use(middlewares.TeamMiddleware)
-		r.Use(middlewares.LobbyMiddleware)
+		r.Use(func(next http.Handler) http.Handler {
+			return middlewares.TeamMiddleware(teamRepo,
+				middlewares.LobbyMiddleware(teamRepo, next))
+		})
 		r.Get("/{code:[A-z]{5}}", playerHandler.CheckIn)
 		r.Post("/{code:[A-z]{5}}", playerHandler.CheckInPost)
 	})
 
 	// Check out of a location
 	router.Route("/o", func(r chi.Router) {
-		r.Use(middlewares.TeamMiddleware)
-		r.Use(middlewares.LobbyMiddleware)
+		r.Use(func(next http.Handler) http.Handler {
+			return middlewares.TeamMiddleware(teamRepo,
+				middlewares.LobbyMiddleware(teamRepo, next))
+		})
 		r.Get("/", playerHandler.CheckOut)
 		r.Get("/{code:[A-z]{5}}", playerHandler.CheckOut)
 		r.Post("/{code:[A-z]{5}}", playerHandler.CheckOutPost)
 	})
 
 	router.Route("/checkins", func(r chi.Router) {
-		r.Use(middlewares.TeamMiddleware)
-		r.Use(middlewares.LobbyMiddleware)
+		r.Use(func(next http.Handler) http.Handler {
+			return middlewares.TeamMiddleware(teamRepo,
+				middlewares.LobbyMiddleware(teamRepo, next))
+		})
 		r.Get("/", playerHandler.MyCheckins)
 		r.Get("/{id}", playerHandler.CheckInView)
 	})

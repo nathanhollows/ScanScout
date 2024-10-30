@@ -13,7 +13,7 @@ import (
 	"github.com/nathanhollows/Rapua/internal/models"
 )
 
-func Instances(instances models.Instances, currentInstance models.Instance) templ.Component {
+func Instances(instances []models.Instance, currentInstance models.Instance) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)

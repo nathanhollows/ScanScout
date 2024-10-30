@@ -20,6 +20,7 @@ type PlayerHandler struct {
 	GameplayService     services.GameplayService
 	NotificationService services.NotificationService
 	BlockService        services.BlockService
+	TeamService         services.TeamService
 }
 
 func NewPlayerHandler(logger *slog.Logger, gs services.GameplayService, ns services.NotificationService) *PlayerHandler {
@@ -27,16 +28,17 @@ func NewPlayerHandler(logger *slog.Logger, gs services.GameplayService, ns servi
 		Logger:              logger,
 		GameplayService:     gs,
 		NotificationService: ns,
-		BlockService:        services.NewBlockService(repositories.NewBlockRepository()),
+		BlockService:        services.NewBlockService(repositories.NewBlockRepository(), repositories.NewBlockStateRepository()),
+		TeamService:         services.NewTeamService(repositories.NewTeamRepository()),
 	}
 }
 
 // getTeamIfExists retrieves a team by its code if present.
-func (h *PlayerHandler) getTeamIfExists(r *http.Request, teamCode interface{}) (*models.Team, error) {
+func (h *PlayerHandler) getTeamIfExists(ctx context.Context, teamCode interface{}) (*models.Team, error) {
 	if teamCode == nil {
 		return nil, nil
 	}
-	return h.GameplayService.GetTeamByCode(r.Context(), teamCode.(string))
+	return h.GameplayService.GetTeamByCode(ctx, teamCode.(string))
 }
 
 // GetTeamFromContext retrieves the team from the context

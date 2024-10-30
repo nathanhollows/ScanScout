@@ -7,7 +7,6 @@ import (
 // NotifyAllPost sends a notification to all teams
 func (h *AdminHandler) NotifyAllPost(w http.ResponseWriter, r *http.Request) {
 	user := h.UserFromContext(r.Context())
-	user.CurrentInstance.LoadTeams(r.Context())
 
 	if err := r.ParseForm(); err != nil {
 		h.handleError(w, r, "NotifyAllPost parsing form", "Error parsing form", "error", err, "instance_id", user.CurrentInstanceID)
@@ -17,7 +16,7 @@ func (h *AdminHandler) NotifyAllPost(w http.ResponseWriter, r *http.Request) {
 	content := r.FormValue("content")
 
 	// Send the notification
-	err := h.NotificationService.SendNotificationToAll(r.Context(), user.CurrentInstance.Teams, content)
+	err := h.NotificationService.SendNotificationToAllTeams(r.Context(), user.CurrentInstanceID, content)
 	if err != nil {
 		h.handleError(w, r, "NotifyAllPost sending notification", "Error sending notification", "error", err, "instance_id", user.CurrentInstanceID)
 		return

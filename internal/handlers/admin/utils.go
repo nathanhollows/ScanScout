@@ -15,21 +15,37 @@ import (
 
 type AdminHandler struct {
 	Logger              *slog.Logger
-	GameManagerService  *services.GameManagerService
+	GameManagerService  services.GameManagerService
 	NotificationService services.NotificationService
 	UserServices        services.UserServices
 	AssetGenerator      services.AssetGenerator
+	LocationService     services.LocationService
 	BlockService        services.BlockService
+	TeamService         services.TeamService
+	ClueService         services.ClueService
 }
 
-func NewAdminHandler(logger *slog.Logger, gs *services.GameManagerService, ns services.NotificationService, us services.UserServices) *AdminHandler {
+func NewAdminHandler(logger *slog.Logger, gs services.GameManagerService, ns services.NotificationService, us services.UserServices) *AdminHandler {
 	return &AdminHandler{
 		Logger:              logger,
 		GameManagerService:  gs,
 		NotificationService: ns,
 		UserServices:        us,
 		AssetGenerator:      services.NewAssetGenerator(),
-		BlockService:        services.NewBlockService(repositories.NewBlockRepository()),
+		LocationService: services.NewLocationService(
+			repositories.NewClueRepository(),
+		),
+		BlockService: services.NewBlockService(
+			repositories.NewBlockRepository(),
+			repositories.NewBlockStateRepository(),
+		),
+		TeamService: services.NewTeamService(
+			repositories.NewTeamRepository(),
+		),
+		ClueService: services.NewClueService(
+			repositories.NewClueRepository(),
+			repositories.NewLocationRepository(),
+		),
 	}
 }
 

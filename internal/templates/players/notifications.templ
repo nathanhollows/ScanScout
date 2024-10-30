@@ -5,7 +5,7 @@ import (
 	"github.com/nathanhollows/Rapua/internal/models"
 )
 
-templ Notifications(notifications models.Notifications) {
+templ Notifications(notifications []models.Notification) {
 	<div class="flex flex-col gap-3 my-5">
 		for _, notification := range notifications {
 			<div
