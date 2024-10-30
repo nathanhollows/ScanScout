@@ -11,12 +11,8 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func setup(t *testing.T) func() {
-	return db.SetupTestDB(t)
-}
-
 func TestClueRepository_Save(t *testing.T) {
-	cleanup := setup(t)
+	cleanup := db.SetupTestDB(t)
 	defer cleanup()
 
 	repo := repositories.NewClueRepository()
@@ -34,7 +30,7 @@ func TestClueRepository_Save(t *testing.T) {
 }
 
 func TestClueRepository_Delete(t *testing.T) {
-	cleanup := setup(t)
+	cleanup := db.SetupTestDB(t)
 	defer cleanup()
 
 	repo := repositories.NewClueRepository()
@@ -57,7 +53,7 @@ func TestClueRepository_Delete(t *testing.T) {
 }
 
 func TestClueRepository_FindCluesByLocation(t *testing.T) {
-	cleanup := setup(t)
+	cleanup := db.SetupTestDB(t)
 	defer cleanup()
 
 	repo := repositories.NewClueRepository()
