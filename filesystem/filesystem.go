@@ -4,32 +4,10 @@ package filesystem
 
 import (
 	"net/http"
-	"os"
 	"strings"
 
 	"github.com/go-chi/chi"
 )
-
-func init() {
-	folders := []string{
-		"assets/",
-		"assets/codes/",
-		"assets/codes/png/",
-		"assets/codes/svg/",
-		"assets/fonts/",
-		"assets/posters/"}
-
-	for _, folder := range folders {
-		_, err := os.Stat(folder)
-		if err != nil {
-			// Attempt to create the directory
-			err = os.MkdirAll(folder, 0755)
-			if err != nil {
-				panic("Directory '" + folder + "' does not exist and could not be created")
-			}
-		}
-	}
-}
 
 // FileSystem interface to allow access to local files
 type FileSystem interface {
