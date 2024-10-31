@@ -5,8 +5,8 @@ import (
 	"os"
 
 	"github.com/go-chi/chi"
-	"github.com/nathanhollows/Rapua/internal/models"
 	"github.com/nathanhollows/Rapua/internal/services"
+	"github.com/nathanhollows/Rapua/models"
 )
 
 // QRCode handles the generation of QR codes for the current instance.

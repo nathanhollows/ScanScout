@@ -7,7 +7,7 @@ import (
 	"strings"
 
 	"github.com/nathanhollows/Rapua/db"
-	"github.com/nathanhollows/Rapua/internal/models"
+	"github.com/nathanhollows/Rapua/models"
 	"github.com/uptrace/bun"
 )
 

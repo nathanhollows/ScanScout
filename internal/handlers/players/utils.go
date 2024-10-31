@@ -9,10 +9,10 @@ import (
 	"github.com/gorilla/sessions"
 	"github.com/nathanhollows/Rapua/internal/contextkeys"
 	"github.com/nathanhollows/Rapua/internal/flash"
-	"github.com/nathanhollows/Rapua/internal/models"
 	"github.com/nathanhollows/Rapua/internal/repositories"
 	"github.com/nathanhollows/Rapua/internal/services"
 	templates "github.com/nathanhollows/Rapua/internal/templates/players"
+	"github.com/nathanhollows/Rapua/models"
 )
 
 type PlayerHandler struct {

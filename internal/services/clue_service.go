@@ -4,13 +4,12 @@ import (
 	"context"
 	"fmt"
 
-	internalModels "github.com/nathanhollows/Rapua/internal/models"
 	"github.com/nathanhollows/Rapua/internal/repositories"
 	"github.com/nathanhollows/Rapua/models"
 )
 
 type ClueService interface {
-	UpdateClues(ctx context.Context, location *internalModels.Location, clues []string, clueIDs []string) error
+	UpdateClues(ctx context.Context, location *models.Location, clues []string, clueIDs []string) error
 }
 
 type clueService struct {
@@ -25,7 +24,7 @@ func NewClueService(clueRepo repositories.ClueRepository, locationRepo repositor
 	}
 }
 
-func (s *clueService) UpdateClues(ctx context.Context, location *internalModels.Location, clues []string, clueIDs []string) error {
+func (s *clueService) UpdateClues(ctx context.Context, location *models.Location, clues []string, clueIDs []string) error {
 	var err error
 	if len(location.Clues) == 0 {
 		err = s.locationRepo.LoadClues(ctx, location)

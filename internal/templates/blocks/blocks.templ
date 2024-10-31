@@ -3,10 +3,10 @@ package blocks
 import (
 	"fmt"
 	"github.com/nathanhollows/Rapua/blocks"
-	internalModels "github.com/nathanhollows/Rapua/internal/models"
+	"github.com/nathanhollows/Rapua/models"
 )
 
-func RenderAdminEdit(settings internalModels.InstanceSettings, block blocks.Block) templ.Component {
+func RenderAdminEdit(settings models.InstanceSettings, block blocks.Block) templ.Component {
 	switch block.GetType() {
 	case "markdown":
 		b := block.(*blocks.MarkdownBlock)
@@ -27,7 +27,7 @@ func RenderAdminEdit(settings internalModels.InstanceSettings, block blocks.Bloc
 	return nil
 }
 
-func RenderPlayerView(settings internalModels.InstanceSettings, block blocks.Block, state blocks.PlayerState) templ.Component {
+func RenderPlayerView(settings models.InstanceSettings, block blocks.Block, state blocks.PlayerState) templ.Component {
 	switch block.GetType() {
 	case "markdown":
 		b := block.(*blocks.MarkdownBlock)
@@ -48,7 +48,7 @@ func RenderPlayerView(settings internalModels.InstanceSettings, block blocks.Blo
 	return nil
 }
 
-func RenderPlayerUpdate(settings internalModels.InstanceSettings, block blocks.Block, state blocks.PlayerState) templ.Component {
+func RenderPlayerUpdate(settings models.InstanceSettings, block blocks.Block, state blocks.PlayerState) templ.Component {
 	switch block.GetType() {
 	case "markdown":
 		b := block.(*blocks.MarkdownBlock)
@@ -72,7 +72,7 @@ func RenderPlayerUpdate(settings internalModels.InstanceSettings, block blocks.B
 templ RenderAdminError() {
 }
 
-templ RenderAdminBlock(settings internalModels.InstanceSettings, block blocks.Block) {
+templ RenderAdminBlock(settings models.InstanceSettings, block blocks.Block) {
 	<div
 		id={ fmt.Sprint("block-", block.GetID()) }
 		class="card card-compact flex flex-col md:flex-row rounded-2xl bg-base-200 focus:outline outline-2 outline-primary outline-offset-2 mb-5 gap-5 p-8"

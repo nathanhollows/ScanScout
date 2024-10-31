@@ -4,8 +4,8 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/nathanhollows/Rapua/helpers"
 	"github.com/nathanhollows/Rapua/internal/flash"
-	"github.com/nathanhollows/Rapua/internal/helpers"
 	templates "github.com/nathanhollows/Rapua/internal/templates/admin"
 )
 

@@ -9,8 +9,8 @@ import (
 
 	"github.com/nathanhollows/Rapua/blocks"
 	"github.com/nathanhollows/Rapua/internal/flash"
-	"github.com/nathanhollows/Rapua/internal/models"
 	"github.com/nathanhollows/Rapua/internal/repositories"
+	"github.com/nathanhollows/Rapua/models"
 	"golang.org/x/exp/rand"
 )
 
@@ -164,7 +164,7 @@ func (s *gameplayService) CheckIn(ctx context.Context, team *models.Team, locati
 	}
 
 	// Find the location
-	location, err := s.LocationService.FindLocationByInstanceAndCode(ctx, team.InstanceID, locationCode)
+	location, err := s.LocationService.FindByInstanceAndCode(ctx, team.InstanceID, locationCode)
 	if err != nil {
 		msg := flash.NewWarning("Please double check the code and try again.").SetTitle("Location code not found")
 		response.AddFlashMessage(msg)
@@ -250,7 +250,7 @@ func (s *gameplayService) CheckIn(ctx context.Context, team *models.Team, locati
 
 func (s *gameplayService) CheckOut(ctx context.Context, team *models.Team, locationCode string) error {
 
-	location, err := s.LocationService.FindLocationByInstanceAndCode(ctx, team.InstanceID, locationCode)
+	location, err := s.LocationService.FindByInstanceAndCode(ctx, team.InstanceID, locationCode)
 	if err != nil {
 		return fmt.Errorf("%w: finding location: %w", ErrLocationNotFound, err)
 	}

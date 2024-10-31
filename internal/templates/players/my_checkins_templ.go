@@ -11,11 +11,11 @@ import templruntime "github.com/a-h/templ/runtime"
 import (
 	"fmt"
 	"github.com/nathanhollows/Rapua/blocks"
-	internalModels "github.com/nathanhollows/Rapua/internal/models"
 	templates "github.com/nathanhollows/Rapua/internal/templates/blocks"
+	"github.com/nathanhollows/Rapua/models"
 )
 
-func MyCheckins(team internalModels.Team) templ.Component {
+func MyCheckins(team models.Team) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
@@ -127,7 +127,7 @@ func MyCheckins(team internalModels.Team) templ.Component {
 	})
 }
 
-func CheckInView(settings internalModels.InstanceSettings, scan internalModels.CheckIn, blocks blocks.Blocks, states map[string]blocks.PlayerState) templ.Component {
+func CheckInView(settings models.InstanceSettings, scan models.CheckIn, blocks blocks.Blocks, states map[string]blocks.PlayerState) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
@@ -168,7 +168,7 @@ func CheckInView(settings internalModels.InstanceSettings, scan internalModels.C
 				return templ_7745c5c3_Err
 			}
 		}
-		if settings.CompletionMethod == internalModels.CheckInAndOut {
+		if settings.CompletionMethod == models.CheckInAndOut {
 			templ_7745c5c3_Err = templ.WriteWatchModeString(templ_7745c5c3_Buffer, 17)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err

@@ -5,10 +5,9 @@ import (
 	"strconv"
 
 	"github.com/go-chi/chi"
-	"github.com/nathanhollows/Rapua/internal/flash"
-	"github.com/nathanhollows/Rapua/internal/models"
 	"github.com/nathanhollows/Rapua/internal/services"
 	templates "github.com/nathanhollows/Rapua/internal/templates/admin"
+	"github.com/nathanhollows/Rapua/models"
 )
 
 // Locations shows admin the locations
@@ -86,10 +85,9 @@ func (h *AdminHandler) ReorderLocations(w http.ResponseWriter, r *http.Request) 
 	}
 
 	locations := r.Form["location"]
-	response := h.GameManagerService.ReorderLocations(r.Context(), user, locations)
-	// Discard the flash messages since this is invoked via HTMX
-	if response.Error != nil {
-		h.handleError(w, r, "ReorderLocations: reordering locations", "Error reordering locations", "error", response.Error, "instance_id", user.CurrentInstanceID)
+	err = h.LocationService.ReorderLocations(r.Context(), user.CurrentInstanceID, locations)
+	if err != nil {
+		h.handleError(w, r, "ReorderLocations: reordering locations", "Error reordering locations", "error", err, "instance_id", user.CurrentInstanceID)
 		return
 	}
 
@@ -104,7 +102,7 @@ func (h *AdminHandler) LocationEdit(w http.ResponseWriter, r *http.Request) {
 	code := chi.URLParam(r, "id")
 	user := h.UserFromContext(r.Context())
 
-	location, err := models.FindLocationByInstanceAndCode(r.Context(), user.CurrentInstanceID, code)
+	location, err := h.LocationService.FindByInstanceAndCode(r.Context(), user.CurrentInstanceID, code)
 	if err != nil {
 		h.Logger.Error("LocationEdit: finding location", "error", err, "instance_id", user.CurrentInstanceID, "location_code", code)
 		h.redirect(w, r, "/admin/locations")
@@ -180,7 +178,7 @@ func (h *AdminHandler) LocationEditPost(w http.ResponseWriter, r *http.Request) 
 		Points:    points,
 	}
 
-	location, err := h.LocationService.FindLocationByInstanceAndCode(r.Context(), user.CurrentInstanceID, locationCode)
+	location, err := h.LocationService.FindByInstanceAndCode(r.Context(), user.CurrentInstanceID, locationCode)
 	if err != nil {
 		h.handleError(w, r, "LocationEditPost: finding location", "Error finding location", "error", err)
 		return
@@ -222,34 +220,22 @@ func (h *AdminHandler) LocationDelete(w http.ResponseWriter, r *http.Request) {
 	locationCode := chi.URLParam(r, "id")
 
 	user := h.UserFromContext(r.Context())
-	user.CurrentInstance.LoadLocations(r.Context())
 
-	// Make sure the location exists and is part of the current instance
-	var location models.Location
-	for _, l := range user.CurrentInstance.Locations {
-		if l.MarkerID == locationCode {
-			location = l
-			break
-		}
-	}
-	if location.MarkerID == "" {
-		h.Logger.Error("LocationDelete: finding location", "error", "location not found")
-		err := templates.Toast(*flash.NewError("Location not found")).Render(r.Context(), w)
-		if err != nil {
-			h.Logger.Error("LocationDelete: rendering toast:", "error", err)
-		}
-		return
-	}
-
-	err := h.GameManagerService.DeleteLocation(r.Context(), &location)
+	location, err := h.LocationService.FindByInstanceAndCode(r.Context(), user.CurrentInstanceID, locationCode)
 	if err != nil {
-		h.Logger.Error("LocationDelete: deleting location", "error", err)
-		err := templates.Toast(*flash.NewError("Error deleting location")).Render(r.Context(), w)
-		if err != nil {
-			h.Logger.Error("LocationDelete: rendering toast:", "error", err)
-		}
+		h.handleError(w, r, "LocationDelete: finding location", "Error finding location", "error", err)
 		return
 	}
 
-	w.Header().Set("HX-Redirect", "/admin/locations")
+	if location.ID == "" {
+		h.handleError(w, r, "LocationDelete: location not found", "Location not found")
+		return
+	}
+
+	if err = h.LocationService.DeleteLocation(r.Context(), location.ID); err != nil {
+		h.handleError(w, r, "LocationDelete: deleting location", "Error deleting location", "error", err)
+		return
+	}
+
+	h.redirect(w, r, "/admin/locations")
 }

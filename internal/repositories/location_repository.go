@@ -6,16 +6,16 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/nathanhollows/Rapua/db"
-	"github.com/nathanhollows/Rapua/internal/models"
+	"github.com/nathanhollows/Rapua/models"
 )
 
 type LocationRepository interface {
-	// FindLocation finds a location by ID
-	FindLocation(ctx context.Context, locationID string) (*models.Location, error)
-	// FindLocationByInstanceAndCode finds a location by instance and code
-	FindLocationByInstanceAndCode(ctx context.Context, instanceID string, code string) (*models.Location, error)
+	// Find finds a location by ID
+	Find(ctx context.Context, locationID string) (*models.Location, error)
+	// FindByInstance finds a location by instance and code
+	FindByInstanceAndCode(ctx context.Context, instanceID string, code string) (*models.Location, error)
 	// Find all locations for an instance
-	FindAllLocations(ctx context.Context, instanceID string) ([]models.Location, error)
+	FindByInstance(ctx context.Context, instanceID string) ([]models.Location, error)
 	// Update updates a location in the database
 	// FindLocationsByMarkerID(ctx context.Context, markerID string) ([]models.Location, error)
 	FindLocationsByMarkerID(ctx context.Context, markerID string) ([]models.Location, error)
@@ -44,8 +44,8 @@ func NewLocationRepository() LocationRepository {
 	return &locationRepository{}
 }
 
-// FindLocation finds a location by ID
-func (r *locationRepository) FindLocation(ctx context.Context, locationID string) (*models.Location, error) {
+// Find finds a location by ID
+func (r *locationRepository) Find(ctx context.Context, locationID string) (*models.Location, error) {
 	var location models.Location
 	err := db.DB.NewSelect().Model(&location).Where("id = ?", locationID).Scan(ctx)
 	if err != nil {
@@ -54,8 +54,8 @@ func (r *locationRepository) FindLocation(ctx context.Context, locationID string
 	return &location, nil
 }
 
-// FindLocationByInstanceAndCode finds a location by instance and code
-func (r *locationRepository) FindLocationByInstanceAndCode(ctx context.Context, instanceID string, code string) (*models.Location, error) {
+// FindByInstance finds a location by instance and code
+func (r *locationRepository) FindByInstanceAndCode(ctx context.Context, instanceID string, code string) (*models.Location, error) {
 	var location models.Location
 	err := db.DB.
 		NewSelect().
@@ -70,9 +70,14 @@ func (r *locationRepository) FindLocationByInstanceAndCode(ctx context.Context, 
 }
 
 // Find all locations for an instance
-func (r *locationRepository) FindAllLocations(ctx context.Context, instanceID string) ([]models.Location, error) {
+func (r *locationRepository) FindByInstance(ctx context.Context, instanceID string) ([]models.Location, error) {
 	var locations []models.Location
-	err := db.DB.NewSelect().Model(&locations).Where("instance_id = ?", instanceID).Scan(ctx)
+	err := db.DB.
+		NewSelect().
+		Model(&locations).
+		Where("instance_id = ?", instanceID).
+		Relation("Marker").
+		Scan(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("finding all locations: %w", err)
 	}
