@@ -5,7 +5,6 @@ import (
 	"strconv"
 
 	"github.com/go-chi/chi"
-	"github.com/nathanhollows/Rapua/internal/flash"
 	internalModels "github.com/nathanhollows/Rapua/internal/models"
 	"github.com/nathanhollows/Rapua/internal/services"
 	templates "github.com/nathanhollows/Rapua/internal/templates/admin"
@@ -223,34 +222,22 @@ func (h *AdminHandler) LocationDelete(w http.ResponseWriter, r *http.Request) {
 	locationCode := chi.URLParam(r, "id")
 
 	user := h.UserFromContext(r.Context())
-	user.CurrentInstance.LoadLocations(r.Context())
 
-	// Make sure the location exists and is part of the current instance
-	var location internalModels.Location
-	for _, l := range user.CurrentInstance.Locations {
-		if l.MarkerID == locationCode {
-			location = l
-			break
-		}
-	}
-	if location.MarkerID == "" {
-		h.Logger.Error("LocationDelete: finding location", "error", "location not found")
-		err := templates.Toast(*flash.NewError("Location not found")).Render(r.Context(), w)
-		if err != nil {
-			h.Logger.Error("LocationDelete: rendering toast:", "error", err)
-		}
-		return
-	}
-
-	err := h.GameManagerService.DeleteLocation(r.Context(), &location)
+	location, err := h.LocationService.FindLocationByInstanceAndCode(r.Context(), user.CurrentInstanceID, locationCode)
 	if err != nil {
-		h.Logger.Error("LocationDelete: deleting location", "error", err)
-		err := templates.Toast(*flash.NewError("Error deleting location")).Render(r.Context(), w)
-		if err != nil {
-			h.Logger.Error("LocationDelete: rendering toast:", "error", err)
-		}
+		h.handleError(w, r, "LocationDelete: finding location", "Error finding location", "error", err)
 		return
 	}
 
-	w.Header().Set("HX-Redirect", "/admin/locations")
+	if location.ID == "" {
+		h.handleError(w, r, "LocationDelete: location not found", "Location not found")
+		return
+	}
+
+	if err = h.LocationService.DeleteLocation(r.Context(), location.ID); err != nil {
+		h.handleError(w, r, "LocationDelete: deleting location", "Error deleting location", "error", err)
+		return
+	}
+
+	h.redirect(w, r, "/admin/locations")
 }

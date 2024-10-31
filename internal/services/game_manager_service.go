@@ -56,7 +56,7 @@ func (s *GameManagerService) CreateInstance(ctx context.Context, name string, us
 		UserID: user.ID,
 	}
 
-	if err := instance.Save(ctx); err != nil {
+	if err := s.instanceRepo.Save(ctx, instance); err != nil {
 		response.AddFlashMessage(*flash.NewError("Error saving instance"))
 		response.Error = fmt.Errorf("saving instance: %w", err)
 		return response
@@ -73,8 +73,7 @@ func (s *GameManagerService) CreateInstance(ctx context.Context, name string, us
 	settings := &models.InstanceSettings{
 		InstanceID: instance.ID,
 	}
-	s.instanceSettingsRepo.Save(ctx, settings)
-	if err != nil {
+	if err := s.instanceSettingsRepo.Save(ctx, settings); err != nil {
 		response.AddFlashMessage(*flash.NewError("Error saving settings"))
 		response.Error = fmt.Errorf("saving settings: %w", err)
 		return response
@@ -85,7 +84,7 @@ func (s *GameManagerService) CreateInstance(ctx context.Context, name string, us
 }
 
 func (s *GameManagerService) SwitchInstance(ctx context.Context, user *internalModels.User, instanceID string) (*internalModels.Instance, error) {
-	instance, err := internalModels.FindInstanceByID(ctx, instanceID)
+	instance, err := s.instanceRepo.FindByID(ctx, instanceID)
 	if err != nil {
 		return nil, errors.New("instance not found")
 	}
@@ -107,7 +106,7 @@ func (s *GameManagerService) SwitchInstance(ctx context.Context, user *internalM
 // The teams will not be duplicated
 func (s *GameManagerService) DuplicateInstance(ctx context.Context, user *internalModels.User, id, name string) (response ServiceResponse) {
 	response = ServiceResponse{}
-	oldInstance, err := internalModels.FindInstanceByID(ctx, id)
+	oldInstance, err := s.instanceRepo.FindByID(ctx, id)
 	if err != nil {
 		response.AddFlashMessage(*flash.NewError("Instance not found"))
 		response.Error = fmt.Errorf("finding instance: %w", err)
@@ -126,7 +125,7 @@ func (s *GameManagerService) DuplicateInstance(ctx context.Context, user *intern
 		UserID: user.ID,
 	}
 
-	if err := newInstance.Save(ctx); err != nil {
+	if err := s.instanceRepo.Save(ctx, newInstance); err != nil {
 		response.AddFlashMessage(*flash.NewError("Error saving new instance"))
 		response.Error = fmt.Errorf("saving new instance: %w", err)
 		return response
@@ -168,7 +167,7 @@ func (s *GameManagerService) LoadTeams(ctx context.Context, teams *[]internalMod
 
 func (s *GameManagerService) DeleteInstance(ctx context.Context, user *internalModels.User, instanceID, confirmName string) (response ServiceResponse) {
 	response = ServiceResponse{}
-	instance, err := internalModels.FindInstanceByID(ctx, instanceID)
+	instance, err := s.instanceRepo.FindByID(ctx, instanceID)
 	if err != nil {
 		response.AddFlashMessage(*flash.NewError("Instance not found"))
 		response.Error = fmt.Errorf("finding instance: %w", err)
@@ -445,8 +444,7 @@ func (s *GameManagerService) SetStartTime(ctx context.Context, user *internalMod
 		user.CurrentInstance.EndTime = bun.NullTime{}
 	}
 
-	err := user.CurrentInstance.Update(ctx)
-	if err != nil {
+	if err := s.instanceRepo.Update(ctx, &user.CurrentInstance); err != nil {
 		response.AddFlashMessage(*flash.NewError("Error updating instance"))
 		response.Error = fmt.Errorf("updating instance with new time: %w", err)
 		return response
@@ -477,8 +475,7 @@ func (s *GameManagerService) SetEndTime(ctx context.Context, user *internalModel
 
 	// Update the end time
 	user.CurrentInstance.EndTime = bun.NullTime{Time: time}
-	err := user.CurrentInstance.Update(ctx)
-	if err != nil {
+	if err := s.instanceRepo.Update(ctx, &user.CurrentInstance); err != nil {
 		response.AddFlashMessage(*flash.NewError("Error updating instance"))
 		response.Error = fmt.Errorf("updating instance with new time: %w", err)
 		return response
@@ -507,13 +504,13 @@ func (s *GameManagerService) ScheduleGame(ctx context.Context, user *internalMod
 	instance.EndTime = bun.NullTime{Time: end}
 
 	// Save instance
-	err := instance.Update(ctx)
-	if err != nil {
+	if err := s.instanceRepo.Update(ctx, &instance); err != nil {
 		response.AddFlashMessage(*flash.NewError("Error saving instance"))
 		response.Error = fmt.Errorf("saving instance: %w", err)
 		return response
 	}
 
+	user.CurrentInstance = instance
 	return response
 }
 
@@ -539,9 +536,4 @@ func (s *GameManagerService) ReorderLocations(ctx context.Context, user *interna
 
 	response.AddFlashMessage(*flash.NewSuccess("Locations reordered!"))
 	return response
-}
-
-// DeleteLocation deletes a location
-func (s *GameManagerService) DeleteLocation(ctx context.Context, location *internalModels.Location) error {
-	return s.locationService.DeleteLocation(ctx, location.ID)
 }

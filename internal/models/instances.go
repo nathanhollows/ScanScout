@@ -1,11 +1,8 @@
 package models
 
 import (
-	"context"
 	"time"
 
-	"github.com/google/uuid"
-	"github.com/nathanhollows/Rapua/db"
 	"github.com/nathanhollows/Rapua/models"
 	"github.com/uptrace/bun"
 )
@@ -25,40 +22,6 @@ type Instance struct {
 	Teams     []Team                  `bun:"rel:has-many,join:id=instance_id"`
 	Locations []Location              `bun:"rel:has-many,join:id=instance_id"`
 	Settings  models.InstanceSettings `bun:"rel:has-one,join:id=instance_id"`
-}
-
-func (i *Instance) Save(ctx context.Context) error {
-	if i.ID == "" {
-		i.ID = uuid.New().String()
-	}
-	_, err := db.DB.NewInsert().Model(i).Exec(ctx)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-func (i *Instance) Update(ctx context.Context) error {
-	_, err := db.DB.NewUpdate().Model(i).WherePK().Exec(ctx)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-// FindInstanceByID finds an instance by ID
-func FindInstanceByID(ctx context.Context, id string) (*Instance, error) {
-	instance := &Instance{}
-	err := db.DB.NewSelect().
-		Model(instance).
-		Where("id = ?", id).
-		Relation("Locations").
-		Relation("Settings").
-		Scan(ctx)
-	if err != nil {
-		return nil, err
-	}
-	return instance, nil
 }
 
 // GetStatus returns the status of the instance
@@ -81,31 +44,4 @@ func (i *Instance) GetStatus() models.GameStatus {
 	// If the start time is in the past, the game is active
 	return models.Active
 
-}
-
-// LoadSettings loads the settings for an instance
-func (i *Instance) LoadSettings(ctx context.Context) error {
-	if i.Settings.InstanceID == "" {
-		i.Settings = models.InstanceSettings{}
-		err := db.DB.NewSelect().Model(&i.Settings).Where("instance_id = ?", i.ID).Scan(ctx)
-		if err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
-// LoadLocations loads the locations for an instance
-func (i *Instance) LoadLocations(ctx context.Context) error {
-	if len(i.Locations) > 0 {
-		return nil
-	}
-
-	var err error
-	i.Locations, err = FindAllLocations(ctx, i.ID)
-	if err != nil {
-		return err
-	}
-
-	return nil
 }

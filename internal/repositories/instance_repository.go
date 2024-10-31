@@ -19,6 +19,8 @@ type InstanceRepository interface {
 	Update(ctx context.Context, instance *internalModels.Instance) error
 	// Delete deletes an instance from the database
 	Delete(ctx context.Context, instanceID string) error
+	// FindByID finds an instance by ID
+	FindByID(ctx context.Context, id string) (*internalModels.Instance, error)
 }
 
 type instanceRepository struct{}
@@ -104,4 +106,18 @@ func (r *instanceRepository) Delete(ctx context.Context, instanceID string) erro
 	}
 
 	return tx.Commit()
+}
+
+func (r *instanceRepository) FindByID(ctx context.Context, id string) (*internalModels.Instance, error) {
+	instance := &internalModels.Instance{}
+	err := db.DB.NewSelect().
+		Model(instance).
+		Where("id = ?", id).
+		Relation("Locations").
+		Relation("Settings").
+		Scan(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return instance, nil
 }
