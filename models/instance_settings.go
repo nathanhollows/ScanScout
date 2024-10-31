@@ -1,11 +1,5 @@
 package models
 
-import (
-	"context"
-
-	"github.com/nathanhollows/Rapua/db"
-)
-
 type InstanceSettings struct {
 	InstanceID        string           `bun:"instance_id,pk,type:varchar(36)"`
 	NavigationMode    NavigationMode   `bun:"navigation_mode,type:int"`
@@ -16,10 +10,4 @@ type InstanceSettings struct {
 	EnablePoints      bool             `bun:"enable_points,type:bool"`
 	EnableBonusPoints bool             `bun:"enable_bonus_points,type:bool"`
 	ShowLeaderboard   bool             `bun:"show_leaderboard,type:bool"`
-}
-
-// Save saves the instance settings to the database
-func (s *InstanceSettings) Save(ctx context.Context) error {
-	_, err := db.DB.NewInsert().Model(s).On("conflict (instance_id) do update").Exec(ctx)
-	return err
 }

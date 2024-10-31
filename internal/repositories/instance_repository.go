@@ -61,6 +61,13 @@ func (r *instanceRepository) Delete(ctx context.Context, instanceID string) erro
 		return err
 	}
 
+	// Delete settings
+	_, err = tx.NewDelete().Model(&models.InstanceSettings{}).Where("instance_id = ?", instanceID).Exec(ctx)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+
 	// Delete instance
 	_, err = tx.NewDelete().Model(&internalModels.Instance{}).Where("id = ?", instanceID).Exec(ctx)
 	if err != nil {

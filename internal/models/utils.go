@@ -13,7 +13,7 @@ import (
 func CreateTables(logger *slog.Logger) {
 	var models = []interface{}{
 		(*models.Notification)(nil),
-		(*InstanceSettings)(nil),
+		(*models.InstanceSettings)(nil),
 		(*models.Block)(nil),
 		(*models.TeamBlockState)(nil),
 		(*Location)(nil),

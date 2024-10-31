@@ -3,11 +3,12 @@ package templates
 import (
 	"fmt"
 	"github.com/nathanhollows/Rapua/blocks"
-	"github.com/nathanhollows/Rapua/internal/models"
+	internalModels "github.com/nathanhollows/Rapua/internal/models"
 	bTemplates "github.com/nathanhollows/Rapua/internal/templates/blocks"
+	"github.com/nathanhollows/Rapua/models"
 )
 
-templ LocationsIndex(settings models.InstanceSettings, locations []models.Location) {
+templ LocationsIndex(settings models.InstanceSettings, locations []internalModels.Location) {
 	<!-- Header -->
 	<div class="flex flex-col gap-3 md:flex-row justify-between items-center w-full p-5">
 		<h1 class="text-2xl font-bold">
@@ -235,7 +236,7 @@ templ AddLocation(settings models.InstanceSettings) {
 	@locationScript()
 }
 
-templ EditLocation(location models.Location, settings models.InstanceSettings, contentBlocks blocks.Blocks) {
+templ EditLocation(location internalModels.Location, settings models.InstanceSettings, contentBlocks blocks.Blocks) {
 	<form
 		hx-post={ fmt.Sprint("/admin/locations/", location.MarkerID) }
 		hx-trigger="submit"

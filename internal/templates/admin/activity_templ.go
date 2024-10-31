@@ -40,7 +40,7 @@ func ActivityTracker(instance internalModels.Instance) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		switch instance.GetStatus() {
-		case internalModels.Active:
+		case models.Active:
 			templ_7745c5c3_Err = templ.WriteWatchModeString(templ_7745c5c3_Buffer, 2)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
@@ -58,7 +58,7 @@ func ActivityTracker(instance internalModels.Instance) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-		case internalModels.Scheduled:
+		case models.Scheduled:
 			templ_7745c5c3_Err = templ.WriteWatchModeString(templ_7745c5c3_Buffer, 4)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
@@ -76,7 +76,7 @@ func ActivityTracker(instance internalModels.Instance) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-		case internalModels.Closed:
+		case models.Closed:
 			templ_7745c5c3_Err = templ.WriteWatchModeString(templ_7745c5c3_Buffer, 6)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
@@ -195,7 +195,7 @@ func ActivityTracker(instance internalModels.Instance) templ.Component {
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				if instance.Settings.CompletionMethod == internalModels.CheckInAndOut {
+				if instance.Settings.CompletionMethod == models.CheckInAndOut {
 					templ_7745c5c3_Err = templ.WriteWatchModeString(templ_7745c5c3_Buffer, 20)
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
@@ -488,7 +488,7 @@ func GameScheduleStatus(instance internalModels.Instance, messages ...flash.Mess
 			return templ_7745c5c3_Err
 		}
 		switch instance.GetStatus() {
-		case internalModels.Active:
+		case models.Active:
 			templ_7745c5c3_Err = templ.WriteWatchModeString(templ_7745c5c3_Buffer, 44)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
@@ -497,7 +497,7 @@ func GameScheduleStatus(instance internalModels.Instance, messages ...flash.Mess
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-		case internalModels.Scheduled:
+		case models.Scheduled:
 			templ_7745c5c3_Err = templ.WriteWatchModeString(templ_7745c5c3_Buffer, 45)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
@@ -506,7 +506,7 @@ func GameScheduleStatus(instance internalModels.Instance, messages ...flash.Mess
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-		case internalModels.Closed:
+		case models.Closed:
 			templ_7745c5c3_Err = templ.WriteWatchModeString(templ_7745c5c3_Buffer, 46)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
@@ -570,7 +570,7 @@ func scheduleButton(scheduled bool, t schema.NullTime) templ.Component {
 	})
 }
 
-func TeamActivity(settings internalModels.InstanceSettings, team internalModels.Team, notifications []models.Notification, nextLocations []internalModels.Location) templ.Component {
+func TeamActivity(settings models.InstanceSettings, team internalModels.Team, notifications []models.Notification, nextLocations []internalModels.Location) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)

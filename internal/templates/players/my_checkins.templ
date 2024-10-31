@@ -5,6 +5,7 @@ import (
 	"github.com/nathanhollows/Rapua/blocks"
 	internalModels "github.com/nathanhollows/Rapua/internal/models"
 	templates "github.com/nathanhollows/Rapua/internal/templates/blocks"
+	"github.com/nathanhollows/Rapua/models"
 )
 
 templ MyCheckins(team internalModels.Team) {
@@ -58,7 +59,7 @@ templ MyCheckins(team internalModels.Team) {
 	</div>
 }
 
-templ CheckInView(settings internalModels.InstanceSettings, scan internalModels.CheckIn, blocks blocks.Blocks, states map[string]blocks.PlayerState) {
+templ CheckInView(settings models.InstanceSettings, scan internalModels.CheckIn, blocks blocks.Blocks, states map[string]blocks.PlayerState) {
 	<div class="sm:mx-auto sm:w-full sm:max-w-sm">
 		<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-map-pin-check-inside w-16 h-16 m-auto"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"></path><path d="m9 10 2 2 4-4"></path></svg>
 		<h2 class="mt-5 text-center text-2xl font-bold leading-9 tracking-tight">
@@ -69,7 +70,7 @@ templ CheckInView(settings internalModels.InstanceSettings, scan internalModels.
 		for _, block := range blocks {
 			@templates.RenderPlayerView(settings, block, states[block.GetID()])
 		}
-		if settings.CompletionMethod == internalModels.CheckInAndOut {
+		if settings.CompletionMethod == models.CheckInAndOut {
 			<p class="text-center my-5">
 				<strong>Note:</strong> Remember to check out when you are done!
 			</p>

@@ -6,7 +6,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/nathanhollows/Rapua/internal/models"
+	internalModels "github.com/nathanhollows/Rapua/internal/models"
+	"github.com/nathanhollows/Rapua/models"
 	"golang.org/x/exp/rand"
 )
 
@@ -23,7 +24,7 @@ func NewNavigationService() NavigationService {
 
 // CheckValidLocation checks if the location code is valid for the team to scan in to
 // This function returns an error if the location code is invalid
-func (s NavigationService) CheckValidLocation(ctx context.Context, team *models.Team, settings *models.InstanceSettings, locationCode string) (bool, error) {
+func (s NavigationService) CheckValidLocation(ctx context.Context, team *internalModels.Team, settings *models.InstanceSettings, locationCode string) (bool, error) {
 
 	// Find valid locations
 	locations, err := s.DetermineNextLocations(ctx, team)
@@ -41,7 +42,7 @@ func (s NavigationService) CheckValidLocation(ctx context.Context, team *models.
 	return false, nil
 }
 
-func (s NavigationService) DetermineNextLocations(ctx context.Context, team *models.Team) ([]models.Location, error) {
+func (s NavigationService) DetermineNextLocations(ctx context.Context, team *internalModels.Team) ([]internalModels.Location, error) {
 	// Check if the team has visited all locations
 	if len(team.CheckIns) == len(team.Instance.Locations) {
 		return nil, ErrorAllLocationsVisited
@@ -65,8 +66,8 @@ func (s NavigationService) DetermineNextLocations(ctx context.Context, team *mod
 }
 
 // getUnvisitedLocations returns a list of locations that the team has not visited
-func (s NavigationService) getUnvisitedLocations(_ context.Context, team *models.Team) []models.Location {
-	unvisited := []models.Location{}
+func (s NavigationService) getUnvisitedLocations(_ context.Context, team *internalModels.Team) []internalModels.Location {
+	unvisited := []internalModels.Location{}
 
 	// Find the next location
 	for _, location := range team.Instance.Locations {
@@ -88,7 +89,7 @@ func (s NavigationService) getUnvisitedLocations(_ context.Context, team *models
 
 // getOrderedLocations returns locations in the order defined by the admin
 // This function returns the next location for the team to visit
-func (s NavigationService) getOrderedLocations(ctx context.Context, team *models.Team) ([]models.Location, error) {
+func (s NavigationService) getOrderedLocations(ctx context.Context, team *internalModels.Team) ([]internalModels.Location, error) {
 	unvisited := s.getUnvisitedLocations(ctx, team)
 	if len(unvisited) == 0 {
 		return nil, ErrorAllLocationsVisited
@@ -112,7 +113,7 @@ func (s NavigationService) getOrderedLocations(ctx context.Context, team *models
 // 1. Shuffle the list of all locations deterministically based on team code
 // 2. Select the first n unvisited locations from the shuffled list
 // 3. Return these locations ensuring the order is consistent across refreshes
-func (s NavigationService) getRandomLocations(ctx context.Context, team *models.Team) ([]models.Location, error) {
+func (s NavigationService) getRandomLocations(ctx context.Context, team *internalModels.Team) ([]internalModels.Location, error) {
 	allLocations := team.Instance.Locations
 	if len(allLocations) == 0 {
 		return nil, errors.New("no locations found")
@@ -132,7 +133,7 @@ func (s NavigationService) getRandomLocations(ctx context.Context, team *models.
 
 	// We shuffle the list of all locations to ensure randomness
 	// even when the team has visited some locations
-	shuffledLocations := make([]models.Location, len(allLocations))
+	shuffledLocations := make([]internalModels.Location, len(allLocations))
 	copy(shuffledLocations, allLocations)
 	rand.Shuffle(len(shuffledLocations), func(i, j int) {
 		shuffledLocations[i], shuffledLocations[j] = shuffledLocations[j], shuffledLocations[i]
@@ -140,7 +141,7 @@ func (s NavigationService) getRandomLocations(ctx context.Context, team *models.
 
 	// Select the first n unvisited locations from the shuffled list
 	n := team.Instance.Settings.MaxNextLocations
-	selectedLocations := []models.Location{}
+	selectedLocations := []internalModels.Location{}
 	for _, loc := range shuffledLocations {
 		if !s.HasVisited(team.CheckIns, loc.ID) {
 			selectedLocations = append(selectedLocations, loc)
@@ -159,7 +160,7 @@ func (s NavigationService) getRandomLocations(ctx context.Context, team *models.
 
 // getFreeRoamLocations returns a list of locations for free roam mode
 // This function returns all locations in the instance for the team to visit
-func (s NavigationService) getFreeRoamLocations(ctx context.Context, team *models.Team) ([]models.Location, error) {
+func (s NavigationService) getFreeRoamLocations(ctx context.Context, team *internalModels.Team) ([]internalModels.Location, error) {
 	unvisited := s.getUnvisitedLocations(ctx, team)
 
 	if len(unvisited) == 0 {
@@ -170,7 +171,7 @@ func (s NavigationService) getFreeRoamLocations(ctx context.Context, team *model
 }
 
 // HasVisited returns true if the team has visited the location
-func (s NavigationService) HasVisited(checkins []models.CheckIn, locationID string) bool {
+func (s NavigationService) HasVisited(checkins []internalModels.CheckIn, locationID string) bool {
 	for _, checkin := range checkins {
 		if checkin.LocationID == locationID {
 			return true

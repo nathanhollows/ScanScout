@@ -6,9 +6,10 @@ import (
 
 	"github.com/go-chi/chi"
 	"github.com/nathanhollows/Rapua/internal/flash"
-	"github.com/nathanhollows/Rapua/internal/models"
+	internalModels "github.com/nathanhollows/Rapua/internal/models"
 	"github.com/nathanhollows/Rapua/internal/services"
 	templates "github.com/nathanhollows/Rapua/internal/templates/admin"
+	"github.com/nathanhollows/Rapua/models"
 )
 
 // Locations shows admin the locations
@@ -104,7 +105,7 @@ func (h *AdminHandler) LocationEdit(w http.ResponseWriter, r *http.Request) {
 	code := chi.URLParam(r, "id")
 	user := h.UserFromContext(r.Context())
 
-	location, err := models.FindLocationByInstanceAndCode(r.Context(), user.CurrentInstanceID, code)
+	location, err := internalModels.FindLocationByInstanceAndCode(r.Context(), user.CurrentInstanceID, code)
 	if err != nil {
 		h.Logger.Error("LocationEdit: finding location", "error", err, "instance_id", user.CurrentInstanceID, "location_code", code)
 		h.redirect(w, r, "/admin/locations")
@@ -225,7 +226,7 @@ func (h *AdminHandler) LocationDelete(w http.ResponseWriter, r *http.Request) {
 	user.CurrentInstance.LoadLocations(r.Context())
 
 	// Make sure the location exists and is part of the current instance
-	var location models.Location
+	var location internalModels.Location
 	for _, l := range user.CurrentInstance.Locations {
 		if l.MarkerID == locationCode {
 			location = l

@@ -16,26 +16,29 @@ import (
 	"github.com/nathanhollows/Rapua/internal/flash"
 	internalModels "github.com/nathanhollows/Rapua/internal/models"
 	"github.com/nathanhollows/Rapua/internal/repositories"
+	"github.com/nathanhollows/Rapua/models"
 	"github.com/uptrace/bun"
 )
 
 type GameManagerService struct {
-	locationService LocationService
-	userService     UserService
-	teamService     TeamService
-	markerRepo      repositories.MarkerRepository
-	clueRepo        repositories.ClueRepository
-	instanceRepo    repositories.InstanceRepository
+	locationService      LocationService
+	userService          UserService
+	teamService          TeamService
+	markerRepo           repositories.MarkerRepository
+	clueRepo             repositories.ClueRepository
+	instanceRepo         repositories.InstanceRepository
+	instanceSettingsRepo repositories.InstanceSettingsRepository
 }
 
 func NewGameManagerService() GameManagerService {
 	return GameManagerService{
-		locationService: NewLocationService(repositories.NewClueRepository()),
-		userService:     NewUserService(repositories.NewUserRepository()),
-		teamService:     NewTeamService(repositories.NewTeamRepository()),
-		markerRepo:      repositories.NewMarkerRepository(),
-		clueRepo:        repositories.NewClueRepository(),
-		instanceRepo:    repositories.NewInstanceRepository(),
+		locationService:      NewLocationService(repositories.NewClueRepository()),
+		userService:          NewUserService(repositories.NewUserRepository()),
+		teamService:          NewTeamService(repositories.NewTeamRepository()),
+		markerRepo:           repositories.NewMarkerRepository(),
+		clueRepo:             repositories.NewClueRepository(),
+		instanceRepo:         repositories.NewInstanceRepository(),
+		instanceSettingsRepo: repositories.NewInstanceSettingsRepository(),
 	}
 }
 
@@ -67,10 +70,10 @@ func (s *GameManagerService) CreateInstance(ctx context.Context, name string, us
 		return response
 	}
 
-	settings := &internalModels.InstanceSettings{
+	settings := &models.InstanceSettings{
 		InstanceID: instance.ID,
 	}
-	err = settings.Save(ctx)
+	s.instanceSettingsRepo.Save(ctx, settings)
 	if err != nil {
 		response.AddFlashMessage(*flash.NewError("Error saving settings"))
 		response.Error = fmt.Errorf("saving settings: %w", err)
@@ -142,7 +145,7 @@ func (s *GameManagerService) DuplicateInstance(ctx context.Context, user *intern
 	// Copy settings
 	settings := oldInstance.Settings
 	settings.InstanceID = newInstance.ID
-	if err := settings.Save(ctx); err != nil {
+	if err := s.instanceSettingsRepo.Save(ctx, &settings); err != nil {
 		response.AddFlashMessage(*flash.NewError("Error saving settings"))
 		response.Error = fmt.Errorf("saving settings: %w", err)
 		return response
@@ -349,12 +352,12 @@ func (s *GameManagerService) GetQRCodePathAndContent(action, id, name, extension
 }
 
 // UpdateSettings parses the form values and updates the instance settings
-func (s *GameManagerService) UpdateSettings(ctx context.Context, settings *internalModels.InstanceSettings, form url.Values) (response ServiceResponse) {
+func (s *GameManagerService) UpdateSettings(ctx context.Context, settings *models.InstanceSettings, form url.Values) (response ServiceResponse) {
 	response = ServiceResponse{}
 	response.Data = make(map[string]interface{})
 
 	// Navigation mode
-	navMode, err := internalModels.ParseNavigationMode(form.Get("navigationMode"))
+	navMode, err := models.ParseNavigationMode(form.Get("navigationMode"))
 	if err != nil {
 		response.AddFlashMessage(*flash.NewError("Something went wrong parsing navigation mode. Please try again."))
 		response.Error = fmt.Errorf("parsing navigation mode: %w", err)
@@ -363,7 +366,7 @@ func (s *GameManagerService) UpdateSettings(ctx context.Context, settings *inter
 	settings.NavigationMode = navMode
 
 	// Completion method
-	completionMethod, err := internalModels.ParseCompletionMethod(form.Get("completionMethod"))
+	completionMethod, err := models.ParseCompletionMethod(form.Get("completionMethod"))
 	if err != nil {
 		response.AddFlashMessage(*flash.NewError("Something went wrong parsing completion method. Please try again."))
 		response.Error = fmt.Errorf("parsing completion method: %w", err)
@@ -372,7 +375,7 @@ func (s *GameManagerService) UpdateSettings(ctx context.Context, settings *inter
 	settings.CompletionMethod = completionMethod
 
 	// Navigation method
-	navMethod, err := internalModels.ParseNavigationMethod(form.Get("navigationMethod"))
+	navMethod, err := models.ParseNavigationMethod(form.Get("navigationMethod"))
 	if err != nil {
 		response.AddFlashMessage(*flash.NewError("Something went wrong parsing navigation method. Please try again."))
 		response.Error = fmt.Errorf("parsing navigation method: %w", err)
@@ -405,11 +408,10 @@ func (s *GameManagerService) UpdateSettings(ctx context.Context, settings *inter
 	settings.EnableBonusPoints = enableBonusPoints
 
 	// Save settings
-	err = settings.Save(ctx)
-	if err != nil {
+	if err := s.instanceSettingsRepo.Update(ctx, settings); err != nil {
 		response.AddFlashMessage(*flash.NewError("Error saving settings. Please try again."))
 		response.Error = fmt.Errorf("saving settings: %w", err)
-		return
+		return response
 	}
 
 	response.AddFlashMessage(*flash.NewSuccess("Settings updated!"))
@@ -431,7 +433,7 @@ func (s *GameManagerService) SetStartTime(ctx context.Context, user *internalMod
 	response = ServiceResponse{}
 
 	// Check if the game is already active
-	if user.CurrentInstance.GetStatus() == internalModels.Active {
+	if user.CurrentInstance.GetStatus() == models.Active {
 		response.AddFlashMessage(*flash.NewInfo("Game is already active"))
 		response.Error = errors.New("game is already active")
 		return response
@@ -460,7 +462,7 @@ func (s *GameManagerService) SetEndTime(ctx context.Context, user *internalModel
 	response = ServiceResponse{}
 
 	// Check if the game is already closed
-	if user.CurrentInstance.GetStatus() == internalModels.Closed {
+	if user.CurrentInstance.GetStatus() == models.Closed {
 		response.AddFlashMessage(*flash.NewError("Game is already over"))
 		response.Error = errors.New("game is already closed")
 		return response

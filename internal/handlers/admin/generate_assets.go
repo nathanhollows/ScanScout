@@ -5,8 +5,9 @@ import (
 	"os"
 
 	"github.com/go-chi/chi"
-	"github.com/nathanhollows/Rapua/internal/models"
+	internalModels "github.com/nathanhollows/Rapua/internal/models"
 	"github.com/nathanhollows/Rapua/internal/services"
+	"github.com/nathanhollows/Rapua/models"
 )
 
 // QRCode handles the generation of QR codes for the current instance.
@@ -199,7 +200,7 @@ func (h *AdminHandler) GeneratePoster(w http.ResponseWriter, r *http.Request) {
 	}
 
 	found := false
-	var location models.Location
+	var location internalModels.Location
 	for _, loc := range user.CurrentInstance.Locations {
 		if loc.MarkerID == id {
 			found = true

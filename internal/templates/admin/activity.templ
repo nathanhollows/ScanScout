@@ -14,15 +14,15 @@ templ ActivityTracker(instance internalModels.Instance) {
 		<h1 class="text-2xl font-bold">
 			Activity tracker
 			switch instance.GetStatus() {
-				case internalModels.Active:
+				case models.Active:
 					<span class="badge badge-success">
 						{ instance.GetStatus().String() }
 					</span>
-				case internalModels.Scheduled:
+				case models.Scheduled:
 					<span class="badge badge-warning">
 						{ instance.GetStatus().String() }
 					</span>
-				case internalModels.Closed:
+				case models.Closed:
 					<span class="badge badge-outline">
 						Inactive
 					</span>
@@ -88,7 +88,7 @@ templ ActivityTracker(instance internalModels.Instance) {
 									<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-map-pin-check-inside w-5 h-5"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"></path><path d="m9 10 2 2 4-4"></path></svg>
 									<strong>{ fmt.Sprint(location.TotalVisits - location.CurrentCount) }</strong>
 								</span>
-								if instance.Settings.CompletionMethod == internalModels.CheckInAndOut {
+								if instance.Settings.CompletionMethod == models.CheckInAndOut {
 									<span
 										if location.CurrentCount > 0 {
 											class="tooltip flex space-x-2 tooltip-left text-sm md:tooltip-top"
@@ -313,7 +313,7 @@ templ GameScheduleStatus(instance internalModels.Instance, messages ...flash.Mes
 	}
 	<div id="schedule-status" class="flex flex-row gap-3">
 		switch instance.GetStatus() {
-			case internalModels.Active:
+			case models.Active:
 				<a
 					hx-get="/admin/schedule/stop"
 					hx-target="#schedule-status"
@@ -324,7 +324,7 @@ templ GameScheduleStatus(instance internalModels.Instance, messages ...flash.Mes
 					Stop
 				</a>
 				@scheduleButton(instance.EndTime.After(instance.StartTime.Time), instance.EndTime)
-			case internalModels.Scheduled:
+			case models.Scheduled:
 				<a
 					hx-get="/admin/schedule/start"
 					hx-target="#schedule-status"
@@ -335,7 +335,7 @@ templ GameScheduleStatus(instance internalModels.Instance, messages ...flash.Mes
 					Start now
 				</a>
 				@scheduleButton(true, instance.StartTime)
-			case internalModels.Closed:
+			case models.Closed:
 				<a hx-get="/admin/schedule/start" hx-target="#schedule-status" class="btn btn-outline btn-success flex join-item tooltip" data-tip="Start the game">
 					<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-play w-5 h-5"><polygon points="6 3 20 12 6 21 6 3"></polygon></svg>
 					Start
@@ -447,7 +447,7 @@ templ scheduleButton(scheduled bool, t schema.NullTime) {
 	}
 }
 
-templ TeamActivity(settings internalModels.InstanceSettings, team internalModels.Team, notifications []models.Notification, nextLocations []internalModels.Location) {
+templ TeamActivity(settings models.InstanceSettings, team internalModels.Team, notifications []models.Notification, nextLocations []internalModels.Location) {
 	<h3 class="text-lg font-bold">
 		{ team.Code }
 		if team.Name != "" {

@@ -9,8 +9,9 @@ import (
 
 	"github.com/nathanhollows/Rapua/blocks"
 	"github.com/nathanhollows/Rapua/internal/flash"
-	"github.com/nathanhollows/Rapua/internal/models"
+	internalModels "github.com/nathanhollows/Rapua/internal/models"
 	"github.com/nathanhollows/Rapua/internal/repositories"
+	"github.com/nathanhollows/Rapua/models"
 	"golang.org/x/exp/rand"
 )
 
@@ -26,18 +27,18 @@ var (
 )
 
 type GameplayService interface {
-	CheckGameStatus(ctx context.Context, team *models.Team) *ServiceResponse
-	GetTeamByCode(ctx context.Context, teamCode string) (*models.Team, error)
+	CheckGameStatus(ctx context.Context, team *internalModels.Team) *ServiceResponse
+	GetTeamByCode(ctx context.Context, teamCode string) (*internalModels.Team, error)
 	GetMarkerByCode(ctx context.Context, locationCode string) *ServiceResponse
 	StartPlaying(ctx context.Context, teamCode, customTeamName string) *ServiceResponse
-	SuggestNextLocations(ctx context.Context, team *models.Team, limit int) ([]models.Location, error)
+	SuggestNextLocations(ctx context.Context, team *internalModels.Team, limit int) ([]internalModels.Location, error)
 	// CheckIn checks a team in at a location
 	// It also manages the points and mustScanOut fields
 	// As well as checking if any blocks must be completed
-	CheckIn(ctx context.Context, team *models.Team, locationCode string) ServiceResponse
-	CheckOut(ctx context.Context, team *models.Team, locationCode string) error
-	CheckValidLocation(ctx context.Context, team *models.Team, locationCode string) (bool, error)
-	ValidateAndUpdateBlockState(ctx context.Context, team models.Team, data map[string][]string) (blocks.PlayerState, blocks.Block, error)
+	CheckIn(ctx context.Context, team *internalModels.Team, locationCode string) ServiceResponse
+	CheckOut(ctx context.Context, team *internalModels.Team, locationCode string) error
+	CheckValidLocation(ctx context.Context, team *internalModels.Team, locationCode string) (bool, error)
+	ValidateAndUpdateBlockState(ctx context.Context, team internalModels.Team, data map[string][]string) (blocks.PlayerState, blocks.Block, error)
 }
 
 type gameplayService struct {
@@ -64,7 +65,7 @@ func NewGameplayService() GameplayService {
 }
 
 // GetGameStatus returns the current status of the game
-func (s *gameplayService) CheckGameStatus(ctx context.Context, team *models.Team) (response *ServiceResponse) {
+func (s *gameplayService) CheckGameStatus(ctx context.Context, team *internalModels.Team) (response *ServiceResponse) {
 	response = &ServiceResponse{}
 	response.Data = make(map[string]interface{})
 
@@ -80,7 +81,7 @@ func (s *gameplayService) CheckGameStatus(ctx context.Context, team *models.Team
 	return response
 }
 
-func (s *gameplayService) GetTeamByCode(ctx context.Context, teamCode string) (*models.Team, error) {
+func (s *gameplayService) GetTeamByCode(ctx context.Context, teamCode string) (*internalModels.Team, error) {
 	teamCode = strings.TrimSpace(strings.ToUpper(teamCode))
 	team, err := s.TeamService.FindTeamByCode(ctx, teamCode)
 	if err != nil {
@@ -131,7 +132,7 @@ func (s *gameplayService) StartPlaying(ctx context.Context, teamCode, customTeam
 	return response
 }
 
-func (s *gameplayService) SuggestNextLocations(ctx context.Context, team *models.Team, limit int) ([]models.Location, error) {
+func (s *gameplayService) SuggestNextLocations(ctx context.Context, team *internalModels.Team, limit int) ([]internalModels.Location, error) {
 	// Populate the team with the necessary data
 	err := s.TeamService.LoadRelations(ctx, team)
 	if err != nil {
@@ -147,7 +148,7 @@ func (s *gameplayService) SuggestNextLocations(ctx context.Context, team *models
 	return locations, nil
 }
 
-func (s *gameplayService) CheckIn(ctx context.Context, team *models.Team, locationCode string) (response ServiceResponse) {
+func (s *gameplayService) CheckIn(ctx context.Context, team *internalModels.Team, locationCode string) (response ServiceResponse) {
 	response = ServiceResponse{}
 
 	// Load team relations
@@ -248,7 +249,7 @@ func (s *gameplayService) CheckIn(ctx context.Context, team *models.Team, locati
 	return response
 }
 
-func (s *gameplayService) CheckOut(ctx context.Context, team *models.Team, locationCode string) error {
+func (s *gameplayService) CheckOut(ctx context.Context, team *internalModels.Team, locationCode string) error {
 
 	location, err := s.LocationService.FindLocationByInstanceAndCode(ctx, team.InstanceID, locationCode)
 	if err != nil {
@@ -287,7 +288,7 @@ func (s *gameplayService) CheckOut(ctx context.Context, team *models.Team, locat
 }
 
 // CheckLocation checks if the location is valid for the team to check in
-func (s *gameplayService) CheckValidLocation(ctx context.Context, team *models.Team, locationCode string) (bool, error) {
+func (s *gameplayService) CheckValidLocation(ctx context.Context, team *internalModels.Team, locationCode string) (bool, error) {
 	if team.Instance.ID == "" {
 		return false, ErrInstanceNotFound
 	}
@@ -310,7 +311,7 @@ func (s *gameplayService) CheckValidLocation(ctx context.Context, team *models.T
 
 // loadClues loads the clues for the current location
 // By default, it will only show one clue per location
-func (s *gameplayService) loadClues(ctx context.Context, team *models.Team, locations []models.Location) (response ServiceResponse) {
+func (s *gameplayService) loadClues(ctx context.Context, team *internalModels.Team, locations []internalModels.Location) (response ServiceResponse) {
 	response = ServiceResponse{}
 	response.Data = make(map[string]interface{})
 
@@ -347,7 +348,7 @@ func (s *gameplayService) loadClues(ctx context.Context, team *models.Team, loca
 	return response
 }
 
-func (s *gameplayService) ValidateAndUpdateBlockState(ctx context.Context, team models.Team, data map[string][]string) (blocks.PlayerState, blocks.Block, error) {
+func (s *gameplayService) ValidateAndUpdateBlockState(ctx context.Context, team internalModels.Team, data map[string][]string) (blocks.PlayerState, blocks.Block, error) {
 	blockID := data["block"][0]
 	if blockID == "" {
 		return nil, nil, fmt.Errorf("blockID must be set")

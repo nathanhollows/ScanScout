@@ -6,6 +6,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/nathanhollows/Rapua/db"
+	"github.com/nathanhollows/Rapua/models"
 	"github.com/uptrace/bun"
 )
 
@@ -14,16 +15,16 @@ import (
 type Instance struct {
 	baseModel
 
-	ID        string       `bun:"id,pk,type:varchar(36)"`
-	Name      string       `bun:"name,type:varchar(255)"`
-	UserID    string       `bun:"user_id,type:varchar(36)"`
-	StartTime bun.NullTime `bun:"start_time,nullzero"`
-	EndTime   bun.NullTime `bun:"end_time,nullzero"`
-	Status    GameStatus   `bun:"-"`
+	ID        string            `bun:"id,pk,type:varchar(36)"`
+	Name      string            `bun:"name,type:varchar(255)"`
+	UserID    string            `bun:"user_id,type:varchar(36)"`
+	StartTime bun.NullTime      `bun:"start_time,nullzero"`
+	EndTime   bun.NullTime      `bun:"end_time,nullzero"`
+	Status    models.GameStatus `bun:"-"`
 
-	Teams     []Team           `bun:"rel:has-many,join:id=instance_id"`
-	Locations []Location       `bun:"rel:has-many,join:id=instance_id"`
-	Settings  InstanceSettings `bun:"rel:has-one,join:id=instance_id"`
+	Teams     []Team                  `bun:"rel:has-many,join:id=instance_id"`
+	Locations []Location              `bun:"rel:has-many,join:id=instance_id"`
+	Settings  models.InstanceSettings `bun:"rel:has-one,join:id=instance_id"`
 }
 
 func (i *Instance) Save(ctx context.Context) error {
@@ -61,31 +62,31 @@ func FindInstanceByID(ctx context.Context, id string) (*Instance, error) {
 }
 
 // GetStatus returns the status of the instance
-func (i *Instance) GetStatus() GameStatus {
+func (i *Instance) GetStatus() models.GameStatus {
 	// If the start time is null, the game is closed
 	if i.StartTime.Time.IsZero() {
-		return Closed
+		return models.Closed
 	}
 
 	// If the start time is in the future, the game is scheduled
 	if i.StartTime.Time.UTC().After(time.Now().UTC()) {
-		return Scheduled
+		return models.Scheduled
 	}
 
 	// If the end time is in the past, the game is closed
 	if !i.EndTime.Time.IsZero() && i.EndTime.Time.Before(time.Now().UTC()) {
-		return Closed
+		return models.Closed
 	}
 
 	// If the start time is in the past, the game is active
-	return Active
+	return models.Active
 
 }
 
 // LoadSettings loads the settings for an instance
 func (i *Instance) LoadSettings(ctx context.Context) error {
 	if i.Settings.InstanceID == "" {
-		i.Settings = InstanceSettings{}
+		i.Settings = models.InstanceSettings{}
 		err := db.DB.NewSelect().Model(&i.Settings).Where("instance_id = ?", i.ID).Scan(ctx)
 		if err != nil {
 			return err
