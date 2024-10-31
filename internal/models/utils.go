@@ -12,7 +12,7 @@ import (
 
 func CreateTables(logger *slog.Logger) {
 	var models = []interface{}{
-		(*Notification)(nil),
+		(*models.Notification)(nil),
 		(*InstanceSettings)(nil),
 		(*models.Block)(nil),
 		(*models.TeamBlockState)(nil),
