@@ -4,14 +4,13 @@ import (
 	"context"
 	"testing"
 
-	"github.com/nathanhollows/Rapua/internal/models"
-	db "github.com/nathanhollows/Rapua/internal/models"
 	"github.com/nathanhollows/Rapua/internal/repositories"
+	"github.com/nathanhollows/Rapua/models"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestTeamRepository_Update(t *testing.T) {
-	cleanup := db.SetupTestDB(t)
+	cleanup := models.SetupTestDB(t)
 	defer cleanup()
 
 	repo := repositories.NewTeamRepository()
@@ -23,7 +22,7 @@ func TestTeamRepository_Update(t *testing.T) {
 }
 
 func TestTeamRepository_Delete(t *testing.T) {
-	cleanup := db.SetupTestDB(t)
+	cleanup := models.SetupTestDB(t)
 	defer cleanup()
 
 	repo := repositories.NewTeamRepository()
@@ -41,7 +40,7 @@ func TestTeamRepository_Delete(t *testing.T) {
 }
 
 func TestTeamRepository_FindAll(t *testing.T) {
-	cleanup := db.SetupTestDB(t)
+	cleanup := models.SetupTestDB(t)
 	defer cleanup()
 
 	repo := repositories.NewTeamRepository()
@@ -63,7 +62,7 @@ func TestTeamRepository_FindAll(t *testing.T) {
 }
 
 func TestTeamRepository_FindAllWithScans(t *testing.T) {
-	cleanup := db.SetupTestDB(t)
+	cleanup := models.SetupTestDB(t)
 	defer cleanup()
 
 	repo := repositories.NewTeamRepository()
@@ -86,7 +85,7 @@ func TestTeamRepository_FindAllWithScans(t *testing.T) {
 }
 
 func TestTeamRepository_InsertBatch(t *testing.T) {
-	cleanup := db.SetupTestDB(t)
+	cleanup := models.SetupTestDB(t)
 	defer cleanup()
 
 	repo := repositories.NewTeamRepository()
@@ -98,7 +97,7 @@ func TestTeamRepository_InsertBatch(t *testing.T) {
 }
 
 func TestTeamRepository_InsertBatch_UniqueConstraintError(t *testing.T) {
-	cleanup := db.SetupTestDB(t)
+	cleanup := models.SetupTestDB(t)
 	defer cleanup()
 
 	repo := repositories.NewTeamRepository()

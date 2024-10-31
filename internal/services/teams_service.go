@@ -6,8 +6,8 @@ import (
 	"time"
 
 	"github.com/nathanhollows/Rapua/helpers"
-	"github.com/nathanhollows/Rapua/internal/models"
 	"github.com/nathanhollows/Rapua/internal/repositories"
+	"github.com/nathanhollows/Rapua/models"
 )
 
 type TeamService interface {

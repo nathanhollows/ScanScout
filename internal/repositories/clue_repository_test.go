@@ -5,14 +5,13 @@ import (
 	"testing"
 
 	"github.com/google/uuid"
-	db "github.com/nathanhollows/Rapua/internal/models"
 	"github.com/nathanhollows/Rapua/internal/repositories"
 	"github.com/nathanhollows/Rapua/models"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestClueRepository_Save(t *testing.T) {
-	cleanup := db.SetupTestDB(t)
+	cleanup := models.SetupTestDB(t)
 	defer cleanup()
 
 	repo := repositories.NewClueRepository()
@@ -30,7 +29,7 @@ func TestClueRepository_Save(t *testing.T) {
 }
 
 func TestClueRepository_Delete(t *testing.T) {
-	cleanup := db.SetupTestDB(t)
+	cleanup := models.SetupTestDB(t)
 	defer cleanup()
 
 	repo := repositories.NewClueRepository()
@@ -53,7 +52,7 @@ func TestClueRepository_Delete(t *testing.T) {
 }
 
 func TestClueRepository_FindCluesByLocation(t *testing.T) {
-	cleanup := db.SetupTestDB(t)
+	cleanup := models.SetupTestDB(t)
 	defer cleanup()
 
 	repo := repositories.NewClueRepository()

@@ -4,7 +4,6 @@ import (
 	"context"
 	"testing"
 
-	internalModels "github.com/nathanhollows/Rapua/internal/models"
 	"github.com/nathanhollows/Rapua/internal/repositories"
 	"github.com/nathanhollows/Rapua/internal/services"
 	"github.com/nathanhollows/Rapua/models"
@@ -12,7 +11,7 @@ import (
 )
 
 func setupLocationService(t *testing.T) (services.LocationService, func()) {
-	cleanup := internalModels.SetupTestDB(t)
+	cleanup := models.SetupTestDB(t)
 	clueRepo := repositories.NewClueRepository()
 	locationService := services.NewLocationService(clueRepo)
 	return locationService, cleanup
@@ -43,7 +42,7 @@ func TestLocationService_LoadCluesForLocation(t *testing.T) {
 	assert.NoError(t, err, "expected no error when saving clue 2")
 
 	// Create location and load clues
-	location := &internalModels.Location{ID: locationID}
+	location := &models.Location{ID: locationID}
 	err = locationService.LoadCluesForLocation(ctx, location)
 
 	assert.NoError(t, err, "expected no error when loading clues for location")

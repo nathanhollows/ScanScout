@@ -2,11 +2,10 @@ package templates
 
 import (
 	"fmt"
-	internalModels "github.com/nathanhollows/Rapua/internal/models"
 	"github.com/nathanhollows/Rapua/models"
 )
 
-templ Lobby(team internalModels.Team) {
+templ Lobby(team models.Team) {
 	<div hx-get="/lobby" hx-swap="none" hx-trigger="every 20s, timer" hx-boost="true"></div>
 	<!-- Header -->
 	<div class="sm:mx-auto sm:w-full sm:max-w-sm">

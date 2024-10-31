@@ -4,7 +4,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/nathanhollows/Rapua/models"
 	"github.com/uptrace/bun"
 )
 
@@ -13,55 +12,55 @@ func TestInstance_GetStatus(t *testing.T) {
 		name      string
 		startTime bun.NullTime
 		endTime   bun.NullTime
-		want      models.GameStatus
+		want      GameStatus
 	}{
 		{
 			name:      "Closed - No Times",
 			startTime: bun.NullTime{},
 			endTime:   bun.NullTime{},
-			want:      models.Closed,
+			want:      Closed,
 		},
 		{
 			name:      "Closed - End Time Only",
 			startTime: bun.NullTime{},
 			endTime:   bun.NullTime{Time: time.Now().Add(-time.Hour)},
-			want:      models.Closed,
+			want:      Closed,
 		},
 		{
 			name:      "Closed - End Time in Past",
 			startTime: bun.NullTime{Time: time.Now().Add(-2 * time.Hour)},
 			endTime:   bun.NullTime{Time: time.Now().Add(-time.Hour)},
-			want:      models.Closed,
+			want:      Closed,
 		},
 		{
 			name:      "Scheduled - Start Time Only",
 			startTime: bun.NullTime{Time: time.Now().Add(time.Hour)},
 			endTime:   bun.NullTime{},
-			want:      models.Scheduled,
+			want:      Scheduled,
 		},
 		{
 			name:      "Scheduled - Start Time in Future",
 			startTime: bun.NullTime{Time: time.Now().Add(time.Hour)},
 			endTime:   bun.NullTime{Time: time.Now().Add(2 * time.Hour)},
-			want:      models.Scheduled,
+			want:      Scheduled,
 		},
 		{
 			name:      "Active - Start Time in Past, End Time in Future",
 			startTime: bun.NullTime{Time: time.Now().Add(-time.Hour)},
 			endTime:   bun.NullTime{Time: time.Now().Add(time.Hour)},
-			want:      models.Active,
+			want:      Active,
 		},
 		{
 			name:      "Active - Start Time in Past, No End Time",
 			startTime: bun.NullTime{Time: time.Now().Add(-time.Hour)},
 			endTime:   bun.NullTime{},
-			want:      models.Active,
+			want:      Active,
 		},
 		{
 			name:      "Closed - No Start Time, End Time in Past",
 			startTime: bun.NullTime{},
 			endTime:   bun.NullTime{Time: time.Now().Add(-time.Hour)},
-			want:      models.Closed,
+			want:      Closed,
 		},
 	}
 

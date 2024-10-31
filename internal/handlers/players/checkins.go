@@ -8,9 +8,9 @@ import (
 
 	"github.com/go-chi/chi"
 	"github.com/nathanhollows/Rapua/internal/flash"
-	"github.com/nathanhollows/Rapua/internal/models"
 	"github.com/nathanhollows/Rapua/internal/services"
 	templates "github.com/nathanhollows/Rapua/internal/templates/players"
+	"github.com/nathanhollows/Rapua/models"
 )
 
 // CheckIn handles the GET request for scanning a location

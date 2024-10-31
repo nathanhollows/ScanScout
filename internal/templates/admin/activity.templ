@@ -3,13 +3,12 @@ package templates
 import (
 	"fmt"
 	"github.com/nathanhollows/Rapua/internal/flash"
-	internalModels "github.com/nathanhollows/Rapua/internal/models"
 	"github.com/nathanhollows/Rapua/models"
 	"github.com/uptrace/bun/schema"
 	"sort"
 )
 
-templ ActivityTracker(instance internalModels.Instance) {
+templ ActivityTracker(instance models.Instance) {
 	<div class="flex flex-col sm:flex-row gap-3 justify-between items-center w-full p-5">
 		<h1 class="text-2xl font-bold">
 			Activity tracker
@@ -200,7 +199,7 @@ templ teamModal() {
 	</script>
 }
 
-templ ActivityTeamsTable(locations []internalModels.Location, teams []internalModels.Team) {
+templ ActivityTeamsTable(locations []models.Location, teams []models.Team) {
 	<table
 		id="team-activity"
 		class="table table-sm w-full mt-5 md:mt-0 h-auto self-start"
@@ -264,13 +263,13 @@ templ ActivityTeamsTable(locations []internalModels.Location, teams []internalMo
 
 // teamLocationMatrix returns a matrix of team locations [teamCode][locatinStatus]
 // ● for visiting, ✔ for visited, blank for not visited
-func teamLocationMatrix(locations []internalModels.Location, teams []internalModels.Team) [][]string {
+func teamLocationMatrix(locations []models.Location, teams []models.Team) [][]string {
 	matrix := make([][]string, len(teams))
 	for i := range matrix {
 		matrix[i] = make([]string, len(locations)+1)
 	}
 	// Sort teams by code
-	teams = func(teams []internalModels.Team) []internalModels.Team {
+	teams = func(teams []models.Team) []models.Team {
 		sort.Slice(teams, func(i, j int) bool {
 			return teams[i].Code < teams[j].Code
 		})
@@ -307,7 +306,7 @@ func teamLocationMatrix(locations []internalModels.Location, teams []internalMod
 	return matrix
 }
 
-templ GameScheduleStatus(instance internalModels.Instance, messages ...flash.Message) {
+templ GameScheduleStatus(instance models.Instance, messages ...flash.Message) {
 	for _, msg := range messages {
 		@Toast(msg)
 	}
@@ -447,7 +446,7 @@ templ scheduleButton(scheduled bool, t schema.NullTime) {
 	}
 }
 
-templ TeamActivity(settings models.InstanceSettings, team internalModels.Team, notifications []models.Notification, nextLocations []internalModels.Location) {
+templ TeamActivity(settings models.InstanceSettings, team models.Team, notifications []models.Notification, nextLocations []models.Location) {
 	<h3 class="text-lg font-bold">
 		{ team.Code }
 		if team.Name != "" {
@@ -536,7 +535,7 @@ templ TeamActivity(settings models.InstanceSettings, team internalModels.Team, n
 	</div>
 }
 
-templ scheduleModal(instance internalModels.Instance) {
+templ scheduleModal(instance models.Instance) {
 	<dialog id="schedule_modal" class="modal modal-bottom sm:modal-middle">
 		<form hx-post="/admin/schedule/" hx-swap="none" class="modal-box">
 			<h3 class="text-lg font-bold">Schedule a Game</h3>

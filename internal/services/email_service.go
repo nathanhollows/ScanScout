@@ -7,8 +7,8 @@ import (
 	"os"
 
 	"github.com/a-h/templ"
-	"github.com/nathanhollows/Rapua/internal/models"
 	emails "github.com/nathanhollows/Rapua/internal/templates/emails"
+	"github.com/nathanhollows/Rapua/models"
 	"github.com/sendgrid/rest"
 	"github.com/sendgrid/sendgrid-go"
 	"github.com/sendgrid/sendgrid-go/helpers/mail"
