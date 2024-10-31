@@ -5,7 +5,6 @@ import (
 	"strconv"
 
 	"github.com/go-chi/chi"
-	internalModels "github.com/nathanhollows/Rapua/internal/models"
 	"github.com/nathanhollows/Rapua/internal/services"
 	templates "github.com/nathanhollows/Rapua/internal/templates/admin"
 	"github.com/nathanhollows/Rapua/models"
@@ -86,10 +85,9 @@ func (h *AdminHandler) ReorderLocations(w http.ResponseWriter, r *http.Request) 
 	}
 
 	locations := r.Form["location"]
-	response := h.GameManagerService.ReorderLocations(r.Context(), user, locations)
-	// Discard the flash messages since this is invoked via HTMX
-	if response.Error != nil {
-		h.handleError(w, r, "ReorderLocations: reordering locations", "Error reordering locations", "error", response.Error, "instance_id", user.CurrentInstanceID)
+	err = h.LocationService.ReorderLocations(r.Context(), user.CurrentInstanceID, locations)
+	if err != nil {
+		h.handleError(w, r, "ReorderLocations: reordering locations", "Error reordering locations", "error", err, "instance_id", user.CurrentInstanceID)
 		return
 	}
 
@@ -104,7 +102,7 @@ func (h *AdminHandler) LocationEdit(w http.ResponseWriter, r *http.Request) {
 	code := chi.URLParam(r, "id")
 	user := h.UserFromContext(r.Context())
 
-	location, err := internalModels.FindLocationByInstanceAndCode(r.Context(), user.CurrentInstanceID, code)
+	location, err := h.LocationService.FindByInstanceAndCode(r.Context(), user.CurrentInstanceID, code)
 	if err != nil {
 		h.Logger.Error("LocationEdit: finding location", "error", err, "instance_id", user.CurrentInstanceID, "location_code", code)
 		h.redirect(w, r, "/admin/locations")
@@ -180,7 +178,7 @@ func (h *AdminHandler) LocationEditPost(w http.ResponseWriter, r *http.Request) 
 		Points:    points,
 	}
 
-	location, err := h.LocationService.FindLocationByInstanceAndCode(r.Context(), user.CurrentInstanceID, locationCode)
+	location, err := h.LocationService.FindByInstanceAndCode(r.Context(), user.CurrentInstanceID, locationCode)
 	if err != nil {
 		h.handleError(w, r, "LocationEditPost: finding location", "Error finding location", "error", err)
 		return
@@ -223,7 +221,7 @@ func (h *AdminHandler) LocationDelete(w http.ResponseWriter, r *http.Request) {
 
 	user := h.UserFromContext(r.Context())
 
-	location, err := h.LocationService.FindLocationByInstanceAndCode(r.Context(), user.CurrentInstanceID, locationCode)
+	location, err := h.LocationService.FindByInstanceAndCode(r.Context(), user.CurrentInstanceID, locationCode)
 	if err != nil {
 		h.handleError(w, r, "LocationDelete: finding location", "Error finding location", "error", err)
 		return

@@ -165,7 +165,7 @@ func (s *gameplayService) CheckIn(ctx context.Context, team *internalModels.Team
 	}
 
 	// Find the location
-	location, err := s.LocationService.FindLocationByInstanceAndCode(ctx, team.InstanceID, locationCode)
+	location, err := s.LocationService.FindByInstanceAndCode(ctx, team.InstanceID, locationCode)
 	if err != nil {
 		msg := flash.NewWarning("Please double check the code and try again.").SetTitle("Location code not found")
 		response.AddFlashMessage(msg)
@@ -251,7 +251,7 @@ func (s *gameplayService) CheckIn(ctx context.Context, team *internalModels.Team
 
 func (s *gameplayService) CheckOut(ctx context.Context, team *internalModels.Team, locationCode string) error {
 
-	location, err := s.LocationService.FindLocationByInstanceAndCode(ctx, team.InstanceID, locationCode)
+	location, err := s.LocationService.FindByInstanceAndCode(ctx, team.InstanceID, locationCode)
 	if err != nil {
 		return fmt.Errorf("%w: finding location: %w", ErrLocationNotFound, err)
 	}

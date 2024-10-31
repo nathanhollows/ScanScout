@@ -113,7 +113,7 @@ func (s *GameManagerService) DuplicateInstance(ctx context.Context, user *intern
 		return response
 	}
 
-	locations, err := internalModels.FindAllLocations(ctx, oldInstance.ID)
+	locations, err := s.locationService.FindByInstance(ctx, oldInstance.ID)
 	if err != nil {
 		response.AddFlashMessage(*flash.NewError("Error finding locations"))
 		response.Error = fmt.Errorf("finding locations: %w", err)
@@ -232,13 +232,9 @@ func (s *GameManagerService) AddTeams(ctx context.Context, instanceID string, co
 	return response
 }
 
-func (s *GameManagerService) GetAllLocations(ctx context.Context, instanceID string) ([]internalModels.Location, error) {
-	return internalModels.FindAllLocations(ctx, instanceID)
-}
-
 func (s *GameManagerService) GetTeamActivityOverview(ctx context.Context, instanceID string) ([]TeamActivity, error) {
 	locationRepository := repositories.NewLocationRepository()
-	locations, err := locationRepository.FindAllLocations(ctx, instanceID)
+	locations, err := locationRepository.FindByInstance(ctx, instanceID)
 	if err != nil {
 		return nil, fmt.Errorf("finding all locations: %w", err)
 	}
@@ -511,29 +507,5 @@ func (s *GameManagerService) ScheduleGame(ctx context.Context, user *internalMod
 	}
 
 	user.CurrentInstance = instance
-	return response
-}
-
-// ReorderLocations takes a list of location IDs and updates the order
-func (s *GameManagerService) ReorderLocations(ctx context.Context, user *internalModels.User, codes []string) (response ServiceResponse) {
-	response = ServiceResponse{}
-
-	// Loop through the locations and update the order
-	for i, locationID := range codes {
-		location, err := internalModels.FindLocationByInstanceAndCode(ctx, user.CurrentInstanceID, locationID)
-		if err != nil {
-			response.AddFlashMessage(*flash.NewError("Error finding location: " + locationID))
-			response.Error = fmt.Errorf("finding location: %w", err)
-			return response
-		}
-		location.Order = i
-		if err := location.Save(ctx); err != nil {
-			response.AddFlashMessage(*flash.NewError("Error saving location: " + locationID))
-			response.Error = fmt.Errorf("saving location: %w", err)
-			return response
-		}
-	}
-
-	response.AddFlashMessage(*flash.NewSuccess("Locations reordered!"))
 	return response
 }
