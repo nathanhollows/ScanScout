@@ -17,6 +17,6 @@ type Team struct {
 	Instance         Instance                `bun:"rel:has-one,join:instance_id=id"`
 	CheckIns         []CheckIn               `bun:"rel:has-many,join:code=team_code"`
 	BlockingLocation Location                `bun:"rel:has-one,join:must_scan_out=marker_id,join:instance_id=instance_id"`
-	Messages         []Notification          `bun:"rel:has-many,join:code=team_code"`
+	Messages         []models.Notification   `bun:"rel:has-many,join:code=team_code"`
 	Blocks           []models.TeamBlockState `bun:"rel:has-many,join:code=team_code"`
 }
