@@ -2,17 +2,19 @@ package middlewares
 
 import (
 	"context"
+	"log/slog"
 	"net/http"
 	"regexp"
 
 	"github.com/nathanhollows/Rapua/internal/contextkeys"
 	"github.com/nathanhollows/Rapua/internal/flash"
-	"github.com/nathanhollows/Rapua/internal/services"
+	internalServices "github.com/nathanhollows/Rapua/internal/services"
 	"github.com/nathanhollows/Rapua/models"
+	"github.com/nathanhollows/Rapua/services"
 )
 
 // AdminAuthMiddleware ensures the user is authenticated and has verified their email.
-func AdminAuthMiddleware(authService services.AuthService, next http.Handler) http.Handler {
+func AdminAuthMiddleware(authService internalServices.AuthService, next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// Make sure the user is authenticated
 		user, err := authService.GetAuthenticatedUser(r)
@@ -54,6 +56,35 @@ func AdminCheckInstanceMiddleware(next http.Handler) http.Handler {
 				Style:   flash.Error,
 			}.Save(w, r)
 			http.Redirect(w, r, "/admin/instances", http.StatusSeeOther)
+			return
+		}
+
+		next.ServeHTTP(w, r)
+	})
+}
+
+// AdminCheckBillingMiddleware ensures the user has a billing plan selected.
+func AdminCheckBillingMiddleware(billingService services.BillingService, next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		user := r.Context().Value(contextkeys.UserKey).(*models.User)
+
+		required, err := billingService.RequiresPlanSelection(r.Context(), user.ID)
+		if err != nil {
+			slog.Error("Failed to check billing status", err)
+			flash.NewError("Failed to check billing status").Save(w, r)
+			http.Redirect(w, r, "/login", http.StatusSeeOther)
+			return
+		}
+
+		if required {
+			// If url is /admin/payment, don't redirect
+			if r.URL.Path == "/admin/payment" {
+				next.ServeHTTP(w, r)
+				return
+			} else {
+				http.Redirect(w, r, "/admin/payment", http.StatusSeeOther)
+			}
+
 			return
 		}
 

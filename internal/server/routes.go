@@ -164,10 +164,14 @@ func setupPublicRoutes(router chi.Router, publicHandler *public.PublicHandler) {
 
 func setupAdminRoutes(router chi.Router, adminHandler *admin.AdminHandler) {
 	router.Route("/admin", func(r chi.Router) {
+		billingService := services.NewBillingService()
 		r.Use(func(next http.Handler) http.Handler {
 			return middlewares.AdminAuthMiddleware(adminHandler.UserServices.AuthService, next)
 		})
 		r.Use(middlewares.AdminCheckInstanceMiddleware)
+		r.Use(func(next http.Handler) http.Handler {
+			return middlewares.AdminCheckBillingMiddleware(billingService, next)
+		})
 
 		r.Route("/payment", func(r chi.Router) {
 			r.Get("/", adminHandler.Payment)

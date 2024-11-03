@@ -46,7 +46,7 @@ func TestUserRepository_GetUserByEmail(t *testing.T) {
 	assert.NoError(t, err)
 
 	// Test GetUserByEmail
-	fetchedUser, err := repo.GetUserByEmail(ctx, "john.doe@example.com")
+	fetchedUser, err := repo.FindByEmail(ctx, "john.doe@example.com")
 	assert.NoError(t, err)
 	assert.Equal(t, user.Email, fetchedUser.Email)
 	assert.Equal(t, user.Name, fetchedUser.Name)
@@ -75,7 +75,7 @@ func TestUserRepository_Update(t *testing.T) {
 	assert.NoError(t, err)
 
 	// Verify update
-	fetchedUser, err := repo.GetUserByEmail(ctx, "john.doe@example.com")
+	fetchedUser, err := repo.FindByEmail(ctx, "john.doe@example.com")
 	assert.NoError(t, err)
 	assert.Equal(t, "John Updated", fetchedUser.Name)
 }
@@ -98,7 +98,7 @@ func TestUserRepository_FindUserByID(t *testing.T) {
 	assert.NoError(t, err)
 
 	// Test FindUserByID
-	fetchedUser, err := repo.FindUserByID(ctx, user.ID)
+	fetchedUser, err := repo.FindByID(ctx, user.ID)
 	assert.NoError(t, err)
 	assert.Equal(t, user.ID, fetchedUser.ID)
 	assert.Equal(t, user.Email, fetchedUser.Email)
@@ -122,7 +122,7 @@ func TestUserRepository_GetUserByEmailAndProvider(t *testing.T) {
 	assert.NoError(t, err)
 
 	// Test GetUserByEmailAndProvider
-	fetchedUser, err := repo.GetUserByEmailAndProvider(ctx, "john.doe@example.com", "local")
+	fetchedUser, err := repo.FindByEmailAndProvider(ctx, "john.doe@example.com", "local")
 	assert.NoError(t, err)
 	assert.Equal(t, user.Email, fetchedUser.Email)
 	assert.Equal(t, user.Provider, fetchedUser.Provider)

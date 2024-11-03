@@ -33,7 +33,7 @@ func NewUserService(userRepository repositories.UserRepository) UserService {
 
 // GetUserByEmail retrieves a user by their email address
 func (s *userService) GetUserByEmail(ctx context.Context, email string) (*models.User, error) {
-	return s.userRepository.GetUserByEmail(ctx, email)
+	return s.userRepository.FindByEmail(ctx, email)
 }
 
 // UpdateUser updates a user in the database

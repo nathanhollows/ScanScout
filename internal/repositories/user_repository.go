@@ -19,12 +19,14 @@ type UserRepository interface {
 	Create(ctx context.Context, user *models.User) error
 	// Update updates a user in the database
 	Update(ctx context.Context, user *models.User) error
-	// GetUserByEmail retrieves a user by their email address
-	GetUserByEmail(ctx context.Context, email string) (*models.User, error)
-	// FindUserByID fetches a user by their ID from the database.
-	FindUserByID(ctx context.Context, userID string) (*models.User, error)
-	// GetUserByEmailAndProvider retrieves a user by their email address and provider
-	GetUserByEmailAndProvider(ctx context.Context, email, provider string) (*models.User, error)
+	// FindByEmail retrieves a user by their email address
+	FindByEmail(ctx context.Context, email string) (*models.User, error)
+	// FindByID fetches a user by their ID from the database.
+	FindByID(ctx context.Context, userID string) (*models.User, error)
+	// FindByEmailAndProvider retrieves a user by their email address and provider
+	FindByEmailAndProvider(ctx context.Context, email, provider string) (*models.User, error)
+	// ResetEventBoost resets the event boost for a user
+	ResetEventBoost(ctx context.Context, userID string) error
 }
 
 type userRepository struct{}
@@ -53,8 +55,8 @@ func (r *userRepository) Create(ctx context.Context, user *models.User) error {
 	return err
 }
 
-// GetUserByEmail retrieves a user by their email address
-func (r *userRepository) GetUserByEmail(ctx context.Context, email string) (*models.User, error) {
+// FindByEmail retrieves a user by their email address
+func (r *userRepository) FindByEmail(ctx context.Context, email string) (*models.User, error) {
 	user := &models.User{}
 	err := db.DB.NewSelect().
 		Model(user).
@@ -65,8 +67,8 @@ func (r *userRepository) GetUserByEmail(ctx context.Context, email string) (*mod
 	return user, err
 }
 
-// FindUserByID fetches a user by their ID from the database.
-func (r *userRepository) FindUserByID(ctx context.Context, userID string) (*models.User, error) {
+// FindByID fetches a user by their ID from the database.
+func (r *userRepository) FindByID(ctx context.Context, userID string) (*models.User, error) {
 	var user models.User
 	err := db.DB.NewSelect().
 		Model(&user).
@@ -87,8 +89,8 @@ func (r *userRepository) FindUserByID(ctx context.Context, userID string) (*mode
 	return &user, nil
 }
 
-// GetUserByEmailAndProvider retrieves a user by their email address and provider
-func (r *userRepository) GetUserByEmailAndProvider(ctx context.Context, email, provider string) (*models.User, error) {
+// FindByEmailAndProvider retrieves a user by their email address and provider
+func (r *userRepository) FindByEmailAndProvider(ctx context.Context, email, provider string) (*models.User, error) {
 	user := &models.User{}
 	err := db.DB.NewSelect().
 		Model(user).
@@ -98,4 +100,14 @@ func (r *userRepository) GetUserByEmailAndProvider(ctx context.Context, email, p
 		Relation("Instances").
 		Scan(ctx)
 	return user, err
+}
+
+// ResetEventBoost resets the event boost for a user
+func (r *userRepository) ResetEventBoost(ctx context.Context, userID string) error {
+	_, err := db.DB.NewUpdate().
+		Model(&models.User{ID: userID}).
+		Column("event_boost_expiry").
+		Set("event_boost_expiry = NULL").
+		Exec(ctx)
+	return err
 }
