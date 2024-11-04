@@ -788,7 +788,7 @@ templ locationScript() {
 	btn = modal.querySelector("button.btn-error")
 	btn.setAttribute("hx-delete", url);
 	btn.setAttribute("hx-swap", "outerHTML");
-	btn.setAttribute("hx-target", "#" + event.target.closest(".collapse").id);
+	btn.setAttribute("hx-target", "#" + event.target.closest(".content-block").id);
 	modal.showModal();
 	htmx.process(modal);
   }

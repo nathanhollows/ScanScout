@@ -7283,6 +7283,16 @@ details.collapse summary::-webkit-details-marker {
   }
 }
 
+.checked\:bg-accent:checked {
+  --tw-bg-opacity: 1;
+  background-color: var(--fallback-a,oklch(var(--a)/var(--tw-bg-opacity)));
+}
+
+.checked\:bg-primary:checked {
+  --tw-bg-opacity: 1;
+  background-color: var(--fallback-p,oklch(var(--p)/var(--tw-bg-opacity)));
+}
+
 .hover\:border-0:hover {
   border-width: 0px;
 }

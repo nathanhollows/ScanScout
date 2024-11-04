@@ -75,7 +75,7 @@ templ RenderAdminError() {
 templ RenderAdminBlock(settings models.InstanceSettings, block blocks.Block) {
 	<div
 		id={ fmt.Sprint("block-", block.GetID()) }
-		class="card card-compact flex flex-col md:flex-row rounded-2xl bg-base-200 focus:outline outline-2 outline-primary outline-offset-2 mb-5 gap-5 p-8"
+		class="content-block card card-compact flex flex-col md:flex-row rounded-2xl bg-base-200 focus:outline outline-2 outline-primary outline-offset-2 mb-5 gap-5 p-8"
 		tabindex="0"
 	>
 		<div class="flex flex-1 flex-row gap-5">
