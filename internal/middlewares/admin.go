@@ -64,7 +64,7 @@ func AdminCheckInstanceMiddleware(next http.Handler) http.Handler {
 }
 
 // AdminCheckBillingMiddleware ensures the user has a billing plan selected.
-func AdminCheckBillingMiddleware(billingService services.BillingService, next http.Handler) http.Handler {
+func AdminCheckBillingMiddleware(billingService services.PlanService, next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		user := r.Context().Value(contextkeys.UserKey).(*models.User)
 
@@ -77,12 +77,12 @@ func AdminCheckBillingMiddleware(billingService services.BillingService, next ht
 		}
 
 		if required {
-			// If url is /admin/payment, don't redirect
-			if r.URL.Path == "/admin/payment" {
+			// If url is /admin/plan, don't redirect
+			if r.URL.Path == "/admin/plan" {
 				next.ServeHTTP(w, r)
 				return
 			} else {
-				http.Redirect(w, r, "/admin/payment", http.StatusSeeOther)
+				http.Redirect(w, r, "/admin/plan", http.StatusSeeOther)
 			}
 
 			return

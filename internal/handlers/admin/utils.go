@@ -8,44 +8,47 @@ import (
 	"github.com/nathanhollows/Rapua/internal/contextkeys"
 	"github.com/nathanhollows/Rapua/internal/flash"
 	"github.com/nathanhollows/Rapua/internal/repositories"
-	"github.com/nathanhollows/Rapua/internal/services"
+	internalServices "github.com/nathanhollows/Rapua/internal/services"
 	templates "github.com/nathanhollows/Rapua/internal/templates/admin"
 	"github.com/nathanhollows/Rapua/models"
+	"github.com/nathanhollows/Rapua/services"
 )
 
 type AdminHandler struct {
 	Logger              *slog.Logger
-	GameManagerService  services.GameManagerService
-	NotificationService services.NotificationService
-	UserServices        services.UserServices
-	AssetGenerator      services.AssetGenerator
-	LocationService     services.LocationService
-	BlockService        services.BlockService
-	TeamService         services.TeamService
-	ClueService         services.ClueService
+	GameManagerService  internalServices.GameManagerService
+	NotificationService internalServices.NotificationService
+	UserServices        internalServices.UserServices
+	AssetGenerator      internalServices.AssetGenerator
+	LocationService     internalServices.LocationService
+	BlockService        internalServices.BlockService
+	TeamService         internalServices.TeamService
+	ClueService         internalServices.ClueService
+	PlanService         services.PlanService
 }
 
-func NewAdminHandler(logger *slog.Logger, gs services.GameManagerService, ns services.NotificationService, us services.UserServices) *AdminHandler {
+func NewAdminHandler(logger *slog.Logger, gs internalServices.GameManagerService, ns internalServices.NotificationService, us internalServices.UserServices) *AdminHandler {
 	return &AdminHandler{
 		Logger:              logger,
 		GameManagerService:  gs,
 		NotificationService: ns,
 		UserServices:        us,
-		AssetGenerator:      services.NewAssetGenerator(),
-		LocationService: services.NewLocationService(
+		AssetGenerator:      internalServices.NewAssetGenerator(),
+		LocationService: internalServices.NewLocationService(
 			repositories.NewClueRepository(),
 		),
-		BlockService: services.NewBlockService(
+		BlockService: internalServices.NewBlockService(
 			repositories.NewBlockRepository(),
 			repositories.NewBlockStateRepository(),
 		),
-		TeamService: services.NewTeamService(
+		TeamService: internalServices.NewTeamService(
 			repositories.NewTeamRepository(),
 		),
-		ClueService: services.NewClueService(
+		ClueService: internalServices.NewClueService(
 			repositories.NewClueRepository(),
 			repositories.NewLocationRepository(),
 		),
+		PlanService: internalServices.NewPlanService(),
 	}
 }
 

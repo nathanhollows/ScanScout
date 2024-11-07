@@ -2,17 +2,17 @@ package templates
 
 import "github.com/nathanhollows/Rapua/helpers"
 
-templ Payment(email string) {
+templ Plan(email string) {
 	<div class="flex flex-col justify-center flex-1 px-3 lg:px-8">
 		<div class="mx-auto w-full max-w-sm">
 			<div class="flex flex-col gap-4 sm:outline dark:outline-base-200 rounded-box sm:shadow-2xl p-6" hx-ext="response-targets">
 				<h1 class="text-3xl font-bold self-center">Choose a plan</h1>
-				<div id="payment-error"></div>
+				<div id="plan-error"></div>
 				<form
 					class="space-y-3"
-					hx-post="/payment"
+					hx-post="/plan"
 					hx-trigger="submit"
-					hx-target-401="#payment-error"
+					hx-target-401="#plan-error"
 				>
 					<span class="text-sm font-bold">Select a plan:</span>
 					<div class="form-control mb-3">
@@ -143,12 +143,20 @@ templ Payment(email string) {
 							Up to 20 games/month, 60 participants per game.
 						</p>
 						<p class="text-sm pb-3">
-							Please use an email address associated with your organisation. Current email:
+							You must use an email address associated with your organisation. Current email:
 							<code>{ email }</code>
 						</p>
-						<button class="btn btn-primary w-full">Pay What You Want (via Stripe)</button>
+						<button
+							name="paymentType"
+							value="pwyw"
+							class="btn btn-primary w-full"
+						>Pay What You Want (via Stripe)</button>
 						<div class="divider py-3">OR</div>
-						<button class="btn btn-accent w-full">Use Rapua for Free</button>
+						<button
+							name="paymentType"
+							value="free"
+							class="btn btn-accent w-full"
+						>Use Rapua for Free</button>
 					</div>
 				</form>
 			</div>
@@ -168,13 +176,11 @@ templ Payment(email string) {
       document.getElementById(sectionId).style.display = 'block';
     }
 
-    document.addEventListener("DOMContentLoaded", function () {
-      updateSection(); // Set initial visibility
-      const planInputs = document.querySelectorAll('input[name="plan"]');
-      planInputs.forEach(input => {
-        input.addEventListener('change', updateSection); // Listen for plan selection changes
-      });
-    });
+		updateSection(); // Set initial visibility
+		const planInputs = document.querySelectorAll('input[name="plan"]');
+		planInputs.forEach(input => {
+			input.addEventListener('change', updateSection); // Listen for plan selection changes
+		});
   })();
 </script>
 }

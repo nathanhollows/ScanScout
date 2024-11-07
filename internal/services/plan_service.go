@@ -17,21 +17,21 @@ const (
 	TierEducator = "Educator"
 )
 
-type billingService struct {
+type planService struct {
 	billingRepository repositories.BillingRepository
 	userRepository    repositories.UserRepository
 }
 
-// NewBillingService creates a new billing service
-func NewBillingService() services.BillingService {
-	return &billingService{
+// NewPlanService creates a new billing service
+func NewPlanService() services.PlanService {
+	return &planService{
 		repositories.NewBillingRepository(),
 		repositories.NewUserRepository(),
 	}
 }
 
 // CheckPlanLimits checks the plan limits for a team
-func (s *billingService) CheckPlanLimits(ctx context.Context, userID string) error {
+func (s *planService) CheckPlanLimits(ctx context.Context, userID string) error {
 	user, err := s.userRepository.FindByID(ctx, userID)
 	if err != nil {
 		return fmt.Errorf("failed to find user: %w", err)
@@ -71,7 +71,7 @@ func (s *billingService) CheckPlanLimits(ctx context.Context, userID string) err
 }
 
 // SubscribeUser subscribes a user to a plan
-func (s *billingService) SubscribeUser(ctx context.Context, userID string, tier string) error {
+func (s *planService) SubscribeUser(ctx context.Context, userID string, tier string) error {
 	_, err := s.userRepository.FindByID(ctx, userID)
 	if err != nil {
 		return fmt.Errorf("failed to find user: %w", err)
@@ -82,22 +82,22 @@ func (s *billingService) SubscribeUser(ctx context.Context, userID string, tier 
 }
 
 // UpgradePlan upgrades the plan for a team
-func (s *billingService) UpgradePlan(ctx context.Context, userID string, newTier string) error {
+func (s *planService) UpgradePlan(ctx context.Context, userID string, newTier string) error {
 	return nil
 }
 
 // ActivateEventBoost activates an event boost for a team
-func (s *billingService) ActivateEventBoost(ctx context.Context, userID string, duration time.Duration) error {
+func (s *planService) ActivateEventBoost(ctx context.Context, userID string, duration time.Duration) error {
 	return nil
 }
 
 // TrackUsage tracks the usage of a team's instance
-func (s *billingService) TrackUsage(ctx context.Context, userID string, instanceID string, numPlayers int) error {
+func (s *planService) TrackUsage(ctx context.Context, userID string, instanceID string, numPlayers int) error {
 	return nil
 }
 
 // RequiresPlanSelection checks if a user needs to select a plan
-func (s *billingService) RequiresPlanSelection(ctx context.Context, userID string) (bool, error) {
+func (s *planService) RequiresPlanSelection(ctx context.Context, userID string) (bool, error) {
 	status, err := s.GetPlanStatus(ctx, userID)
 	if err != nil {
 		return false, fmt.Errorf("getting plan status: %w", err)
@@ -116,6 +116,6 @@ func (s *billingService) RequiresPlanSelection(ctx context.Context, userID strin
 }
 
 // GetPlanStatus retrieves the plan status for a user
-func (s *billingService) GetPlanStatus(ctx context.Context, userID string) (*services.BillingStatus, error) {
+func (s *planService) GetPlanStatus(ctx context.Context, userID string) (*services.PlanStatus, error) {
 	return s.billingRepository.GetPlanStatus(ctx, userID)
 }

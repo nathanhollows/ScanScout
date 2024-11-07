@@ -10,7 +10,7 @@ import (
 
 type BillingRepository interface {
 	// Retrieve billing information for the user
-	GetPlanStatus(ctx context.Context, userID string) (*services.BillingStatus, error)
+	GetPlanStatus(ctx context.Context, userID string) (*services.PlanStatus, error)
 }
 
 type billingRepository struct{}
@@ -21,8 +21,8 @@ func NewBillingRepository() BillingRepository {
 }
 
 // GetBillingInfo retrieves the billing information for a user
-func (r *billingRepository) GetPlanStatus(ctx context.Context, userID string) (*services.BillingStatus, error) {
-	var billingStatus services.BillingStatus
+func (r *billingRepository) GetPlanStatus(ctx context.Context, userID string) (*services.PlanStatus, error) {
+	var billingStatus services.PlanStatus
 	err := db.DB.NewSelect().
 		Model(&models.User{}).
 		Column("tier", "event_boost_expiry").

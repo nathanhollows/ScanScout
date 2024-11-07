@@ -5,13 +5,13 @@ import (
 	"time"
 )
 
-type BillingStatus struct {
+type PlanStatus struct {
 	Tier             string
 	PlanExpiryDate   time.Time
 	EventBoostExpiry time.Time
 }
 
-type BillingService interface {
+type PlanService interface {
 	// CheckPlanLimits checks if the user has exceeded their plan limits
 	// and returns an error if they have
 	CheckPlanLimits(ctx context.Context, userID string) error
@@ -36,13 +36,13 @@ type BillingService interface {
 	RequiresPlanSelection(ctx context.Context, userID string) (bool, error)
 
 	// Retrieve the user's current plan status
-	GetPlanStatus(ctx context.Context, userID string) (*BillingStatus, error)
+	GetPlanStatus(ctx context.Context, userID string) (*PlanStatus, error)
 }
 
 type NoOpBillingService struct{}
 
 // NewNoOpBillingService returns a new no-op billing service
-func NewNoOpBillingService() BillingService {
+func NewNoOpBillingService() PlanService {
 	return &NoOpBillingService{}
 }
 
@@ -70,8 +70,8 @@ func (n *NoOpBillingService) RequiresPlanSelection(ctx context.Context, userID s
 	return false, nil
 }
 
-func (n *NoOpBillingService) GetPlanStatus(ctx context.Context, userID string) (*BillingStatus, error) {
-	return &BillingStatus{
+func (n *NoOpBillingService) GetPlanStatus(ctx context.Context, userID string) (*PlanStatus, error) {
+	return &PlanStatus{
 		Tier:             "",
 		PlanExpiryDate:   time.Time{},
 		EventBoostExpiry: time.Time{},

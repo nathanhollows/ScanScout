@@ -6223,10 +6223,6 @@ details.collapse summary::-webkit-details-marker {
   padding-top: 1rem;
 }
 
-.pb-2 {
-  padding-bottom: 0.5rem;
-}
-
 .text-left {
   text-align: left;
 }
@@ -6311,11 +6307,6 @@ details.collapse summary::-webkit-details-marker {
 
 .tracking-widest {
   letter-spacing: 0.1em;
-}
-
-.text-accent {
-  --tw-text-opacity: 1;
-  color: var(--fallback-a,oklch(var(--a)/var(--tw-text-opacity)));
 }
 
 .text-base-content {
