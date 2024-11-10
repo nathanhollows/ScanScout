@@ -3,13 +3,6 @@
 
 
 <!-- PROJECT SHIELDS -->
-<!--
-*** I'm using markdown "reference style" links for readability.
-*** Reference links are enclosed in brackets [ ] instead of parentheses ( ).
-*** See the bottom of this document for the declaration of the reference variables
-*** for contributors-url, forks-url, etc. This is an optional, concise syntax you may use.
-*** https://www.markdownguide.org/basic-syntax/#reference-style-links
--->
 [![Contributors][contributors-shield]][contributors-url]
 [![Forks][forks-shield]][forks-url]
 [![Stargazers][stars-shield]][stars-url]
@@ -33,9 +26,9 @@
     <br />
     <a href="https://rapua.nz">See in action</a>
     ·
-    <a href="https://github.com/nathanhollows/Rapua/issues/new?labels=bug&template=bug-report---.md">Report Bug</a>
+    <a href="https://github.com/nathanhollows/Rapua/issues/new?assignees=&labels=&projects=&template=bug_report.md&title=Bug:">Report Bug</a>
     ·
-    <a href="https://github.com/nathanhollows/Rapua/issues/new?labels=enhancement&template=feature-request---.md">Request Feature</a>
+    <a href="https://github.com/nathanhollows/Rapua/issues/new?assignees=&labels=&projects=&template=feature_request.md&title=Feature:">Request Feature</a>
   </p>
 </div>
 
