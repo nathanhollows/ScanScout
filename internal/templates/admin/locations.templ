@@ -236,11 +236,6 @@ templ AddLocation(settings models.InstanceSettings) {
 }
 
 templ EditLocation(location models.Location, settings models.InstanceSettings, contentBlocks blocks.Blocks) {
-	<form
-		hx-post={ fmt.Sprint("/admin/locations/", location.MarkerID) }
-		hx-trigger="submit"
-		hx-swap="none"
-	></form>
 	<!-- Header -->
 	<div class="flex flex-col sm:flex-row gap-3 justify-between items-center w-full p-5">
 		<h1 class="text-2xl font-bold">Editing <em>{ location.Name }</em></h1>
@@ -306,7 +301,13 @@ templ EditLocation(location models.Location, settings models.InstanceSettings, c
 				</ul>
 			</div>
 			<button type="button" class="btn btn-error" onclick="confirm_delete_modal.showModal();">Delete</button>
-			<button type="submit" class="btn btn-primary">Save</button>
+			<button
+				class="btn btn-primary"
+				hx-post={ fmt.Sprint("/admin/locations/", location.MarkerID) }
+				hx-swap="none"
+				hx-include="[form=edit-location]"
+				hx-trigger="click, keyup changed from:[form=edit-location] delay:500ms"
+			>Save</button>
 		</div>
 	</div>
 	<div class="flex-grow mx-auto">
@@ -322,6 +323,7 @@ templ EditLocation(location models.Location, settings models.InstanceSettings, c
 							type="text"
 							id="name"
 							name="name"
+							form="edit-location"
 							class="input input-bordered w-full"
 							value={ location.Marker.Name }
 							placeholder="Location name"
@@ -345,6 +347,7 @@ templ EditLocation(location models.Location, settings models.InstanceSettings, c
 								type="number"
 								id="points"
 								name="points"
+								form="edit-location"
 								class="input input-bordered w-full"
 								value={ fmt.Sprint(location.Points) }
 								placeholder="Enter points"
@@ -395,6 +398,7 @@ templ EditLocation(location models.Location, settings models.InstanceSettings, c
 									<input
 										type="text"
 										name="clues"
+										form="edit-location"
 										class="w-full input hover:border-0 hover:outline-0 focus:border-0 focus:outline-0 border-0 outline-0 pr-8 pl-0 bg-transparent overflow-ellipsis"
 										value={ clue.Content }
 										placeholder="Add a clue"
@@ -484,15 +488,31 @@ templ EditLocation(location models.Location, settings models.InstanceSettings, c
 						<input
 							type="checkbox"
 							name="location"
+							form="edit-location"
 							class="checkbox checkbox-sm"
 							checked="checked"
 						/>
 					</label>
 				</div>
 				<!-- Hidden inputs for form handling -->
-				<input type="hidden" name="code" value={ location.Marker.Code }/>
-				<input type="hidden" name="latitude" value={ floatToString(location.Marker.Lat) }/>
-				<input type="hidden" name="longitude" value={ floatToString(location.Marker.Lng) }/>
+				<input
+					type="hidden"
+					name="code"
+					form="edit-location"
+					value={ location.Marker.Code }
+				/>
+				<input
+					type="hidden"
+					name="latitude"
+					form="edit-location"
+					value={ floatToString(location.Marker.Lat) }
+				/>
+				<input
+					type="hidden"
+					name="longitude"
+					form="edit-location"
+					value={ floatToString(location.Marker.Lng) }
+				/>
 			</aside>
 		</div>
 	</div>
