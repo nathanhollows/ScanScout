@@ -115,15 +115,13 @@ templ pincodePlayerUpdate(settings models.InstanceSettings, block blocks.Pincode
 
 templ pincodeAdmin(settings models.InstanceSettings, block blocks.PincodeBlock) {
 	<form
+		id={ fmt.Sprintf("form-%s", block.ID) }
 		hx-post={ fmt.Sprint("/admin/locations/", block.LocationID, "/blocks/", block.ID, "/update") }
-		class="modal-box md:w-11/12 max-w-5xl"
+		hx-trigger={ fmt.Sprintf("keyup change from:(#form-%s textarea, #form-%s input) delay:1000ms", block.ID, block.ID) }
+		hx-swap="none"
 	>
-		<h3 class="text-lg font-bold flex flex-row gap-3">
-			@templ.Raw(block.GetIconSVG())
-			{ block.GetName() } block
-		</h3>
 		if settings.EnablePoints {
-			<label class="form-control w-full">
+			<label class="form-control w-full mt-5">
 				<div class="label">
 					<span class="label-text font-bold">Points</span>
 				</div>
@@ -135,21 +133,10 @@ templ pincodeAdmin(settings models.InstanceSettings, block blocks.PincodeBlock) 
 		}
 		<label
 			for={ fmt.Sprintf("md-%s", block.ID) }
-			class="form-control w-full my-5"
+			class="form-control w-full"
 		>
 			<div class="label">
 				<span class="label-text font-bold">Prompt</span>
-				<label class="label-text-alt flex flex-row gap-3">
-					Preview
-					<input
-						type="checkbox"
-						class="toggle toggle-sm md-toggle"
-						name="preview"
-						class="checkbox"
-						data-block={ block.ID }
-						onclick="previewMD(event)"
-					/>
-				</label>
 			</div>
 			<textarea
 				id={ fmt.Sprintf("md-%s", block.ID) }
@@ -158,21 +145,13 @@ templ pincodeAdmin(settings models.InstanceSettings, block blocks.PincodeBlock) 
 				class="textarea textarea-bordered w-full font-mono"
 				placeholder="What is third word of the second paragraph? What is the middle name of the person wearing a red hat?"
 			>{ block.Prompt }</textarea>
-			<div
-				id={ fmt.Sprintf("preview-md-%s", block.ID) }
-				class="flex items-center justify-center min-h-48 border border-base-300 hidden card w-full bg-base-200 rounded-[var(--rounded-btn)] p-5"
-			></div>
 			<div class="label">
-				<span class="label-text-alt flex flex-row content-center gap-1">
-					<span class="self-center">
-						This block uses Markdown for formatting content. <a class="link" href="/admin/markdown" target="blank">Here's a quick guide</a> (new tab).
-					</span>
-				</span>
+				@markdownHint()
 			</div>
 		</label>
 		<label
 			for={ fmt.Sprintf("pincode-%s", block.ID) }
-			class="form-control w-full my-5"
+			class="form-control w-full"
 		>
 			<div class="label">
 				<span class="label-text font-bold">Pincode</span>
@@ -181,22 +160,10 @@ templ pincodeAdmin(settings models.InstanceSettings, block blocks.PincodeBlock) 
 				id={ fmt.Sprintf("pincode-%s", block.ID) }
 				type="number"
 				name="pincode"
-				class="input input-bordered w-full font-mono tracking-widest"
-				placeholder="Pincode here..."
+				class="input input-bordered font-mono tracking-widest max-w-sm"
+				placeholder="12345"
 				value={ block.Pincode }
 			/>
 		</label>
-		<div class="modal-action">
-			<button
-				type="button"
-				class="btn"
-				onclick="block_edit_modal.close()"
-			>Nevermind</button>
-			<button
-				type="submit"
-				class="btn btn-primary"
-				onclick="block_edit_modal.close()"
-			>Save</button>
-		</div>
 	</form>
 }
