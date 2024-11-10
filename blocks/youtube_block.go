@@ -3,7 +3,8 @@ package blocks
 import (
 	"encoding/json"
 	"fmt"
-	"net/url"
+	"net/http"
+	"regexp"
 	"strings"
 )
 
@@ -39,15 +40,24 @@ func (b *YoutubeBlock) ParseData() error {
 
 func (b *YoutubeBlock) UpdateBlockData(input map[string][]string) error {
 	if u, exists := input["URL"]; exists && len(u) > 0 {
-		u := strings.TrimSpace(u[0])
-		if !strings.HasPrefix(u, "https://www.youtube.com/watch?v=") {
-			return fmt.Errorf("URL must be a valid Youtube video URL")
-		}
-		_, err := url.ParseRequestURI(u)
+		u[0] = strings.TrimSpace(u[0])
+		// Regex: https://stackoverflow.com/a/6904504
+		_, err := regexp.MatchString(`(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})`, u[0])
 		if err != nil {
 			return fmt.Errorf("URL is not valid")
 		}
-		b.URL = u
+
+		// Confirm URL is valid
+		checkURL := fmt.Sprintf("https://www.youtube.com/oembed?format=json&url=%s", u[0])
+		resp, err := http.Get(checkURL)
+		if err != nil {
+			return fmt.Errorf("URL is not valid")
+		}
+		if resp.StatusCode != 200 {
+			return fmt.Errorf("URL is not valid")
+		}
+
+		b.URL = u[0]
 	}
 	return nil
 }
