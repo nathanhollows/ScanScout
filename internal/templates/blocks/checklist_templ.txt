@@ -29,7 +29,7 @@
 \"> <span class=\"badge badge-info tooltip tooltip-left\" data-tip=\"Set to 0 to disable\">Optional</span></label></label> 
 <label for=\"
 \" class=\"form-control w-full mt-5\"><div class=\"label\"><span class=\"label-text font-bold\">Instructions</span></div><textarea id=\"
-\" name=\"content\" rows=\"2\" class=\"textarea textarea-bordered w-full font-mono pt-3\" style=\"field-sizing: content;\" placeholder=\"Markdown content here...\">
+\" name=\"content\" rows=\"2\" class=\"markdown-textarea textarea textarea-bordered w-full font-mono pt-3\" style=\"field-sizing: content;\" placeholder=\"Markdown content here...\">
 </textarea></label><div class=\"form-control w-full\"><div class=\"label font-bold flex justify-between\">Checklist Items <button class=\"btn btn-outline btn-sm my-2\" type=\"button\" onclick=\"addChecklistItem(event)\"><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"lucide lucide-list-plus w-5 h-5\"><path d=\"M11 12H3\"></path><path d=\"M16 6H3\"></path><path d=\"M16 18H3\"></path><path d=\"M18 9v6\"></path><path d=\"M21 12h-6\"></path></svg> Add Item</button></div><div id=\"checklist-items\" class=\"checklist-admin flex flex-col join join-vertical bg-base-100\">
 <label class=\"checklist-item input input-bordered bg-transparent flex flex-row items-top gap-2 h-auto join-item\" data-item-id=\"
 \">

@@ -142,7 +142,7 @@ templ answerAdmin(settings models.InstanceSettings, block blocks.AnswerBlock) {
 				id={ fmt.Sprintf("md-%s", block.ID) }
 				name="prompt"
 				rows="2"
-				class="textarea textarea-bordered w-full font-mono"
+				class="markdown-textarea textarea textarea-bordered w-full font-mono"
 				style="field-sizing: content;"
 				placeholder="What is third word of the second paragraph? What is the middle name of the person wearing a red hat?"
 			>{ block.Prompt }</textarea>

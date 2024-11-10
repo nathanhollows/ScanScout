@@ -142,7 +142,7 @@ templ pincodeAdmin(settings models.InstanceSettings, block blocks.PincodeBlock) 
 				id={ fmt.Sprintf("md-%s", block.ID) }
 				name="prompt"
 				rows="2"
-				class="textarea textarea-bordered w-full font-mono"
+				class="markdown-textarea textarea textarea-bordered w-full font-mono"
 				placeholder="What is third word of the second paragraph? What is the middle name of the person wearing a red hat?"
 			>{ block.Prompt }</textarea>
 			<div class="label">
