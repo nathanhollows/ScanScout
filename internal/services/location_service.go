@@ -297,7 +297,7 @@ func (s locationService) ReorderLocations(ctx context.Context, instanceID string
 		}
 	}
 	if len(locationMap) != len(locationIDs) {
-		return fmt.Errorf("duplicate location IDs")
+		return fmt.Errorf("list length does not match number of locations")
 	}
 
 	// Reorder the locations

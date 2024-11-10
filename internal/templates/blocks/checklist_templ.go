@@ -283,7 +283,7 @@ func checklistAdmin(settings models.InstanceSettings, block blocks.ChecklistBloc
 			var templ_7745c5c3_Var13 string
 			templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprint(block.Points))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/blocks/checklist.templ`, Line: 88, Col: 106}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/blocks/checklist.templ`, Line: 89, Col: 106}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var13))
 			if templ_7745c5c3_Err != nil {
@@ -301,7 +301,7 @@ func checklistAdmin(settings models.InstanceSettings, block blocks.ChecklistBloc
 		var templ_7745c5c3_Var14 string
 		templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("md-%s", block.ID))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/blocks/checklist.templ`, Line: 94, Col: 39}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/blocks/checklist.templ`, Line: 95, Col: 39}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var14))
 		if templ_7745c5c3_Err != nil {
@@ -314,7 +314,7 @@ func checklistAdmin(settings models.InstanceSettings, block blocks.ChecklistBloc
 		var templ_7745c5c3_Var15 string
 		templ_7745c5c3_Var15, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("md-%s", block.ID))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/blocks/checklist.templ`, Line: 101, Col: 39}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/blocks/checklist.templ`, Line: 102, Col: 39}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var15))
 		if templ_7745c5c3_Err != nil {
@@ -327,7 +327,7 @@ func checklistAdmin(settings models.InstanceSettings, block blocks.ChecklistBloc
 		var templ_7745c5c3_Var16 string
 		templ_7745c5c3_Var16, templ_7745c5c3_Err = templ.JoinStringErrs(block.Content)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/blocks/checklist.templ`, Line: 107, Col: 19}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/blocks/checklist.templ`, Line: 108, Col: 19}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var16))
 		if templ_7745c5c3_Err != nil {
@@ -345,7 +345,7 @@ func checklistAdmin(settings models.InstanceSettings, block blocks.ChecklistBloc
 			var templ_7745c5c3_Var17 string
 			templ_7745c5c3_Var17, templ_7745c5c3_Err = templ.JoinStringErrs(item.ID)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/blocks/checklist.templ`, Line: 122, Col: 140}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/blocks/checklist.templ`, Line: 123, Col: 140}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var17))
 			if templ_7745c5c3_Err != nil {
@@ -380,7 +380,7 @@ func checklistAdmin(settings models.InstanceSettings, block blocks.ChecklistBloc
 			var templ_7745c5c3_Var20 string
 			templ_7745c5c3_Var20, templ_7745c5c3_Err = templ.JoinStringErrs(item.Description)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/blocks/checklist.templ`, Line: 128, Col: 31}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/blocks/checklist.templ`, Line: 129, Col: 31}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var20))
 			if templ_7745c5c3_Err != nil {
@@ -393,7 +393,7 @@ func checklistAdmin(settings models.InstanceSettings, block blocks.ChecklistBloc
 			var templ_7745c5c3_Var21 string
 			templ_7745c5c3_Var21, templ_7745c5c3_Err = templ.JoinStringErrs(item.Description)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/blocks/checklist.templ`, Line: 132, Col: 25}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/blocks/checklist.templ`, Line: 133, Col: 25}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var21))
 			if templ_7745c5c3_Err != nil {
@@ -406,7 +406,7 @@ func checklistAdmin(settings models.InstanceSettings, block blocks.ChecklistBloc
 			var templ_7745c5c3_Var22 string
 			templ_7745c5c3_Var22, templ_7745c5c3_Err = templ.JoinStringErrs(item.ID)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/blocks/checklist.templ`, Line: 137, Col: 22}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/blocks/checklist.templ`, Line: 138, Col: 22}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var22))
 			if templ_7745c5c3_Err != nil {

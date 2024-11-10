@@ -18,6 +18,7 @@ templ markdownAdmin(_ models.InstanceSettings, block blocks.MarkdownBlock) {
 		hx-post={ fmt.Sprint("/admin/locations/", block.LocationID, "/blocks/", block.ID, "/update") }
 		hx-trigger={ fmt.Sprintf("keyup change from:(#form-%s textarea) delay:1000ms", block.ID) }
 		hx-swap="none"
+		hx-indicator={ fmt.Sprintf("#block-%s .loading", block.ID) }
 	>
 		<label
 			for={ fmt.Sprintf("md-%s", block.ID) }

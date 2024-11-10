@@ -3,7 +3,8 @@
 <form id=\"
 \" hx-post=\"
 \" hx-trigger=\"
-\" hx-swap=\"none\"><label for=\"
+\" hx-swap=\"none\" hx-indicator=\"
+\"><label for=\"
 \" class=\"form-control w-full mt-5\"><textarea id=\"
 \" name=\"content\" rows=\"7\" class=\"textarea textarea-bordered w-full font-mono\" style=\"field-sizing: content;\" placeholder=\"Markdown content here\">
 </textarea><div class=\"label\">

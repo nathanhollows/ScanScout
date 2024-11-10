@@ -240,266 +240,262 @@ templ EditLocation(location models.Location, settings models.InstanceSettings, c
 		hx-post={ fmt.Sprint("/admin/locations/", location.MarkerID) }
 		hx-trigger="submit"
 		hx-swap="none"
-	>
-		<!-- Header -->
-		<div class="flex flex-col sm:flex-row gap-3 justify-between items-center w-full p-5">
-			<h1 class="text-2xl font-bold">Editing <em>{ location.Name }</em></h1>
-			<div class="flex gap-3">
-				<div class="dropdown">
-					<div tabindex="0" role="button" class="btn btn-outline">
-						Downloads
-						<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down w-4 h-4"><path d="m6 9 6 6 6-6"></path></svg>
-					</div>
-					<ul tabindex="0" class="dropdown-content menu bg-base-100 rounded-box z-[1] w-52 p-2 shadow">
-						<h2 class="menu-title">Pre-made</h2>
+	></form>
+	<!-- Header -->
+	<div class="flex flex-col sm:flex-row gap-3 justify-between items-center w-full p-5">
+		<h1 class="text-2xl font-bold">Editing <em>{ location.Name }</em></h1>
+		<div class="flex gap-3">
+			<div class="dropdown">
+				<div tabindex="0" role="button" class="btn btn-outline">
+					Downloads
+					<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down w-4 h-4"><path d="m6 9 6 6 6-6"></path></svg>
+				</div>
+				<ul tabindex="0" class="dropdown-content menu bg-base-100 rounded-box z-[1] w-52 p-2 shadow">
+					<h2 class="menu-title">Pre-made</h2>
+					<li>
+						<ul>
+							<li>
+								<a
+									href={ templ.SafeURL(fmt.Sprint("/admin/locations/poster/", location.MarkerID, ".pdf")) }
+								>
+									if settings.CompletionMethod == models.CheckInAndOut {
+										Posters (PDF)
+									} else {
+										Poster (PDF)
+									}
+								</a>
+							</li>
+						</ul>
+					</li>
+					<h2 class="menu-title">Check-In</h2>
+					<li>
+						<ul>
+							<li>
+								<a
+									href={ templ.SafeURL(fmt.Sprint("/admin/locations/qr/in/", location.MarkerID, ".png")) }
+									download={ fmt.Sprint("Check In ", location.MarkerID, " ", location.Name, ".png") }
+								>QR Code (PNG)</a>
+							</li>
+							<li>
+								<a
+									href={ templ.SafeURL(fmt.Sprint("/admin/locations/qr/in/", location.MarkerID, ".svg")) }
+									download={ fmt.Sprint("Check In ", location.MarkerID, " ", location.Name, ".svg") }
+								>QR Code (SVG)</a>
+							</li>
+						</ul>
+					</li>
+					if settings.CompletionMethod == models.CheckInAndOut {
+						<h2 class="menu-title">Check-Out</h2>
 						<li>
 							<ul>
 								<li>
 									<a
-										href={ templ.SafeURL(fmt.Sprint("/admin/locations/poster/", location.MarkerID, ".pdf")) }
-									>
-										if settings.CompletionMethod == models.CheckInAndOut {
-											Posters (PDF)
-										} else {
-											Poster (PDF)
-										}
-									</a>
-								</li>
-							</ul>
-						</li>
-						<h2 class="menu-title">Check-In</h2>
-						<li>
-							<ul>
-								<li>
-									<a
-										href={ templ.SafeURL(fmt.Sprint("/admin/locations/qr/in/", location.MarkerID, ".png")) }
-										download={ fmt.Sprint("Check In ", location.MarkerID, " ", location.Name, ".png") }
+										href={ templ.SafeURL(fmt.Sprint("/admin/locations/qr/out/", location.MarkerID, ".png")) }
+										download={ fmt.Sprint("Check Out ", location.MarkerID, " ", location.Name, ".png") }
 									>QR Code (PNG)</a>
 								</li>
 								<li>
 									<a
-										href={ templ.SafeURL(fmt.Sprint("/admin/locations/qr/in/", location.MarkerID, ".svg")) }
-										download={ fmt.Sprint("Check In ", location.MarkerID, " ", location.Name, ".svg") }
+										href={ templ.SafeURL(fmt.Sprint("/admin/locations/qr/out/", location.MarkerID, ".svg")) }
+										download={ fmt.Sprint("Check Out ", location.MarkerID, " ", location.Name, ".svg") }
 									>QR Code (SVG)</a>
 								</li>
 							</ul>
 						</li>
-						if settings.CompletionMethod == models.CheckInAndOut {
-							<h2 class="menu-title">Check-Out</h2>
-							<li>
-								<ul>
-									<li>
-										<a
-											href={ templ.SafeURL(fmt.Sprint("/admin/locations/qr/out/", location.MarkerID, ".png")) }
-											download={ fmt.Sprint("Check Out ", location.MarkerID, " ", location.Name, ".png") }
-										>QR Code (PNG)</a>
-									</li>
-									<li>
-										<a
-											href={ templ.SafeURL(fmt.Sprint("/admin/locations/qr/out/", location.MarkerID, ".svg")) }
-											download={ fmt.Sprint("Check Out ", location.MarkerID, " ", location.Name, ".svg") }
-										>QR Code (SVG)</a>
-									</li>
-								</ul>
-							</li>
-						}
-					</ul>
-				</div>
-				<button type="button" class="btn btn-error" onclick="confirm_delete_modal.showModal();">Delete</button>
-				<button type="submit" class="btn btn-primary">Save</button>
+					}
+				</ul>
 			</div>
+			<button type="button" class="btn btn-error" onclick="confirm_delete_modal.showModal();">Delete</button>
+			<button type="submit" class="btn btn-primary">Save</button>
 		</div>
-		<div class="flex-grow mx-auto">
-			<div class="flex flex-col md:flex-row p-5 pt-0 gap-5 lg:gap-20">
-				<div class="flex flex-col flex-grow">
-					<div class="flex flex-col sm:flex-row gap-5 mb-5">
-						<!-- Location Title -->
-						<label for="name" class="form-control w-full md:w-1/2">
+	</div>
+	<div class="flex-grow mx-auto">
+		<div class="flex flex-col md:flex-row p-5 pt-0 gap-5 lg:gap-20">
+			<div class="flex flex-col flex-grow">
+				<div class="flex flex-col sm:flex-row gap-5 mb-5">
+					<!-- Location Title -->
+					<label for="name" class="form-control w-full md:w-1/2">
+						<div class="label">
+							<span class="label-text font-bold">Location name</span>
+						</div>
+						<input
+							type="text"
+							id="name"
+							name="name"
+							class="input input-bordered w-full"
+							value={ location.Marker.Name }
+							placeholder="Location name"
+						/>
+					</label>
+					if settings.EnablePoints {
+						<!-- Location Points -->
+						<label for="points" class="form-control w-full md:w-1/2">
 							<div class="label">
-								<span class="label-text font-bold">Location name</span>
+								<span class="label-text font-bold">Points</span>
+								if !settings.EnablePoints {
+									<span class="label-text-alt">
+										<span class="flex gap-1 badge badge-outline badge-sm tooltip cursor-help" data-tip="Points are currently disabled">
+											<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-info w-3 h-3"><circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4"></path><path d="M12 8h.01"></path></svg>
+											Disabled
+										</span>
+									</span>
+								}
 							</div>
 							<input
-								type="text"
-								id="name"
-								name="name"
+								type="number"
+								id="points"
+								name="points"
 								class="input input-bordered w-full"
-								value={ location.Marker.Name }
-								placeholder="Location name"
+								value={ fmt.Sprint(location.Points) }
+								placeholder="Enter points"
 							/>
 						</label>
-						if settings.EnablePoints {
-							<!-- Location Points -->
-							<label for="points" class="form-control w-full md:w-1/2">
-								<div class="label">
-									<span class="label-text font-bold">Points</span>
-									if !settings.EnablePoints {
-										<span class="label-text-alt">
-											<span class="flex gap-1 badge badge-outline badge-sm tooltip cursor-help" data-tip="Points are currently disabled">
-												<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-info w-3 h-3"><circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4"></path><path d="M12 8h.01"></path></svg>
-												Disabled
-											</span>
-										</span>
-									}
-								</div>
-								<input
-									type="number"
-									id="points"
-									name="points"
-									class="input input-bordered w-full"
-									value={ fmt.Sprint(location.Points) }
-									placeholder="Enter points"
-								/>
-							</label>
-						} else {
-							<input type="hidden" name="points" value={ fmt.Sprint(location.Points) }/>
-						}
-					</div>
-					<!-- Clues -->
-					if settings.NavigationMethod == models.ShowClues {
-						<section class="mb-8">
-							<div class="label flex justify-between">
-								<div class="flex flex-row-reverse justify-end md:justify-start md:flex-row">
-									<strong>Clues</strong>
-									<div class="dropdown dropdown-hover">
-										<div tabindex="0" role="button" class="btn btn-circle btn-ghost btn-xs text-info">
-											<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-alert w-4 h-4 text-info"><circle cx="12" cy="12" r="10"></circle><line x1="12" x2="12" y1="8" y2="12"></line><line x1="12" x2="12.01" y1="16" y2="16"></line></svg>
-										</div>
-										<div
-											tabindex="0"
-											class="card compact dropdown-content bg-base-200 rounded-box z-[1] w-64 shadow"
-										>
-											<div tabindex="0" class="card-body">
-												<h2 class="card-title">Clues</h2>
-												<p class="text-wrap">Each team is shown one randomly selected clue.</p>
-												<p class="text-wrap">If no clues are available then the player is told the name of the location as a freebie.</p>
-												<p class="text-wrap">Clues may contain <a class="link" href="/admin/markdown" target="blank">Markdown</a> formatting.</p>
-											</div>
-										</div>
-									</div>
-								</div>
-								<button class="add-clue-btn btn btn-sm btn-neutral my-2" type="button">
-									<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-list-plus w-5 h-5"><path d="M11 12H3"></path><path d="M16 6H3"></path><path d="M16 18H3"></path><path d="M18 9v6"></path><path d="M21 12h-6"></path></svg>
-									Add a clue
-								</button>
-							</div>
-							<div id="clue-list" class="flex flex-col join join-vertical">
-								if len(location.Clues) == 0 {
-									<div class="alert">
-										<span>
-											There are no clues to show. Do you want to <a class="link add-clue-btn">add a clue</a>? 
-										</span>
-									</div>
-								}
-								for _, clue := range location.Clues {
-									<label class="clue-line input input-bordered bg-transparent flex flex-row items-top gap-2 h-auto join-item" data-item-id={ clue.ID }>
-										<input
-											type="text"
-											name="clues"
-											class="w-full input hover:border-0 hover:outline-0 focus:border-0 focus:outline-0 border-0 outline-0 pr-8 pl-0 bg-transparent overflow-ellipsis"
-											value={ clue.Content }
-											placeholder="Add a clue"
-											autoComplete="off"
-										/>
-										<input type="hidden" name="clue-ids" value={ clue.ID }/>
-										<button
-											type="button"
-											class="btn btn-xs btn-circle hover:btn-error tooltip tooltip-left flex mt-3"
-											data-tip="Delete"
-											onclick="this.closest('.clue-line').remove()"
-											tabindex="-1"
-										>
-											<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-trash-2 w-3 h-3"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path><line x1="10" x2="10" y1="11" y2="17"></line><line x1="14" x2="14" y1="11" y2="17"></line></svg>
-										</button>
-									</label>
-								}
-							</div>
-						</section>
+					} else {
+						<input type="hidden" name="points" value={ fmt.Sprint(location.Points) }/>
 					}
-					<!-- Blocks -->
-					<section>
-						<div class="divider mt-5 mb-10">
-							<div class="dropdown">
-								<div class="block">
-									<div tabindex="0" role="button" class="btn btn-sm btn-neutral w-32 flex flex-col">
-										<svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-plus"><path d="M5 12h14"></path><path d="M12 5v14"></path></svg>
-										Add a Block
+				</div>
+				<!-- Clues -->
+				if settings.NavigationMethod == models.ShowClues {
+					<section class="mb-8">
+						<div class="label flex justify-between">
+							<div class="flex flex-row-reverse justify-end md:justify-start md:flex-row">
+								<strong>Clues</strong>
+								<div class="dropdown dropdown-hover">
+									<div tabindex="0" role="button" class="btn btn-circle btn-ghost btn-xs text-info">
+										<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-alert w-4 h-4 text-info"><circle cx="12" cy="12" r="10"></circle><line x1="12" x2="12" y1="8" y2="12"></line><line x1="12" x2="12.01" y1="16" y2="16"></line></svg>
 									</div>
-								</div>
-								<div tabindex="0" class="dropdown-content card bg-base-200 border border-base-300 shadow-lg w-80 -ml-24 mt-3 z-50">
-									<div class="card-body">
-										<h2 class="card-title mb-3">Add a Block</h2>
-										<div class="grid grid-cols-2 grid-flow-row gap-5">
-											for _, block := range blocks.GetRegisteredBlocks() {
-												<div class="indicator w-full">
-													if   block.RequiresValidation() {
-														<span
-															class="indicator-item indicator-top indicator-center badge badge-outline border-base-content/30 bg-base-100"
-														>
-															Interactive
-														</span>
-													}
-													<div
-														class="btn btn-outline border-base-content/30 h-auto p-3 tooltip flex flex-col gap-1 items-center rounded-md w-full"
-														data-tip={ block.GetDescription() }
-														hx-post={ fmt.Sprint("/admin/locations/", location.ID, "/blocks/new/", block.GetType()) }
-														hx-target="#blocks"
-														hx-swap="beforeend"
-													>
-														@templ.Raw(block.GetIconSVG())
-														{ block.GetName() }
-													</div>
-												</div>
-											}
+									<div
+										tabindex="0"
+										class="card compact dropdown-content bg-base-200 rounded-box z-[1] w-64 shadow"
+									>
+										<div tabindex="0" class="card-body">
+											<h2 class="card-title">Clues</h2>
+											<p class="text-wrap">Each team is shown one randomly selected clue.</p>
+											<p class="text-wrap">If no clues are available then the player is told the name of the location as a freebie.</p>
+											<p class="text-wrap">Clues may contain <a class="link" href="/admin/markdown" target="blank">Markdown</a> formatting.</p>
 										</div>
 									</div>
 								</div>
 							</div>
+							<button class="add-clue-btn btn btn-sm btn-neutral my-2" type="button">
+								<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-list-plus w-5 h-5"><path d="M11 12H3"></path><path d="M16 6H3"></path><path d="M16 18H3"></path><path d="M18 9v6"></path><path d="M21 12h-6"></path></svg>
+								Add a clue
+							</button>
 						</div>
-						<div
-							id="blocks"
-							class="sortable"
-							hx-post={ fmt.Sprint("/admin/locations/", location.ID, "/blocks/reorder") }
-							hx-trigger="end"
-						>
-							for _, block := range contentBlocks {
-								@bTemplates.RenderAdminBlock(settings, block)
+						<div id="clue-list" class="flex flex-col join join-vertical">
+							if len(location.Clues) == 0 {
+								<div class="alert">
+									<span>
+										There are no clues to show. Do you want to <a class="link add-clue-btn">add a clue</a>? 
+									</span>
+								</div>
+							}
+							for _, clue := range location.Clues {
+								<label class="clue-line input input-bordered bg-transparent flex flex-row items-top gap-2 h-auto join-item" data-item-id={ clue.ID }>
+									<input
+										type="text"
+										name="clues"
+										class="w-full input hover:border-0 hover:outline-0 focus:border-0 focus:outline-0 border-0 outline-0 pr-8 pl-0 bg-transparent overflow-ellipsis"
+										value={ clue.Content }
+										placeholder="Add a clue"
+										autoComplete="off"
+									/>
+									<input type="hidden" name="clue-ids" value={ clue.ID }/>
+									<button
+										type="button"
+										class="btn btn-xs btn-circle hover:btn-error tooltip tooltip-left flex mt-3"
+										data-tip="Delete"
+										onclick="this.closest('.clue-line').remove()"
+										tabindex="-1"
+									>
+										<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-trash-2 w-3 h-3"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path><line x1="10" x2="10" y1="11" y2="17"></line><line x1="14" x2="14" y1="11" y2="17"></line></svg>
+									</button>
+								</label>
 							}
 						</div>
 					</section>
-				</div>
-				<!-- Sidebar -->
-				<aside class="flex flex-col">
-					<!-- Map -->
-					<div id="map-container" class="relative w-full aspect-square md:w-[35vw] lg:w-96 rounded-lg shadow-lg mt-5">
-						<div id="map" class="map w-full h-full rounded-lg"></div>
-						<!-- Overlay Button and Backdrop -->
-						<div id="map-lock-overlay" class="absolute inset-0 bg-base-300 bg-opacity-70 flex justify-center items-center opacity-0 hover:opacity-100 transition rounded-lg focus:opacity-100" tabindex="0">
-							<button id="unlock-map-btn" class="btn btn-neutral" onclick="document.getElementById('map-lock-overlay').remove()">
-								<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-lock-keyhole w-5 h-5"><circle cx="12" cy="16" r="1"></circle><rect x="3" y="10" width="18" height="12" rx="2"></rect><path d="M7 10V7a5 5 0 0 1 10 0v3"></path></svg>
-								Unlock to edit
-							</button>
+				}
+				<!-- Blocks -->
+				<section>
+					<div class="divider mt-5 mb-10">
+						<div class="dropdown">
+							<div class="block">
+								<div tabindex="0" role="button" class="btn btn-sm btn-neutral w-32 flex flex-col">
+									<svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-plus"><path d="M5 12h14"></path><path d="M12 5v14"></path></svg>
+									Add a Block
+								</div>
+							</div>
+							<div tabindex="0" class="dropdown-content card bg-base-200 border border-base-300 shadow-lg w-80 -ml-24 mt-3 z-50">
+								<div class="card-body">
+									<h2 class="card-title mb-3">Add a Block</h2>
+									<div class="grid grid-cols-2 grid-flow-row gap-5">
+										for _, block := range blocks.GetRegisteredBlocks() {
+											<div class="indicator w-full">
+												if   block.RequiresValidation() {
+													<span
+														class="indicator-item indicator-top indicator-center badge badge-outline border-base-content/30 bg-base-100"
+													>
+														Interactive
+													</span>
+												}
+												<div
+													class="btn btn-outline border-base-content/30 h-auto p-3 tooltip flex flex-col gap-1 items-center rounded-md w-full"
+													data-tip={ block.GetDescription() }
+													hx-post={ fmt.Sprint("/admin/locations/", location.ID, "/blocks/new/", block.GetType()) }
+													hx-target="#blocks"
+													hx-swap="beforeend"
+												>
+													@templ.Raw(block.GetIconSVG())
+													{ block.GetName() }
+												</div>
+											</div>
+										}
+									</div>
+								</div>
+							</div>
 						</div>
 					</div>
-					<div class="form-control">
-						<label class="label cursor-pointer">
-							<span class="label-text">Save map location</span>
-							<input
-								type="checkbox"
-								name="location"
-								class="checkbox checkbox-sm"
-								checked="checked"
-							/>
-						</label>
+					<div
+						id="blocks"
+						class="flex flex-col gap-5"
+					>
+						for _, block := range contentBlocks {
+							@bTemplates.RenderAdminBlock(settings, block)
+						}
 					</div>
-					<!-- Hidden inputs for form handling -->
-					<input type="hidden" name="code" value={ location.Marker.Code }/>
-					<input type="hidden" name="latitude" value={ floatToString(location.Marker.Lat) }/>
-					<input type="hidden" name="longitude" value={ floatToString(location.Marker.Lng) }/>
-				</aside>
+				</section>
 			</div>
+			<!-- Sidebar -->
+			<aside class="flex flex-col">
+				<!-- Map -->
+				<div id="map-container" class="relative w-full aspect-square md:w-[35vw] lg:w-96 rounded-lg shadow-lg mt-5">
+					<div id="map" class="map w-full h-full rounded-lg"></div>
+					<!-- Overlay Button and Backdrop -->
+					<div id="map-lock-overlay" class="absolute inset-0 bg-base-300 bg-opacity-70 flex justify-center items-center opacity-0 hover:opacity-100 transition rounded-lg focus:opacity-100" tabindex="0">
+						<button id="unlock-map-btn" class="btn btn-neutral" onclick="document.getElementById('map-lock-overlay').remove()">
+							<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-lock-keyhole w-5 h-5"><circle cx="12" cy="16" r="1"></circle><rect x="3" y="10" width="18" height="12" rx="2"></rect><path d="M7 10V7a5 5 0 0 1 10 0v3"></path></svg>
+							Unlock to edit
+						</button>
+					</div>
+				</div>
+				<div class="form-control">
+					<label class="label cursor-pointer">
+						<span class="label-text">Save map location</span>
+						<input
+							type="checkbox"
+							name="location"
+							class="checkbox checkbox-sm"
+							checked="checked"
+						/>
+					</label>
+				</div>
+				<!-- Hidden inputs for form handling -->
+				<input type="hidden" name="code" value={ location.Marker.Code }/>
+				<input type="hidden" name="latitude" value={ floatToString(location.Marker.Lat) }/>
+				<input type="hidden" name="longitude" value={ floatToString(location.Marker.Lng) }/>
+			</aside>
 		</div>
-	</form>
-	<dialog id="block_edit_modal" class="modal modal-bottom md:modal-middle"></dialog>
+	</div>
 	<dialog id="confirm_delete_block" class="modal">
 		<div class="modal-box prose outline outline-2 outline-offset-1 outline-error">
 			<h3 class="text-lg font-bold">Delete this block?</h3>
@@ -538,6 +534,66 @@ templ EditLocation(location models.Location, settings models.InstanceSettings, c
 			</div>
 		</div>
 	</dialog>
+	<script>
+    function moveblock(event, direction) {
+        event.preventDefault();
+        const block = event.target.closest('.content-block');
+        if (block) {
+            let sibling;
+            if (direction === 'up') {
+                sibling = block.previousElementSibling;
+            } else if (direction === 'down') {
+                sibling = block.nextElementSibling;
+            }
+
+            if (sibling && sibling.classList.contains('content-block')) {
+                // Calculate the height of the sibling plus the gap (20px for Tailwind gap-5)
+                const blockHeight = block.offsetHeight;
+                const siblingHeight = sibling.offsetHeight;
+                const gap = 20; // gap-5 in pixels
+
+                // Apply a relative position and initial offset for a smooth transition
+                block.style.position = 'relative';
+                sibling.style.position = 'relative';
+                
+                if (direction === 'up') {
+                    block.style.transform = `translateY(-${siblingHeight + gap}px)`;
+                    sibling.style.transform = `translateY(${blockHeight + gap}px)`;
+                } else {
+                    block.style.transform = `translateY(${siblingHeight + gap}px)`;
+                    sibling.style.transform = `translateY(-${blockHeight + gap}px)`;
+                }
+
+                // Trigger reflow to apply the animation
+                requestAnimationFrame(() => {
+                    block.classList.add('transitioning');
+                    sibling.classList.add('transitioning');
+
+                    // Reset transforms and swap elements after animation duration
+                    setTimeout(() => {
+                        block.style.transform = '';
+                        sibling.style.transform = '';
+                        block.classList.remove('transitioning');
+                        sibling.classList.remove('transitioning');
+                        
+                        block.style.position = '';
+                        sibling.style.position = '';
+                        
+                        block.parentNode.insertBefore(
+                            direction === 'up' ? block : sibling,
+                            direction === 'up' ? sibling : block
+                        );
+                    }, 300);
+                });
+            }
+        }
+    }
+</script>
+	<style>
+    .transitioning {
+        transition: transform 0.3s ease;
+    }
+</style>
 	<script>
 (() => {
   const addClueBtns = document.querySelectorAll(".add-clue-btn");
@@ -613,74 +669,6 @@ templ EditLocation(location models.Location, settings models.InstanceSettings, c
     }
   };
 })();
-document.querySelector("#blocks").addEventListener("htmx:afterSettle", (event) => {
-    // Select the last .block-edit-btn inside #blocks
-    const blocks = document.querySelectorAll("#blocks .block-edit-btn");
-    const lastBlockEditBtn = blocks[blocks.length - 1];
-
-    // Check if the element exists
-    if (lastBlockEditBtn) {
-        // Trigger a click event on the last .block-edit-btn
-        htmx.trigger(lastBlockEditBtn, "click");
-    }
-    
-});
-  function previewMD(e) {
-	var checkBox = e.target;
-	var id = e.target.dataset.block;
-    var textarea = document.getElementById("md-" + id);
-    var preview = document.getElementById("preview-md-" + id);
-
-    if (checkBox.checked == true){
-      textarea.classList.add("hidden");
-      preview.classList.remove("hidden");
-      preview.setAttribute("aria-busy", true)
-      preview.innerHTML = "<span class='loading loading-ring loading-lg'></span>"
-
-      var xhr = new XMLHttpRequest();
-      xhr.open("POST", '/admin/markdown/preview', true);
-      xhr.setRequestHeader('Content-Type', 'application/json');
-      xhr.send(JSON.stringify({
-        markdown: textarea.value
-      }));
-
-      xhr.onreadystatechange = (e) => {
-        preview.innerHTML = xhr.response
-      }
-    } else {
-      textarea.classList.remove("hidden");
-      preview.classList.add("hidden");
-      preview.innerHTML = null
-    }
-  }
-
-function sortables() {
-    var sortables = document.querySelectorAll(".sortable");
-    for (var i = 0; i < sortables.length; i++) {
-      var sortable = sortables[i];
-      var sortableInstance = new Sortable(sortable, {
-          animation: 150,
-          handle: ".cursor-move",
-
-          // Make the `.htmx-indicator` unsortable
-          filter: ".htmx-indicator",
-          onMove: function (evt) {
-            return evt.related.className.indexOf('htmx-indicator') === -1;
-          },
-
-          // Disable sorting on the `end` event
-          onEnd: function (evt) {
-            this.option("disabled", true);
-          }
-      });
-
-      // Re-enable sorting on the `htmx:afterSwap` event
-      sortable.addEventListener("htmx:afterSwap", function() {
-        sortableInstance.option("disabled", false);
-      });
-    }
-}
-sortables();
 </script>
 	@locationScript()
 }

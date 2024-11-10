@@ -24,7 +24,7 @@
 <form id=\"
 \" hx-post=\"
 \" hx-trigger=\"
-\">
+\" hx-swap=\"none\">
 <label class=\"form-control w-full\"><div class=\"label\"><span class=\"label-text font-bold\">Points</span></div><label class=\"input input-bordered flex items-center gap-2\"><input name=\"points\" type=\"number\" class=\"grow\" placeholder=\"Search\" value=\"
 \"> <span class=\"badge badge-info tooltip tooltip-left\" data-tip=\"Set to 0 to disable\">Optional</span></label></label> 
 <label for=\"

@@ -78,6 +78,7 @@ templ checklistAdmin(settings models.InstanceSettings, block blocks.ChecklistBlo
 		id={ fmt.Sprintf("form-%s", block.ID) }
 		hx-post={ fmt.Sprint("/admin/locations/", block.LocationID, "/blocks/", block.ID, "/update") }
 		hx-trigger={ fmt.Sprintf("keyup changed from:(#form-%s textarea) delay:500ms, click from:(#form-%s button) delay:100ms", block.ID, block.ID) }
+		hx-swap="none"
 	>
 		if settings.EnablePoints {
 			<label class="form-control w-full">
