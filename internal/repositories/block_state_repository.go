@@ -159,5 +159,5 @@ func (r *blockStateRepository) NewBlockState(ctx context.Context, blockID, teamC
 		isComplete:    false,
 		pointsAwarded: 0,
 	}
-	return r.Create(ctx, state)
+	return state, nil
 }

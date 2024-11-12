@@ -8,7 +8,7 @@ import (
 
 templ checklistPlayer(settings models.InstanceSettings, block blocks.ChecklistBlock, data blocks.PlayerState) {
 	<div
-		id={ fmt.Sprintf("block-%s", block.ID) }
+		id={ fmt.Sprintf("player-block-%s", block.ID) }
 		class="indicator w-full"
 	>
 		if settings.EnablePoints && block.Points > 0 {
@@ -23,7 +23,7 @@ templ checklistPlayer(settings models.InstanceSettings, block blocks.ChecklistBl
 			@templ.Raw(stringToMarkdown(block.Content))
 			<form
 				hx-post={ fmt.Sprint("/blocks/validate") }
-				hx-target={ fmt.Sprintf("#block-%s", block.ID) }
+				hx-target={ fmt.Sprintf("#player-block-%s", block.ID) }
 				hx-trigger="change"
 			>
 				<input type="hidden" name="block" value={ block.ID }/>
@@ -77,7 +77,7 @@ templ checklistAdmin(settings models.InstanceSettings, block blocks.ChecklistBlo
 	<form
 		id={ fmt.Sprintf("form-%s", block.ID) }
 		hx-post={ fmt.Sprint("/admin/locations/", block.LocationID, "/blocks/", block.ID, "/update") }
-		hx-trigger={ fmt.Sprintf("keyup changed from:(#form-%s textarea) delay:500ms, click from:(#form-%s button) delay:100ms", block.ID, block.ID) }
+		hx-trigger={ fmt.Sprintf("keyup changed from:(#form-%s textarea) delay:500ms, click from:(#form-%s button) delay:100ms, keyup change from:(#form-%s input) delay:500ms", block.ID, block.ID, block.ID) }
 		hx-swap="none"
 	>
 		if settings.EnablePoints {
@@ -86,7 +86,7 @@ templ checklistAdmin(settings models.InstanceSettings, block blocks.ChecklistBlo
 					<span class="label-text font-bold">Points</span>
 				</div>
 				<label class="input input-bordered flex items-center gap-2">
-					<input name="points" type="number" class="grow" placeholder="Search" value={ fmt.Sprint(block.Points) }/>
+					<input name="points" type="number" class="grow" placeholder="Points" value={ fmt.Sprint(block.Points) }/>
 					<span class="badge badge-info tooltip tooltip-left" data-tip="Set to 0 to disable">Optional</span>
 				</label>
 			</label>

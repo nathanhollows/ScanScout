@@ -74,11 +74,10 @@ document.addEventListener("DOMContentLoaded", function() {
 		textarea.dataset.processed = "true";
 
 		// Handle text input to convert to HTML (optional, you may remove this if you only want paste handling)
-		textarea.addEventListener("input", function() {
-			const markdownText = textarea.value;
-			const html = turndownService.turndown(markdownText);
-			console.log(html); // You can replace this with whatever you need to do with the HTML, like rendering it or sending it to the server
-		});
+		// textarea.addEventListener("input", function() {
+		// 	const markdownText = textarea.value;
+		// 	const html = turndownService.turndown(markdownText);
+		// });
 
 		// Handle paste event
 		textarea.addEventListener("paste", function(event) {

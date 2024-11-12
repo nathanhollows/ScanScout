@@ -25,7 +25,7 @@
 \" hx-post=\"
 \" hx-trigger=\"
 \" hx-swap=\"none\">
-<label class=\"form-control w-full\"><div class=\"label\"><span class=\"label-text font-bold\">Points</span></div><label class=\"input input-bordered flex items-center gap-2\"><input name=\"points\" type=\"number\" class=\"grow\" placeholder=\"Search\" value=\"
+<label class=\"form-control w-full\"><div class=\"label\"><span class=\"label-text font-bold\">Points</span></div><label class=\"input input-bordered flex items-center gap-2\"><input name=\"points\" type=\"number\" class=\"grow\" placeholder=\"Points\" value=\"
 \"> <span class=\"badge badge-info tooltip tooltip-left\" data-tip=\"Set to 0 to disable\">Optional</span></label></label> 
 <label for=\"
 \" class=\"form-control w-full mt-5\"><div class=\"label\"><span class=\"label-text font-bold\">Instructions</span></div><textarea id=\"

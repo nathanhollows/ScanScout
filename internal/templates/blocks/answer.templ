@@ -8,7 +8,7 @@ import (
 
 templ answerPlayer(settings models.InstanceSettings, block blocks.AnswerBlock, data blocks.PlayerState) {
 	<div
-		id={ fmt.Sprintf("block-%s", block.ID) }
+		id={ fmt.Sprintf("player-block-%s", block.ID) }
 		class="indicator w-full"
 	>
 		if settings.EnablePoints && block.Points > 0 {
@@ -61,7 +61,7 @@ templ answerPlayer(settings models.InstanceSettings, block blocks.AnswerBlock, d
 
 templ answerPlayerUpdate(settings models.InstanceSettings, block blocks.AnswerBlock, data blocks.PlayerState) {
 	<div
-		id={ fmt.Sprintf("block-%s", block.ID) }
+		id={ fmt.Sprintf("player-block-%s", block.ID) }
 		class="indicator w-full"
 		hx-swap-oob="true"
 	>
@@ -151,14 +151,14 @@ templ answerAdmin(settings models.InstanceSettings, block blocks.AnswerBlock) {
 			</div>
 		</label>
 		<label
-			for={ fmt.Sprintf("answer-%s", block.ID) }
+			for={ fmt.Sprintf("admin-answer-%s", block.ID) }
 			class="form-control w-full"
 		>
 			<div class="label">
 				<span class="label-text font-bold">Answer</span>
 			</div>
 			<input
-				id={ fmt.Sprintf("answer-%s", block.ID) }
+				id={ fmt.Sprintf("admin-answer-%s", block.ID) }
 				type="text"
 				name="answer"
 				class="input input-bordered w-full"
