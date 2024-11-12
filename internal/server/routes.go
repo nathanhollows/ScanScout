@@ -210,6 +210,7 @@ func setupAdminRoutes(router chi.Router, adminHandler *admin.AdminHandler) {
 		r.Route("/experience", func(r chi.Router) {
 			r.Get("/", adminHandler.Experience)
 			r.Post("/", adminHandler.ExperiencePost)
+			r.Post("/preview", adminHandler.ExperiencePreview)
 		})
 
 		r.Route("/instances", func(r chi.Router) {

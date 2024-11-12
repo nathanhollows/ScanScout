@@ -103,7 +103,7 @@ func showMap(locations []models.Location) templ.Component {
 			var templ_7745c5c3_Var3 string
 			templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprint(location.Marker.Lat))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/players/next.templ`, Line: 46, Col: 72}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/players/next.templ`, Line: 45, Col: 72}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 			if templ_7745c5c3_Err != nil {
@@ -116,7 +116,7 @@ func showMap(locations []models.Location) templ.Component {
 			var templ_7745c5c3_Var4 string
 			templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprint(location.Marker.Lng))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/players/next.templ`, Line: 46, Col: 117}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/players/next.templ`, Line: 45, Col: 117}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 			if templ_7745c5c3_Err != nil {
@@ -165,7 +165,7 @@ func showMapAndNames(team models.Team, locations []models.Location) templ.Compon
 			var templ_7745c5c3_Var6 string
 			templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprint(location.Marker.Lat))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/players/next.templ`, Line: 59, Col: 46}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/players/next.templ`, Line: 58, Col: 46}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 			if templ_7745c5c3_Err != nil {
@@ -178,7 +178,7 @@ func showMapAndNames(team models.Team, locations []models.Location) templ.Compon
 			var templ_7745c5c3_Var7 string
 			templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprint(location.Marker.Lng))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/players/next.templ`, Line: 60, Col: 46}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/players/next.templ`, Line: 59, Col: 46}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 			if templ_7745c5c3_Err != nil {
@@ -191,7 +191,7 @@ func showMapAndNames(team models.Team, locations []models.Location) templ.Compon
 			var templ_7745c5c3_Var8 string
 			templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(location.Name)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/players/next.templ`, Line: 61, Col: 19}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/players/next.templ`, Line: 60, Col: 19}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 			if templ_7745c5c3_Err != nil {
@@ -209,7 +209,7 @@ func showMapAndNames(team models.Team, locations []models.Location) templ.Compon
 				var templ_7745c5c3_Var9 string
 				templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprint(location.CurrentCount))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/players/next.templ`, Line: 66, Col: 40}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/players/next.templ`, Line: 65, Col: 40}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 				if templ_7745c5c3_Err != nil {
@@ -267,7 +267,7 @@ func showNames(team models.Team, locations []models.Location) templ.Component {
 			var templ_7745c5c3_Var11 string
 			templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(location.Name)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/players/next.templ`, Line: 85, Col: 22}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/players/next.templ`, Line: 83, Col: 22}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
 			if templ_7745c5c3_Err != nil {
@@ -285,7 +285,7 @@ func showNames(team models.Team, locations []models.Location) templ.Component {
 				var templ_7745c5c3_Var12 string
 				templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprint(location.CurrentCount))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/players/next.templ`, Line: 90, Col: 40}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/players/next.templ`, Line: 88, Col: 40}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
 				if templ_7745c5c3_Err != nil {
@@ -336,7 +336,7 @@ func showClues(locations []models.Location) templ.Component {
 				var templ_7745c5c3_Var14 string
 				templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinStringErrs(location.Name)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/players/next.templ`, Line: 108, Col: 74}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/players/next.templ`, Line: 106, Col: 74}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var14))
 				if templ_7745c5c3_Err != nil {
@@ -355,7 +355,7 @@ func showClues(locations []models.Location) templ.Component {
 				var templ_7745c5c3_Var15 string
 				templ_7745c5c3_Var15, templ_7745c5c3_Err = templ.JoinStringErrs(clue.Content)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/players/next.templ`, Line: 116, Col: 22}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/templates/players/next.templ`, Line: 114, Col: 22}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var15))
 				if templ_7745c5c3_Err != nil {

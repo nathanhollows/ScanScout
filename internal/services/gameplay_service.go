@@ -30,7 +30,7 @@ type GameplayService interface {
 	GetTeamByCode(ctx context.Context, teamCode string) (*models.Team, error)
 	GetMarkerByCode(ctx context.Context, locationCode string) *ServiceResponse
 	StartPlaying(ctx context.Context, teamCode, customTeamName string) *ServiceResponse
-	SuggestNextLocations(ctx context.Context, team *models.Team, limit int) ([]models.Location, error)
+	SuggestNextLocations(ctx context.Context, team *models.Team) ([]models.Location, error)
 	// CheckIn checks a team in at a location
 	// It also manages the points and mustScanOut fields
 	// As well as checking if any blocks must be completed
@@ -131,7 +131,7 @@ func (s *gameplayService) StartPlaying(ctx context.Context, teamCode, customTeam
 	return response
 }
 
-func (s *gameplayService) SuggestNextLocations(ctx context.Context, team *models.Team, limit int) ([]models.Location, error) {
+func (s *gameplayService) SuggestNextLocations(ctx context.Context, team *models.Team) ([]models.Location, error) {
 	// Populate the team with the necessary data
 	err := s.TeamService.LoadRelations(ctx, team)
 	if err != nil {

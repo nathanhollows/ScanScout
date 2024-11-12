@@ -38,10 +38,9 @@ templ showMap(locations []models.Location) {
 		You may choose any of the following locations. Use the map below to help
 		find where you want to go.
 	</p>
-	<div
-		id="map-next"
-		class="w-full h-96 rounded-lg shadow-lg mt-5"
-	></div>
+	<div id="map-container" class="relative w-full aspect-square h-96 rounded-lg shadow-lg my-5 overflow-hidden">
+		<div id="map-next" class="map w-full h-full rounded-lg"></div>
+	</div>
 	for _, location := range locations {
 		<span class="location-name" data-lat={ fmt.Sprint(location.Marker.Lat) } data-lng={ fmt.Sprint(location.Marker.Lng) }></span>
 	}
@@ -68,10 +67,9 @@ templ showMapAndNames(team models.Team, locations []models.Location) {
 			}
 		</p>
 	}
-	<div
-		id="map-next"
-		class="w-full h-96 rounded-lg shadow-lg mt-5"
-	></div>
+	<div id="map-container" class="relative w-full aspect-square h-96 rounded-lg shadow-lg my-5 overflow-hidden">
+		<div id="map-next" class="map w-full h-full rounded-lg"></div>
+	</div>
 	@mapScript()
 }
 
