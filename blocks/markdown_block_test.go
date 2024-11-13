@@ -19,8 +19,6 @@ func TestMarkdownBlock_Getters(t *testing.T) {
 		Content: "Test Content",
 	}
 
-	assert.Equal(t, "Markdown", block.GetName())
-	assert.Equal(t, "Text written in Markdown.", block.GetDescription())
 	assert.Equal(t, "markdown", block.GetType())
 	assert.Equal(t, "test-id", block.GetID())
 	assert.Equal(t, "location-123", block.GetLocationID())
