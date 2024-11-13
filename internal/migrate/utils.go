@@ -1,4 +1,4 @@
-package models
+package migrate
 
 import (
 	"context"
@@ -31,4 +31,3 @@ func CreateTables(logger *slog.Logger) {
 		}
 	}
 }
-

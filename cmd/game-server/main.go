@@ -8,7 +8,7 @@ import (
 
 	"github.com/joho/godotenv"
 	"github.com/nathanhollows/Rapua/db"
-	"github.com/nathanhollows/Rapua/internal/models"
+	"github.com/nathanhollows/Rapua/internal/migrate"
 	"github.com/nathanhollows/Rapua/internal/server"
 	"github.com/nathanhollows/Rapua/internal/sessions"
 )
@@ -18,7 +18,7 @@ func main() {
 	logger := slog.New(slog.NewTextHandler(os.Stderr, nil))
 	initialiseFolders(logger)
 	db.MustOpen()
-	models.CreateTables(logger)
+	migrate.CreateTables(logger)
 	sessions.Start()
 
 	server.Start(logger)
