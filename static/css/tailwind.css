@@ -5177,6 +5177,11 @@ details.collapse summary::-webkit-details-marker {
   margin-bottom: 2rem;
 }
 
+.mx-1 {
+  margin-left: 0.25rem;
+  margin-right: 0.25rem;
+}
+
 .-mb-1 {
   margin-bottom: -0.25rem;
 }
@@ -5275,6 +5280,10 @@ details.collapse summary::-webkit-details-marker {
 
 .mt-8 {
   margin-top: 2rem;
+}
+
+.ml-2 {
+  margin-left: 0.5rem;
 }
 
 .block {
@@ -5456,6 +5465,10 @@ details.collapse summary::-webkit-details-marker {
   width: min-content;
 }
 
+.w-12 {
+  width: 3rem;
+}
+
 .min-w-80 {
   min-width: 20rem;
 }
@@ -5568,6 +5581,10 @@ details.collapse summary::-webkit-details-marker {
 
 .cursor-pointer {
   cursor: pointer;
+}
+
+.resize {
+  resize: both;
 }
 
 .scroll-m-12 {
