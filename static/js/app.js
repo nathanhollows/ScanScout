@@ -148,3 +148,173 @@ document.addEventListener("DOMContentLoaded", function() {
 	// Start observing the document body for changes
 	observer.observe(document.body, { childList: true, subtree: true });
 });
+
+// Textarea shortcuts
+(function() {
+	function enhanceMarkdownTextareas() {
+		var textareas = document.querySelectorAll('textarea.markdown-textarea:not([data-md-enhanced])');
+
+		textareas.forEach(function(textarea) {
+			// Mark this textarea as enhanced
+			textarea.setAttribute('data-md-enhanced', 'true');
+
+			textarea.addEventListener('keydown', function(e) {
+				if (isCtrlOrCmdPressed(e)) {
+					if (e.key === 'b' || e.key === 'B') {
+						e.preventDefault();
+						handleBold(this);
+					} else if (e.key === 'i' || e.key === 'I') {
+						e.preventDefault();
+						handleItalics(this);
+					} else if (e.key === 'k' || e.key === 'K') {
+						e.preventDefault();
+						handleLink(this);
+					}
+				} else if (e.key === 'Enter') {
+					handleListSupport(this, e);
+				}
+			});
+		});
+	}
+
+	function isCtrlOrCmdPressed(e) {
+		return e.ctrlKey || e.metaKey;
+	}
+
+	function handleBold(textarea) {
+		applyFormatting(textarea, '**');
+	}
+
+	function handleItalics(textarea) {
+		applyFormatting(textarea, '*');
+	}
+
+	function applyFormatting(textarea, marker) {
+		var start = textarea.selectionStart;
+		var end = textarea.selectionEnd;
+		var text = textarea.value;
+
+		// Expand selection to include existing markers if they are present
+		var before = text.substring(0, start);
+		var after = text.substring(end);
+
+		var selection = text.substring(start, end);
+		var expandedStart = start;
+		var expandedEnd = end;
+
+		// Check for existing markers before and after the selection
+		if (before.endsWith(marker) && after.startsWith(marker)) {
+			// Remove formatting
+			expandedStart -= marker.length;
+			expandedEnd += marker.length;
+			textarea.setSelectionRange(expandedStart, expandedEnd);
+			textarea.setRangeText(selection, expandedStart, expandedEnd, 'start');
+			textarea.setSelectionRange(expandedStart, expandedStart + selection.length);
+		} else {
+			// Add formatting
+			textarea.setRangeText(marker + selection + marker, start, end, 'end');
+			textarea.setSelectionRange(start + marker.length, start + marker.length + selection.length);
+		}
+	}
+
+	function handleLink(textarea) {
+		var start = textarea.selectionStart;
+		var end = textarea.selectionEnd;
+		var text = textarea.value;
+		var selectedText = text.substring(start, end);
+
+		// Regular expression to find Markdown links
+		var linkRegex = /\[([^\]]+)\]\(([^\)]+)\)/g;
+		var match;
+		var linkStart, linkEnd;
+		var inLink = false;
+
+		// Check if cursor is inside a link
+		linkRegex.lastIndex = 0;
+		while ((match = linkRegex.exec(text)) !== null) {
+			var matchStart = match.index;
+			var matchEnd = linkRegex.lastIndex;
+			if (start >= matchStart && end <= matchEnd) {
+				inLink = true;
+				linkStart = matchStart;
+				linkEnd = matchEnd;
+				selectedText = match[1]; // Text inside the link
+				break;
+			}
+		}
+
+		if (inLink) {
+			// Remove link formatting
+			textarea.setSelectionRange(linkStart, linkEnd);
+			textarea.setRangeText(selectedText, linkStart, linkEnd, 'start');
+			// Place cursor after the unlinked text
+			textarea.setSelectionRange(linkStart + selectedText.length, linkStart + selectedText.length);
+		} else {
+			if (selectedText === '') {
+				// Insert placeholder link
+				var placeholder = '[text](url)';
+				textarea.setRangeText(placeholder, start, end, 'end');
+				textarea.setSelectionRange(start + 1, start + 5); // Select 'text'
+			} else {
+				// Surround selected text with link syntax
+				var newText = '[' + selectedText + '](url)';
+				textarea.setRangeText(newText, start, end, 'end');
+				// Place cursor inside 'url'
+				var urlStart = start + newText.indexOf('](url)') + 2; // Position after ']('
+				var urlEnd = urlStart + 3; // 'url' is 3 letters
+				textarea.setSelectionRange(urlStart, urlEnd);
+			}
+		}
+	}
+
+	function handleListSupport(textarea, e) {
+		var start = textarea.selectionStart;
+		var text = textarea.value;
+
+		var lineStart = text.lastIndexOf('\n', start - 1) + 1;
+		var lineEnd = text.indexOf('\n', start);
+		if (lineEnd === -1) lineEnd = text.length;
+
+		var lineText = text.substring(lineStart, lineEnd);
+		var trimmedLine = lineText.trimLeft();
+		var leadingWhitespace = lineText.substring(0, lineText.length - trimmedLine.length);
+
+		var markerMatch = trimmedLine.match(/^([-*]|\d+\.)\s+/);
+		if (markerMatch) {
+			var afterMarker = trimmedLine.substring(markerMatch[0].length);
+			if (afterMarker.length === 0) {
+				// Line contains only the list marker, remove it
+				e.preventDefault();
+				var beforeLine = text.substring(0, lineStart);
+				var afterLine = text.substring(lineEnd);
+				var newCursorPos = lineStart;
+				textarea.setRangeText('', lineStart, lineEnd + 1, 'start');
+				textarea.setSelectionRange(newCursorPos, newCursorPos);
+			} else {
+				e.preventDefault();
+				var marker = markerMatch[1]; // e.g., '-', '*', '1.'
+				var spaces = markerMatch[0].substring(marker.length); // spaces after marker
+				var newMarker = marker;
+				var olMatch = marker.match(/^(\d+)\.$/);
+				if (olMatch) {
+					var num = parseInt(olMatch[1], 10);
+					newMarker = (num + 1) + '.';
+				}
+				var newLine = '\n' + leadingWhitespace + newMarker + spaces;
+				var newCursorPos = start + newLine.length;
+				textarea.setRangeText(newLine, start, start, 'end');
+				textarea.setSelectionRange(newCursorPos, newCursorPos);
+			}
+		}
+	}
+
+	// Run on document ready
+	document.addEventListener('DOMContentLoaded', function() {
+		enhanceMarkdownTextareas();
+		// Run after any htmx request
+		document.body.addEventListener('htmx:afterSwap', function() {
+			enhanceMarkdownTextareas();
+		});
+	});
+
+})();
