@@ -8,7 +8,7 @@ import (
 
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
-	"github.com/nathanhollows/Rapua/internal/filesystem"
+	"github.com/nathanhollows/Rapua/filesystem"
 	admin "github.com/nathanhollows/Rapua/internal/handlers/admin"
 	players "github.com/nathanhollows/Rapua/internal/handlers/players"
 	public "github.com/nathanhollows/Rapua/internal/handlers/public"
@@ -184,6 +184,7 @@ func setupAdminRoutes(router chi.Router, adminHandler *admin.AdminHandler) {
 			r.Get("/{id}", adminHandler.LocationEdit)
 			r.Post("/{id}", adminHandler.LocationEditPost)
 			r.Delete("/{id}", adminHandler.LocationDelete)
+			r.Get("/{id}/preview", adminHandler.LocationPreview)
 			// Assets
 			r.Get("/qr/{action}/{id}.{extension}", adminHandler.QRCode)
 			r.Get("/qr-codes.zip", adminHandler.GenerateQRCodeArchive)
@@ -209,6 +210,7 @@ func setupAdminRoutes(router chi.Router, adminHandler *admin.AdminHandler) {
 		r.Route("/experience", func(r chi.Router) {
 			r.Get("/", adminHandler.Experience)
 			r.Post("/", adminHandler.ExperiencePost)
+			r.Post("/preview", adminHandler.ExperiencePreview)
 		})
 
 		r.Route("/instances", func(r chi.Router) {

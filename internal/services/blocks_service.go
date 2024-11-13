@@ -16,6 +16,7 @@ type BlockService interface {
 	GetByLocationID(ctx context.Context, locationID string) (blocks.Blocks, error)
 	NewBlock(ctx context.Context, locationID string, blockType string) (blocks.Block, error)
 	NewBlockState(ctx context.Context, blockID, teamCode string) (blocks.PlayerState, error)
+	NewMockBlockState(ctx context.Context, blockID, teamCode string) (blocks.PlayerState, error)
 	UpdateBlock(ctx context.Context, block blocks.Block, data map[string][]string) (blocks.Block, error)
 	DeleteBlock(ctx context.Context, blockID string) error
 	ReorderBlocks(ctx context.Context, locationID string, blockIDs []string) error
@@ -76,7 +77,25 @@ func (s *blockService) NewBlock(ctx context.Context, locationID string, blockTyp
 // NewBlockState creates a new block state
 func (s *blockService) NewBlockState(ctx context.Context, blockID, teamCode string) (blocks.PlayerState, error) {
 	stateRepo := repositories.NewBlockStateRepository()
-	return stateRepo.NewBlockState(ctx, blockID, teamCode)
+	state, err := stateRepo.NewBlockState(ctx, blockID, teamCode)
+	if err != nil {
+		return nil, fmt.Errorf("creating new block state: %w", err)
+	}
+	state, err = stateRepo.Create(ctx, state)
+	if err != nil {
+		return nil, fmt.Errorf("storing new block state: %w", err)
+	}
+	return state, nil
+}
+
+// NewMockBlockState creates a new mock block state
+func (s *blockService) NewMockBlockState(ctx context.Context, blockID, teamCode string) (blocks.PlayerState, error) {
+	stateRepo := repositories.NewBlockStateRepository()
+	state, err := stateRepo.NewBlockState(ctx, blockID, teamCode)
+	if err != nil {
+		return nil, fmt.Errorf("creating new block state: %w", err)
+	}
+	return state, nil
 }
 
 // UpdateBlock updates a block

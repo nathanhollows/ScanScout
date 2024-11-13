@@ -4,8 +4,8 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/nathanhollows/Rapua/internal/models"
 	admin "github.com/nathanhollows/Rapua/internal/templates/admin"
+	"github.com/nathanhollows/Rapua/models"
 )
 
 func (h *AdminHandler) Teams(w http.ResponseWriter, r *http.Request) {

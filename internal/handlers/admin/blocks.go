@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/go-chi/chi"
@@ -85,13 +86,21 @@ func (h *AdminHandler) BlockNewPost(w http.ResponseWriter, r *http.Request) {
 
 	blockType := chi.URLParam(r, "type")
 
-	location := chi.URLParam(r, "location")
-	if !h.GameManagerService.ValidateLocationID(user, location) {
-		h.handleError(w, r, "BlockNewPost: invalid location", "Could not create block. Invalid location", "location", location)
+	locationID := chi.URLParam(r, "location")
+	if !h.GameManagerService.ValidateLocationID(user, locationID) {
+		h.handleError(w, r, "BlockNewPost: invalid location", "Could not create block. Invalid location", "location", locationID)
 		return
 	}
 
-	block, err := h.BlockService.NewBlock(r.Context(), location, blockType)
+	location, err := h.LocationService.FindByID(r.Context(), locationID)
+	if err != nil {
+		h.handleError(w, r, "BlockNewPost: finding location", "Could not create block", "error", err)
+		return
+	}
+
+	fmt.Println("BlockNewPost: creating block", "location", location.ID, "type", blockType)
+
+	block, err := h.BlockService.NewBlock(r.Context(), location.ID, blockType)
 	if err != nil {
 		h.handleError(w, r, "BlockNewPost: creating block", "Could not create block", "error", err)
 		return

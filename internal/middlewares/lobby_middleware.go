@@ -6,9 +6,9 @@ import (
 	"net/http"
 
 	"github.com/nathanhollows/Rapua/internal/contextkeys"
-	"github.com/nathanhollows/Rapua/internal/models"
 	"github.com/nathanhollows/Rapua/internal/repositories"
 	"github.com/nathanhollows/Rapua/internal/sessions"
+	"github.com/nathanhollows/Rapua/models"
 )
 
 // LobbyMiddleware redirects to the lobby if the game is scheduled to start

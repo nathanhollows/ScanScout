@@ -86,7 +86,7 @@ func (r *blockRepository) Save(ctx context.Context, block blocks.Block) (blocks.
 func (r *blockRepository) Create(ctx context.Context, block blocks.Block, locationID string) (blocks.Block, error) {
 	modelBlock := models.Block{
 		ID:                 uuid.New().String(),
-		LocationID:         locationID,
+		LocationID:         block.GetLocationID(),
 		Type:               block.GetType(),
 		Data:               block.GetData(),
 		Ordering:           1e4,

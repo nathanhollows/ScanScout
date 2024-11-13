@@ -11,7 +11,7 @@ import templruntime "github.com/a-h/templ/runtime"
 import (
 	"fmt"
 	"github.com/nathanhollows/Rapua/internal/flash"
-	"github.com/nathanhollows/Rapua/internal/models"
+	"github.com/nathanhollows/Rapua/models"
 	"github.com/uptrace/bun/schema"
 	"sort"
 )

@@ -3,10 +3,10 @@ package blocks
 import (
 	"fmt"
 	"github.com/nathanhollows/Rapua/blocks"
-	internalModels "github.com/nathanhollows/Rapua/internal/models"
+	"github.com/nathanhollows/Rapua/models"
 )
 
-func RenderAdminEdit(settings internalModels.InstanceSettings, block blocks.Block) templ.Component {
+func RenderAdminEdit(settings models.InstanceSettings, block blocks.Block) templ.Component {
 	switch block.GetType() {
 	case "markdown":
 		b := block.(*blocks.MarkdownBlock)
@@ -27,7 +27,7 @@ func RenderAdminEdit(settings internalModels.InstanceSettings, block blocks.Bloc
 	return nil
 }
 
-func RenderPlayerView(settings internalModels.InstanceSettings, block blocks.Block, state blocks.PlayerState) templ.Component {
+func RenderPlayerView(settings models.InstanceSettings, block blocks.Block, state blocks.PlayerState) templ.Component {
 	switch block.GetType() {
 	case "markdown":
 		b := block.(*blocks.MarkdownBlock)
@@ -48,7 +48,7 @@ func RenderPlayerView(settings internalModels.InstanceSettings, block blocks.Blo
 	return nil
 }
 
-func RenderPlayerUpdate(settings internalModels.InstanceSettings, block blocks.Block, state blocks.PlayerState) templ.Component {
+func RenderPlayerUpdate(settings models.InstanceSettings, block blocks.Block, state blocks.PlayerState) templ.Component {
 	switch block.GetType() {
 	case "markdown":
 		b := block.(*blocks.MarkdownBlock)
@@ -72,20 +72,15 @@ func RenderPlayerUpdate(settings internalModels.InstanceSettings, block blocks.B
 templ RenderAdminError() {
 }
 
-templ RenderAdminBlock(settings internalModels.InstanceSettings, block blocks.Block) {
+templ RenderAdminBlock(settings models.InstanceSettings, block blocks.Block) {
 	<div
 		id={ fmt.Sprint("block-", block.GetID()) }
-		class="card card-compact flex flex-col md:flex-row rounded-2xl bg-base-200 focus:outline outline-2 outline-primary outline-offset-2 mb-5 gap-5 p-8"
+		class="content-block card card-compact flex flex-col rounded-2xl bg-base-200 p-5"
 		tabindex="0"
+		data-block-id={ block.GetID() }
 	>
-		<div class="flex flex-1 flex-row gap-5">
-			<div
-				class="tooltip tooltip-right flex items-center cursor-move text-base-content"
-				data-tip="Drag to reorder"
-			>
-				<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-grip-vertical w-5 h-5"><circle cx="9" cy="12" r="1"></circle><circle cx="9" cy="5" r="1"></circle><circle cx="9" cy="19" r="1"></circle><circle cx="15" cy="12" r="1"></circle><circle cx="15" cy="5" r="1"></circle><circle cx="15" cy="19" r="1"></circle></svg>
-			</div>
-			<div class="flex flex-col gap-1 justify-center">
+		<div class="flex flex-row">
+			<div class="flex flex-1 flex-row gap-5">
 				<h3 class="text-lg font-bold flex flex-row gap-3 items-center">
 					<span class="">
 						@templ.Raw(block.GetIconSVG())
@@ -94,53 +89,58 @@ templ RenderAdminBlock(settings internalModels.InstanceSettings, block blocks.Bl
 					if settings.EnablePoints && block.RequiresValidation() {
 						<span class="badge badge-sm">{ fmt.Sprint(block.GetPoints()) } pts</span>
 					}
+					<span class="loading loading-dots loading-md htmx-indicator"></span>
 				</h3>
-				{ block.GetDescription() }
 			</div>
-		</div>
-		<div class="flex justify-end self-center gap-3 content-center">
-			<button
-				type="button"
-				class="block-edit-btn btn btn-secondary btn-xs btn-outline"
-				hx-get={ fmt.Sprint("/admin/locations/", block.GetLocationID(), "/blocks/", block.GetID(), "/edit") }
-				hx-target="#block_edit_modal"
-				hx-trigger="click"
-				hx-swap="innerHTML"
-				onclick="block_edit_modal.showModal();"
-			>
-				<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-pencil w-4 h-4"><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"></path><path d="m15 5 4 4"></path></svg>
-				Edit
-			</button>
-			<div class="dropdown dropdown-end">
-				<div tabindex="0" role="button" class="btn btn-xs btn-ghost btn-circle">
-					<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-ellipsis-vertical w-4 h-4"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg>
-				</div>
-				<ul tabindex="0" class="dropdown-content menu bg-base-100 rounded-box z-[1] w-52 p-2 shadow">
-					<li>
-						<a
-							hx-get={ fmt.Sprint("/admin/locations/", block.GetLocationID(), "/blocks/", block.GetID(), "/edit") }
-							hx-target="#block_edit_modal"
-							hx-trigger="click"
-							hx-swap="innerHTML"
-							onclick="block_edit_modal.showModal();"
-						>
-							<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-pencil w-4 h-4"><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"></path><path d="m15 5 4 4"></path></svg>
-							Edit
-						</a>
-					</li>
-					<li>
-						<span
-							class="block-delete text-error font-bold"
-							data-location={ block.GetLocationID() }
-							data-block={ block.GetID() }
-						>
-							<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-trash-2 w-4 h-4"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path><line x1="10" x2="10" y1="11" y2="17"></line><line x1="14" x2="14" y1="11" y2="17"></line></svg>
-							Delete
-						</span>
-					</li>
-				</ul>
+			<div class="flex gap-3">
+				<button
+					type="button"
+					class="block-delete btn btn-sm btn-circle shadow-none hover:btn-error tooltip flex"
+					data-tip="Delete"
+					data-location={ block.GetLocationID() }
+					data-block={ block.GetID() }
+				>
+					<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-trash-2 w-3 h-3"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path><line x1="10" x2="10" y1="11" y2="17"></line><line x1="14" x2="14" y1="11" y2="17"></line></svg>
+				</button>
+				<span class="join join-horizontal">
+					<button
+						type="button"
+						class="btn btn-sm btn-ghost join-item tooltip move-up-btn"
+						data-tip="Move up"
+						onclick="moveblock(event, 'up')"
+						hx-post={ fmt.Sprint("/admin/locations/", block.GetLocationID(), "/blocks/reorder") }
+						hx-trigger="click delay:400ms"
+						hx-swap="none"
+						hx-include="[name=block_id]"
+						:disabled="{ block.IsFirst() }"
+					>
+						<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-move-up w-3 h-3"><path d="M8 6L12 2L16 6"></path><path d="M12 2V22"></path></svg>
+					</button>
+					<button
+						type="button"
+						class="btn btn-sm btn-ghost join-item tooltip move-down-btn"
+						data-tip="Move down"
+						onclick="moveblock(event, 'down')"
+						hx-post={ fmt.Sprint("/admin/locations/", block.GetLocationID(), "/blocks/reorder") }
+						hx-trigger="click delay:400ms"
+						hx-swap="none"
+						hx-include="[name=block_id]"
+					>
+						<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-move-down w-3 h-3"><path d="M8 18L12 22L16 18"></path><path d="M12 2V22"></path></svg>
+					</button>
+				</span>
 			</div>
 			<input type="hidden" name="block_id" value={ block.GetID() }/>
 		</div>
+		@RenderAdminEdit(settings, block)
 	</div>
+}
+
+templ markdownHint() {
+	<span class="label-text-alt flex flex-row content-center gap-1 text-base-content/80">
+		<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-info w-5 h-5"><circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4"></path><path d="M12 8h.01"></path></svg>
+		<span class="self-center">
+			This block uses Markdown for formatting content. <a class="link" href="/admin/markdown" target="blank">Here's a quick guide</a>.
+		</span>
+	</span>
 }

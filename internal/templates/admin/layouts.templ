@@ -2,7 +2,7 @@ package templates
 
 import (
 	"fmt"
-	"github.com/nathanhollows/Rapua/internal/models"
+	"github.com/nathanhollows/Rapua/models"
 	"os"
 )
 
@@ -40,7 +40,7 @@ templ header(title string) {
 		<!-- JS -->
 		<script src="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v5.0.3/mapbox-gl-geocoder.min.js"></script>
 		<script src="https://unpkg.com/htmx.org@1.9.12/dist/ext/response-targets.js" defer></script>
-		<script src="https://unpkg.com/htmx.org@1.9.12" integrity="sha384-ujb1lZYygJmzgSwoxRggbCHcjc0rB2XoQrxeTUQyRjrOnlCoYta87iKBWq3EsdM2" crossorigin="anonymous" defer></script>
+		<script src="https://unpkg.com/turndown@latest/dist/turndown.js"></script>
 		<script src="https://api.mapbox.com/mapbox-gl-js/v2.10.0/mapbox-gl.js"></script>
 		<script src="/static/js/Sortable.min.js"></script>
 		<script src="/static/js/htmx.min.js"></script>

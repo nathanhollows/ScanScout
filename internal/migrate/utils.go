@@ -1,10 +1,9 @@
-package models
+package migrate
 
 import (
 	"context"
 	"log"
 	"log/slog"
-	"time"
 
 	"github.com/nathanhollows/Rapua/db"
 	"github.com/nathanhollows/Rapua/models"
@@ -12,17 +11,17 @@ import (
 
 func CreateTables(logger *slog.Logger) {
 	var models = []interface{}{
-		(*Notification)(nil),
-		(*InstanceSettings)(nil),
+		(*models.Notification)(nil),
+		(*models.InstanceSettings)(nil),
 		(*models.Block)(nil),
 		(*models.TeamBlockState)(nil),
-		(*Location)(nil),
+		(*models.Location)(nil),
 		(*models.Clue)(nil),
-		(*Team)(nil),
-		(*Marker)(nil),
-		(*CheckIn)(nil),
-		(*Instance)(nil),
-		(*User)(nil),
+		(*models.Team)(nil),
+		(*models.Marker)(nil),
+		(*models.CheckIn)(nil),
+		(*models.Instance)(nil),
+		(*models.User)(nil),
 	}
 
 	for _, model := range models {
@@ -31,10 +30,4 @@ func CreateTables(logger *slog.Logger) {
 			log.Fatal(err)
 		}
 	}
-}
-
-type baseModel struct {
-	CreatedAt time.Time `bun:",nullzero,notnull,default:current_timestamp"`
-	UpdatedAt time.Time `bun:",nullzero,notnull,default:current_timestamp"`
-	DeletedAt time.Time `bun:",soft_delete,nullzero"`
 }

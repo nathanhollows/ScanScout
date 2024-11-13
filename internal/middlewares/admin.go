@@ -7,8 +7,8 @@ import (
 
 	"github.com/nathanhollows/Rapua/internal/contextkeys"
 	"github.com/nathanhollows/Rapua/internal/flash"
-	"github.com/nathanhollows/Rapua/internal/models"
 	"github.com/nathanhollows/Rapua/internal/services"
+	"github.com/nathanhollows/Rapua/models"
 )
 
 // AdminAuthMiddleware ensures the user is authenticated and has verified their email.

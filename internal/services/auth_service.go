@@ -11,9 +11,9 @@ import (
 	"github.com/google/uuid"
 	"github.com/markbates/goth"
 	"github.com/markbates/goth/gothic"
-	"github.com/nathanhollows/Rapua/internal/models"
 	"github.com/nathanhollows/Rapua/internal/repositories"
 	"github.com/nathanhollows/Rapua/internal/sessions"
+	"github.com/nathanhollows/Rapua/models"
 	"github.com/nathanhollows/Rapua/security"
 )
 

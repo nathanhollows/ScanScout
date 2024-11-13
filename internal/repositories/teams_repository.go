@@ -7,7 +7,7 @@ import (
 	"strings"
 
 	"github.com/nathanhollows/Rapua/db"
-	"github.com/nathanhollows/Rapua/internal/models"
+	"github.com/nathanhollows/Rapua/models"
 	"github.com/uptrace/bun"
 )
 
@@ -121,14 +121,20 @@ func isUniqueConstraintError(err error) bool {
 }
 
 func (r *teamRepository) LoadInstance(ctx context.Context, team *models.Team) error {
-	return db.DB.NewSelect().
+	query := db.DB.NewSelect().
 		Model(&team.Instance).
-		Relation("Locations").
-		Relation("Locations.Marker").
-		Relation("Settings").
 		Where("id = ?", team.InstanceID).
-		WherePK().
-		Scan(ctx)
+		WherePK()
+
+	if team.Instance.Settings.InstanceID == "" {
+		query = query.Relation("Settings")
+	}
+
+	if len(team.Instance.Locations) == 0 {
+		query = query.Relation("Locations.Blocks")
+	}
+
+	return query.Scan(ctx)
 }
 
 func (r *teamRepository) LoadCheckIns(ctx context.Context, team *models.Team) error {

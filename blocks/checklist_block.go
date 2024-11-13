@@ -74,14 +74,18 @@ func (b *ChecklistBlock) ParseData() error {
 }
 
 func (b *ChecklistBlock) UpdateBlockData(input map[string][]string) error {
-	// Points
-	if input["points"] != nil {
-		points, err := strconv.Atoi(input["points"][0])
+	// Parse points
+	pointsInput, ok := input["points"]
+	if ok && len(pointsInput[0]) > 0 {
+		points, err := strconv.Atoi(pointsInput[0])
 		if err != nil {
 			return fmt.Errorf("points must be an integer")
 		}
 		b.Points = points
+	} else {
+		b.Points = 0
 	}
+
 	// Update content
 	if content, exists := input["content"]; exists && len(content) > 0 {
 		b.Content = content[0]

@@ -61,7 +61,7 @@ func (h *AdminHandler) TeamActivity(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	locations, err := gameplayService.SuggestNextLocations(r.Context(), team, user.CurrentInstance.Settings.MaxNextLocations)
+	locations, err := gameplayService.SuggestNextLocations(r.Context(), team)
 	if err != nil {
 		h.handleError(w, r, "TeamActivity: getting next locations", "Error getting next locations", "Could not load data", err)
 		return

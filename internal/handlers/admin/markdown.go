@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/nathanhollows/Rapua/internal/helpers"
+	"github.com/nathanhollows/Rapua/helpers"
 	templates "github.com/nathanhollows/Rapua/internal/templates/admin"
 )
 

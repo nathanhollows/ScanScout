@@ -13,7 +13,7 @@ func (h *PlayerHandler) Next(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	locations, err := h.GameplayService.SuggestNextLocations(r.Context(), team, 3)
+	locations, err := h.GameplayService.SuggestNextLocations(r.Context(), team)
 	if err != nil {
 		h.handleError(w, r, "Next: getting next locations", "Error getting next locations", "Could not load data", err)
 		return

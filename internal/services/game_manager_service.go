@@ -12,34 +12,36 @@ import (
 	"time"
 
 	"github.com/nathanhollows/Rapua/db"
+	"github.com/nathanhollows/Rapua/helpers"
 	"github.com/nathanhollows/Rapua/internal/flash"
-	"github.com/nathanhollows/Rapua/internal/helpers"
-	internalModels "github.com/nathanhollows/Rapua/internal/models"
 	"github.com/nathanhollows/Rapua/internal/repositories"
+	"github.com/nathanhollows/Rapua/models"
 	"github.com/uptrace/bun"
 )
 
 type GameManagerService struct {
-	locationService LocationService
-	userService     UserService
-	teamService     TeamService
-	markerRepo      repositories.MarkerRepository
-	clueRepo        repositories.ClueRepository
-	instanceRepo    repositories.InstanceRepository
+	locationService      LocationService
+	userService          UserService
+	teamService          TeamService
+	markerRepo           repositories.MarkerRepository
+	clueRepo             repositories.ClueRepository
+	instanceRepo         repositories.InstanceRepository
+	instanceSettingsRepo repositories.InstanceSettingsRepository
 }
 
 func NewGameManagerService() GameManagerService {
 	return GameManagerService{
-		locationService: NewLocationService(repositories.NewClueRepository()),
-		userService:     NewUserService(repositories.NewUserRepository()),
-		teamService:     NewTeamService(repositories.NewTeamRepository()),
-		markerRepo:      repositories.NewMarkerRepository(),
-		clueRepo:        repositories.NewClueRepository(),
-		instanceRepo:    repositories.NewInstanceRepository(),
+		locationService:      NewLocationService(repositories.NewClueRepository()),
+		userService:          NewUserService(repositories.NewUserRepository()),
+		teamService:          NewTeamService(repositories.NewTeamRepository()),
+		markerRepo:           repositories.NewMarkerRepository(),
+		clueRepo:             repositories.NewClueRepository(),
+		instanceRepo:         repositories.NewInstanceRepository(),
+		instanceSettingsRepo: repositories.NewInstanceSettingsRepository(),
 	}
 }
 
-func (s *GameManagerService) CreateInstance(ctx context.Context, name string, user *internalModels.User) (response ServiceResponse) {
+func (s *GameManagerService) CreateInstance(ctx context.Context, name string, user *models.User) (response ServiceResponse) {
 	response = ServiceResponse{}
 	response.Data = make(map[string]interface{})
 
@@ -48,12 +50,12 @@ func (s *GameManagerService) CreateInstance(ctx context.Context, name string, us
 		response.Error = errors.New("name is required")
 	}
 
-	instance := &internalModels.Instance{
+	instance := &models.Instance{
 		Name:   name,
 		UserID: user.ID,
 	}
 
-	if err := instance.Save(ctx); err != nil {
+	if err := s.instanceRepo.Save(ctx, instance); err != nil {
 		response.AddFlashMessage(*flash.NewError("Error saving instance"))
 		response.Error = fmt.Errorf("saving instance: %w", err)
 		return response
@@ -67,11 +69,10 @@ func (s *GameManagerService) CreateInstance(ctx context.Context, name string, us
 		return response
 	}
 
-	settings := &internalModels.InstanceSettings{
+	settings := &models.InstanceSettings{
 		InstanceID: instance.ID,
 	}
-	err = settings.Save(ctx)
-	if err != nil {
+	if err := s.instanceSettingsRepo.Save(ctx, settings); err != nil {
 		response.AddFlashMessage(*flash.NewError("Error saving settings"))
 		response.Error = fmt.Errorf("saving settings: %w", err)
 		return response
@@ -81,8 +82,8 @@ func (s *GameManagerService) CreateInstance(ctx context.Context, name string, us
 	return response
 }
 
-func (s *GameManagerService) SwitchInstance(ctx context.Context, user *internalModels.User, instanceID string) (*internalModels.Instance, error) {
-	instance, err := internalModels.FindInstanceByID(ctx, instanceID)
+func (s *GameManagerService) SwitchInstance(ctx context.Context, user *models.User, instanceID string) (*models.Instance, error) {
+	instance, err := s.instanceRepo.FindByID(ctx, instanceID)
 	if err != nil {
 		return nil, errors.New("instance not found")
 	}
@@ -102,28 +103,28 @@ func (s *GameManagerService) SwitchInstance(ctx context.Context, user *internalM
 // Duplicate an instance
 // This will create a new instance with the same name and locations
 // The teams will not be duplicated
-func (s *GameManagerService) DuplicateInstance(ctx context.Context, user *internalModels.User, id, name string) (response ServiceResponse) {
+func (s *GameManagerService) DuplicateInstance(ctx context.Context, user *models.User, id, name string) (response ServiceResponse) {
 	response = ServiceResponse{}
-	oldInstance, err := internalModels.FindInstanceByID(ctx, id)
+	oldInstance, err := s.instanceRepo.FindByID(ctx, id)
 	if err != nil {
 		response.AddFlashMessage(*flash.NewError("Instance not found"))
 		response.Error = fmt.Errorf("finding instance: %w", err)
 		return response
 	}
 
-	locations, err := internalModels.FindAllLocations(ctx, oldInstance.ID)
+	locations, err := s.locationService.FindByInstance(ctx, oldInstance.ID)
 	if err != nil {
 		response.AddFlashMessage(*flash.NewError("Error finding locations"))
 		response.Error = fmt.Errorf("finding locations: %w", err)
 		return response
 	}
 
-	newInstance := &internalModels.Instance{
+	newInstance := &models.Instance{
 		Name:   name,
 		UserID: user.ID,
 	}
 
-	if err := newInstance.Save(ctx); err != nil {
+	if err := s.instanceRepo.Save(ctx, newInstance); err != nil {
 		response.AddFlashMessage(*flash.NewError("Error saving new instance"))
 		response.Error = fmt.Errorf("saving new instance: %w", err)
 		return response
@@ -142,7 +143,7 @@ func (s *GameManagerService) DuplicateInstance(ctx context.Context, user *intern
 	// Copy settings
 	settings := oldInstance.Settings
 	settings.InstanceID = newInstance.ID
-	if err := settings.Save(ctx); err != nil {
+	if err := s.instanceSettingsRepo.Save(ctx, &settings); err != nil {
 		response.AddFlashMessage(*flash.NewError("Error saving settings"))
 		response.Error = fmt.Errorf("saving settings: %w", err)
 		return response
@@ -153,7 +154,7 @@ func (s *GameManagerService) DuplicateInstance(ctx context.Context, user *intern
 	return response
 }
 
-func (s *GameManagerService) LoadTeams(ctx context.Context, teams *[]internalModels.Team) error {
+func (s *GameManagerService) LoadTeams(ctx context.Context, teams *[]models.Team) error {
 	for i := range *teams {
 		err := s.teamService.LoadRelation(ctx, &(*teams)[i], "Scans")
 		if err != nil {
@@ -163,9 +164,9 @@ func (s *GameManagerService) LoadTeams(ctx context.Context, teams *[]internalMod
 	return nil
 }
 
-func (s *GameManagerService) DeleteInstance(ctx context.Context, user *internalModels.User, instanceID, confirmName string) (response ServiceResponse) {
+func (s *GameManagerService) DeleteInstance(ctx context.Context, user *models.User, instanceID, confirmName string) (response ServiceResponse) {
 	response = ServiceResponse{}
-	instance, err := internalModels.FindInstanceByID(ctx, instanceID)
+	instance, err := s.instanceRepo.FindByID(ctx, instanceID)
 	if err != nil {
 		response.AddFlashMessage(*flash.NewError("Instance not found"))
 		response.Error = fmt.Errorf("finding instance: %w", err)
@@ -213,9 +214,9 @@ func (s *GameManagerService) AddTeams(ctx context.Context, instanceID string, co
 		return response
 	}
 
-	teams := make([]internalModels.Team, count)
+	teams := make([]models.Team, count)
 	for i := 0; i < count; i++ {
-		teams[i] = internalModels.Team{
+		teams[i] = models.Team{
 			Code:       helpers.NewCode(4),
 			InstanceID: instanceID,
 		}
@@ -230,13 +231,9 @@ func (s *GameManagerService) AddTeams(ctx context.Context, instanceID string, co
 	return response
 }
 
-func (s *GameManagerService) GetAllLocations(ctx context.Context, instanceID string) ([]internalModels.Location, error) {
-	return internalModels.FindAllLocations(ctx, instanceID)
-}
-
 func (s *GameManagerService) GetTeamActivityOverview(ctx context.Context, instanceID string) ([]TeamActivity, error) {
 	locationRepository := repositories.NewLocationRepository()
-	locations, err := locationRepository.FindAllLocations(ctx, instanceID)
+	locations, err := locationRepository.FindByInstance(ctx, instanceID)
 	if err != nil {
 		return nil, fmt.Errorf("finding all locations: %w", err)
 	}
@@ -244,7 +241,7 @@ func (s *GameManagerService) GetTeamActivityOverview(ctx context.Context, instan
 	return s.teamService.GetTeamActivityOverview(ctx, instanceID, locations)
 }
 
-func (s *GameManagerService) SaveLocation(ctx context.Context, location *internalModels.Location, lat, lng, name string) error {
+func (s *GameManagerService) SaveLocation(ctx context.Context, location *models.Location, lat, lng, name string) error {
 	if lat == "" || lng == "" {
 		return errors.New("latitude and longitude are required")
 	}
@@ -271,7 +268,7 @@ func (s *GameManagerService) SaveLocation(ctx context.Context, location *interna
 	return nil
 }
 
-func (s *GameManagerService) CreateLocation(ctx context.Context, user *internalModels.User, data map[string]string) (internalModels.Location, error) {
+func (s *GameManagerService) CreateLocation(ctx context.Context, user *models.User, data map[string]string) (models.Location, error) {
 
 	name := data["name"]
 	lat := data["latitude"]
@@ -283,11 +280,11 @@ func (s *GameManagerService) CreateLocation(ctx context.Context, user *internalM
 	if lat != "" && lng != "" {
 		latFloat, err = strconv.ParseFloat(lat, 64)
 		if err != nil {
-			return internalModels.Location{}, err
+			return models.Location{}, err
 		}
 		lngFloat, err = strconv.ParseFloat(lng, 64)
 		if err != nil {
-			return internalModels.Location{}, err
+			return models.Location{}, err
 		}
 	}
 
@@ -295,7 +292,7 @@ func (s *GameManagerService) CreateLocation(ctx context.Context, user *internalM
 	if points != "" {
 		pointsInt, err = strconv.Atoi(points)
 		if err != nil {
-			return internalModels.Location{}, err
+			return models.Location{}, err
 		}
 	}
 
@@ -305,7 +302,7 @@ func (s *GameManagerService) CreateLocation(ctx context.Context, user *internalM
 
 func (s *GameManagerService) isMarkerShared(ctx context.Context, markerID, instanceID string) (bool, error) {
 	count, err := db.DB.NewSelect().
-		Model((*internalModels.Location)(nil)).
+		Model((*models.Location)(nil)).
 		Where("marker_id = ? AND instance_id != ?", markerID, instanceID).
 		Count(ctx)
 	if err != nil {
@@ -314,7 +311,7 @@ func (s *GameManagerService) isMarkerShared(ctx context.Context, markerID, insta
 	return count > 0, nil
 }
 
-func (s *GameManagerService) ValidateLocationMarker(user *internalModels.User, id string) bool {
+func (s *GameManagerService) ValidateLocationMarker(user *models.User, id string) bool {
 	for _, loc := range user.CurrentInstance.Locations {
 		if loc.MarkerID == id {
 			return true
@@ -323,7 +320,7 @@ func (s *GameManagerService) ValidateLocationMarker(user *internalModels.User, i
 	return false
 }
 
-func (s *GameManagerService) ValidateLocationID(user *internalModels.User, id string) bool {
+func (s *GameManagerService) ValidateLocationID(user *models.User, id string) bool {
 	for _, loc := range user.CurrentInstance.Locations {
 		if loc.ID == id {
 			return true
@@ -349,12 +346,12 @@ func (s *GameManagerService) GetQRCodePathAndContent(action, id, name, extension
 }
 
 // UpdateSettings parses the form values and updates the instance settings
-func (s *GameManagerService) UpdateSettings(ctx context.Context, settings *internalModels.InstanceSettings, form url.Values) (response ServiceResponse) {
+func (s *GameManagerService) UpdateSettings(ctx context.Context, settings *models.InstanceSettings, form url.Values) (response ServiceResponse) {
 	response = ServiceResponse{}
 	response.Data = make(map[string]interface{})
 
 	// Navigation mode
-	navMode, err := internalModels.ParseNavigationMode(form.Get("navigationMode"))
+	navMode, err := models.ParseNavigationMode(form.Get("navigationMode"))
 	if err != nil {
 		response.AddFlashMessage(*flash.NewError("Something went wrong parsing navigation mode. Please try again."))
 		response.Error = fmt.Errorf("parsing navigation mode: %w", err)
@@ -363,7 +360,7 @@ func (s *GameManagerService) UpdateSettings(ctx context.Context, settings *inter
 	settings.NavigationMode = navMode
 
 	// Completion method
-	completionMethod, err := internalModels.ParseCompletionMethod(form.Get("completionMethod"))
+	completionMethod, err := models.ParseCompletionMethod(form.Get("completionMethod"))
 	if err != nil {
 		response.AddFlashMessage(*flash.NewError("Something went wrong parsing completion method. Please try again."))
 		response.Error = fmt.Errorf("parsing completion method: %w", err)
@@ -372,7 +369,7 @@ func (s *GameManagerService) UpdateSettings(ctx context.Context, settings *inter
 	settings.CompletionMethod = completionMethod
 
 	// Navigation method
-	navMethod, err := internalModels.ParseNavigationMethod(form.Get("navigationMethod"))
+	navMethod, err := models.ParseNavigationMethod(form.Get("navigationMethod"))
 	if err != nil {
 		response.AddFlashMessage(*flash.NewError("Something went wrong parsing navigation method. Please try again."))
 		response.Error = fmt.Errorf("parsing navigation method: %w", err)
@@ -405,11 +402,10 @@ func (s *GameManagerService) UpdateSettings(ctx context.Context, settings *inter
 	settings.EnableBonusPoints = enableBonusPoints
 
 	// Save settings
-	err = settings.Save(ctx)
-	if err != nil {
+	if err := s.instanceSettingsRepo.Update(ctx, settings); err != nil {
 		response.AddFlashMessage(*flash.NewError("Error saving settings. Please try again."))
 		response.Error = fmt.Errorf("saving settings: %w", err)
-		return
+		return response
 	}
 
 	response.AddFlashMessage(*flash.NewSuccess("Settings updated!"))
@@ -417,21 +413,21 @@ func (s *GameManagerService) UpdateSettings(ctx context.Context, settings *inter
 }
 
 // StartGame starts the game immediately
-func (s *GameManagerService) StartGame(ctx context.Context, user *internalModels.User) (response ServiceResponse) {
+func (s *GameManagerService) StartGame(ctx context.Context, user *models.User) (response ServiceResponse) {
 	return s.SetStartTime(ctx, user, time.Now())
 }
 
 // StopGame stops the game immediately
-func (s *GameManagerService) StopGame(ctx context.Context, user *internalModels.User) (response ServiceResponse) {
+func (s *GameManagerService) StopGame(ctx context.Context, user *models.User) (response ServiceResponse) {
 	return s.SetEndTime(ctx, user, time.Now())
 }
 
 // SetStartTime sets the game start time to the given time
-func (s *GameManagerService) SetStartTime(ctx context.Context, user *internalModels.User, time time.Time) (response ServiceResponse) {
+func (s *GameManagerService) SetStartTime(ctx context.Context, user *models.User, time time.Time) (response ServiceResponse) {
 	response = ServiceResponse{}
 
 	// Check if the game is already active
-	if user.CurrentInstance.GetStatus() == internalModels.Active {
+	if user.CurrentInstance.GetStatus() == models.Active {
 		response.AddFlashMessage(*flash.NewInfo("Game is already active"))
 		response.Error = errors.New("game is already active")
 		return response
@@ -443,8 +439,7 @@ func (s *GameManagerService) SetStartTime(ctx context.Context, user *internalMod
 		user.CurrentInstance.EndTime = bun.NullTime{}
 	}
 
-	err := user.CurrentInstance.Update(ctx)
-	if err != nil {
+	if err := s.instanceRepo.Update(ctx, &user.CurrentInstance); err != nil {
 		response.AddFlashMessage(*flash.NewError("Error updating instance"))
 		response.Error = fmt.Errorf("updating instance with new time: %w", err)
 		return response
@@ -456,11 +451,11 @@ func (s *GameManagerService) SetStartTime(ctx context.Context, user *internalMod
 }
 
 // SetEndTime sets the game end time to the given time
-func (s *GameManagerService) SetEndTime(ctx context.Context, user *internalModels.User, time time.Time) (response ServiceResponse) {
+func (s *GameManagerService) SetEndTime(ctx context.Context, user *models.User, time time.Time) (response ServiceResponse) {
 	response = ServiceResponse{}
 
 	// Check if the game is already closed
-	if user.CurrentInstance.GetStatus() == internalModels.Closed {
+	if user.CurrentInstance.GetStatus() == models.Closed {
 		response.AddFlashMessage(*flash.NewError("Game is already over"))
 		response.Error = errors.New("game is already closed")
 		return response
@@ -475,8 +470,7 @@ func (s *GameManagerService) SetEndTime(ctx context.Context, user *internalModel
 
 	// Update the end time
 	user.CurrentInstance.EndTime = bun.NullTime{Time: time}
-	err := user.CurrentInstance.Update(ctx)
-	if err != nil {
+	if err := s.instanceRepo.Update(ctx, &user.CurrentInstance); err != nil {
 		response.AddFlashMessage(*flash.NewError("Error updating instance"))
 		response.Error = fmt.Errorf("updating instance with new time: %w", err)
 		return response
@@ -489,7 +483,7 @@ func (s *GameManagerService) SetEndTime(ctx context.Context, user *internalModel
 
 // ScheduleGame schedules the game to start and/or end at a specific time
 // Expects a form with set_start, utc_start_date, utc_start_time, set_end, utc_end_date, and utc_end_time
-func (s *GameManagerService) ScheduleGame(ctx context.Context, user *internalModels.User, start time.Time, end time.Time) (response ServiceResponse) {
+func (s *GameManagerService) ScheduleGame(ctx context.Context, user *models.User, start time.Time, end time.Time) (response ServiceResponse) {
 	response = ServiceResponse{}
 
 	instance := user.CurrentInstance
@@ -505,41 +499,12 @@ func (s *GameManagerService) ScheduleGame(ctx context.Context, user *internalMod
 	instance.EndTime = bun.NullTime{Time: end}
 
 	// Save instance
-	err := instance.Update(ctx)
-	if err != nil {
+	if err := s.instanceRepo.Update(ctx, &instance); err != nil {
 		response.AddFlashMessage(*flash.NewError("Error saving instance"))
 		response.Error = fmt.Errorf("saving instance: %w", err)
 		return response
 	}
 
+	user.CurrentInstance = instance
 	return response
-}
-
-// ReorderLocations takes a list of location IDs and updates the order
-func (s *GameManagerService) ReorderLocations(ctx context.Context, user *internalModels.User, codes []string) (response ServiceResponse) {
-	response = ServiceResponse{}
-
-	// Loop through the locations and update the order
-	for i, locationID := range codes {
-		location, err := internalModels.FindLocationByInstanceAndCode(ctx, user.CurrentInstanceID, locationID)
-		if err != nil {
-			response.AddFlashMessage(*flash.NewError("Error finding location: " + locationID))
-			response.Error = fmt.Errorf("finding location: %w", err)
-			return response
-		}
-		location.Order = i
-		if err := location.Save(ctx); err != nil {
-			response.AddFlashMessage(*flash.NewError("Error saving location: " + locationID))
-			response.Error = fmt.Errorf("saving location: %w", err)
-			return response
-		}
-	}
-
-	response.AddFlashMessage(*flash.NewSuccess("Locations reordered!"))
-	return response
-}
-
-// DeleteLocation deletes a location
-func (s *GameManagerService) DeleteLocation(ctx context.Context, location *internalModels.Location) error {
-	return s.locationService.DeleteLocation(ctx, location.ID)
 }

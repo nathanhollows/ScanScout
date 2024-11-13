@@ -9,8 +9,8 @@ import (
 
 	"github.com/nathanhollows/Rapua/blocks"
 	"github.com/nathanhollows/Rapua/internal/flash"
-	"github.com/nathanhollows/Rapua/internal/models"
 	"github.com/nathanhollows/Rapua/internal/repositories"
+	"github.com/nathanhollows/Rapua/models"
 	"golang.org/x/exp/rand"
 )
 
@@ -30,7 +30,7 @@ type GameplayService interface {
 	GetTeamByCode(ctx context.Context, teamCode string) (*models.Team, error)
 	GetMarkerByCode(ctx context.Context, locationCode string) *ServiceResponse
 	StartPlaying(ctx context.Context, teamCode, customTeamName string) *ServiceResponse
-	SuggestNextLocations(ctx context.Context, team *models.Team, limit int) ([]models.Location, error)
+	SuggestNextLocations(ctx context.Context, team *models.Team) ([]models.Location, error)
 	// CheckIn checks a team in at a location
 	// It also manages the points and mustScanOut fields
 	// As well as checking if any blocks must be completed
@@ -131,7 +131,7 @@ func (s *gameplayService) StartPlaying(ctx context.Context, teamCode, customTeam
 	return response
 }
 
-func (s *gameplayService) SuggestNextLocations(ctx context.Context, team *models.Team, limit int) ([]models.Location, error) {
+func (s *gameplayService) SuggestNextLocations(ctx context.Context, team *models.Team) ([]models.Location, error) {
 	// Populate the team with the necessary data
 	err := s.TeamService.LoadRelations(ctx, team)
 	if err != nil {
@@ -164,7 +164,7 @@ func (s *gameplayService) CheckIn(ctx context.Context, team *models.Team, locati
 	}
 
 	// Find the location
-	location, err := s.LocationService.FindLocationByInstanceAndCode(ctx, team.InstanceID, locationCode)
+	location, err := s.LocationService.FindByInstanceAndCode(ctx, team.InstanceID, locationCode)
 	if err != nil {
 		msg := flash.NewWarning("Please double check the code and try again.").SetTitle("Location code not found")
 		response.AddFlashMessage(msg)
@@ -250,7 +250,7 @@ func (s *gameplayService) CheckIn(ctx context.Context, team *models.Team, locati
 
 func (s *gameplayService) CheckOut(ctx context.Context, team *models.Team, locationCode string) error {
 
-	location, err := s.LocationService.FindLocationByInstanceAndCode(ctx, team.InstanceID, locationCode)
+	location, err := s.LocationService.FindByInstanceAndCode(ctx, team.InstanceID, locationCode)
 	if err != nil {
 		return fmt.Errorf("%w: finding location: %w", ErrLocationNotFound, err)
 	}
