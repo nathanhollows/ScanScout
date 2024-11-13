@@ -328,7 +328,7 @@ templ Experience(settings models.InstanceSettings, locationCount int) {
 							<div
 								if locationCount > 2 {
 									hx-post="/admin/experience/preview"
-									hx-trigger="load, click delay:500ms from:(#movement-settings label), keyup change delay:500ms from:(#movement-settings input)"
+									hx-trigger="load, change delay:500ms from:(#movement-settings input), keyup change delay:500ms from:(#movement-settings input)"
 									hx-swap="innerHTML"
 									hx-include="#movement-settings"
 								}
