@@ -114,15 +114,24 @@ templ ActivityTracker(instance models.Instance) {
 	@announcementModal()
 	@teamModal()
 	<script>
-
 (function () {
   let map; // Store the map instance globally within the IIFE
   let markerArray = []; // Store the markers array globally within the IIFE
 
   function initializeMap() {
-    const coords = [170.5111643, -45.8650509];
-    const zoom = 17;
-
+    const locations = document.querySelectorAll('.location-name');
+    // Calculate the center and zoom level based on the locations
+    let coords = [170.5111643, -45.8650509];
+    let zoom = 17;
+    for (let i = 0; i < locations.length; i++) {
+      lat = parseFloat(locations[i].dataset.lat);
+      lng = parseFloat(locations[i].dataset.lng);
+      if (lat !== 0 && lng !== 0) {
+        coords = [lng, lat];
+        break;
+      }
+    }
+    
     // Clear any existing markers
     markerArray.forEach(marker => marker.remove());
     markerArray = [];
@@ -147,35 +156,46 @@ templ ActivityTracker(instance models.Instance) {
       style: style,
       center: coords,
       zoom: zoom,
-	  cooperativeGestures: true,
+      cooperativeGestures: true,
     });
 
-    // Find and loop through .location-name elements to create markers
-    document.querySelectorAll('.location-name').forEach(function(location) {
-      const marker = new mapboxgl.Marker()
-        .setLngLat([location.dataset.lng, location.dataset.lat]);
+    // Find and loop through .location-name elements to create markers with numbers
+    locations.forEach(function(location, index) {
+      // Create a HTML element for each marker
+      const el = document.createElement('div');
+      el.className = 'marker';
+      el.innerHTML = '<span><b>' + (index + 1) + '</b></span>';
+
+      // Create the marker
+      const marker = new mapboxgl.Marker(el)
+        .setLngLat([location.dataset.lng, location.dataset.lat])
+        .setPopup(new mapboxgl.Popup({ offset: 25 }) // Add popups
+          .setHTML('<h3>' + location.textContent + '</h3>'));
+
       markerArray.push(marker);
     });
 
     // Sort markers by latitude
     markerArray.sort(function(a, b) {
-      // If northern hemisphere, sort by descending latitude
-      return a.getLngLat().lat < 0
-        ? b.getLngLat().lat - a.getLngLat().lat
-        : a.getLngLat().lat - b.getLngLat().lat;
+      return parseFloat(b.getLngLat().lat) - parseFloat(a.getLngLat().lat);
     });
 
-    // Add markers to the map
-    markerArray.forEach(marker => marker.addTo(map));
+    // Add markers to the map in the sorted order
+    markerArray.forEach((marker, index) => {
+      // Update the marker number to match the sorted order
+      marker.getElement().querySelector('b').textContent = index + 1;
+      marker.addTo(map);
+    });
 
     // Fit the map to the bounds of the markers
-    const bounds = new mapboxgl.LngLatBounds();
-    markerArray.forEach(marker => {
-      bounds.extend(marker.getLngLat());
-    });
+    if (markerArray.length > 1) {
+      const bounds = new mapboxgl.LngLatBounds();
+      markerArray.forEach(marker => {
+        bounds.extend(marker.getLngLat());
+      });
 
-	// Disable animation easing for smoother fitBounds
-	map.fitBounds(bounds, { padding: 50, duration: 0 });
+      map.fitBounds(bounds, { padding: 50 });
+    }
   }
 
   // Initialize the map on page load
