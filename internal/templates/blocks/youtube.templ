@@ -17,7 +17,7 @@ templ youtubeAdmin(_ models.InstanceSettings, block blocks.YoutubeBlock) {
 		hx-swap="none"
 	>
 		<label
-			for={ fmt.Sprintf("md-%s", block.ID) }
+			for={ fmt.Sprintf("url-%s", block.ID) }
 			class="form-control w-full mt-5"
 		>
 			<div class="label">
@@ -26,7 +26,7 @@ templ youtubeAdmin(_ models.InstanceSettings, block blocks.YoutubeBlock) {
 			<input
 				id={ fmt.Sprintf("url-%s", block.ID) }
 				name="URL"
-				type="text"
+				type="url"
 				class="input input-bordered w-full"
 				placeholder="Youtube URL"
 				value={ block.URL }
