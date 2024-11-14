@@ -1,0 +1,24 @@
+<figure>
+<a href=\"
+\" target=\"_blank\" rel=\"noopener\"><img src=\"
+\" alt=\"
+\" title=\"
+\" class=\"rounded-2xl\"></a> 
+<img src=\"
+\" alt=\"
+\" class=\"rounded-2xl\"> 
+<figcaption class=\"text-sm text-center\">
+</figcaption>
+</figure>
+<form hx-post=\"
+\" hx-trigger=\"
+\" hx-swap=\"none\"><label for=\"
+\" class=\"form-control w-full mt-5\"><div class=\"label\"><span class=\"label-text font-bold\">Image URL</span></div><input id=\"
+\" name=\"url\" type=\"url\" class=\"input input-bordered w-full\" placeholder=\"Image URL\" value=\"
+\"></label><div class=\"flex flex-col md:flex-row gap-5\"><label for=\"
+\" class=\"form-control w-full mt-5\"><div class=\"label\"><span class=\"w-full label-text font-bold flex justify-between\">Caption  <badge class=\"badge badge-info badge-sm opacity-80\">Optional</badge></span></div><input id=\"
+\" name=\"caption\" type=\"text\" class=\"input input-bordered w-full\" placeholder=\"Caption below image\" value=\"
+\"></label> <label for=\"
+\" class=\"form-control w-full mt-5\"><div class=\"label\"><span class=\"w-full label-text font-bold flex justify-between\">Link <badge class=\"badge badge-info badge-sm opacity-80\">Optional</badge></span></div><input id=\"
+\" name=\"link\" type=\"url\" class=\"input input-bordered w-full\" placeholder=\"Link when clicked\" value=\"
+\"></label></div></form>

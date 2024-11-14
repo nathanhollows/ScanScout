@@ -1,0 +1,100 @@
+package blocks
+
+import (
+	"fmt"
+	"github.com/nathanhollows/Rapua/blocks"
+	"github.com/nathanhollows/Rapua/models"
+)
+
+templ imagePlayer(_ models.InstanceSettings, block blocks.ImageBlock) {
+	<figure>
+		if block.Link != "" {
+			<a
+				href={ templ.SafeURL(block.Link) }
+				target="_blank"
+				rel="noopener"
+			>
+				<img
+					src={ block.URL }
+					alt={ block.Caption }
+					title={ block.Caption }
+					class="rounded-2xl"
+				/>
+			</a>
+		} else {
+			<img
+				src={ block.URL }
+				alt={ block.Caption }
+				class="rounded-2xl"
+			/>
+		}
+		if block.Caption != "" {
+			<figcaption class="text-sm text-center">{ block.Caption }</figcaption>
+		}
+	</figure>
+}
+
+templ imageAdmin(_ models.InstanceSettings, block blocks.ImageBlock) {
+	<form
+		hx-post={ fmt.Sprint("/admin/locations/", block.LocationID, "/blocks/", block.ID, "/update") }
+		hx-trigger={ fmt.Sprintf("submit, keyup change from:#url-%s delay:500ms", block.ID) }
+		hx-swap="none"
+	>
+		<label
+			for={ fmt.Sprintf("url-%s", block.ID) }
+			class="form-control w-full mt-5"
+		>
+			<div class="label">
+				<span class="label-text font-bold">Image URL</span>
+			</div>
+			<input
+				id={ fmt.Sprintf("url-%s", block.ID) }
+				name="url"
+				type="url"
+				class="input input-bordered w-full"
+				placeholder="Image URL"
+				value={ block.URL }
+			/>
+		</label>
+		<div class="flex flex-col md:flex-row gap-5">
+			<label
+				for={ fmt.Sprintf("caption-%s", block.ID) }
+				class="form-control w-full mt-5"
+			>
+				<div class="label">
+					<span class="w-full label-text font-bold flex justify-between">
+						Caption 
+						<badge class="badge badge-info badge-sm opacity-80">Optional</badge>
+					</span>
+				</div>
+				<input
+					id={ fmt.Sprintf("caption-%s", block.ID) }
+					name="caption"
+					type="text"
+					class="input input-bordered w-full"
+					placeholder="Caption below image"
+					value={ block.URL }
+				/>
+			</label>
+			<label
+				for={ fmt.Sprintf("link-%s", block.ID) }
+				class="form-control w-full mt-5"
+			>
+				<div class="label">
+					<span class="w-full label-text font-bold flex justify-between">
+						Link
+						<badge class="badge badge-info badge-sm opacity-80">Optional</badge>
+					</span>
+				</div>
+				<input
+					id={ fmt.Sprintf("link-%s", block.ID) }
+					name="link"
+					type="url"
+					class="input input-bordered w-full"
+					placeholder="Link when clicked"
+					value={ block.URL }
+				/>
+			</label>
+		</div>
+	</form>
+}

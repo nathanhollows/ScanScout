@@ -51,6 +51,7 @@ type BaseBlock struct {
 
 var registeredBlocks = Blocks{
 	&MarkdownBlock{},
+	&ImageBlock{},
 	&AnswerBlock{},
 	&PincodeBlock{},
 	&ChecklistBlock{},
@@ -74,6 +75,8 @@ func CreateFromBaseBlock(baseBlock BaseBlock) (Block, error) {
 		return NewChecklistBlock(baseBlock), nil
 	case "youtube":
 		return NewYoutubeBlock(baseBlock), nil
+	case "image":
+		return NewImageBlock(baseBlock), nil
 	default:
 		return nil, fmt.Errorf("block type %s not found", baseBlock.Type)
 	}
@@ -106,6 +109,12 @@ func NewChecklistBlock(base BaseBlock) *ChecklistBlock {
 
 func NewYoutubeBlock(base BaseBlock) *YoutubeBlock {
 	return &YoutubeBlock{
+		BaseBlock: base,
+	}
+}
+
+func NewImageBlock(base BaseBlock) *ImageBlock {
+	return &ImageBlock{
 		BaseBlock: base,
 	}
 }

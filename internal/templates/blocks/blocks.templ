@@ -11,6 +11,9 @@ func RenderAdminEdit(settings models.InstanceSettings, block blocks.Block) templ
 	case "markdown":
 		b := block.(*blocks.MarkdownBlock)
 		return markdownAdmin(settings, *b)
+	case "image":
+		b := block.(*blocks.ImageBlock)
+		return imageAdmin(settings, *b)
 	case "answer":
 		b := block.(*blocks.AnswerBlock)
 		return answerAdmin(settings, *b)
@@ -32,6 +35,9 @@ func RenderPlayerView(settings models.InstanceSettings, block blocks.Block, stat
 	case "markdown":
 		b := block.(*blocks.MarkdownBlock)
 		return markdownPlayer(settings, *b)
+	case "image":
+		b := block.(*blocks.ImageBlock)
+		return imagePlayer(settings, *b)
 	case "answer":
 		b := block.(*blocks.AnswerBlock)
 		return answerPlayer(settings, *b, state)
@@ -53,6 +59,9 @@ func RenderPlayerUpdate(settings models.InstanceSettings, block blocks.Block, st
 	case "markdown":
 		b := block.(*blocks.MarkdownBlock)
 		return markdownPlayer(settings, *b)
+	case "image":
+		b := block.(*blocks.ImageBlock)
+		return imagePlayer(settings, *b)
 	case "answer":
 		b := block.(*blocks.AnswerBlock)
 		return answerPlayerUpdate(settings, *b, state)
