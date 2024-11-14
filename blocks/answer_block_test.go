@@ -21,7 +21,7 @@ func TestAnswerBlock_Getters(t *testing.T) {
 		Fuzzy:  true,
 	}
 
-	assert.Equal(t, "Answer", block.GetName())
+	assert.Equal(t, "Password", block.GetName())
 	assert.Equal(t, "answer", block.GetType())
 	assert.Equal(t, "test-id", block.GetID())
 	assert.Equal(t, "location-456", block.GetLocationID())
