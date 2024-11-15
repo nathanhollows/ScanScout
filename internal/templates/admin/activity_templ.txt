@@ -12,17 +12,7 @@
 \" hx-boost=\"true\" class=\"link flex-grow location-name\" data-lat=\"
 \" data-lng=\"
 \">
-</a> <span
- class=\"tooltip flex space-x-2 tooltip-left text-sm md:tooltip-top\"
- class=\"tooltip flex space-x-2 tooltip-left text-sm md:tooltip-top opacity-50\"
- data-tip=\"Completed check-ins\"><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"lucide lucide-map-pin-check-inside w-5 h-5\"><path d=\"M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0\"></path><path d=\"m9 10 2 2 4-4\"></path></svg> <strong>
-</strong></span> 
-<span
- class=\"tooltip flex space-x-2 tooltip-left text-sm md:tooltip-top\"
- class=\"tooltip flex space-x-2 tooltip-left text-sm md:tooltip-top opacity-50\"
- data-tip=\"Current check-ins\"><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"lucide lucide-map-pin w-5 h-5\"><path d=\"M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0\"></path><circle cx=\"12\" cy=\"10\" r=\"3\"></circle></svg> <strong>
-</strong></span>
-</div></div>
+</a></div></div>
 </div></div><div class=\"overflow-y-auto w-full\">
 </div></div>
 <script>\n(function () {\n  let map; // Store the map instance globally within the IIFE\n  let markerArray = []; // Store the markers array globally within the IIFE\n\n  function initializeMap() {\n    const locations = document.querySelectorAll('.location-name');\n    // Calculate the center and zoom level based on the locations\n    let coords = [170.5111643, -45.8650509];\n    let zoom = 17;\n    for (let i = 0; i < locations.length; i++) {\n      lat = parseFloat(locations[i].dataset.lat);\n      lng = parseFloat(locations[i].dataset.lng);\n      if (lat !== 0 && lng !== 0) {\n        coords = [lng, lat];\n        break;\n      }\n    }\n    \n    // Clear any existing markers\n    markerArray.forEach(marker => marker.remove());\n    markerArray = [];\n\n    // Destroy existing map instance if it exists\n    if (map) {\n      map.remove();\n      map = null; // Explicitly set to null to clear reference\n    }\n\n    // Set the Mapbox access token\n    mapboxgl.accessToken = document.getElementById('mapbox_key').dataset.key;\n\n    // Determine the style based on color scheme\n    const style = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches\n      ? 'mapbox://styles/nathanhollows/cl9w3nxff002m14sy9fco4vnr'\n      : 'mapbox://styles/nathanhollows/clszboe2y005i01oid8ca37jm';\n\n    // Create the map\n    map = new mapboxgl.Map({\n      container: 'map-activity',\n      style: style,\n      center: coords,\n      zoom: zoom,\n      cooperativeGestures: true,\n    });\n\n    // Find and loop through .location-name elements to create markers with numbers\n    locations.forEach(function(location, index) {\n      // Create a HTML element for each marker\n      const el = document.createElement('div');\n      el.className = 'marker';\n      el.innerHTML = '<span><b>' + (index + 1) + '</b></span>';\n\n      // Create the marker\n      const marker = new mapboxgl.Marker(el)\n        .setLngLat([location.dataset.lng, location.dataset.lat])\n        .setPopup(new mapboxgl.Popup({ offset: 25 }) // Add popups\n          .setHTML('<h3>' + location.textContent + '</h3>'));\n\n      markerArray.push(marker);\n    });\n\n    // Sort markers by latitude\n    markerArray.sort(function(a, b) {\n      return parseFloat(b.getLngLat().lat) - parseFloat(a.getLngLat().lat);\n    });\n\n    // Add markers to the map in the sorted order\n    markerArray.forEach((marker, index) => {\n      // Update the marker number to match the sorted order\n      marker.getElement().querySelector('b').textContent = index + 1;\n      marker.addTo(map);\n    });\n\n    // Fit the map to the bounds of the markers\n    if (markerArray.length > 1) {\n      const bounds = new mapboxgl.LngLatBounds();\n      markerArray.forEach(marker => {\n        bounds.extend(marker.getLngLat());\n      });\n\n      map.fitBounds(bounds, { padding: 50 });\n    }\n  }\n\n  // Initialize the map on page load\n  initializeMap();\n\n})();\n</script>
@@ -32,13 +22,13 @@
 </th>
 </tr></thead> <tbody>
 <tr class=\"hover\">
-<th scope=\"row\"><button class=\"btn btn-xs btn-ghost\" hx-get=\"
+<th scope=\"row\"><button class=\"link\" hx-get=\"
 \" hx-target=\"#team_modal .modal-box\" hx-trigger=\"click\" hx-indicator=\".loading\" hx-swap=\"innerHTML\">
  <span class=\"loading loading-spinner loading-lg\" style=\"display:none;\"></span></button></th>
 <td class=\"text-center\">
 </td>
 </tr>
-<tr><th scope=\"row\" colspan=\"100%\" class=\"text-center\">No <a href=\"/admin/teams\" hx-boost=\"true\" class=\"link\" hx-target=\"body\">teams</a> to show yet 😢</th></tr>
+<tr><th scope=\"row\" colspan=\"100%\" class=\"text-center\"><a href=\"/admin/teams\" hx-boost=\"true\" class=\"link\" hx-target=\"body\">Teams</a> will appear here once they start checking in.</th></tr>
 </tbody></table>
 <div id=\"schedule-status\" class=\"flex flex-row gap-3\">
 <a hx-get=\"/admin/schedule/stop\" hx-target=\"#schedule-status\" class=\"btn btn-outline btn-error flex join-item tooltip\" data-tip=\"Stop the game\"><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"lucide lucide-octagon-x w-5 h-5\"><path d=\"m15 9-6 6\"></path><path d=\"M2.586 16.726A2 2 0 0 1 2 15.312V8.688a2 2 0 0 1 .586-1.414l4.688-4.688A2 2 0 0 1 8.688 2h6.624a2 2 0 0 1 1.414.586l4.688 4.688A2 2 0 0 1 22 8.688v6.624a2 2 0 0 1-.586 1.414l-4.688 4.688a2 2 0 0 1-1.414.586H8.688a2 2 0 0 1-1.414-.586z\"></path><path d=\"m9 9 6 6\"></path></svg> Stop</a>
