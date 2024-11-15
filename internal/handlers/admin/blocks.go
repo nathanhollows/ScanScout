@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/go-chi/chi"
@@ -97,8 +96,6 @@ func (h *AdminHandler) BlockNewPost(w http.ResponseWriter, r *http.Request) {
 		h.handleError(w, r, "BlockNewPost: finding location", "Could not create block", "error", err)
 		return
 	}
-
-	fmt.Println("BlockNewPost: creating block", "location", location.ID, "type", blockType)
 
 	block, err := h.BlockService.NewBlock(r.Context(), location.ID, blockType)
 	if err != nil {
