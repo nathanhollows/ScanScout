@@ -6276,6 +6276,12 @@ details.collapse summary::-webkit-details-marker {
   transition-duration: 150ms;
 }
 
+/* Custom CSS */
+
+.artboard #player-nav {
+  display: none;
+}
+
 /* Basics */
 
 .mapboxgl-ctrl-geocoder,
