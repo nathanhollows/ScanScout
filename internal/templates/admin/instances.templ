@@ -23,12 +23,32 @@ templ Instances(instances []models.Instance, currentInstance models.Instance) {
 					<tr>
 						<th class="text-left">Name</th>
 						<th class="text-left">Actions</th>
+						<th class="text-left">Manage Instance</th>
 					</tr>
 				</thead>
 				<tbody>
 					for _, instance := range instances {
 						<tr class="hover">
 							<td class="font-bold">{ instance.Name }</td>
+							<td>
+								if instance.ID == currentInstance.ID {
+									<a
+										href={ templ.SafeURL(fmt.Sprint("/admin/locations/new")) }
+										class="btn btn-sm btn-secondary"
+									>
+										<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-map-pin-plus w-4 h-4"><path d="M19.914 11.105A7.298 7.298 0 0 0 20 10a8 8 0 0 0-16 0c0 4.993 5.539 10.193 7.399 11.799a1 1 0 0 0 1.202 0 32 32 0 0 0 .824-.738"></path><circle cx="12" cy="10" r="3"></circle><path d="M16 18h6"></path><path d="M19 15v6"></path></svg>
+										Add Location
+									</a>
+								} else {
+									<a
+										href={ templ.SafeURL(fmt.Sprint("/admin/instances/", fmt.Sprint(instance.ID), "/switch?redirect=/admin/locations/new")) }
+										class="btn btn-sm btn-secondary"
+									>
+										<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-map-pin-plus w-4 h-4"><path d="M19.914 11.105A7.298 7.298 0 0 0 20 10a8 8 0 0 0-16 0c0 4.993 5.539 10.193 7.399 11.799a1 1 0 0 0 1.202 0 32 32 0 0 0 .824-.738"></path><circle cx="12" cy="10" r="3"></circle><path d="M16 18h6"></path><path d="M19 15v6"></path></svg>
+										Add Location
+									</a>
+								}
+							</td>
 							<td>
 								if instance.ID == currentInstance.ID {
 									<span class="tooltip cursor-not-allowed" data-tip="Already active">
