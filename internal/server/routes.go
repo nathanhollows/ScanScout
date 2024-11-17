@@ -169,6 +169,11 @@ func setupAdminRoutes(router chi.Router, adminHandler *admin.AdminHandler) {
 		})
 		r.Use(middlewares.AdminCheckInstanceMiddleware)
 
+		r.Route("/quickstart", func(r chi.Router) {
+			r.Get("/", adminHandler.Quickstart)
+			r.Post("/dismiss", adminHandler.DismissQuickstart)
+		})
+
 		r.Get("/", adminHandler.Activity)
 		r.Route("/activity", func(r chi.Router) {
 			r.Get("/", adminHandler.Activity)

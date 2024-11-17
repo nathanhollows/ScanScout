@@ -3,6 +3,7 @@ package repositories
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/nathanhollows/Rapua/db"
 	"github.com/nathanhollows/Rapua/models"
@@ -25,6 +26,8 @@ func (r *instanceSettingsRepository) Save(ctx context.Context, settings *models.
 	if settings.InstanceID == "" {
 		return fmt.Errorf("instance ID is required")
 	}
+	settings.CreatedAt = time.Now()
+	settings.UpdatedAt = time.Now()
 	_, err := db.DB.NewInsert().Model(settings).Exec(ctx)
 	if err != nil {
 		return err
@@ -36,6 +39,7 @@ func (r *instanceSettingsRepository) Update(ctx context.Context, settings *model
 	if settings.InstanceID == "" {
 		return fmt.Errorf("instance ID is required")
 	}
+	settings.UpdatedAt = time.Now()
 	_, err := db.DB.NewUpdate().Model(settings).WherePK().Exec(ctx)
 	if err != nil {
 		return err
