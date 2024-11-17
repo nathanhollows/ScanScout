@@ -21,9 +21,52 @@ templ TeamsList(teams []models.Team) {
 		}
 	</div>
 	<!-- Show teams -->
+	<h2 class="text-xl font-bold py-5">
+		Unused team codes
+		<div class="dropdown dropdown-hover font-normal">
+			<div tabindex="0" role="button" class="btn btn-circle btn-ghost btn-xs text-info">
+				<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4 lucide lucide-info"><circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4"></path><path d="M12 8h.01"></path></svg>
+			</div>
+			<div
+				tabindex="0"
+				class="card compact dropdown-content bg-base-200 rounded-box z-[1] w-72 shadow-2xl"
+			>
+				<div tabindex="0" class="card-body">
+					<h2 class="card-title text-center">Unused team codes</h2>
+					<p>
+						These codes have not yet been registered by a team. They can still be used by new teams.
+					</p>
+				</div>
+			</div>
+		</div>
+	</h2>
 	for _, team := range teams {
 		if !team.HasStarted {
-			<span class="team-code badge badge-ghost badge-lg m-2 font-mono">{ team.Code }</span>
+			<span class="team-code badge badge-lg m-2 font-mono tracking-wider">{ team.Code }</span>
+		}
+	}
+	<h2 class="text-xl font-bold py-5">
+		Active team codes
+		<div class="dropdown dropdown-hover font-normal">
+			<div tabindex="0" role="button" class="btn btn-circle btn-ghost btn-xs text-info">
+				<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4 lucide lucide-info"><circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4"></path><path d="M12 8h.01"></path></svg>
+			</div>
+			<div
+				tabindex="0"
+				class="card compact dropdown-content bg-base-200 rounded-box z-[1] w-72 shadow-2xl"
+			>
+				<div tabindex="0" class="card-body">
+					<h2 class="card-title text-center">Active team codes</h2>
+					<p>
+						These codes have been registered by a team and are currently in use. They cannot be used by new teams.
+					</p>
+				</div>
+			</div>
+		</div>
+	</h2>
+	for _, team := range teams {
+		if team.HasStarted {
+			<span class="team-code badge badge-success badge-outline m-2 font-mono tracking-wider">{ team.Code }</span>
 		}
 	}
 }
