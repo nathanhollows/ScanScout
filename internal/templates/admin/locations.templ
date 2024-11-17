@@ -212,7 +212,9 @@ templ AddLocation(settings models.InstanceSettings) {
 				<div id="geocoder" class="geocoder mt-2"></div>
 			</label>
 		</div>
-		<div id="map" class="w-full h-96 rounded-lg shadow-lg"></div>
+		<div id="map-container" class="relative w-full aspect-square h-96 rounded-lg shadow-lg">
+			<div id="map" class="map w-full h-full rounded-lg"></div>
+		</div>
 		<div class="form-control">
 			<label class="label cursor-pointer font-bold">
 				<span class="label-text">Physical location</span>
@@ -231,6 +233,7 @@ templ AddLocation(settings models.InstanceSettings) {
 			type="hidden"
 			name="longitude"
 		/>
+		<button type="submit" class="btn btn-primary">Save</button>
 	</form>
 	@locationScript()
 }
@@ -770,20 +773,20 @@ templ locationScript() {
       marker.setLngLat(center);
     });
 
-
-		var geocoderEl = document.getElementById('geocoder');
-		if (geocoderEl) {
-			var geocoder = new MapboxGeocoder({
-				accessToken: mapboxgl.accessToken,
-				mapboxgl: mapboxgl,
-				marker: false,
-				placeholder: 'Search for an address or use the map',
-			});
-			geocoderEl.appendChild(geocoder.onAdd(map));
-		}
 	map.on('load',function(){
 	  map.resize()
 	})
+
+	var geocoderEl = document.getElementById('geocoder');
+	if (geocoderEl) {
+		var geocoder = new MapboxGeocoder({
+			accessToken: mapboxgl.accessToken,
+			mapboxgl: mapboxgl,
+			marker: false,
+			placeholder: 'Search for an address or use the map',
+		});
+		geocoderEl.appendChild(geocoder.onAdd(map));
+	}
 
     // Add event listener for location saving switch
     document.querySelector('input[name="location"]').addEventListener('change', function(e) {
