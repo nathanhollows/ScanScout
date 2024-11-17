@@ -135,6 +135,11 @@ templ ActivityTracker(instance models.Instance) {
       cooperativeGestures: true,
     });
 
+	map.on('load',function(){
+	  map.resize()
+      map.fitBounds(bounds, { padding: 50 });
+	})
+
     // Find and loop through .location-name elements to create markers with numbers
     locations.forEach(function(location, index) {
       // Create a HTML element for each marker

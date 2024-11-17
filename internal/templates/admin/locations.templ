@@ -781,6 +781,9 @@ templ locationScript() {
 			});
 			geocoderEl.appendChild(geocoder.onAdd(map));
 		}
+	map.on('load',function(){
+	  map.resize()
+	})
 
     // Add event listener for location saving switch
     document.querySelector('input[name="location"]').addEventListener('change', function(e) {
