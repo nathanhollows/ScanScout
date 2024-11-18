@@ -3466,6 +3466,19 @@ details.collapse summary::-webkit-details-marker {
   isolation: isolate;
 }
 
+@supports (color:color-mix(in oklab,black,black)) {
+  @media (hover:hover) {
+    .link-secondary:hover {
+      color: color-mix(in oklab,var(--fallback-s,oklch(var(--s)/1)) 80%,black);
+    }
+  }
+}
+
+.link-secondary {
+  --tw-text-opacity: 1;
+  color: var(--fallback-s,oklch(var(--s)/var(--tw-text-opacity)));
+}
+
 .link:focus {
   outline: 2px solid transparent;
   outline-offset: 2px;
@@ -6298,6 +6311,10 @@ details.collapse summary::-webkit-details-marker {
   padding-top: 1rem;
 }
 
+.pt-8 {
+  padding-top: 2rem;
+}
+
 .text-left {
   text-align: left;
 }
@@ -6491,6 +6508,10 @@ details.collapse summary::-webkit-details-marker {
 
 .opacity-50 {
   opacity: 0.5;
+}
+
+.bg-blend-darken {
+  background-blend-mode: darken;
 }
 
 .shadow {
