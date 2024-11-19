@@ -11,12 +11,13 @@ import (
 type Instance struct {
 	baseModel
 
-	ID        string       `bun:"id,pk,type:varchar(36)"`
-	Name      string       `bun:"name,type:varchar(255)"`
-	UserID    string       `bun:"user_id,type:varchar(36)"`
-	StartTime bun.NullTime `bun:"start_time,nullzero"`
-	EndTime   bun.NullTime `bun:"end_time,nullzero"`
-	Status    GameStatus   `bun:"-"`
+	ID                    string       `bun:"id,pk,type:varchar(36)"`
+	Name                  string       `bun:"name,type:varchar(255)"`
+	UserID                string       `bun:"user_id,type:varchar(36)"`
+	StartTime             bun.NullTime `bun:"start_time,nullzero"`
+	EndTime               bun.NullTime `bun:"end_time,nullzero"`
+	Status                GameStatus   `bun:"-"`
+	IsQuickStartDismissed bool         `bun:"is_quick_start_dismissed,type:bool"`
 
 	Teams     []Team           `bun:"rel:has-many,join:id=instance_id"`
 	Locations []Location       `bun:"rel:has-many,join:id=instance_id"`

@@ -212,7 +212,9 @@ templ AddLocation(settings models.InstanceSettings) {
 				<div id="geocoder" class="geocoder mt-2"></div>
 			</label>
 		</div>
-		<div id="map" class="w-full h-96 rounded-lg shadow-lg"></div>
+		<div id="map-container" class="relative w-full aspect-square h-96 rounded-lg shadow-lg">
+			<div id="map" class="map w-full h-full rounded-lg"></div>
+		</div>
 		<div class="form-control">
 			<label class="label cursor-pointer font-bold">
 				<span class="label-text">Physical location</span>
@@ -231,6 +233,7 @@ templ AddLocation(settings models.InstanceSettings) {
 			type="hidden"
 			name="longitude"
 		/>
+		<button type="submit" class="btn btn-primary">Save</button>
 	</form>
 	@locationScript()
 }
@@ -242,7 +245,7 @@ templ EditLocation(location models.Location, settings models.InstanceSettings, c
 		<div class="flex gap-3">
 			<div class="dropdown">
 				<div tabindex="0" role="button" class="btn btn-outline">
-					Downloads
+					Download
 					<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down w-4 h-4"><path d="m6 9 6 6 6-6"></path></svg>
 				</div>
 				<ul tabindex="0" class="dropdown-content menu bg-base-100 rounded-box z-[1] w-52 p-2 shadow">
@@ -427,12 +430,12 @@ templ EditLocation(location models.Location, settings models.InstanceSettings, c
 							<div class="block">
 								<div tabindex="0" role="button" class="btn btn-sm btn-neutral w-32 flex flex-col">
 									<svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-plus"><path d="M5 12h14"></path><path d="M12 5v14"></path></svg>
-									Add a Block
+									Add content
 								</div>
 							</div>
 							<div tabindex="0" class="dropdown-content card bg-base-200 border border-base-300 shadow-lg w-80 -ml-24 mt-3 z-50">
 								<div class="card-body">
-									<h2 class="card-title mb-3">Add a Block</h2>
+									<h2 class="card-title mb-3">Add content</h2>
 									<div class="grid grid-cols-2 grid-flow-row gap-5">
 										for _, block := range blocks.GetRegisteredBlocks() {
 											<div class="indicator w-full">
@@ -770,17 +773,20 @@ templ locationScript() {
       marker.setLngLat(center);
     });
 
+	map.on('load',function(){
+	  map.resize()
+	})
 
-		var geocoderEl = document.getElementById('geocoder');
-		if (geocoderEl) {
-			var geocoder = new MapboxGeocoder({
-				accessToken: mapboxgl.accessToken,
-				mapboxgl: mapboxgl,
-				marker: false,
-				placeholder: 'Search for an address or use the map',
-			});
-			geocoderEl.appendChild(geocoder.onAdd(map));
-		}
+	var geocoderEl = document.getElementById('geocoder');
+	if (geocoderEl) {
+		var geocoder = new MapboxGeocoder({
+			accessToken: mapboxgl.accessToken,
+			mapboxgl: mapboxgl,
+			marker: false,
+			placeholder: 'Search for an address or use the map',
+		});
+		geocoderEl.appendChild(geocoder.onAdd(map));
+	}
 
     // Add event listener for location saving switch
     document.querySelector('input[name="location"]').addEventListener('change', function(e) {

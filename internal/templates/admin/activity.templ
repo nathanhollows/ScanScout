@@ -76,30 +76,6 @@ templ ActivityTracker(instance models.Instance) {
 									data-lat={ fmt.Sprint(location.Marker.Lat) }
 									data-lng={ fmt.Sprint(location.Marker.Lng) }
 								>{ location.Marker.Name }</a>
-								<span
-									if location.TotalVisits - location.CurrentCount > 0 {
-										class="tooltip flex space-x-2 tooltip-left text-sm md:tooltip-top"
-									} else {
-										class="tooltip flex space-x-2 tooltip-left text-sm md:tooltip-top opacity-50"
-									}
-									data-tip="Completed check-ins"
-								>
-									<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-map-pin-check-inside w-5 h-5"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"></path><path d="m9 10 2 2 4-4"></path></svg>
-									<strong>{ fmt.Sprint(location.TotalVisits - location.CurrentCount) }</strong>
-								</span>
-								if instance.Settings.CompletionMethod == models.CheckInAndOut {
-									<span
-										if location.CurrentCount > 0 {
-											class="tooltip flex space-x-2 tooltip-left text-sm md:tooltip-top"
-										} else {
-											class="tooltip flex space-x-2 tooltip-left text-sm md:tooltip-top opacity-50"
-										}
-										data-tip="Current check-ins"
-									>
-										<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-map-pin w-5 h-5"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"></path><circle cx="12" cy="10" r="3"></circle></svg>
-										<strong>{ fmt.Sprint(location.CurrentCount) }</strong>
-									</span>
-								}
 							</div>
 						</div>
 					}
@@ -114,15 +90,24 @@ templ ActivityTracker(instance models.Instance) {
 	@announcementModal()
 	@teamModal()
 	<script>
-
 (function () {
   let map; // Store the map instance globally within the IIFE
   let markerArray = []; // Store the markers array globally within the IIFE
 
   function initializeMap() {
-    const coords = [170.5111643, -45.8650509];
-    const zoom = 17;
-
+    const locations = document.querySelectorAll('.location-name');
+    // Calculate the center and zoom level based on the locations
+    let coords = [170.5111643, -45.8650509];
+    let zoom = 17;
+    for (let i = 0; i < locations.length; i++) {
+      lat = parseFloat(locations[i].dataset.lat);
+      lng = parseFloat(locations[i].dataset.lng);
+      if (lat !== 0 && lng !== 0) {
+        coords = [lng, lat];
+        break;
+      }
+    }
+    
     // Clear any existing markers
     markerArray.forEach(marker => marker.remove());
     markerArray = [];
@@ -147,35 +132,51 @@ templ ActivityTracker(instance models.Instance) {
       style: style,
       center: coords,
       zoom: zoom,
-	  cooperativeGestures: true,
+      cooperativeGestures: true,
     });
 
-    // Find and loop through .location-name elements to create markers
-    document.querySelectorAll('.location-name').forEach(function(location) {
-      const marker = new mapboxgl.Marker()
-        .setLngLat([location.dataset.lng, location.dataset.lat]);
+	map.on('load',function(){
+	  map.resize()
+      map.fitBounds(bounds, { padding: 50 });
+	})
+
+    // Find and loop through .location-name elements to create markers with numbers
+    locations.forEach(function(location, index) {
+      // Create a HTML element for each marker
+      const el = document.createElement('div');
+      el.className = 'marker';
+      el.innerHTML = '<span><b>' + (index + 1) + '</b></span>';
+
+      // Create the marker
+      const marker = new mapboxgl.Marker(el)
+        .setLngLat([location.dataset.lng, location.dataset.lat])
+        .setPopup(new mapboxgl.Popup({ offset: 25 }) // Add popups
+          .setHTML('<h3>' + location.textContent + '</h3>'));
+
       markerArray.push(marker);
     });
 
     // Sort markers by latitude
     markerArray.sort(function(a, b) {
-      // If northern hemisphere, sort by descending latitude
-      return a.getLngLat().lat < 0
-        ? b.getLngLat().lat - a.getLngLat().lat
-        : a.getLngLat().lat - b.getLngLat().lat;
+      return parseFloat(b.getLngLat().lat) - parseFloat(a.getLngLat().lat);
     });
 
-    // Add markers to the map
-    markerArray.forEach(marker => marker.addTo(map));
+    // Add markers to the map in the sorted order
+    markerArray.forEach((marker, index) => {
+      // Update the marker number to match the sorted order
+      marker.getElement().querySelector('b').textContent = index + 1;
+      marker.addTo(map);
+    });
 
     // Fit the map to the bounds of the markers
-    const bounds = new mapboxgl.LngLatBounds();
-    markerArray.forEach(marker => {
-      bounds.extend(marker.getLngLat());
-    });
+    if (markerArray.length > 1) {
+      const bounds = new mapboxgl.LngLatBounds();
+      markerArray.forEach(marker => {
+        bounds.extend(marker.getLngLat());
+      });
 
-	// Disable animation easing for smoother fitBounds
-	map.fitBounds(bounds, { padding: 50, duration: 0 });
+      map.fitBounds(bounds, { padding: 50 });
+    }
   }
 
   // Initialize the map on page load
@@ -229,7 +230,7 @@ templ ActivityTeamsTable(locations []models.Location, teams []models.Team) {
 						if i == 0 {
 							<th scope="row">
 								<button
-									class="btn btn-xs btn-ghost"
+									class="link"
 									hx-get={ fmt.Sprintf("/admin/activity/team/%s", location) }
 									hx-target="#team_modal .modal-box"
 									hx-trigger="click"
@@ -253,7 +254,7 @@ templ ActivityTeamsTable(locations []models.Location, teams []models.Team) {
 						colspan="100%"
 						class="text-center"
 					>
-						No <a href="/admin/teams" hx-boost="true" class="link" hx-target="body">teams</a> to show yet 😢
+						<a href="/admin/teams" hx-boost="true" class="link" hx-target="body">Teams</a> will appear here once they start checking in.
 					</th>
 				</tr>
 			}

@@ -20,6 +20,8 @@ type InstanceRepository interface {
 	Delete(ctx context.Context, instanceID string) error
 	// FindByID finds an instance by ID
 	FindByID(ctx context.Context, id string) (*models.Instance, error)
+	// DismissQuickstart marks the user as having dismissed the quickstart
+	DismissQuickstart(ctx context.Context, userID string) error
 }
 
 type instanceRepository struct{}
@@ -119,4 +121,14 @@ func (r *instanceRepository) FindByID(ctx context.Context, id string) (*models.I
 		return nil, err
 	}
 	return instance, nil
+}
+
+// DismissQuickstart marks the user as having dismissed the quickstart
+func (r *instanceRepository) DismissQuickstart(ctx context.Context, instanceID string) error {
+	_, err := db.DB.NewUpdate().
+		Model(&models.Instance{}).
+		Set("is_quick_start_dismissed = ?", true).
+		Where("id = ?", instanceID).
+		Exec(ctx)
+	return err
 }

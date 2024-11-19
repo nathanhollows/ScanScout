@@ -65,11 +65,12 @@ func TestCreateFromBaseBlock(t *testing.T) {
 func TestGetRegisteredBlocks(t *testing.T) {
 	t.Run("returns registered blocks", func(t *testing.T) {
 		blocklist := blocks.GetRegisteredBlocks()
-		assert.Len(t, blocklist, 5)
+		assert.Len(t, blocklist, 6)
 		assert.IsType(t, &blocks.MarkdownBlock{}, blocklist[0])
-		assert.IsType(t, &blocks.AnswerBlock{}, blocklist[1])
-		assert.IsType(t, &blocks.PincodeBlock{}, blocklist[2])
-		assert.IsType(t, &blocks.ChecklistBlock{}, blocklist[3])
-		assert.IsType(t, &blocks.YoutubeBlock{}, blocklist[4])
+		assert.IsType(t, &blocks.ImageBlock{}, blocklist[1])
+		assert.IsType(t, &blocks.AnswerBlock{}, blocklist[2])
+		assert.IsType(t, &blocks.PincodeBlock{}, blocklist[3])
+		assert.IsType(t, &blocks.ChecklistBlock{}, blocklist[4])
+		assert.IsType(t, &blocks.YoutubeBlock{}, blocklist[5])
 	})
 }

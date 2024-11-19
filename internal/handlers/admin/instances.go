@@ -92,6 +92,11 @@ func (h *AdminHandler) InstanceSwitch(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if r.URL.Query().Has("redirect") {
+		h.redirect(w, r, r.URL.Query().Get("redirect"))
+		return
+	}
+
 	h.redirect(w, r, r.Header.Get("Referer"))
 }
 

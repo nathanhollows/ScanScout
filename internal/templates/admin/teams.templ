@@ -3,27 +3,9 @@ package templates
 import "github.com/nathanhollows/Rapua/models"
 
 templ TeamsList(teams []models.Team) {
-	<!-- Show alert if there are no teams -->
-	<div
-		id="teams-none-alert"
-		if len(teams) != 0 {
-			class="p-0 d-none"
-		} else {
-			class="p-5"
-		}
-		hx-swap-oob="true"
-	>
-		if len(teams) == 0 {
-			<div class="alert">
-				<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-alert-circle text-neutral"><circle cx="12" cy="12" r="10"></circle> <line x1="12" x2="12" y1="8" y2="12"></line> <line x1="12" x2="12.01" y1="16" y2="16"></line></svg>
-				<span><strong>Nothing to see!</strong> The are no teams to display. </span>
-			</div>
-		}
-	</div>
-	<!-- Show teams -->
 	for _, team := range teams {
 		if !team.HasStarted {
-			<span class="team-code badge badge-ghost badge-lg m-2 font-mono">{ team.Code }</span>
+			<span class="team-code badge badge-lg m-2 font-mono tracking-wider">{ team.Code }</span>
 		}
 	}
 }
@@ -54,8 +36,68 @@ templ Teams(teams []models.Team) {
 		</div>
 	</div>
 	<!-- Show teams, except those which have checked in -->
-	<div id="teams-list" class="w-full p-5">
-		@TeamsList(teams)
+	<div id="teams-list" class="w-full px-5">
+		<!-- Show teams -->
+		<h2 class="text-xl font-bold pb-5">
+			Unused team codes
+			<div class="dropdown dropdown-hover font-normal">
+				<div tabindex="0" role="button" class="btn btn-circle btn-ghost btn-xs text-info">
+					<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4 lucide lucide-info"><circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4"></path><path d="M12 8h.01"></path></svg>
+				</div>
+				<div
+					tabindex="0"
+					class="card compact dropdown-content bg-base-200 rounded-box z-[1] w-72 shadow-2xl"
+				>
+					<div tabindex="0" class="card-body">
+						<h2 class="card-title text-center">Unused team codes</h2>
+						<p>
+							These codes have not yet been registered by a team. They can still be used by new teams.
+						</p>
+					</div>
+				</div>
+			</div>
+		</h2>
+		if len(filter(teams, func(team models.Team) bool { return !team.HasStarted })) == 0 {
+			if len(teams) == 0 {
+				<span class="text-base-content/80">No teams to show yet! Would you like to <a href="#" class="link link-secondary bg-blend-darken" onclick="add_teams_modal.showModal()">add some teams</a>?</span>
+			} else {
+				<span>All teams have started playing! Would you like to <a href="#" class="link link-secondary bg-blend-darken" onclick="add_teams_modal.showModal()">add some more teams</a>?</span>
+			}
+		}
+		<div id="unused-teams">
+			for _, team := range teams {
+				if !team.HasStarted {
+					<span class="team-code badge badge-lg m-2 font-mono tracking-wider">{ team.Code }</span>
+				}
+			}
+		</div>
+		<h2 class="text-xl font-bold pb-5 pt-8">
+			Active team codes
+			<div class="dropdown dropdown-hover font-normal">
+				<div tabindex="0" role="button" class="btn btn-circle btn-ghost btn-xs text-info">
+					<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4 lucide lucide-info"><circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4"></path><path d="M12 8h.01"></path></svg>
+				</div>
+				<div
+					tabindex="0"
+					class="card compact dropdown-content bg-base-200 rounded-box z-[1] w-72 shadow-2xl"
+				>
+					<div tabindex="0" class="card-body">
+						<h2 class="card-title text-center">Active team codes</h2>
+						<p>
+							These codes have been registered by a team and are currently in use. They cannot be used by new teams.
+						</p>
+					</div>
+				</div>
+			</div>
+		</h2>
+		if len(filter(teams, func(team models.Team) bool { return team.HasStarted })) == 0 {
+			<span class="text-base-content/80">Teams will appear here when they start playing.</span>
+		}
+		for _, team := range teams {
+			if team.HasStarted {
+				<span class="team-code badge badge-success badge-outline m-2 font-mono tracking-wider">{ team.Code }</span>
+			}
+		}
 	</div>
 	<!-- Modal for adding teams -->
 	<dialog
@@ -67,7 +109,7 @@ templ Teams(teams []models.Team) {
 			<p class="py-4">How many teams would you like to add?</p>
 			<form
 				hx-post="/admin/teams/add"
-				hx-target="#teams-list"
+				hx-target="#unused-teams"
 				hx-swap="beforeend swap:0.5s"
 				class="join flex flex-row w-full"
 			>

@@ -3,6 +3,11 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Custom CSS */
+.artboard #player-nav {
+  @apply hidden;
+}
+
 /* Basics */
 .mapboxgl-ctrl-geocoder,
 .mapboxgl-ctrl-geocoder *,
@@ -111,6 +116,81 @@
 
 .mapboxgl-ctrl-geocoder--powered-by a:not(:hover) {
   text-decoration: none;  
+}
+
+#map-container .marker {
+  @apply w-0 h-0 text-sm;
+}
+
+#map-container .marker span {
+  @apply bg-base-100/70 backdrop-blur-md text-base-content flex w-7 h-7;
+  justify-content:center;
+  align-items:center;
+  box-sizing:border-box;
+  border:solid 2px;
+  border-radius: 0 70% 70%;
+  box-shadow:0 0 2px #000;
+  cursor: pointer;
+  transform-origin:0 0;
+  transform: rotateZ(-135deg);
+}
+
+#map-container .marker b {transform: rotateZ(135deg)}
+
+#map-container .mapboxgl-popup {
+  @apply max-w-52
+}
+
+#map-container .mapboxgl-popup-content {
+  @apply text-center;
+}
+
+#map-container .mapboxgl-popup-content {
+  @apply bg-base-content text-base-100 shadow-lg text-base rounded-md py-2 pl-4 pr-7;
+}
+
+#map-container .mapboxgl-popup-anchor-bottom .mapboxgl-popup-tip {
+  @apply border-t-base-content;
+}
+#map-container .mapboxgl-popup-anchor-top .mapboxgl-popup-tip {
+  @apply border-b-base-content;
+}
+#map-container .mapboxgl-popup-anchor-left .mapboxgl-popup-tip {
+  @apply border-r-base-content;
+}
+#map-container .mapboxgl-popup-anchor-right .mapboxgl-popup-tip {
+  @apply border-l-base-content;
+}
+
+
+#map-container .mapboxgl-popup-anchor-top-right .mapboxgl-popup-tip {
+  @apply border-b-base-content;
+}
+#map-container .mapboxgl-popup-anchor-top-right .mapboxgl-popup-content {
+  @apply rounded-tr-none;
+}
+#map-container .mapboxgl-popup-anchor-top-left .mapboxgl-popup-tip {
+  @apply border-b-base-content;
+}
+#map-container .mapboxgl-popup-anchor-top-left .mapboxgl-popup-content {
+  @apply rounded-tl-none;
+}
+#map-container .mapboxgl-popup-anchor-bottom-right .mapboxgl-popup-tip {
+  @apply border-t-base-content;
+}
+#map-container .mapboxgl-popup-anchor-bottom-right .mapboxgl-popup-content {
+  @apply rounded-br-none;
+}
+#map-container .mapboxgl-popup-anchor-bottom-left .mapboxgl-popup-tip {
+  @apply border-t-base-content;
+}
+#map-container .mapboxgl-popup-anchor-bottom-left .mapboxgl-popup-content {
+  @apply rounded-bl-none;
+}
+
+#map-container .mapboxgl-popup-close-button {
+  @apply btn btn-xs btn-ghost focus-visible:outline-none mt-2;
+  margin-right: 0.15rem;
 }
 
 /* Animation */

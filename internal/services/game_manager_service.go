@@ -508,3 +508,8 @@ func (s *GameManagerService) ScheduleGame(ctx context.Context, user *models.User
 	user.CurrentInstance = instance
 	return response
 }
+
+// DismissQuickstart marks the user as having dismissed the quickstart
+func (s *GameManagerService) DismissQuickstart(ctx context.Context, instanceID string) error {
+	return s.instanceRepo.DismissQuickstart(ctx, instanceID)
+}
