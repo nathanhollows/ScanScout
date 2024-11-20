@@ -5,6 +5,24 @@ import (
 	"github.com/nathanhollows/Rapua/models"
 )
 
+templ TeamID(team models.Team) {
+	<div id="team-id" class="flex gap-3 justify-center" hx-swap-oob="true">
+		<p>Team code: <span class="font-mono font-bold">{ team.Code }</span></p>
+		<p>
+			Team name: 
+			if team.Name == "" {
+				<a class="link" onclick="my_modal_5.showModal()">Add a name</a>
+			} else {
+				<a class="link" onclick="my_modal_5.showModal()">
+					<span class="font-mono font-bold">
+						{ team.Name }
+					</span>
+				</a>
+			}
+		</p>
+	</div>
+}
+
 templ Lobby(team models.Team) {
 	<div hx-get="/lobby" hx-swap="none" hx-trigger="every 20s, timer" hx-boost="true"></div>
 	<!-- Header -->
@@ -64,9 +82,20 @@ templ Lobby(team models.Team) {
 			@instructions(team.Instance.Settings)
 			<div class="divider mb-5"></div>
 		</div>
-		<div class="flex gap-3 justify-center">
+		<div id="team-id" class="flex gap-3 justify-center">
 			<p>Team code: <span class="font-mono font-bold">{ team.Code }</span></p>
-			<p>Team name: <span class="font-mono font-bold">{ team.Name }</span></p>
+			<p>
+				Team name: 
+				if team.Name == "" {
+					<a class="link" onclick="my_modal_5.showModal()">Add a name</a>
+				} else {
+					<a class="link" onclick="my_modal_5.showModal()">
+						<span class="font-mono font-bold">
+							{ team.Name }
+						</span>
+					</a>
+				}
+			</p>
 		</div>
 		<div class="text-center mt-12">
 			switch team.Instance.GetStatus() {
@@ -78,6 +107,29 @@ templ Lobby(team models.Team) {
 			}
 		</div>
 	</div>
+	<dialog id="my_modal_5" class="modal modal-bottom sm:modal-middle">
+		<div class="modal-box">
+			<h3 class="text-lg font-bold">Choose a team name</h3>
+			<label class="input input-bordered flex items-center gap-2 my-5">
+				Name:
+				<input form="team-name" name="name" type="text" class="grow" value={ team.Name }/>
+			</label>
+			<input form="team-name" type="hidden" name="team_id" value={ team.Code }/>
+			<div class="modal-action">
+				<form method="dialog">
+					<!-- if there is a button in form, it will close the modal -->
+					<button class="btn">Nevermind</button>
+					<button
+						class="btn btn-primary"
+						hx-post="/lobby/team-name"
+						hx-include="[form='team-name']"
+						hx-target="#team-id"
+						onclick="my_modal_5.close()"
+					>Save</button>
+				</form>
+			</div>
+		</div>
+	</dialog>
 	<style>
 	for i := range 60 {
 		{ fmt.Sprintf("[data-value=\"%d\"]", i) } {
