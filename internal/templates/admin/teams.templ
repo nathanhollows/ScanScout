@@ -1,16 +1,71 @@
 package templates
 
-import "github.com/nathanhollows/Rapua/models"
+import (
+	"fmt"
+	"github.com/nathanhollows/Rapua/models"
+)
 
 templ TeamsList(teams []models.Team) {
 	for _, team := range teams {
-		if !team.HasStarted {
-			<span class="team-code badge badge-lg m-2 font-mono tracking-wider">{ team.Code }</span>
-		}
+		@teamItem(team, "inactive")
 	}
 }
 
+templ teamItem(team models.Team, classes string) {
+	<div
+		class={ fmt.Sprint("team-item flex flex-row justify-between items-center gap-3 border border-base-300 hover:bg-base-200 rounded-lg p-3 join-item bg-transparent transition-colors ", classes) }
+	>
+		<div class="flex flex-row items-center gap-3 grow">
+			<input
+				name="team-checkbox"
+				type="checkbox"
+				class="team-checkbox checkbox checkbox-sm checkbox-primary"
+				value={ team.Code }
+				_="on htmx:afterRequest from #delete-teams
+					if me.checked
+						add .bg-danger .text-danger-content to closest .team-item
+						transition opacity to 0 then
+						remove the closest .team-item
+				"
+			/>
+			<!-- Location code -->
+			<div
+				class="tooltip cursor-pointer"
+				data-tip="Click to copy"
+				_="on click 
+					writeText(my textContent) on navigator.clipboard
+					set @data-tip to 'Copied!'
+					wait 2s
+					set @data-tip to 'Click to copy'
+					"
+			>
+				if team.HasStarted {
+					<span class="team-code badge badge-success badge-outline font-mono tracking-wider">{ team.Code }</span>
+				} else {
+					<span class="team-code badge font-mono tracking-wider">{ team.Code }</span>
+				}
+			</div>
+			<!-- Location name -->
+			if team.Name == "" {
+				<em class="flex-grow opacity-50">
+					No name set
+				</em>
+			} else {
+				<a
+					class="flex-grow"
+				>
+					{ team.Name }
+				</a>
+			}
+			if team.Points > 0 {
+				<span class="badge badge-ghost">{ fmt.Sprint( team.Points) } pts</span>
+			}
+		</div>
+	</div>
+}
+
 templ Teams(teams []models.Team) {
+	<span class="hidden bg-danger text-danger-content border-error"></span>
 	<div class="flex flex-col gap-3 md:flex-row justify-between items-center w-full p-5">
 		<h1 class="text-2xl font-bold">
 			Teams
@@ -35,69 +90,183 @@ templ Teams(teams []models.Team) {
 			</button>
 		</div>
 	</div>
-	<!-- Show teams, except those which have checked in -->
-	<div id="teams-list" class="w-full px-5">
-		<!-- Show teams -->
-		<h2 class="text-xl font-bold pb-5">
-			Unused team codes
-			<div class="dropdown dropdown-hover font-normal">
-				<div tabindex="0" role="button" class="btn btn-circle btn-ghost btn-xs text-info">
-					<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4 lucide lucide-info"><circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4"></path><path d="M12 8h.01"></path></svg>
-				</div>
-				<div
-					tabindex="0"
-					class="card compact dropdown-content bg-base-200 rounded-box z-[1] w-72 shadow-2xl"
-				>
-					<div tabindex="0" class="card-body">
-						<h2 class="card-title text-center">Unused team codes</h2>
-						<p>
-							These codes have not yet been registered by a team. They can still be used by new teams.
-						</p>
-					</div>
+	<div id="teams-list" class="join join-vertical w-full px-5 rounded-lg">
+		<div class="flex flex-row items-center gap-3 border border-base-300 bg-base-200/80 rounded p-3 py-4 join-item">
+			<!-- Select all -->
+			<input
+				id="select-all"
+				type="checkbox"
+				class="checkbox checkbox-sm checkbox-primary"
+				_="on change or load
+						set <.team-item:not(.hidden) input[name='team-checkbox']/>'s checked to my checked
+						if my checked or my indeterminate
+							add .hidden to #team-filters
+							remove .hidden from #team-actions
+						else
+							add .hidden to #team-actions
+							remove .hidden from #team-filters
+					end
+					on change from <input[name='team-checkbox']/>
+						if <input[name='team-checkbox']:checked/>'s length is not <input[name='team-checkbox']/>'s length
+							set my indeterminate to true
+						end
+						if <input[name='team-checkbox']:checked/>'s length is 0
+							set my indeterminate to false
+							set my checked to false
+						end
+						if <input[name='team-checkbox']:checked/>'s length is <input[name='team-checkbox']/>'s length
+							set my indeterminate to false
+							set my checked to true
+						end
+						if my checked or my indeterminate
+							add .hidden to #team-filters
+							remove .hidden from #team-actions
+						else
+							add .hidden to #team-actions
+							remove .hidden from #team-filters
+					end
+					on htmx:afterRequest from #delete-teams
+						wait 0.5s
+						if me.checked
+							set me.checked to false
+							set me.indeterminate to false
+							remove .hidden from #team-filters
+							add .hidden to #team-actions
+					"
+			/>
+			<div id="team-actions" class="hidden flex flex-row flex-grow gap-3 items-center justify-between">
+				<span class="font-bold text-base-content text-sm">
+					Selected: 
+					<span
+						class="font-bold text-base-content/60"
+						_="on change from <input[type='checkbox']/>
+							set my textContent to <input[name='team-checkbox']:checked/>'s length"
+					></span>
+				</span>
+				<div class="flex flex-row gap-2">
+					<button
+						class="btn btn-sm btn-outline"
+						_="on click
+						set list to []
+						repeat for x in <input[name='team-checkbox']:checked/>
+							append x's value to list
+						end
+						writeText(list.join('\n')) on navigator.clipboard
+						set my textContent to 'Copied!'
+						wait 1.5s
+						set my textContent to 'Copy Codes'
+					"
+					>Copy Codes</button>
+					<button
+						id="delete-teams"
+						class="btn btn-sm btn-error btn-outline"
+						hx-post="/admin/teams/delete"
+						hx-include=".team-item"
+						hx-swap="none"
+						_="on mouseover
+						repeat for x in <input[name='team-checkbox']:checked/>
+							add .border-error .z-10 to x.closest('.team-item')
+						end
+						on mouseout
+							repeat for x in <input[name='team-checkbox']:checked/>
+								remove .border-error .z-10 from x.closest('.team-item')
+						end
+						on click
+							set #select-all's indeterminate to false
+					"
+					>Delete</button>
 				</div>
 			</div>
-		</h2>
-		if len(filter(teams, func(team models.Team) bool { return !team.HasStarted })) == 0 {
-			if len(teams) == 0 {
-				<span class="text-base-content/80">No teams to show yet! Would you like to <a href="#" class="link link-secondary bg-blend-darken" onclick="add_teams_modal.showModal()">add some teams</a>?</span>
-			} else {
-				<span>All teams have started playing! Would you like to <a href="#" class="link link-secondary bg-blend-darken" onclick="add_teams_modal.showModal()">add some more teams</a>?</span>
-			}
-		}
-		<div id="unused-teams">
-			for _, team := range teams {
-				if !team.HasStarted {
-					<span class="team-code badge badge-lg m-2 font-mono tracking-wider">{ team.Code }</span>
-				}
-			}
+			<div id="team-filters" class="flex flex-grow flex-row justify-between">
+				<!-- Active/Inactive count -->
+				<div class="flex gap-3 items-center flex-row">
+					<a
+						href="#"
+						class="font-bold text-base-content text-sm"
+						_="on click
+						if I do not match .opacity-60 and (next <a/>) matches .opacity-60
+							remove .opacity-60 from next <a/>
+							remove .hidden from <.team-item.inactive/>
+						else
+							add .opacity-60 to next <a/>
+							remove .opacity-60 from me
+							remove .hidden from <.team-item.active/>
+							add .hidden to <.team-item.inactive/>
+						end"
+					>
+						<span _="on htmx:afterSettle from body set my textContent to <.team-item.active/>'s length">
+							{ fmt.Sprint(len(filter(teams, func(team models.Team) bool { return team.HasStarted }))) }
+						</span>
+						Active
+					</a>
+					<a
+						href="#"
+						class="font-bold text-sm"
+						_="on click
+						if I do not match .opacity-60 and (previous <a/>) matches .opacity-60
+							remove .opacity-60 from previous <a/>
+							remove .hidden from <.team-item.active/>
+						else
+							add .opacity-60 to previous <a/>
+							remove .opacity-60 from me
+							remove .hidden from <.team-item.inactive/>
+							add .hidden to <.team-item.active/>
+						end"
+					>
+						<span _="on htmx:afterSettle from body or htmx:afterRequest from #delete-teams wait 0.5s set my textContent to <.team-item.inactive/>'s length">
+							{ fmt.Sprint(len(filter(teams, func(team models.Team) bool { return !team.HasStarted }))) }
+						</span>
+						Inactive
+					</a>
+				</div>
+				<!-- Search -->
+				<label class="input input-bordered input-sm flex items-center gap-2">
+					<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-search w-4 h-4"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg>
+					<input
+						type="text"
+						class="grow"
+						placeholder="Search"
+						_="on input 
+							show .team-item
+								when its textContent.toLowerCase().normalize('NFD')
+								contains my value.toLowerCase().normalize('NFD')"
+					/>
+				</label>
+			</div>
 		</div>
-		<h2 class="text-xl font-bold pb-5 pt-8">
-			Active team codes
-			<div class="dropdown dropdown-hover font-normal">
-				<div tabindex="0" role="button" class="btn btn-circle btn-ghost btn-xs text-info">
-					<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4 lucide lucide-info"><circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4"></path><path d="M12 8h.01"></path></svg>
-				</div>
-				<div
-					tabindex="0"
-					class="card compact dropdown-content bg-base-200 rounded-box z-[1] w-72 shadow-2xl"
-				>
-					<div tabindex="0" class="card-body">
-						<h2 class="card-title text-center">Active team codes</h2>
-						<p>
-							These codes have been registered by a team and are currently in use. They cannot be used by new teams.
-						</p>
-					</div>
-				</div>
-			</div>
-		</h2>
-		if len(filter(teams, func(team models.Team) bool { return team.HasStarted })) == 0 {
-			<span class="text-base-content/80">Teams will appear here when they start playing.</span>
+		for _, team := range filter(teams, func(team models.Team) bool { return team.HasStarted }) {
+			@teamItem(team, "active")
 		}
-		for _, team := range teams {
-			if team.HasStarted {
-				<span class="team-code badge badge-success badge-outline m-2 font-mono tracking-wider">{ team.Code }</span>
+		for _, team := range filter(teams, func(team models.Team) bool { return !team.HasStarted }) {
+			@teamItem(team, "inactive")
+		}
+		<div
+			if len(teams) == 0 {
+				class="no-teams flex flex-row justify-between items-center gap-3 border border-base-300 hover:bg-base-200 rounded-lg p-3 join-item bg-transparent transition-colors"
+			} else {
+				class="no-teams flex flex-row justify-between items-center gap-3 border border-base-300 hover:bg-base-200 rounded-lg p-3 join-item bg-transparent transition-colors hidden"
 			}
-		}
+			_="on htmx:afterSettle from body
+				if <.team-item/>'s length == 0
+					remove .hidden from me
+				else
+					add .hidden to me
+				end
+				on htmx:afterRequest from body
+					wait 0.5s
+					if <.team-item/>'s length == 0
+						remove .hidden from me
+					else
+						add .hidden to me
+					end
+				"
+		>
+			<div class="flex flex-row items-center gap-3 grow">
+				<p class="flex-grow text-center">
+					No teams to show yet. Do you want to <a href="#" class="link" onclick="add_teams_modal.showModal()">add some teams</a>?
+				</p>
+			</div>
+		</div>
 	</div>
 	<!-- Modal for adding teams -->
 	<dialog
@@ -109,7 +278,7 @@ templ Teams(teams []models.Team) {
 			<p class="py-4">How many teams would you like to add?</p>
 			<form
 				hx-post="/admin/teams/add"
-				hx-target="#unused-teams"
+				hx-target="#teams-list"
 				hx-swap="beforeend swap:0.5s"
 				class="join flex flex-row w-full"
 			>
