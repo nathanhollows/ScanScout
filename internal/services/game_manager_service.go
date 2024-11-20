@@ -12,7 +12,6 @@ import (
 	"time"
 
 	"github.com/nathanhollows/Rapua/db"
-	"github.com/nathanhollows/Rapua/helpers"
 	"github.com/nathanhollows/Rapua/internal/flash"
 	"github.com/nathanhollows/Rapua/internal/repositories"
 	"github.com/nathanhollows/Rapua/models"
@@ -203,31 +202,6 @@ func (s *GameManagerService) DeleteInstance(ctx context.Context, user *models.Us
 	}
 
 	response.AddFlashMessage(*flash.NewSuccess("Instance deleted!"))
-	return response
-}
-
-func (s *GameManagerService) AddTeams(ctx context.Context, instanceID string, count int) (response ServiceResponse) {
-	response = ServiceResponse{}
-	response.Data = make(map[string]interface{})
-	if count < 1 {
-		response.AddFlashMessage(*flash.NewError("Please enter a valid number of teams (1 or more)"))
-		return response
-	}
-
-	teams := make([]models.Team, count)
-	for i := 0; i < count; i++ {
-		teams[i] = models.Team{
-			Code:       helpers.NewCode(4),
-			InstanceID: instanceID,
-		}
-	}
-	_, err := db.DB.NewInsert().Model(&teams).Exec(ctx)
-	if err != nil {
-		response.AddFlashMessage(*flash.NewError("Error adding teams"))
-		response.Error = fmt.Errorf("AddTeams save teams: %w", err)
-		return response
-	}
-	response.Data["teams"] = teams
 	return response
 }
 
