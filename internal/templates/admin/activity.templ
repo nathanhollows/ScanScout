@@ -462,7 +462,7 @@ templ TeamActivity(settings models.InstanceSettings, team models.Team, notificat
 				<ul>
 					for _, location := range nextLocations {
 						<li>
-							{ location.Marker.Name }
+							{ location.Name }
 							if settings.NavigationMethod.String() == "Show Clues" {
 								for _, clue := range location.Clues {
 									<blockquote class="text-sm"><p>{ clue.Content }</p></blockquote>
