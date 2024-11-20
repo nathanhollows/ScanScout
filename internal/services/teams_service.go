@@ -14,9 +14,9 @@ type TeamService interface {
 	// Update updates a team in the database
 	Update(ctx context.Context, team *models.Team) error
 	// Delete removes a team from the database
-	Delete(ctx context.Context, teamCode string) error
+	Delete(ctx context.Context, instanceID string, teamCode string) error
 	// AddTeams adds teams to the database
-	AddTeams(ctx context.Context, instanceID string, count int) error
+	AddTeams(ctx context.Context, instanceID string, count int) ([]models.Team, error)
 	// AwardPoints awards points to a team
 	AwardPoints(ctx context.Context, team *models.Team, points int, reason string) error
 	// LoadRelation loads relations for a team
@@ -62,12 +62,13 @@ func (s *teamService) Update(ctx context.Context, team *models.Team) error {
 }
 
 // Delete removes a team from the database
-func (s *teamService) Delete(ctx context.Context, teamCode string) error {
-	return s.teamRepo.Delete(ctx, teamCode)
+func (s *teamService) Delete(ctx context.Context, instanceID string, teamCode string) error {
+	return s.teamRepo.Delete(ctx, instanceID, teamCode)
 }
 
 // AddTeams generates and inserts teams in batches, retrying if unique constraint errors occur
-func (s *teamService) AddTeams(ctx context.Context, instanceID string, count int) error {
+func (s *teamService) AddTeams(ctx context.Context, instanceID string, count int) ([]models.Team, error) {
+	var newTeams []models.Team
 	for i := 0; i < count; i += s.batchSize {
 		size := min(s.batchSize, count-i)
 		teams := make([]models.Team, 0, size)
@@ -97,11 +98,12 @@ func (s *teamService) AddTeams(ctx context.Context, instanceID string, count int
 				i -= s.batchSize // Retry this batch
 				continue
 			}
-			return err // Return on other errors
+			return nil, err
 		}
+		newTeams = append(newTeams, teams...)
 	}
 
-	return nil
+	return newTeams, nil
 }
 
 // Helper function to check for code uniqueness within a batch

@@ -5,7 +5,6 @@ import (
 	"strconv"
 
 	admin "github.com/nathanhollows/Rapua/internal/templates/admin"
-	"github.com/nathanhollows/Rapua/models"
 )
 
 func (h *AdminHandler) Teams(w http.ResponseWriter, r *http.Request) {
@@ -20,7 +19,6 @@ func (h *AdminHandler) Teams(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *AdminHandler) TeamsAdd(w http.ResponseWriter, r *http.Request) {
-
 	user := h.UserFromContext(r.Context())
 
 	if err := r.ParseForm(); err != nil {
@@ -36,15 +34,31 @@ func (h *AdminHandler) TeamsAdd(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Add the teams
-	response := h.GameManagerService.AddTeams(r.Context(), user.CurrentInstanceID, count)
-	if response.Error != nil {
-		h.handleError(w, r, "TeamsAdd adding teams", "Error adding teams", "error", response.Error, "instance_id", user.CurrentInstanceID, "count", count)
-		return
-	}
+	teams, err := h.TeamService.AddTeams(r.Context(), user.CurrentInstanceID, count)
 
-	teams := response.Data["teams"].([]models.Team)
 	err = admin.TeamsList(teams).Render(r.Context(), w)
 	if err != nil {
 		h.Logger.Error("TeamsAdd rendering teams list", "error", err.Error(), "instance_id", user.CurrentInstanceID)
 	}
+}
+
+func (h *AdminHandler) TeamsDelete(w http.ResponseWriter, r *http.Request) {
+	user := h.UserFromContext(r.Context())
+	r.ParseForm()
+
+	teamID := r.Form["team-checkbox"]
+	if len(teamID) == 0 {
+		h.handleError(w, r, "TeamsDelete no team_id", "Error deleting team", "error", nil, "instance_id", user.CurrentInstanceID)
+		return
+	}
+
+	for _, id := range teamID {
+		err := h.TeamService.Delete(r.Context(), user.CurrentInstanceID, id)
+		if err != nil {
+			h.handleError(w, r, "TeamsDelete deleting team", "Error deleting team", "error", err, "instance_id", user.CurrentInstanceID, "team_id", teamID)
+			return
+		}
+	}
+
+	h.handleSuccess(w, r, "Team(s) deleted")
 }

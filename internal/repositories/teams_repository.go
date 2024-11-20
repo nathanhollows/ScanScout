@@ -15,7 +15,7 @@ type TeamRepository interface {
 	// Update saves or updates a team in the database
 	Update(ctx context.Context, t *models.Team) error
 	// Delete removes the team from the database
-	Delete(ctx context.Context, teamCode string) error
+	Delete(ctx context.Context, instanceID string, teamCode string) error
 	// DeleteByInstanceID removes all teams for an instance
 	DeleteByInstanceID(ctx context.Context, instanceID string) error
 	// FindAll returns all teams for an instance
@@ -51,8 +51,12 @@ func (r *teamRepository) Update(ctx context.Context, t *models.Team) error {
 	return err
 }
 
-func (r *teamRepository) Delete(ctx context.Context, teamCode string) error {
-	_, err := db.DB.NewDelete().Model(&models.Team{Code: teamCode}).WherePK().Exec(ctx)
+func (r *teamRepository) Delete(ctx context.Context, instanceID string, teamCode string) error {
+	_, err := db.DB.
+		NewDelete().
+		Model(&models.Team{}).
+		Where("code = ? AND instance_id = ?", teamCode, instanceID).
+		Exec(ctx)
 	return err
 }
 
