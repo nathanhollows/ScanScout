@@ -50,7 +50,7 @@ templ LocationsIndex(settings models.InstanceSettings, locations []models.Locati
 			if settings.NavigationMode == models.OrderedNav {
 				class="join join-vertical w-full shadow sortable"
 			} else {
-				class="join join-vertical w-full shadow"
+				class="join join-vertical w-full"
 			}
 			hx-post="/admin/locations/reorder"
 			hx-trigger="end"
