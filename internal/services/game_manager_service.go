@@ -248,6 +248,7 @@ func (s *GameManagerService) CreateLocation(ctx context.Context, user *models.Us
 	lat := data["latitude"]
 	lng := data["longitude"]
 	points := data["points"]
+	marker := data["marker"]
 
 	var latFloat, lngFloat float64
 	var err error
@@ -270,7 +271,32 @@ func (s *GameManagerService) CreateLocation(ctx context.Context, user *models.Us
 		}
 	}
 
-	return s.locationService.CreateLocation(ctx, user.CurrentInstanceID, name, latFloat, lngFloat, pointsInt)
+	if marker == "" {
+		return s.locationService.CreateLocation(ctx, user.CurrentInstanceID, name, latFloat, lngFloat, pointsInt)
+	}
+
+	instances, err := s.GetInstanceIDsForUser(ctx, user.ID)
+	if err != nil {
+		return models.Location{}, fmt.Errorf("getting instances for user: %w", err)
+	}
+
+	markers, err := s.markerRepo.FindNotInInstance(ctx, user.CurrentInstanceID, instances)
+	if err != nil {
+		return models.Location{}, fmt.Errorf("finding markers not in instance: %w", err)
+	}
+
+	markerExists := false
+	for _, m := range markers {
+		if m.Code == marker {
+			markerExists = true
+			break
+		}
+	}
+	if !markerExists {
+		return models.Location{}, errors.New("marker does not exist")
+	}
+
+	return s.locationService.CreateLocationFromMarker(ctx, user.CurrentInstanceID, name, latFloat, lngFloat, pointsInt, marker)
 
 }
 
@@ -486,4 +512,17 @@ func (s *GameManagerService) ScheduleGame(ctx context.Context, user *models.User
 // DismissQuickstart marks the user as having dismissed the quickstart
 func (s *GameManagerService) DismissQuickstart(ctx context.Context, instanceID string) error {
 	return s.instanceRepo.DismissQuickstart(ctx, instanceID)
+}
+
+func (s *GameManagerService) GetInstanceIDsForUser(ctx context.Context, userID string) ([]string, error) {
+	instances, err := s.instanceRepo.FindByUserID(ctx, userID)
+	if err != nil {
+		return nil, fmt.Errorf("finding instances for user: %w", err)
+	}
+
+	ids := make([]string, len(instances))
+	for i, instance := range instances {
+		ids[i] = instance.ID
+	}
+	return ids, nil
 }

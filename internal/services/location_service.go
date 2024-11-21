@@ -12,6 +12,7 @@ type LocationService interface {
 	FindByID(ctx context.Context, locationID string) (*models.Location, error)
 	FindByInstanceAndCode(ctx context.Context, instanceID string, code string) (*models.Location, error)
 	FindByInstance(ctx context.Context, instanceID string) ([]models.Location, error)
+	FindMarkersNotInInstance(ctx context.Context, instanceID string, otherInstances []string) ([]models.Marker, error)
 	LoadCluesForLocation(ctx context.Context, location *models.Location) error
 	LoadCluesForLocations(ctx context.Context, locations *[]models.Location) error
 	LoadRelations(ctx context.Context, location *models.Location) error
@@ -20,6 +21,7 @@ type LocationService interface {
 	UpdateName(ctx context.Context, location *models.Location, name string) error
 	UpdateLocation(ctx context.Context, location *models.Location, data LocationUpdateData) error
 	CreateLocation(ctx context.Context, instanceID, name string, lat, lng float64, points int) (models.Location, error)
+	CreateLocationFromMarker(ctx context.Context, instanceID, name string, lat, lng float64, points int, markerCode string) (models.Location, error)
 	CreateMarker(ctx context.Context, name string, lat, lng float64) (models.Marker, error)
 	DuplicateLocation(ctx context.Context, location *models.Location, newInstanceID string) (models.Location, error)
 	DeleteLocation(ctx context.Context, locationID string) error
@@ -69,6 +71,15 @@ func (s locationService) FindByInstance(ctx context.Context, instanceID string) 
 		return nil, fmt.Errorf("finding all locations: %v", err)
 	}
 	return locations, nil
+}
+
+// FindMarkersNotInInstance finds all markers that are not in the given instance
+func (s locationService) FindMarkersNotInInstance(ctx context.Context, instanceID string, otherInstances []string) ([]models.Marker, error) {
+	markers, err := s.markerRepo.FindNotInInstance(ctx, instanceID, otherInstances)
+	if err != nil {
+		return nil, fmt.Errorf("finding markers not in instance: %v", err)
+	}
+	return markers, nil
 }
 
 // LoadCluesForLocation loads the clues for a specific location if they are not already loaded
@@ -195,6 +206,27 @@ func (s locationService) CreateLocation(ctx context.Context, instanceID, name st
 	marker, err := s.CreateMarker(ctx, name, lat, lng)
 	if err != nil {
 		return models.Location{}, fmt.Errorf("creating marker: %v", err)
+	}
+
+	location := models.Location{
+		Name:       name,
+		InstanceID: instanceID,
+		MarkerID:   marker.Code,
+		Points:     points,
+	}
+	err = s.locationRepo.Save(ctx, &location)
+	if err != nil {
+		return models.Location{}, fmt.Errorf("saving location: %v", err)
+	}
+
+	return location, nil
+}
+
+// CreateLocationFromMarker creates a new location from an existing marker
+func (s locationService) CreateLocationFromMarker(ctx context.Context, instanceID, name string, lat, lng float64, points int, markerCode string) (models.Location, error) {
+	marker, err := s.markerRepo.FindByCode(ctx, markerCode)
+	if err != nil {
+		return models.Location{}, fmt.Errorf("finding marker: %v", err)
 	}
 
 	location := models.Location{
