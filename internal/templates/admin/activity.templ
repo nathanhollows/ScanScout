@@ -451,7 +451,7 @@ templ TeamActivity(settings models.InstanceSettings, team models.Team, notificat
 	<h3 class="text-lg font-bold">
 		{ team.Code }
 		if team.Name != "" {
-			| { team.Name }
+			∕ { team.Name }
 		}
 	</h3>
 	<!-- Next Locations -->
