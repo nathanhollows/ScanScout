@@ -5395,10 +5395,6 @@ details.collapse summary::-webkit-details-marker {
   z-index: 1;
 }
 
-.col-span-2 {
-  grid-column: span 2 / span 2;
-}
-
 .m-1 {
   margin: 0.25rem;
 }
@@ -5648,10 +5644,6 @@ details.collapse summary::-webkit-details-marker {
   height: 100vh;
 }
 
-.h-56 {
-  height: 14rem;
-}
-
 .min-h-full {
   min-height: 100%;
 }
@@ -5893,10 +5885,6 @@ details.collapse summary::-webkit-details-marker {
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
-.grid-cols-3 {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-}
-
 .flex-row {
   flex-direction: row;
 }
@@ -6049,10 +6037,6 @@ details.collapse summary::-webkit-details-marker {
   overflow-y: auto;
 }
 
-.overflow-x-scroll {
-  overflow-x: scroll;
-}
-
 .overflow-y-scroll {
   overflow-y: scroll;
 }
@@ -6183,6 +6167,10 @@ details.collapse summary::-webkit-details-marker {
 
 .bg-transparent {
   background-color: transparent;
+}
+
+.bg-base-200\/50 {
+  background-color: var(--fallback-b2,oklch(var(--b2)/0.5));
 }
 
 .bg-opacity-70 {
@@ -6673,10 +6661,6 @@ details.collapse summary::-webkit-details-marker {
   transition-property: opacity;
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
   transition-duration: 150ms;
-}
-
-.\[--tab-bg\:secondary\] {
-  --tab-bg: secondary;
 }
 
 /* Custom CSS */
@@ -7737,6 +7721,20 @@ details.collapse summary::-webkit-details-marker {
   to {
     transform: rotate(360deg);
   }
+}
+
+/* Docs */
+
+.anchor {
+  text-decoration-line: none;
+  opacity: 0.5;
+  transition-property: opacity;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+}
+
+.anchor:hover {
+  opacity: 1;
 }
 
 @media (hover: hover) {

@@ -159,6 +159,10 @@ func setupPublicRoutes(router chi.Router, publicHandler *public.PublicHandler) {
 		r.Post("/resend", publicHandler.ResendEmailVerification)
 	})
 
+	router.Route("/docs", func(r chi.Router) {
+		r.Get("/*", publicHandler.Docs)
+	})
+
 	router.NotFound(publicHandler.NotFound)
 
 }

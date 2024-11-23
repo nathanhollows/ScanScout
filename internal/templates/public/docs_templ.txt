@@ -1,0 +1,17 @@
+<li><a href=\"
+\"
+ class=\"active\"
+>
+</a> 
+<ul>
+</ul>
+</li>
+<main class=\"max-w-7xl m-auto pb-8\"><!-- Menu and content w/ flex--><div class=\"flex flex-col md:flex-row w-full gap-8 p-5\"><div class=\"w-min-content\"><ul hx-boost=\"true\" class=\"menu bg-base-200 rounded-box w-56\">
+</ul></div><section class=\"w-full prose\">
+</section><div class=\"w-min-content\"><ul id=\"menu\" class=\"menu bg-base-200 rounded-box w-72 sticky top-12\"><li><a class=\"menu-title\">Table of Contents</a><ul>
+<li><a href=\"
+\">
+</a></li>
+</ul></li></ul></div></div></main><style>\n.prose pre code{\n  text-wrap: auto;\n  display: inline-flex;\n  padding-right: 4em;\n}\n.mockup-code pre {\n  overflow: hidden;\n}\n</style><script>\ndocument.addEventListener(\"DOMContentLoaded\", function () {\n  const menuLinks = document.querySelectorAll(\"#menu a\");\n  const sections = document.querySelectorAll(\"section h1, section h2\");\n  const scrollMargin = 3 * 16; // 3rem in pixels\n\n  function onScroll() {\n    let scrollPos = window.scrollY || document.documentElement.scrollTop || document.body.scrollTop;\n    let offset = scrollMargin; // Offset for highlighting\n\n    sections.forEach(section => {\n      let top = section.offsetTop - offset;\n      let bottom = top + section.offsetHeight;\n\n      if (scrollPos >= top && scrollPos <= bottom) {\n        menuLinks.forEach(link => {\n          link.classList.remove(\"active\");\n          if (link.getAttribute(\"href\").substring(1) === section.id) {\n            link.classList.add(\"active\");\n          }\n        });\n      }\n    });\n  }\n\n  function onClick(event) {\n    menuLinks.forEach(link => link.classList.remove(\"active\"));\n    event.currentTarget.classList.add(\"active\");\n  }\n\n  // Initial scroll spy activation\n  window.addEventListener(\"scroll\", onScroll);\n\n  // Refresh active state on menu click\n  menuLinks.forEach(link => {\n    link.addEventListener(\"click\", function (event) {\n      onClick(event);\n      setTimeout(onScroll, 100); // Re-run onScroll after a short delay\n    });\n  });\n});\n</script>
+<div class=\"prose w-full\">
+</div>

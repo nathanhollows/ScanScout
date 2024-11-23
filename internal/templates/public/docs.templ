@@ -1,0 +1,112 @@
+package templates
+
+import (
+	"github.com/nathanhollows/Rapua/services"
+	"html/template"
+)
+
+templ recursiveSidebar(topPage *services.DocPage, page *services.DocPage, sidebar []*services.DocPage) {
+	<li>
+		<a
+			href={ templ.SafeURL(page.URL) }
+			if topPage.URL == page.URL && len(page.Children) == 0 {
+				class="active"
+			}
+		>{ page.Title }</a>
+		if len(page.Children) > 0 {
+			<ul>
+				for _, child := range page.Children {
+					@recursiveSidebar(topPage, child, sidebar)
+				}
+			</ul>
+		}
+	</li>
+}
+
+templ Docs(page *services.DocPage, sidebar []*services.DocPage) {
+	<main class="max-w-7xl m-auto pb-8">
+		<!-- Menu and content w/ flex-->
+		<div class="flex flex-col md:flex-row w-full gap-8 p-5">
+			<div class="w-min-content">
+				<ul hx-boost="true" class="menu bg-base-200 rounded-box w-56">
+					for _, item := range sidebar {
+						@recursiveSidebar(page, item, sidebar)
+					}
+				</ul>
+			</div>
+			<section class="w-full prose">
+				@templ.Raw(stringToMarkdown(page.Content))
+			</section>
+			<div class="w-min-content">
+				<ul id="menu" class="menu bg-base-200 rounded-box w-72 sticky top-12">
+					<li>
+						<a class="menu-title">Table of Contents</a>
+						<ul>
+							for _, item := range page.Headings {
+								<li><a href={ templ.SafeURL("#" + item.ID) }>{ item.Text }</a></li>
+							}
+						</ul>
+					</li>
+				</ul>
+			</div>
+		</div>
+	</main>
+	<style>
+.prose pre code{
+  text-wrap: auto;
+  display: inline-flex;
+  padding-right: 4em;
+}
+.mockup-code pre {
+  overflow: hidden;
+}
+</style>
+	<script>
+document.addEventListener("DOMContentLoaded", function () {
+  const menuLinks = document.querySelectorAll("#menu a");
+  const sections = document.querySelectorAll("section h1, section h2");
+  const scrollMargin = 3 * 16; // 3rem in pixels
+
+  function onScroll() {
+    let scrollPos = window.scrollY || document.documentElement.scrollTop || document.body.scrollTop;
+    let offset = scrollMargin; // Offset for highlighting
+
+    sections.forEach(section => {
+      let top = section.offsetTop - offset;
+      let bottom = top + section.offsetHeight;
+
+      if (scrollPos >= top && scrollPos <= bottom) {
+        menuLinks.forEach(link => {
+          link.classList.remove("active");
+          if (link.getAttribute("href").substring(1) === section.id) {
+            link.classList.add("active");
+          }
+        });
+      }
+    });
+  }
+
+  function onClick(event) {
+    menuLinks.forEach(link => link.classList.remove("active"));
+    event.currentTarget.classList.add("active");
+  }
+
+  // Initial scroll spy activation
+  window.addEventListener("scroll", onScroll);
+
+  // Refresh active state on menu click
+  menuLinks.forEach(link => {
+    link.addEventListener("click", function (event) {
+      onClick(event);
+      setTimeout(onScroll, 100); // Re-run onScroll after a short delay
+    });
+  });
+});
+</script>
+}
+
+templ MarkdownPreview(md template.HTML) {
+	<div class="prose w-full">
+		@templ.Raw(md)
+	</div>
+}
