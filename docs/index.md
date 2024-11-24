@@ -1,5 +1,5 @@
 ---
-title: "Introduction"
+title: "Overview"
 sidebar: true
 order: 1
 ---
@@ -10,24 +10,16 @@ order: 1
 
 Rapua is the culmination of years of research and development in the field of educational games. I have worked with a variety of organisations to create custom games for their specific needs, and I have seen first-hand the power of games to engage learners and make learning fun.
 
-## What does Rapua mean?
+## Read the Docs
 
-*Rapua* is the te reo Māori word for "search" or "explore." The name was given to the platform by the Law faculty at the University of Otago, for whom the first version of this platform was developed. The name reflects the platform’s focus on exploration and discovery, as well as its roots in New Zealand.
+Rapua is a hosted platform and open-source project. There are two sets of documentation available:
 
-## Why use Rapua?
-
-Games are a very effective way to engage and educate, and Rapua was designed with this in mind. With Rapua, you can:  
-
-- **Simplify Complex Ideas**: Teach challenging concepts in an engaging and approachable way.  
-- **Reach Diverse Audiences**: Tailor experiences for participants of all ages and abilities.  
-- **Foster Real-World Learning**: Create games that blend education with real-world exploration.
-
-And because I believe impactful learning should be accessible to everyone, **Rapua is free for all educators and communicators forever.**
+- [**User Docs**](/docs/user/) for those who want to create and manage games using Rapua.
+- [**Developer Docs**](/docs/developer/) for those who want to install and host their own version of Rapua or contribute to the project.
 
 ---
 
-### What's Next?
-- Learn more about the core [Features](/docs/features)
-- [Getting Started](/docs/getting-started)
-- Need help? Contact me at [nathan@rapua.nz](mailto:nathan@rapua.nz)
+### What's next
 
+- [User Docs](/docs/user/)
+- [Developer Docs](/docs/developer/)
