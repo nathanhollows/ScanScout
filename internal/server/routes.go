@@ -235,7 +235,6 @@ func setupAdminRoutes(router chi.Router, adminHandler *admin.AdminHandler) {
 		})
 
 		r.Route("/markdown", func(r chi.Router) {
-			r.Get("/", adminHandler.MarkdownGuide)
 			r.Post("/preview", adminHandler.PreviewMarkdown)
 		})
 
