@@ -3,6 +3,7 @@ package services
 import (
 	"os"
 	"path/filepath"
+	"regexp"
 	"sort"
 	"strings"
 
@@ -124,6 +125,8 @@ func extractHeadings(content string) []Heading {
 			level := len(strings.SplitN(line, " ", 2)[0])
 			text := strings.TrimSpace(strings.TrimLeft(line, "# "))
 			id := strings.ReplaceAll(strings.ToLower(text), " ", "-")
+			reg := regexp.MustCompile(`[^A-z0-9-]`)
+			id = reg.ReplaceAllString(id, "")
 			headings = append(headings, Heading{
 				Level: level,
 				Text:  text,
