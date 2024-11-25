@@ -3,24 +3,27 @@ package templates
 import (
 	"github.com/nathanhollows/Rapua/services"
 	"html/template"
+	"strings"
 )
 
 templ recursiveSidebar(topPage *services.DocPage, page *services.DocPage, sidebar []*services.DocPage) {
-	<li>
-		<a
-			href={ templ.SafeURL(page.URL) }
-			if topPage.URL == page.URL && len(page.Children) == 0 {
-				class="active"
-			}
-		>{ page.Title }</a>
-		if len(page.Children) > 0 {
-			<ul>
-				for _, child := range page.Children {
-					@recursiveSidebar(topPage, child, sidebar)
+	if !(strings.Contains(page.Path, "index.md") && page.Order != 1) {
+		<li>
+			<a
+				href={ templ.SafeURL(page.URL) }
+				if topPage.URL == page.URL {
+					class="active"
 				}
-			</ul>
-		}
-	</li>
+			>{ page.Title }</a>
+			if len(page.Children) > 0 {
+				<ul>
+					for _, child := range page.Children {
+						@recursiveSidebar(topPage, child, sidebar)
+					}
+				</ul>
+			}
+		</li>
+	}
 }
 
 templ Docs(page *services.DocPage, sidebar []*services.DocPage) {
@@ -37,18 +40,20 @@ templ Docs(page *services.DocPage, sidebar []*services.DocPage) {
 			<section class="w-full prose">
 				@templ.Raw(stringToMarkdown(page.Content))
 			</section>
-			<div class="w-min-content">
-				<ul id="toc" class="menu bg-base-200 rounded-box w-72 sticky top-12">
-					<li>
-						<a class="menu-title">Table of Contents</a>
-						<ul>
-							for _, item := range page.Headings {
-								<li><a href={ templ.SafeURL("#" + item.ID) }>{ item.Text }</a></li>
-							}
-						</ul>
-					</li>
-				</ul>
-			</div>
+			if len(page.Headings) > 2 {
+				<div class="w-min-content">
+					<ul id="toc" class="menu bg-base-200 rounded-box w-72 sticky top-12">
+						<li>
+							<a class="menu-title">Table of Contents</a>
+							<ul>
+								for _, item := range page.Headings {
+									<li><a href={ templ.SafeURL("#" + item.ID) }>{ item.Text }</a></li>
+								}
+							</ul>
+						</li>
+					</ul>
+				</div>
+			}
 		</div>
 	</main>
 	<style>
