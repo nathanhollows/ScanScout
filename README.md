@@ -137,7 +137,7 @@ You will also need to have SQLite installed on your machine. If you don't have i
 <!-- USAGE EXAMPLES -->
 ## Usage
 
-For examples of how to use Rapua, please refer to [Inspo](https://rapua.nz/inspo).
+For examples of how to use Rapua, please refer to the [Docs](https://rapua.nz/docs).
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
