@@ -6,23 +6,45 @@ import (
 	"strings"
 )
 
-templ recursiveSidebar(topPage *services.DocPage, page *services.DocPage, sidebar []*services.DocPage) {
+templ recursiveSidebar(topPage *services.DocPage, page *services.DocPage, sidebar []*services.DocPage, isChild bool) {
 	if !(strings.Contains(page.Path, "index.md") && page.Order != 1) {
-		<li>
-			<a
-				href={ templ.SafeURL(page.URL) }
-				if topPage.URL == page.URL {
-					class="active"
-				}
-			>{ page.Title }</a>
-			if len(page.Children) > 0 {
-				<ul>
-					for _, child := range page.Children {
-						@recursiveSidebar(topPage, child, sidebar)
+		if len(page.Children) == 0 {
+			<li>
+				<a
+					href={ templ.SafeURL(page.URL) }
+					if topPage.URL == page.URL {
+						class="active"
 					}
-				</ul>
-			}
-		</li>
+				>
+					{ page.Title }
+				</a>
+			</li>
+		} else {
+			<li>
+				<details open>
+					<summary>
+						switch page.Title {
+							case "User Docs":
+								<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-book-open w-5 h-5 text-accent"><path d="M12 7v14"></path><path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"></path></svg>
+							case "Developer Docs":
+								<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-code w-5 h-5 stroke-primary"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
+							case "Guides":
+								<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-lightbulb w-5 h-5"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"></path><path d="M9 18h6"></path><path d="M10 22h4"></path></svg>
+						}
+						if isChild {
+							<h2 class="menu-title flex items-center gap-4 px-1.5">{ page.Title }</h2>
+						} else {
+							{ page.Title }
+						}
+					</summary>
+					<ul>
+						for _, child := range page.Children {
+							@recursiveSidebar(topPage, child, sidebar, true)
+						}
+					</ul>
+				</details>
+			</li>
+		}
 	}
 }
 
@@ -31,13 +53,13 @@ templ Docs(page *services.DocPage, sidebar []*services.DocPage) {
 		<!-- Menu and content w/ flex-->
 		<div class="flex flex-col md:flex-row w-full gap-8 p-5">
 			<div class="w-min-content">
-				<ul hx-boost="true" class="menu bg-base-200 rounded-box w-56">
+				<ul hx-boost="true" class="menu rounded-box w-72">
 					for _, item := range sidebar {
-						@recursiveSidebar(page, item, sidebar)
+						@recursiveSidebar(page, item, sidebar, false)
 					}
 				</ul>
 			</div>
-			<section class="w-full prose">
+			<section class="w-full prose prose-sm md:prose-base">
 				@templ.Raw(stringToMarkdown(page.Content))
 			</section>
 			if len(page.Headings) > 2 {
@@ -45,12 +67,12 @@ templ Docs(page *services.DocPage, sidebar []*services.DocPage) {
 					<ul id="toc" class="menu bg-base-200 rounded-box w-72 sticky top-12">
 						<li>
 							<a class="menu-title">Table of Contents</a>
-							<ul>
-								for _, item := range page.Headings {
-									<li><a href={ templ.SafeURL("#" + item.ID) }>{ item.Text }</a></li>
-								}
-							</ul>
 						</li>
+						for _, item := range page.Headings {
+							if item.Level < 3 {
+								<li><a href={ templ.SafeURL("#" + item.ID) }>{ item.Text }</a></li>
+							}
+						}
 					</ul>
 				</div>
 			}
@@ -149,6 +171,11 @@ templ Docs(page *services.DocPage, sidebar []*services.DocPage) {
   });
 })();
 </script>
+	<style>
+.prose img {
+				border-radius: var(--rounded-box, 1rem);
+}
+</style>
 }
 
 templ MarkdownPreview(md template.HTML) {
