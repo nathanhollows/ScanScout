@@ -30,4 +30,13 @@ If you're a writer or editor, you can help improve the documentation for Rapua. 
 - Improve the clarity and organization of the content.
 - Add new sections or examples to the documentation.
 
+## Contact
+
+Nathan Hollows - nathan@rapua.nz 
+
+[![][linkedin-shield]][linkedin-url]
+
 Thank you for being part of this journey! Let's make navigating learning easier together. 🚀
+
+[linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=for-the-badge&logo=linkedin&colorB=555
+[linkedin-url]: https://linkedin.com/in/nathanhollows
