@@ -29,6 +29,8 @@
     <a href="https://github.com/nathanhollows/Rapua/issues/new?assignees=&labels=&projects=&template=bug_report.md&title=Bug:">Report Bug</a>
     ·
     <a href="https://github.com/nathanhollows/Rapua/issues/new?assignees=&labels=&projects=&template=feature_request.md&title=Feature:">Request Feature</a>
+    ·
+    <a href="https://rapua.nz/docs/">Read the Docs</a>
   </p>
 </div>
 
