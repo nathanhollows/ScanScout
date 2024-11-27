@@ -8,6 +8,10 @@ order: 2
 
 Welcome to Rapua! Follow these five simple steps to set up and launch your first game. Whether you’re hosting a team-building event, an educational exercise, or a community activity, Rapua makes the process quick and straightforward.
 
+This guide expands on the Quickstart Bar that appears when you first sign up or when you create a new instance.
+
+![](/static/images/docs/quickstart-bar.webp)
+
 ---
 
 ## Step 1: Create an Instance
@@ -39,6 +43,10 @@ Adding locations is the foundation of your game. Rapua (for now) expects all loc
 
 **Tip:** Add at least three locations for variety and better engagement. This makes a good starting point for most games, and will help visualise the gameplay more in [Step 4](#step-4-update-game-settings).
 
+Locations you add will appear on the map in the activity view.
+
+![](/static/images/docs/activity-map.webp)
+
 ---
 
 ## Step 3: Add Teams  
@@ -63,6 +71,8 @@ Customize the gameplay experience.
    - **Enable Points:**: Enable or disable scoring mechanisms (optional).  
 3. Save your changes.
 
+Rapua automatically generates a set of rules based on your selections. Players will be shown these rules in the lobby after beginning the game.
+
 **Tip:** Hover over the information icons 🛈 for additional guidance. Each setting influences the gameplay, so choose wisely.
 
 ---
@@ -82,7 +92,7 @@ That’s it! Your game is live, and participants are ready to explore and learn.
 
 ### What’s Next?
 
-- Need more customization? Check out the **[Features Guide](/docs/user/features)**.  
+- Need more customization? Check out the **[Features](/docs/user/features)**.  
 - Have questions? Visit the **[FAQs](/docs/user/faq)** or contact us at [support@rapua.nz](mailto:support@rapua.nz).  
 
 Let the adventure begin!
