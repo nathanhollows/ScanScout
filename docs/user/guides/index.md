@@ -1,7 +1,7 @@
 ---
 title: "Guides"
 sidebar: true
-order: 20
+order: 30
 ---
 
 # Guides and walkthroughs
