@@ -14,11 +14,11 @@ All content is formatted using Markdown, a lightweight markup language with plai
 
 **Text Block:**
 
-![](/static/images/docs/block-text.webp)
+![](/static/images/docs/user/blocks/block-text.webp)
 
 **Player Perspective:**
 
-![](/static/images/docs/block-text-preview.webp)
+![](/static/images/docs/user/blocks/block-text-preview.webp)
 
 ## Notes
 
