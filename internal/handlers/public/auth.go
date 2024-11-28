@@ -250,34 +250,30 @@ func (h *PublicHandler) VerifyEmailWithToken(w http.ResponseWriter, r *http.Requ
 	}
 
 	if user.EmailVerified {
-		flash.NewInfo("Your email is already verified.").Save(w, r)
 		http.Redirect(w, r, "/admin", http.StatusSeeOther)
 		return
 	}
 
 	token := chi.URLParam(r, "token")
 
-	err = h.UserServices.AuthService.VerifyEmail(r.Context(), user, token)
+	err = h.UserServices.AuthService.VerifyEmail(r.Context(), token)
 	if err != nil {
 		if errors.Is(err, services.ErrInvalidToken) {
-			flash.NewError("Invalid link. Please try again.").Save(w, r)
 			http.Redirect(w, r, "/verify-email", http.StatusSeeOther)
 			return
 		}
 		if errors.Is(err, services.ErrTokenExpired) {
-			flash.NewError("Link expired. We have sent you a new email with a new token.").Save(w, r)
 			http.Redirect(w, r, "/verify-email", http.StatusSeeOther)
 			return
 		}
 		h.Logger.Error("verifying email", "err", err)
 		w.WriteHeader(http.StatusInternalServerError)
-		flash.NewError("An error occurred while trying to verify your email. Please try again.").Save(w, r)
 		http.Redirect(w, r, "/verify-email", http.StatusSeeOther)
 		return
 	}
 
-	flash.NewSuccess("Email verified!").Save(w, r)
-	http.Redirect(w, r, "/admin", http.StatusSeeOther)
+	// Send a meta refresh to the verify email page
+	w.Write([]byte(`<html><head><meta http-equiv="refresh" content="2; url='/admin'"></head><body></body></html>`))
 }
 
 // Poll for email verification for HTMX
