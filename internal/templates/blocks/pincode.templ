@@ -40,7 +40,7 @@ templ pincodePlayer(settings models.InstanceSettings, block blocks.PincodeBlock,
 								id={ fmt.Sprintf("pincode-%s", block.ID) }
 								name="pincode"
 								type="number"
-								placeholder="Type here"
+								placeholder="Answer"
 								class="input input-bordered input-primary join-item w-full max-w-xs font-mono tracking-widest"
 								autoComplete="off"
 								required
@@ -86,7 +86,7 @@ templ pincodePlayerUpdate(settings models.InstanceSettings, block blocks.Pincode
 				>
 					if data.IsComplete() {
 						<p class="label-text font-bold text-success">
-							Yay! You got it!
+							You got it!
 						</p>
 					} else {
 						<div class="join w-full animate-[wobble_1s_ease-in-out]">
@@ -94,7 +94,7 @@ templ pincodePlayerUpdate(settings models.InstanceSettings, block blocks.Pincode
 								id={ fmt.Sprintf("pincode-%s", block.ID) }
 								name="pincode"
 								type="number"
-								placeholder="Type here"
+								placeholder="Answer"
 								class="input input-bordered input-primary join-item w-full max-w-xs font-mono tracking-widest"
 								autoComplete="off"
 								required
