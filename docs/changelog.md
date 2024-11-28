@@ -15,7 +15,7 @@ order: 100
 - **Interactive Map:**
   - Map markers now display popups with names for better navigation and understanding of locations. [Closes #25](https://github.com/nathanhollows/Rapua/issues/25)
 - **Documentation:**
-  - New public documentation system [(Closes #190)](https://github.com/nathanhollows/Rapua/issues/19), including documentation:
+  - New public documentation system [(Closes #19)](https://github.com/nathanhollows/Rapua/issues/19), including documentation:
     - User and developer guides.
     - Quickstart guide.
     - Tutorials, such as a Student Induction Tutorial.
