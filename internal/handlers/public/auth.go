@@ -243,13 +243,9 @@ func (h *PublicHandler) VerifyEmail(w http.ResponseWriter, r *http.Request) {
 
 // VerifyEmailWithToken is the handler for verifying a user's email address
 func (h *PublicHandler) VerifyEmailWithToken(w http.ResponseWriter, r *http.Request) {
+	// If the user is authenticated without error, we will redirect them to the admin page
 	user, err := h.UserServices.AuthService.GetAuthenticatedUser(r)
-	if err != nil || user == nil {
-		http.Redirect(w, r, "/login", http.StatusSeeOther)
-		return
-	}
-
-	if user.EmailVerified {
+	if err == nil && user != nil && user.EmailVerified {
 		flash.NewInfo("Your email is already verified.").Save(w, r)
 		http.Redirect(w, r, "/admin", http.StatusSeeOther)
 		return
@@ -257,7 +253,7 @@ func (h *PublicHandler) VerifyEmailWithToken(w http.ResponseWriter, r *http.Requ
 
 	token := chi.URLParam(r, "token")
 
-	err = h.UserServices.AuthService.VerifyEmail(r.Context(), user, token)
+	err = h.UserServices.AuthService.VerifyEmail(r.Context(), token)
 	if err != nil {
 		if errors.Is(err, services.ErrInvalidToken) {
 			flash.NewError("Invalid link. Please try again.").Save(w, r)
