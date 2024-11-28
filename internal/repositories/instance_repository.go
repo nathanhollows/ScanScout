@@ -20,6 +20,8 @@ type InstanceRepository interface {
 	Delete(ctx context.Context, instanceID string) error
 	// FindByID finds an instance by ID
 	FindByID(ctx context.Context, id string) (*models.Instance, error)
+	// FindByUserID(ctx context.Context, userID string) (*models.Instance, error)
+	FindByUserID(ctx context.Context, userID string) ([]models.Instance, error)
 	// DismissQuickstart marks the user as having dismissed the quickstart
 	DismissQuickstart(ctx context.Context, userID string) error
 }
@@ -121,6 +123,18 @@ func (r *instanceRepository) FindByID(ctx context.Context, id string) (*models.I
 		return nil, err
 	}
 	return instance, nil
+}
+
+func (r *instanceRepository) FindByUserID(ctx context.Context, userID string) ([]models.Instance, error) {
+	instances := []models.Instance{}
+	err := db.DB.NewSelect().
+		Model(&instances).
+		Where("user_id = ?", userID).
+		Scan(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return instances, nil
 }
 
 // DismissQuickstart marks the user as having dismissed the quickstart

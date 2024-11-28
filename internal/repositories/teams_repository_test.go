@@ -35,7 +35,7 @@ func TestTeamRepository_Delete(t *testing.T) {
 	assert.NoError(t, err, "expected no error when saving team")
 
 	// Now delete it
-	err = repo.Delete(ctx, sampleTeam.Code)
+	err = repo.Delete(ctx, "instance-1", sampleTeam.Code)
 	assert.NoError(t, err, "expected no error when deleting team")
 }
 

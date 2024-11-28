@@ -91,6 +91,7 @@ func setupPlayerRoutes(router chi.Router, playerHandler *players.PlayerHandler) 
 			return middlewares.TeamMiddleware(teamRepo, next)
 		})
 		r.Get("/", playerHandler.Lobby)
+		r.Post("/team-name", playerHandler.SetTeamName)
 	})
 
 	// Check in to a location
@@ -158,6 +159,10 @@ func setupPublicRoutes(router chi.Router, publicHandler *public.PublicHandler) {
 		r.Post("/resend", publicHandler.ResendEmailVerification)
 	})
 
+	router.Route("/docs", func(r chi.Router) {
+		r.Get("/*", publicHandler.Docs)
+	})
+
 	router.NotFound(publicHandler.NotFound)
 
 }
@@ -210,6 +215,7 @@ func setupAdminRoutes(router chi.Router, adminHandler *admin.AdminHandler) {
 		r.Route("/teams", func(r chi.Router) {
 			r.Get("/", adminHandler.Teams)
 			r.Post("/add", adminHandler.TeamsAdd)
+			r.Post("/delete", adminHandler.TeamsDelete)
 		})
 
 		r.Route("/experience", func(r chi.Router) {
@@ -229,7 +235,6 @@ func setupAdminRoutes(router chi.Router, adminHandler *admin.AdminHandler) {
 		})
 
 		r.Route("/markdown", func(r chi.Router) {
-			r.Get("/", adminHandler.MarkdownGuide)
 			r.Post("/preview", adminHandler.PreviewMarkdown)
 		})
 

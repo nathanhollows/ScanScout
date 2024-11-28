@@ -67,5 +67,7 @@ require (
 	github.com/uptrace/bun/extra/bundebug v1.2.1
 	github.com/vmihailenco/msgpack/v5 v5.4.1 // indirect
 	github.com/vmihailenco/tagparser/v2 v2.0.0 // indirect
+	go.abhg.dev/goldmark/anchor v0.1.1
 	golang.org/x/sys v0.21.0 // indirect
+	golang.org/x/text v0.20.0
 )

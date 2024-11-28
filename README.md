@@ -29,6 +29,8 @@
     <a href="https://github.com/nathanhollows/Rapua/issues/new?assignees=&labels=&projects=&template=bug_report.md">Report Bug</a>
     ·
     <a href="https://github.com/nathanhollows/Rapua/issues/new?assignees=&labels=&projects=&template=feature_request.md">Request Feature</a>
+    ·
+    <a href="https://rapua.nz/docs/">Read the Docs</a>
   </p>
 </div>
 
@@ -135,7 +137,7 @@ You will also need to have SQLite installed on your machine. If you don't have i
 <!-- USAGE EXAMPLES -->
 ## Usage
 
-For examples of how to use Rapua, please refer to [Inspo](https://rapua.nz/inspo).
+For examples of how to use Rapua, please refer to the [Docs](https://rapua.nz/docs).
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 

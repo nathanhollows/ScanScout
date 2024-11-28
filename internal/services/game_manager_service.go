@@ -12,7 +12,6 @@ import (
 	"time"
 
 	"github.com/nathanhollows/Rapua/db"
-	"github.com/nathanhollows/Rapua/helpers"
 	"github.com/nathanhollows/Rapua/internal/flash"
 	"github.com/nathanhollows/Rapua/internal/repositories"
 	"github.com/nathanhollows/Rapua/models"
@@ -206,31 +205,6 @@ func (s *GameManagerService) DeleteInstance(ctx context.Context, user *models.Us
 	return response
 }
 
-func (s *GameManagerService) AddTeams(ctx context.Context, instanceID string, count int) (response ServiceResponse) {
-	response = ServiceResponse{}
-	response.Data = make(map[string]interface{})
-	if count < 1 {
-		response.AddFlashMessage(*flash.NewError("Please enter a valid number of teams (1 or more)"))
-		return response
-	}
-
-	teams := make([]models.Team, count)
-	for i := 0; i < count; i++ {
-		teams[i] = models.Team{
-			Code:       helpers.NewCode(4),
-			InstanceID: instanceID,
-		}
-	}
-	_, err := db.DB.NewInsert().Model(&teams).Exec(ctx)
-	if err != nil {
-		response.AddFlashMessage(*flash.NewError("Error adding teams"))
-		response.Error = fmt.Errorf("AddTeams save teams: %w", err)
-		return response
-	}
-	response.Data["teams"] = teams
-	return response
-}
-
 func (s *GameManagerService) GetTeamActivityOverview(ctx context.Context, instanceID string) ([]TeamActivity, error) {
 	locationRepository := repositories.NewLocationRepository()
 	locations, err := locationRepository.FindByInstance(ctx, instanceID)
@@ -274,6 +248,7 @@ func (s *GameManagerService) CreateLocation(ctx context.Context, user *models.Us
 	lat := data["latitude"]
 	lng := data["longitude"]
 	points := data["points"]
+	marker := data["marker"]
 
 	var latFloat, lngFloat float64
 	var err error
@@ -296,7 +271,32 @@ func (s *GameManagerService) CreateLocation(ctx context.Context, user *models.Us
 		}
 	}
 
-	return s.locationService.CreateLocation(ctx, user.CurrentInstanceID, name, latFloat, lngFloat, pointsInt)
+	if marker == "" {
+		return s.locationService.CreateLocation(ctx, user.CurrentInstanceID, name, latFloat, lngFloat, pointsInt)
+	}
+
+	instances, err := s.GetInstanceIDsForUser(ctx, user.ID)
+	if err != nil {
+		return models.Location{}, fmt.Errorf("getting instances for user: %w", err)
+	}
+
+	markers, err := s.markerRepo.FindNotInInstance(ctx, user.CurrentInstanceID, instances)
+	if err != nil {
+		return models.Location{}, fmt.Errorf("finding markers not in instance: %w", err)
+	}
+
+	markerExists := false
+	for _, m := range markers {
+		if m.Code == marker {
+			markerExists = true
+			break
+		}
+	}
+	if !markerExists {
+		return models.Location{}, errors.New("marker does not exist")
+	}
+
+	return s.locationService.CreateLocationFromMarker(ctx, user.CurrentInstanceID, name, latFloat, lngFloat, pointsInt, marker)
 
 }
 
@@ -512,4 +512,17 @@ func (s *GameManagerService) ScheduleGame(ctx context.Context, user *models.User
 // DismissQuickstart marks the user as having dismissed the quickstart
 func (s *GameManagerService) DismissQuickstart(ctx context.Context, instanceID string) error {
 	return s.instanceRepo.DismissQuickstart(ctx, instanceID)
+}
+
+func (s *GameManagerService) GetInstanceIDsForUser(ctx context.Context, userID string) ([]string, error) {
+	instances, err := s.instanceRepo.FindByUserID(ctx, userID)
+	if err != nil {
+		return nil, fmt.Errorf("finding instances for user: %w", err)
+	}
+
+	ids := make([]string, len(instances))
+	for i, instance := range instances {
+		ids[i] = instance.ID
+	}
+	return ids, nil
 }

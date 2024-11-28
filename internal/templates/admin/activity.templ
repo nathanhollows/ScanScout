@@ -451,7 +451,7 @@ templ TeamActivity(settings models.InstanceSettings, team models.Team, notificat
 	<h3 class="text-lg font-bold">
 		{ team.Code }
 		if team.Name != "" {
-			| { team.Name }
+			∕ { team.Name }
 		}
 	</h3>
 	<!-- Next Locations -->
@@ -462,7 +462,7 @@ templ TeamActivity(settings models.InstanceSettings, team models.Team, notificat
 				<ul>
 					for _, location := range nextLocations {
 						<li>
-							{ location.Marker.Name }
+							{ location.Name }
 							if settings.NavigationMethod.String() == "Show Clues" {
 								for _, clue := range location.Clues {
 									<blockquote class="text-sm"><p>{ clue.Content }</p></blockquote>

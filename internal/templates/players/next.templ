@@ -42,7 +42,12 @@ templ showMap(locations []models.Location) {
 		<div id="map-next" class="map w-full h-full rounded-lg"></div>
 	</div>
 	for _, location := range locations {
-		<span class="location-name" data-lat={ fmt.Sprint(location.Marker.Lat) } data-lng={ fmt.Sprint(location.Marker.Lng) }></span>
+		<span
+			class="location-name"
+			data-lat={ fmt.Sprint(location.Marker.Lat) }
+			data-lng={ fmt.Sprint(location.Marker.Lng) }
+			data-code={ location.MarkerID }
+		></span>
 	}
 	@mapScript()
 }
@@ -57,6 +62,8 @@ templ showMapAndNames(team models.Team, locations []models.Location) {
 				class="location-name"
 				data-lat={ fmt.Sprint(location.Marker.Lat) }
 				data-lng={ fmt.Sprint(location.Marker.Lng) }
+				data-name={ location.Name }
+				data-code={ location.MarkerID }
 			>{ location.Name }</em>
 			<!-- Show the number of teams visiting this location -->
 			if team.Instance.Settings.ShowTeamCount {
@@ -168,7 +175,11 @@ templ mapScript() {
     // Find and loop through .location-name elements to create markers
     document.querySelectorAll('.location-name').forEach(function(location) {
       const marker = new mapboxgl.Marker()
-        .setLngLat([location.dataset.lng, location.dataset.lat]);
+        .setLngLat([location.dataset.lng, location.dataset.lat])
+	  if (location.dataset.name) marker
+        .setPopup(new mapboxgl.Popup() // Add popups
+	    .setHTML('<h3>' + location.dataset.name + '</h3>'));
+	  marker._element.id = "marker-"+location.dataset.code;
       markerArray.push(marker);
     });
 
@@ -196,6 +207,21 @@ templ mapScript() {
 
   // Initialize the map on page load
   initializeMap();
+
+	// Event listener for span click/tap
+	document.querySelectorAll('.location-name').forEach(function(span) {
+	  span.addEventListener('click', function() {
+		const id = "marker-"+span.dataset.code; // Get the id from the clicked span
+		const marker = document.getElementById(id); // Find the marker by id
+
+		if (marker) {
+		  // Open the popup for the marker
+		  marker.click();
+		} else {
+		  console.error('Marker not found for id:', id);
+		}
+	  });
+	});
 
 })();
 </script>

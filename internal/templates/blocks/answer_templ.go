@@ -480,16 +480,6 @@ func answerAdmin(settings models.InstanceSettings, block blocks.AnswerBlock) tem
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		if block.Fuzzy {
-			templ_7745c5c3_Err = templ.WriteWatchModeString(templ_7745c5c3_Buffer, 45)
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-		}
-		templ_7745c5c3_Err = templ.WriteWatchModeString(templ_7745c5c3_Buffer, 46)
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
 		return templ_7745c5c3_Err
 	})
 }
