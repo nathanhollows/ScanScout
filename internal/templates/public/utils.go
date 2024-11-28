@@ -48,6 +48,7 @@ func markdownToHTML(s string) (template.HTML, error) {
 		),
 		goldmark.WithRendererOptions(
 			html.WithHardWraps(),
+			html.WithUnsafe(),
 		),
 	)
 
