@@ -14,13 +14,13 @@ import (
 
 var DB *bun.DB
 
-func MustOpen() {
+func MustOpen() *bun.DB {
 	var sqldb *sql.DB
 	var err error
 
 	dataSourceName := os.Getenv("DB_CONNECTION")
 	if dataSourceName == "" {
-		log.Fatal("DB_CONNECTION not set")
+		log.Fatal("DB_CONNECTION not set. Please set DB_CONNECTION in the environment")
 	}
 
 	driverName := os.Getenv("DB_TYPE")
@@ -32,20 +32,22 @@ func MustOpen() {
 		sqldb, err = sql.Open(sqliteshim.ShimName, dataSourceName)
 		DB = bun.NewDB(sqldb, sqlitedialect.New())
 	default:
-		panic("unsupported DB_TYPE: " + driverName)
+		panic("unsupported DB_TYPE: " + driverName + ". Supported types are mysql and sqlite3")
 	}
 
 	if err != nil {
 		panic(err)
 	}
 
+	debugEnabled := os.Getenv("BUNDEBUG") == "true"
 	DB.AddQueryHook(bundebug.NewQueryHook(
 		// disable the hook
-		bundebug.WithEnabled(false),
+		bundebug.WithEnabled(debugEnabled),
 
 		// BUNDEBUG=1 logs failed queries
 		// BUNDEBUG=2 logs all queries
-		bundebug.FromEnv("BUNDEBUG"),
+		bundebug.FromEnv(""),
 	))
 
+	return DB
 }
