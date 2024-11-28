@@ -8,27 +8,27 @@ order: 100
 
 ## 2.5.0 (2024-11-28)
 
-#### Added
+### Added
 - **Team Features:**
   - Teams can now set their own names directly within the platform.
   - Bulk deletion of teams is now supported for easier management.
 - **Interactive Map:**
-  - Map markers now display popups with names for better navigation and understanding of locations.
+  - Map markers now display popups with names for better navigation and understanding of locations. [Closes #25](https://github.com/nathanhollows/Rapua/issues/25)
 - **Documentation:**
-  - New public documentation system, including documentation for:
+  - New public documentation system [(Closes #190)](https://github.com/nathanhollows/Rapua/issues/19), including documentation:
     - User and developer guides.
     - Quickstart guide.
     - Tutorials, such as a Student Induction Tutorial.
-  - "Docs" now takes the place of "Inspo" in the main navigation.
+  - "Docs" now takes the place of "Inspo" in the main navigation. [Fixes #35](https://github.com/nathanhollows/Rapua/issues/35)
 - **API Updates:**
   - Introduced new endpoints for managing teams in the Teams service, allowing programmatic creation, updates, and bulk deletion.
   - Added support for creating locations using existing map markers.
 
-#### Changed
+### Changed
 - The team management interface has been redesigned for usability, using Hyperscript for interactivity.
 - Game logic refactoring ensures more efficient handling of location relationships, including clues.
 
-#### Fixed
+### Fixed
 - Resolved an issue where marker names were not populating in the activity overview.
 - Corrected a database query issue with an incorrect column name.
 - Fixed an issue where game relationships weren’t fully loaded, affecting progression in specific scenarios.
