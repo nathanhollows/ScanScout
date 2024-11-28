@@ -34,7 +34,7 @@ type AuthService interface {
 	CheckUserRegisteredWithOAuth(ctx context.Context, provider, userID string) (*models.User, error)
 	CreateUserWithOAuth(ctx context.Context, user goth.User) (*models.User, error)
 	CompleteUserAuth(w http.ResponseWriter, r *http.Request) (*models.User, error)
-	VerifyEmail(ctx context.Context, user *models.User, token string) error
+	VerifyEmail(ctx context.Context, token string) error
 	SendEmailVerification(ctx context.Context, user *models.User) error
 }
 
@@ -56,7 +56,7 @@ func (s *authService) AuthenticateUser(ctx context.Context, email, password stri
 		return nil, errors.New("email and password are required")
 	}
 
-	user, err := s.userRepository.GetUserByEmail(ctx, email)
+	user, err := s.userRepository.FindUserByEmail(ctx, email)
 	if err != nil {
 		return nil, fmt.Errorf("error getting user by email: %w", err)
 	}
@@ -96,7 +96,7 @@ func (s *authService) AllowGoogleLogin() bool {
 
 // OAuthLogin handles User Login via OAuth
 func (s *authService) OAuthLogin(ctx context.Context, provider string, oauthUser goth.User) (*models.User, error) {
-	existingUser, err := s.userRepository.GetUserByEmail(ctx, oauthUser.Email)
+	existingUser, err := s.userRepository.FindUserByEmail(ctx, oauthUser.Email)
 	if err != nil {
 		// User doesn't exist, create a new one
 		newUser, err := s.CreateUserWithOAuth(ctx, oauthUser)
@@ -111,7 +111,7 @@ func (s *authService) OAuthLogin(ctx context.Context, provider string, oauthUser
 
 // CheckUserRegisteredWithOAuth looks for user already registered with OAuth
 func (s *authService) CheckUserRegisteredWithOAuth(ctx context.Context, provider, email string) (*models.User, error) {
-	user, err := s.userRepository.GetUserByEmailAndProvider(ctx, email, provider)
+	user, err := s.userRepository.FindUserByEmailAndProvider(ctx, email, provider)
 	if err != nil {
 		return nil, fmt.Errorf("getting user by email and provider: %w", err)
 	}
@@ -154,7 +154,12 @@ func (s *authService) CompleteUserAuth(w http.ResponseWriter, r *http.Request) (
 }
 
 // VerifyEmail verifies the user's email address
-func (s *authService) VerifyEmail(ctx context.Context, user *models.User, token string) error {
+func (s *authService) VerifyEmail(ctx context.Context, token string) error {
+	user, err := s.userRepository.FindUserByEmailToken(ctx, token)
+	if err != nil {
+		return ErrInvalidToken
+	}
+
 	if user.EmailToken != token {
 		return ErrInvalidToken
 	}
@@ -167,7 +172,7 @@ func (s *authService) VerifyEmail(ctx context.Context, user *models.User, token 
 	user.EmailToken = ""
 	user.EmailTokenExpiry = sql.NullTime{}
 
-	err := s.userRepository.Update(ctx, user)
+	err = s.userRepository.Update(ctx, user)
 	if err != nil {
 		return fmt.Errorf("updating user: %w", err)
 	}

@@ -19,12 +19,14 @@ type UserRepository interface {
 	Create(ctx context.Context, user *models.User) error
 	// Update updates a user in the database
 	Update(ctx context.Context, user *models.User) error
-	// GetUserByEmail retrieves a user by their email address
-	GetUserByEmail(ctx context.Context, email string) (*models.User, error)
+	// FindUserByEmail retrieves a user by their email address
+	FindUserByEmail(ctx context.Context, email string) (*models.User, error)
+	// FindUserByEmailToken retrieves a user by their email token
+	FindUserByEmailToken(ctx context.Context, token string) (*models.User, error)
 	// FindUserByID fetches a user by their ID from the database.
 	FindUserByID(ctx context.Context, userID string) (*models.User, error)
-	// GetUserByEmailAndProvider retrieves a user by their email address and provider
-	GetUserByEmailAndProvider(ctx context.Context, email, provider string) (*models.User, error)
+	// FindUserByEmailAndProvider retrieves a user by their email address and provider
+	FindUserByEmailAndProvider(ctx context.Context, email, provider string) (*models.User, error)
 }
 
 type userRepository struct{}
@@ -53,14 +55,24 @@ func (r *userRepository) Create(ctx context.Context, user *models.User) error {
 	return err
 }
 
-// GetUserByEmail retrieves a user by their email address
-func (r *userRepository) GetUserByEmail(ctx context.Context, email string) (*models.User, error) {
+// FindUserByEmail retrieves a user by their email address
+func (r *userRepository) FindUserByEmail(ctx context.Context, email string) (*models.User, error) {
 	user := &models.User{}
 	err := db.DB.NewSelect().
 		Model(user).
 		Where("email = ?", email).
 		Relation("CurrentInstance").
 		Relation("Instances").
+		Scan(ctx)
+	return user, err
+}
+
+// FindUserByEmailToken retrieves a user by their email token
+func (r *userRepository) FindUserByEmailToken(ctx context.Context, token string) (*models.User, error) {
+	user := &models.User{}
+	err := db.DB.NewSelect().
+		Model(user).
+		Where("email_token = ?", token).
 		Scan(ctx)
 	return user, err
 }
@@ -87,8 +99,8 @@ func (r *userRepository) FindUserByID(ctx context.Context, userID string) (*mode
 	return &user, nil
 }
 
-// GetUserByEmailAndProvider retrieves a user by their email address and provider
-func (r *userRepository) GetUserByEmailAndProvider(ctx context.Context, email, provider string) (*models.User, error) {
+// FindUserByEmailAndProvider retrieves a user by their email address and provider
+func (r *userRepository) FindUserByEmailAndProvider(ctx context.Context, email, provider string) (*models.User, error) {
 	user := &models.User{}
 	err := db.DB.NewSelect().
 		Model(user).
