@@ -39,14 +39,14 @@ func MustOpen() *bun.DB {
 		panic(err)
 	}
 
-	debugEnabled := os.Getenv("BUNDEBUG") == "true"
+	debugEnabled := os.Getenv("BUNDEBUG") == "1" || os.Getenv("BUNDEBUG") == "2"
 	DB.AddQueryHook(bundebug.NewQueryHook(
 		// disable the hook
 		bundebug.WithEnabled(debugEnabled),
 
 		// BUNDEBUG=1 logs failed queries
 		// BUNDEBUG=2 logs all queries
-		bundebug.FromEnv(""),
+		bundebug.FromEnv("BUNDEBUG"),
 	))
 
 	return DB
