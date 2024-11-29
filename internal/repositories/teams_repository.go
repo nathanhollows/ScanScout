@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/nathanhollows/Rapua/db"
 	"github.com/nathanhollows/Rapua/models"
 	"github.com/uptrace/bun"
 )
@@ -38,21 +37,25 @@ type TeamRepository interface {
 	LoadRelations(ctx context.Context, team *models.Team) error
 }
 
-type teamRepository struct{}
+type teamRepository struct {
+	db *bun.DB
+}
 
 // NewTeamRepository creates a new TeamRepository
-func NewTeamRepository() TeamRepository {
-	return &teamRepository{}
+func NewTeamRepository(db *bun.DB) TeamRepository {
+	return &teamRepository{
+		db: db,
+	}
 }
 
 // Update saves or updates a team in the database
 func (r *teamRepository) Update(ctx context.Context, t *models.Team) error {
-	_, err := db.DB.NewUpdate().Model(t).WherePK().Exec(ctx)
+	_, err := r.db.NewUpdate().Model(t).WherePK().Exec(ctx)
 	return err
 }
 
 func (r *teamRepository) Delete(ctx context.Context, instanceID string, teamCode string) error {
-	_, err := db.DB.
+	_, err := r.db.
 		NewDelete().
 		Model(&models.Team{}).
 		Where("code = ? AND instance_id = ?", teamCode, instanceID).
@@ -61,13 +64,13 @@ func (r *teamRepository) Delete(ctx context.Context, instanceID string, teamCode
 }
 
 func (r *teamRepository) DeleteByInstanceID(ctx context.Context, instanceID string) error {
-	_, err := db.DB.NewDelete().Model(&models.Team{}).Where("instance_id = ?", instanceID).Exec(ctx)
+	_, err := r.db.NewDelete().Model(&models.Team{}).Where("instance_id = ?", instanceID).Exec(ctx)
 	return err
 }
 
 func (r *teamRepository) FindAll(ctx context.Context, instanceID string) ([]models.Team, error) {
 	var teams []models.Team
-	err := db.DB.NewSelect().
+	err := r.db.NewSelect().
 		Model(&teams).
 		Where("team.instance_id = ?", instanceID).
 		Scan(ctx)
@@ -79,7 +82,7 @@ func (r *teamRepository) FindAll(ctx context.Context, instanceID string) ([]mode
 
 func (r *teamRepository) FindAllWithScans(ctx context.Context, instanceID string) ([]models.Team, error) {
 	var teams []models.Team
-	err := db.DB.NewSelect().
+	err := r.db.NewSelect().
 		Model(&teams).
 		Where("team.instance_id = ?", instanceID).
 		// Add the scans in the relation order by location_id
@@ -97,7 +100,7 @@ func (r *teamRepository) FindAllWithScans(ctx context.Context, instanceID string
 func (r *teamRepository) FindTeamByCode(ctx context.Context, code string) (*models.Team, error) {
 	code = strings.ToUpper(code)
 	var team models.Team
-	err := db.DB.NewSelect().Model(&team).Where("team.code = ?", code).
+	err := r.db.NewSelect().Model(&team).Where("team.code = ?", code).
 		Relation("Instance").
 		Relation("BlockingLocation").
 		Relation("CheckIns", func(q *bun.SelectQuery) *bun.SelectQuery {
@@ -112,7 +115,7 @@ func (r *teamRepository) FindTeamByCode(ctx context.Context, code string) (*mode
 
 // InsertBatch inserts a batch of teams and returns an error if there's a unique constraint conflict
 func (r *teamRepository) InsertBatch(ctx context.Context, teams []models.Team) error {
-	_, err := db.DB.NewInsert().Model(&teams).Exec(ctx)
+	_, err := r.db.NewInsert().Model(&teams).Exec(ctx)
 	if err != nil && isUniqueConstraintError(err) {
 		return errors.New("unique constraint error")
 	}
@@ -125,7 +128,7 @@ func isUniqueConstraintError(err error) bool {
 }
 
 func (r *teamRepository) LoadInstance(ctx context.Context, team *models.Team) error {
-	query := db.DB.NewSelect().
+	query := r.db.NewSelect().
 		Model(&team.Instance).
 		Where("id = ?", team.InstanceID).
 		WherePK()
@@ -143,7 +146,7 @@ func (r *teamRepository) LoadInstance(ctx context.Context, team *models.Team) er
 
 func (r *teamRepository) LoadCheckIns(ctx context.Context, team *models.Team) error {
 	// Only load the scans if they are not already loaded
-	err := db.DB.NewSelect().Model(&team.CheckIns).
+	err := r.db.NewSelect().Model(&team.CheckIns).
 		Where("team_code = ?", team.Code).
 		Relation("Location").
 		Order("time_in DESC").
@@ -158,7 +161,7 @@ func (r *teamRepository) LoadBlockingLocation(ctx context.Context, team *models.
 	if team.MustCheckOut == "" || team.BlockingLocation.ID != "" {
 		return nil
 	}
-	err := db.DB.NewSelect().Model(&team.BlockingLocation).
+	err := r.db.NewSelect().Model(&team.BlockingLocation).
 		Where("ID = ?", team.MustCheckOut).
 		Scan(ctx)
 	if err != nil {

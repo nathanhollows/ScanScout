@@ -5,8 +5,8 @@ import (
 	"fmt"
 
 	"github.com/google/uuid"
-	"github.com/nathanhollows/Rapua/db"
 	"github.com/nathanhollows/Rapua/models"
+	"github.com/uptrace/bun"
 )
 
 type LocationRepository interface {
@@ -37,17 +37,20 @@ type LocationRepository interface {
 }
 
 type locationRepository struct {
+	db *bun.DB
 }
 
 // NewClueRepository creates a new ClueRepository
-func NewLocationRepository() LocationRepository {
-	return &locationRepository{}
+func NewLocationRepository(db *bun.DB) LocationRepository {
+	return &locationRepository{
+		db: db,
+	}
 }
 
 // Find finds a location by ID
 func (r *locationRepository) Find(ctx context.Context, locationID string) (*models.Location, error) {
 	var location models.Location
-	err := db.DB.NewSelect().Model(&location).Where("id = ?", locationID).Scan(ctx)
+	err := r.db.NewSelect().Model(&location).Where("id = ?", locationID).Scan(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("finding location: %w", err)
 	}
@@ -57,7 +60,7 @@ func (r *locationRepository) Find(ctx context.Context, locationID string) (*mode
 // FindByInstance finds a location by instance and code
 func (r *locationRepository) FindByInstanceAndCode(ctx context.Context, instanceID string, code string) (*models.Location, error) {
 	var location models.Location
-	err := db.DB.
+	err := r.db.
 		NewSelect().
 		Model(&location).
 		Where("instance_id = ? AND marker_id = ?", instanceID, code).
@@ -72,7 +75,7 @@ func (r *locationRepository) FindByInstanceAndCode(ctx context.Context, instance
 // Find all locations for an instance
 func (r *locationRepository) FindByInstance(ctx context.Context, instanceID string) ([]models.Location, error) {
 	var locations []models.Location
-	err := db.DB.
+	err := r.db.
 		NewSelect().
 		Model(&locations).
 		Where("instance_id = ?", instanceID).
@@ -87,7 +90,7 @@ func (r *locationRepository) FindByInstance(ctx context.Context, instanceID stri
 // FindLocationsByMarkerID finds all locations for a given marker
 func (r *locationRepository) FindLocationsByMarkerID(ctx context.Context, markerID string) ([]models.Location, error) {
 	var locations []models.Location
-	err := db.DB.NewSelect().Model(&locations).Where("marker_id = ?", markerID).Scan(ctx)
+	err := r.db.NewSelect().Model(&locations).Where("marker_id = ?", markerID).Scan(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("finding locations by marker ID: %w", err)
 	}
@@ -96,7 +99,7 @@ func (r *locationRepository) FindLocationsByMarkerID(ctx context.Context, marker
 
 // Update updates a location in the database
 func (r *locationRepository) Update(ctx context.Context, location *models.Location) error {
-	_, err := db.DB.NewUpdate().Model(location).WherePK().Exec(ctx)
+	_, err := r.db.NewUpdate().Model(location).WherePK().Exec(ctx)
 	return err
 }
 
@@ -105,7 +108,7 @@ func (r *locationRepository) Save(ctx context.Context, location *models.Location
 	var err error
 	if location.ID == "" {
 		location.ID = uuid.New().String()
-		_, err = db.DB.NewInsert().Model(location).Exec(ctx)
+		_, err = r.db.NewInsert().Model(location).Exec(ctx)
 		return err
 	}
 	return r.Update(ctx, location)
@@ -113,7 +116,7 @@ func (r *locationRepository) Save(ctx context.Context, location *models.Location
 
 // Delete deletes a location from the database
 func (r *locationRepository) Delete(ctx context.Context, locationID string) error {
-	_, err := db.DB.NewDelete().Model(&models.Location{ID: locationID}).WherePK().Exec(ctx)
+	_, err := r.db.NewDelete().Model(&models.Location{ID: locationID}).WherePK().Exec(ctx)
 	if err != nil {
 		return fmt.Errorf("deleting location: %w", err)
 	}
@@ -122,7 +125,7 @@ func (r *locationRepository) Delete(ctx context.Context, locationID string) erro
 
 // LoadRelations loads all relations for a location
 func (r *locationRepository) LoadRelations(ctx context.Context, location *models.Location) error {
-	err := db.DB.NewSelect().
+	err := r.db.NewSelect().
 		Model(location).
 		Relation("Clues").
 		Relation("Blocks").
@@ -138,7 +141,7 @@ func (r *locationRepository) LoadRelations(ctx context.Context, location *models
 
 // LoadClues loads all clues for a location
 func (r *locationRepository) LoadClues(ctx context.Context, location *models.Location) error {
-	err := db.DB.NewSelect().
+	err := r.db.NewSelect().
 		Model(&location.Clues).
 		Where("location_id = ?", location.ID).
 		Scan(ctx)
@@ -150,7 +153,7 @@ func (r *locationRepository) LoadClues(ctx context.Context, location *models.Loc
 
 // LoadMarker loads the marker for a location
 func (r *locationRepository) LoadMarker(ctx context.Context, location *models.Location) error {
-	err := db.DB.NewSelect().
+	err := r.db.NewSelect().
 		Model(location).
 		Relation("Marker").
 		Scan(ctx)
@@ -162,7 +165,7 @@ func (r *locationRepository) LoadMarker(ctx context.Context, location *models.Lo
 
 // LoadInstance loads the instance for a location
 func (r *locationRepository) LoadInstance(ctx context.Context, location *models.Location) error {
-	err := db.DB.NewSelect().
+	err := r.db.NewSelect().
 		Model(location).
 		Relation("Instance").
 		Scan(ctx)
@@ -174,7 +177,7 @@ func (r *locationRepository) LoadInstance(ctx context.Context, location *models.
 
 // LoadBlocks loads the blocks for a location
 func (r *locationRepository) LoadBlocks(ctx context.Context, location *models.Location) error {
-	err := db.DB.NewSelect().
+	err := r.db.NewSelect().
 		Model(location).
 		Relation("Blocks").
 		Scan(ctx)

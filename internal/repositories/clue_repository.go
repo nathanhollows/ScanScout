@@ -5,8 +5,8 @@ import (
 	"fmt"
 
 	"github.com/google/uuid"
-	"github.com/nathanhollows/Rapua/db"
 	"github.com/nathanhollows/Rapua/models"
+	"github.com/uptrace/bun"
 )
 
 type ClueRepository interface {
@@ -20,11 +20,15 @@ type ClueRepository interface {
 	FindCluesByLocation(ctx context.Context, locationID string) ([]models.Clue, error)
 }
 
-type clueRepository struct{}
+type clueRepository struct {
+	db *bun.DB
+}
 
 // NewClueRepository creates a new ClueRepository
-func NewClueRepository() ClueRepository {
-	return &clueRepository{}
+func NewClueRepository(db *bun.DB) ClueRepository {
+	return &clueRepository{
+		db: db,
+	}
 }
 
 // Save saves or updates a clue in the database
@@ -40,13 +44,13 @@ func (r *clueRepository) Save(ctx context.Context, c *models.Clue) error {
 		}
 		c.ID = id.String()
 	}
-	_, err = db.DB.NewInsert().Model(c).Exec(ctx)
+	_, err = r.db.NewInsert().Model(c).Exec(ctx)
 	return err
 }
 
 // Delete removes the clue from the database
 func (r *clueRepository) Delete(ctx context.Context, clueID string) error {
-	_, err := db.DB.
+	_, err := r.db.
 		NewDelete().
 		Model(&models.Clue{ID: clueID}).
 		ForceDelete().
@@ -57,7 +61,7 @@ func (r *clueRepository) Delete(ctx context.Context, clueID string) error {
 
 // DeleteByLocationID removes all clues for a location
 func (r *clueRepository) DeleteByLocationID(ctx context.Context, locationID string) error {
-	_, err := db.DB.
+	_, err := r.db.
 		NewDelete().
 		Model(&models.Clue{}).
 		Where("location_id = ?", locationID).
@@ -69,7 +73,7 @@ func (r *clueRepository) DeleteByLocationID(ctx context.Context, locationID stri
 // FindCluesByLocation returns all clues for a given location
 func (r *clueRepository) FindCluesByLocation(ctx context.Context, locationID string) ([]models.Clue, error) {
 	clues := []models.Clue{}
-	err := db.DB.
+	err := r.db.
 		NewSelect().
 		Model(&clues).
 		Where("location_id = ?", locationID).

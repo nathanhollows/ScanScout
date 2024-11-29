@@ -16,14 +16,17 @@ type NotificationService interface {
 }
 
 type notificationService struct {
-	teamRepository         repositories.TeamRepository
 	notificationRepository repositories.NotificationRepository
+	teamRepository         repositories.TeamRepository
 }
 
-func NewNotificationService() NotificationService {
+func NewNotificationService(
+	notificationRepository repositories.NotificationRepository,
+	teamRepository repositories.TeamRepository,
+) NotificationService {
 	return &notificationService{
-		teamRepository:         repositories.NewTeamRepository(),
-		notificationRepository: repositories.NewNotificationRepository(),
+		notificationRepository: notificationRepository,
+		teamRepository:         teamRepository,
 	}
 }
 

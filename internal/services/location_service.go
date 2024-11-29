@@ -37,12 +37,17 @@ type locationService struct {
 }
 
 // NewLocationService creates a new instance of LocationService
-func NewLocationService(clueRepo repositories.ClueRepository) LocationService {
+func NewLocationService(
+	clueRepo repositories.ClueRepository,
+	locationRepo repositories.LocationRepository,
+	markerRepo repositories.MarkerRepository,
+	blockRepo repositories.BlockRepository,
+) LocationService {
 	return locationService{
 		clueRepo:     clueRepo,
-		locationRepo: repositories.NewLocationRepository(),
-		markerRepo:   repositories.NewMarkerRepository(),
-		blockRepo:    repositories.NewBlockRepository(),
+		locationRepo: locationRepo,
+		markerRepo:   markerRepo,
+		blockRepo:    blockRepo,
 	}
 }
 

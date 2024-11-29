@@ -19,15 +19,19 @@ type CheckInService interface {
 
 type checkInService struct {
 	checkInRepo  repositories.CheckInRepository
-	teamRepo     repositories.TeamRepository
 	locationRepo repositories.LocationRepository
+	teamRepo     repositories.TeamRepository
 }
 
-func NewCheckInService() CheckInService {
+func NewCheckInService(
+	checkInRepo repositories.CheckInRepository,
+	locationRepo repositories.LocationRepository,
+	teamRepo repositories.TeamRepository,
+) CheckInService {
 	return &checkInService{
-		checkInRepo:  repositories.NewCheckInRepository(),
-		teamRepo:     repositories.NewTeamRepository(),
-		locationRepo: repositories.NewLocationRepository(),
+		checkInRepo:  checkInRepo,
+		locationRepo: locationRepo,
+		teamRepo:     teamRepo,
 	}
 }
 

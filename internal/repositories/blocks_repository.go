@@ -7,6 +7,7 @@ import (
 	"github.com/nathanhollows/Rapua/blocks"
 	"github.com/nathanhollows/Rapua/db"
 	"github.com/nathanhollows/Rapua/models"
+	"github.com/uptrace/bun"
 )
 
 type BlockRepository interface {
@@ -26,10 +27,16 @@ type BlockRepository interface {
 	GetBlockAndStateByBlockIDAndTeamCode(ctx context.Context, blockID string, teamCode string) (blocks.Block, blocks.PlayerState, error)
 }
 
-type blockRepository struct{}
+type blockRepository struct {
+	db        *bun.DB
+	stateRepo BlockStateRepository
+}
 
-func NewBlockRepository() BlockRepository {
-	return &blockRepository{}
+func NewBlockRepository(db *bun.DB, stateRepo BlockStateRepository) BlockRepository {
+	return &blockRepository{
+		db:        db,
+		stateRepo: stateRepo,
+	}
 }
 
 // GetByLocationID fetches all blocks for a location
@@ -251,8 +258,6 @@ func (r *blockRepository) GetBlocksAndStatesByLocationIDAndTeamCode(ctx context.
 
 // GetBlockAndStateByBlockIDAndTeamCode fetches a block by its ID with the player state for a given team
 func (r *blockRepository) GetBlockAndStateByBlockIDAndTeamCode(ctx context.Context, blockID string, teamCode string) (blocks.Block, blocks.PlayerState, error) {
-	stateRepo := NewBlockStateRepository()
-
 	modelBlock := models.Block{}
 	err := db.DB.NewSelect().
 		Model(&modelBlock).
@@ -262,11 +267,11 @@ func (r *blockRepository) GetBlockAndStateByBlockIDAndTeamCode(ctx context.Conte
 		return nil, nil, err
 	}
 
-	state, err := stateRepo.GetByBlockAndTeam(ctx, blockID, teamCode)
+	state, err := r.stateRepo.GetByBlockAndTeam(ctx, blockID, teamCode)
 	if err != nil && err.Error() != "sql: no rows in result set" {
 		return nil, nil, err
 	} else if err != nil {
-		state, err = stateRepo.NewBlockState(ctx, blockID, teamCode)
+		state, err = r.stateRepo.NewBlockState(ctx, blockID, teamCode)
 		if err != nil {
 			return nil, nil, err
 		}

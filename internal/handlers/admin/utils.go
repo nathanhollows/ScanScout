@@ -7,7 +7,6 @@ import (
 
 	"github.com/nathanhollows/Rapua/internal/contextkeys"
 	"github.com/nathanhollows/Rapua/internal/flash"
-	"github.com/nathanhollows/Rapua/internal/repositories"
 	"github.com/nathanhollows/Rapua/internal/services"
 	templates "github.com/nathanhollows/Rapua/internal/templates/admin"
 	"github.com/nathanhollows/Rapua/models"
@@ -15,37 +14,43 @@ import (
 
 type AdminHandler struct {
 	Logger              *slog.Logger
-	GameManagerService  services.GameManagerService
-	NotificationService services.NotificationService
-	UserServices        services.UserServices
 	AssetGenerator      services.AssetGenerator
-	LocationService     services.LocationService
+	AuthService         services.AuthService
 	BlockService        services.BlockService
-	TeamService         services.TeamService
 	ClueService         services.ClueService
+	GameManagerService  services.GameManagerService
+	GameplayService     services.GameplayService
+	LocationService     services.LocationService
+	NotificationService services.NotificationService
+	TeamService         services.TeamService
+	UserService         services.UserService
 }
 
-func NewAdminHandler(logger *slog.Logger, gs services.GameManagerService, ns services.NotificationService, us services.UserServices) *AdminHandler {
+func NewAdminHandler(
+	logger *slog.Logger,
+	assetGenerator services.AssetGenerator,
+	authService services.AuthService,
+	blockService services.BlockService,
+	clueService services.ClueService,
+	gameManagerService services.GameManagerService,
+	gameplayService services.GameplayService,
+	locationService services.LocationService,
+	notificationService services.NotificationService,
+	teamService services.TeamService,
+	userService services.UserService,
+) *AdminHandler {
 	return &AdminHandler{
 		Logger:              logger,
-		GameManagerService:  gs,
-		NotificationService: ns,
-		UserServices:        us,
-		AssetGenerator:      services.NewAssetGenerator(),
-		LocationService: services.NewLocationService(
-			repositories.NewClueRepository(),
-		),
-		BlockService: services.NewBlockService(
-			repositories.NewBlockRepository(),
-			repositories.NewBlockStateRepository(),
-		),
-		TeamService: services.NewTeamService(
-			repositories.NewTeamRepository(),
-		),
-		ClueService: services.NewClueService(
-			repositories.NewClueRepository(),
-			repositories.NewLocationRepository(),
-		),
+		AssetGenerator:      assetGenerator,
+		AuthService:         authService,
+		BlockService:        blockService,
+		ClueService:         clueService,
+		GameManagerService:  gameManagerService,
+		GameplayService:     gameplayService,
+		LocationService:     locationService,
+		NotificationService: notificationService,
+		TeamService:         teamService,
+		UserService:         userService,
 	}
 }
 

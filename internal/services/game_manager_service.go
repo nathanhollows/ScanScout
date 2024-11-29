@@ -28,15 +28,23 @@ type GameManagerService struct {
 	instanceSettingsRepo repositories.InstanceSettingsRepository
 }
 
-func NewGameManagerService() GameManagerService {
+func NewGameManagerService(
+	locationService LocationService,
+	userService UserService,
+	teamService TeamService,
+	markerRepo repositories.MarkerRepository,
+	clueRepo repositories.ClueRepository,
+	instanceRepo repositories.InstanceRepository,
+	instanceSettingsRepo repositories.InstanceSettingsRepository,
+) GameManagerService {
 	return GameManagerService{
-		locationService:      NewLocationService(repositories.NewClueRepository()),
-		userService:          NewUserService(repositories.NewUserRepository()),
-		teamService:          NewTeamService(repositories.NewTeamRepository()),
-		markerRepo:           repositories.NewMarkerRepository(),
-		clueRepo:             repositories.NewClueRepository(),
-		instanceRepo:         repositories.NewInstanceRepository(),
-		instanceSettingsRepo: repositories.NewInstanceSettingsRepository(),
+		locationService:      locationService,
+		userService:          userService,
+		teamService:          teamService,
+		markerRepo:           markerRepo,
+		clueRepo:             clueRepo,
+		instanceRepo:         instanceRepo,
+		instanceSettingsRepo: instanceSettingsRepo,
 	}
 }
 
@@ -206,8 +214,7 @@ func (s *GameManagerService) DeleteInstance(ctx context.Context, user *models.Us
 }
 
 func (s *GameManagerService) GetTeamActivityOverview(ctx context.Context, instanceID string) ([]TeamActivity, error) {
-	locationRepository := repositories.NewLocationRepository()
-	locations, err := locationRepository.FindByInstance(ctx, instanceID)
+	locations, err := s.locationService.FindByInstance(ctx, instanceID)
 	if err != nil {
 		return nil, fmt.Errorf("finding all locations: %w", err)
 	}

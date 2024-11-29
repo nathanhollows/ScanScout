@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/nathanhollows/Rapua/db"
 	"github.com/nathanhollows/Rapua/models"
+	"github.com/uptrace/bun"
 )
 
 type CheckInRepository interface {
@@ -16,15 +16,19 @@ type CheckInRepository interface {
 	CheckOut(ctx context.Context, team *models.Team, location *models.Location) (models.CheckIn, error)
 }
 
-type checkInRepository struct{}
+type checkInRepository struct {
+	db *bun.DB
+}
 
-func NewCheckInRepository() CheckInRepository {
-	return &checkInRepository{}
+func NewCheckInRepository(db *bun.DB) CheckInRepository {
+	return &checkInRepository{
+		db: db,
+	}
 }
 
 func (r *checkInRepository) FindCheckInByTeamAndLocation(ctx context.Context, teamCode string, locationID string) (*models.CheckIn, error) {
 	var checkIn models.CheckIn
-	err := db.DB.NewSelect().Model(&checkIn).Where("team_code = ? AND location_id = ?", teamCode, locationID).Scan(ctx)
+	err := r.db.NewSelect().Model(&checkIn).Where("team_code = ? AND location_id = ?", teamCode, locationID).Scan(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("finding check in by team and location: %w", err)
 	}
@@ -32,7 +36,7 @@ func (r *checkInRepository) FindCheckInByTeamAndLocation(ctx context.Context, te
 }
 
 func (r *checkInRepository) Update(ctx context.Context, checkIn *models.CheckIn) error {
-	_, err := db.DB.NewUpdate().Model(checkIn).WherePK().Exec(ctx)
+	_, err := r.db.NewUpdate().Model(checkIn).WherePK().Exec(ctx)
 	return err
 }
 
@@ -48,9 +52,9 @@ func (r *checkInRepository) LogCheckIn(ctx context.Context, team models.Team, lo
 	}
 	var err error
 	if scan.CreatedAt.IsZero() {
-		_, err = db.DB.NewInsert().Model(scan).Exec(ctx)
+		_, err = r.db.NewInsert().Model(scan).Exec(ctx)
 	} else {
-		_, err = db.DB.NewUpdate().Model(scan).WherePK().Exec(ctx)
+		_, err = r.db.NewUpdate().Model(scan).WherePK().Exec(ctx)
 	}
 	if err != nil {
 		return models.CheckIn{}, fmt.Errorf("saving scan: %w", err)

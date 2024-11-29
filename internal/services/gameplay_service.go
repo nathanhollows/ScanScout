@@ -49,17 +49,21 @@ type gameplayService struct {
 	MarkerRepository  repositories.MarkerRepository
 }
 
-func NewGameplayService() GameplayService {
+func NewGameplayService(
+	checkInService CheckInService,
+	locationService LocationService,
+	teamService TeamService,
+	blockService BlockService,
+	navigationService NavigationService,
+	markerRepository repositories.MarkerRepository,
+) GameplayService {
 	return &gameplayService{
-		CheckInService:  NewCheckInService(),
-		LocationService: NewLocationService(repositories.NewClueRepository()),
-		TeamService:     NewTeamService(repositories.NewTeamRepository()),
-		BlockService: NewBlockService(
-			repositories.NewBlockRepository(),
-			repositories.NewBlockStateRepository(),
-		),
-		NavigationService: NewNavigationService(),
-		MarkerRepository:  repositories.NewMarkerRepository(),
+		CheckInService:    checkInService,
+		LocationService:   locationService,
+		TeamService:       teamService,
+		BlockService:      blockService,
+		NavigationService: navigationService,
+		MarkerRepository:  markerRepository,
 	}
 }
 

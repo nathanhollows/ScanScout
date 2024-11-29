@@ -4,7 +4,6 @@ import (
 	"context"
 	"strings"
 
-	"github.com/nathanhollows/Rapua/db"
 	"github.com/nathanhollows/Rapua/helpers"
 	"github.com/nathanhollows/Rapua/models"
 	"github.com/uptrace/bun"
@@ -27,10 +26,14 @@ type MarkerRepository interface {
 	UserOwnsMarker(ctx context.Context, userID, markerCode string) (bool, error)
 }
 
-type markerRepository struct{}
+type markerRepository struct {
+	db *bun.DB
+}
 
-func NewMarkerRepository() MarkerRepository {
-	return &markerRepository{}
+func NewMarkerRepository(db *bun.DB) MarkerRepository {
+	return &markerRepository{
+		db: db,
+	}
 }
 
 // Save saves or updates a marker in the database
@@ -38,16 +41,16 @@ func (r *markerRepository) Save(ctx context.Context, marker *models.Marker) erro
 	if marker.Code == "" {
 		// TODO: Remove magic number
 		marker.Code = helpers.NewCode(5)
-		_, err := db.DB.NewInsert().Model(marker).Exec(ctx)
+		_, err := r.db.NewInsert().Model(marker).Exec(ctx)
 		return err
 	}
-	_, err := db.DB.NewUpdate().Model(marker).WherePK("code").Exec(ctx)
+	_, err := r.db.NewUpdate().Model(marker).WherePK("code").Exec(ctx)
 	return err
 }
 
 // Update updates a marker in the database
 func (r *markerRepository) Update(ctx context.Context, marker *models.Marker) error {
-	_, err := db.DB.
+	_, err := r.db.
 		NewUpdate().
 		Model(marker).
 		Column("name", "lat", "lng", "total_visits", "current_count", "avg_duration").
@@ -59,7 +62,7 @@ func (r *markerRepository) Update(ctx context.Context, marker *models.Marker) er
 
 // Delete deletes a marker from the database
 func (r *markerRepository) Delete(ctx context.Context, markerCode string) error {
-	_, err := db.DB.NewDelete().Model(&models.Marker{Code: markerCode}).WherePK().Exec(ctx)
+	_, err := r.db.NewDelete().Model(&models.Marker{Code: markerCode}).WherePK().Exec(ctx)
 	return err
 }
 
@@ -67,7 +70,7 @@ func (r *markerRepository) Delete(ctx context.Context, markerCode string) error 
 func (r *markerRepository) FindByCode(ctx context.Context, code string) (*models.Marker, error) {
 	code = strings.ToUpper(strings.TrimSpace(code))
 	var marker models.Marker
-	err := db.DB.NewSelect().Model(&marker).Where("code = ?", code).Scan(ctx)
+	err := r.db.NewSelect().Model(&marker).Where("code = ?", code).Scan(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -76,7 +79,7 @@ func (r *markerRepository) FindByCode(ctx context.Context, code string) (*models
 
 func (r *markerRepository) FindNotInInstance(ctx context.Context, instanceID string, otherInstances []string) ([]models.Marker, error) {
 	var markers []models.Marker
-	err := db.DB.NewSelect().
+	err := r.db.NewSelect().
 		Model(&markers).
 		Where("code IN (SELECT marker_id FROM locations WHERE instance_id IN (?))", bun.In(otherInstances)). // Markers used by otherInstances
 		Where("code NOT IN (SELECT marker_id FROM locations WHERE instance_id = ?)", instanceID).            // Exclude markers used by instanceID
@@ -89,14 +92,14 @@ func (r *markerRepository) FindNotInInstance(ctx context.Context, instanceID str
 func (r *markerRepository) UpdateCoords(ctx context.Context, marker *models.Marker, lat, lng float64) error {
 	marker.Lat = lat
 	marker.Lng = lng
-	_, err := db.DB.NewUpdate().Model(marker).WherePK().Column("lat", "lng").Exec(ctx)
+	_, err := r.db.NewUpdate().Model(marker).WherePK().Column("lat", "lng").Exec(ctx)
 	return err
 }
 
 // IsShared checks if a marker is shared
 func (r *markerRepository) IsShared(ctx context.Context, code string) (bool, error) {
 	var count int
-	count, err := db.DB.NewSelect().Model(&models.Location{}).Where("marker_id = ?", code).Count(ctx)
+	count, err := r.db.NewSelect().Model(&models.Location{}).Where("marker_id = ?", code).Count(ctx)
 	if err != nil {
 		return false, err
 	}
@@ -106,7 +109,7 @@ func (r *markerRepository) IsShared(ctx context.Context, code string) (bool, err
 // UserOwnsMarker checks if a user owns a marker
 func (r *markerRepository) UserOwnsMarker(ctx context.Context, userID, markerCode string) (bool, error) {
 	var count int
-	count, err := db.DB.
+	count, err := r.db.
 		NewSelect().
 		Model(&models.Location{}).
 		Where("marker_id = ? AND user_id = ?", markerCode, userID).

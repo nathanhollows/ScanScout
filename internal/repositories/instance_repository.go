@@ -6,7 +6,6 @@ import (
 	"fmt"
 
 	"github.com/google/uuid"
-	"github.com/nathanhollows/Rapua/db"
 	"github.com/nathanhollows/Rapua/models"
 	"github.com/uptrace/bun"
 )
@@ -26,17 +25,21 @@ type InstanceRepository interface {
 	DismissQuickstart(ctx context.Context, userID string) error
 }
 
-type instanceRepository struct{}
+type instanceRepository struct {
+	db *bun.DB
+}
 
-func NewInstanceRepository() InstanceRepository {
-	return &instanceRepository{}
+func NewInstanceRepository(db *bun.DB) InstanceRepository {
+	return &instanceRepository{
+		db: db,
+	}
 }
 
 func (r *instanceRepository) Save(ctx context.Context, instance *models.Instance) error {
 	if instance.ID == "" {
 		instance.ID = uuid.New().String()
 	}
-	_, err := db.DB.NewInsert().Model(instance).Exec(ctx)
+	_, err := r.db.NewInsert().Model(instance).Exec(ctx)
 	if err != nil {
 		return err
 	}
@@ -47,7 +50,7 @@ func (r *instanceRepository) Update(ctx context.Context, instance *models.Instan
 	if instance.ID == "" {
 		return fmt.Errorf("ID is required")
 	}
-	_, err := db.DB.NewUpdate().Model(instance).WherePK().Exec(ctx)
+	_, err := r.db.NewUpdate().Model(instance).WherePK().Exec(ctx)
 	if err != nil {
 		return err
 	}
@@ -61,7 +64,7 @@ func (r *instanceRepository) Delete(ctx context.Context, instanceID string) erro
 		db *bun.DB
 	}
 
-	tx, err := db.DB.BeginTx(ctx, &sql.TxOptions{})
+	tx, err := r.db.BeginTx(ctx, &sql.TxOptions{})
 	if err != nil {
 		return err
 	}
@@ -113,7 +116,7 @@ func (r *instanceRepository) Delete(ctx context.Context, instanceID string) erro
 
 func (r *instanceRepository) FindByID(ctx context.Context, id string) (*models.Instance, error) {
 	instance := &models.Instance{}
-	err := db.DB.NewSelect().
+	err := r.db.NewSelect().
 		Model(instance).
 		Where("id = ?", id).
 		Relation("Locations").
@@ -127,7 +130,7 @@ func (r *instanceRepository) FindByID(ctx context.Context, id string) (*models.I
 
 func (r *instanceRepository) FindByUserID(ctx context.Context, userID string) ([]models.Instance, error) {
 	instances := []models.Instance{}
-	err := db.DB.NewSelect().
+	err := r.db.NewSelect().
 		Model(&instances).
 		Where("user_id = ?", userID).
 		Scan(ctx)
@@ -139,7 +142,7 @@ func (r *instanceRepository) FindByUserID(ctx context.Context, userID string) ([
 
 // DismissQuickstart marks the user as having dismissed the quickstart
 func (r *instanceRepository) DismissQuickstart(ctx context.Context, instanceID string) error {
-	_, err := db.DB.NewUpdate().
+	_, err := r.db.NewUpdate().
 		Model(&models.Instance{}).
 		Set("is_quick_start_dismissed = ?", true).
 		Where("id = ?", instanceID).

@@ -6,13 +6,13 @@ import (
 	"net/http"
 
 	"github.com/nathanhollows/Rapua/internal/contextkeys"
-	"github.com/nathanhollows/Rapua/internal/repositories"
+	"github.com/nathanhollows/Rapua/internal/services"
 	"github.com/nathanhollows/Rapua/internal/sessions"
 	"github.com/nathanhollows/Rapua/models"
 )
 
 // LobbyMiddleware redirects to the lobby if the game is scheduled to start
-func LobbyMiddleware(teamRepo repositories.TeamRepository, next http.Handler) http.Handler {
+func LobbyMiddleware(teamService services.TeamService, next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// Extract the session
 		session, err := sessions.Get(r, "scanscout")
@@ -30,7 +30,7 @@ func LobbyMiddleware(teamRepo repositories.TeamRepository, next http.Handler) ht
 		}
 
 		// Find the matching team instance
-		team, err := teamRepo.FindTeamByCode(r.Context(), teamCode)
+		team, err := teamService.FindTeamByCode(r.Context(), teamCode)
 		if err != nil {
 			slog.Error("finding team by code: ", "err", err, "teamCode", teamCode)
 			next.ServeHTTP(w, r)

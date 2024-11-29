@@ -4,7 +4,6 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/nathanhollows/Rapua/internal/services"
 	admin "github.com/nathanhollows/Rapua/internal/templates/admin"
 	players "github.com/nathanhollows/Rapua/internal/templates/players"
 	"github.com/nathanhollows/Rapua/models"
@@ -53,7 +52,6 @@ func (h *AdminHandler) ExperiencePost(w http.ResponseWriter, r *http.Request) {
 
 // Show a player preview for navigation
 func (h *AdminHandler) ExperiencePreview(w http.ResponseWriter, r *http.Request) {
-	gameplayService := services.NewGameplayService()
 	user := h.UserFromContext(r.Context())
 
 	if err := r.ParseForm(); err != nil {
@@ -93,7 +91,7 @@ func (h *AdminHandler) ExperiencePreview(w http.ResponseWriter, r *http.Request)
 		Instance:   user.CurrentInstance,
 	}
 
-	locations, err := gameplayService.SuggestNextLocations(r.Context(), &team)
+	locations, err := h.GameplayService.SuggestNextLocations(r.Context(), &team)
 	if err != nil {
 		h.handleError(w, r, "Next: getting next locations", "Error getting next locations", "Could not load data", err)
 		return

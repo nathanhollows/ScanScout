@@ -12,18 +12,61 @@ import (
 	"time"
 
 	"github.com/go-chi/chi"
+	admin "github.com/nathanhollows/Rapua/internal/handlers/admin"
+	players "github.com/nathanhollows/Rapua/internal/handlers/players"
+	public "github.com/nathanhollows/Rapua/internal/handlers/public"
 	"github.com/nathanhollows/Rapua/internal/services"
 )
 
 var router *chi.Mux
 var server *http.Server
 
-func Start(logger *slog.Logger) {
-	gameplayService := services.NewGameplayService()
-	gameManagerService := services.NewGameManagerService()
-	notificationService := services.NewNotificationService()
+func Start(logger *slog.Logger,
+	assetGenerator services.AssetGenerator,
+	authService services.AuthService,
+	blockService services.BlockService,
+	checkInService services.CheckInService,
+	clueService services.ClueService,
+	emailService services.EmailService,
+	gameManagerService services.GameManagerService,
+	gameplayService services.GameplayService,
+	locationService services.LocationService,
+	navigationService services.NavigationService,
+	notificationService services.NotificationService,
+	teamService services.TeamService,
+	userService services.UserService,
+) {
+	// Public routes
+	publicHandler := public.NewPublicHandler(
+		logger,
+		authService,
+		userService,
+	)
 
-	router = setupRouter(logger, gameplayService, gameManagerService, notificationService)
+	// Player routes
+	playerHandler := players.NewPlayerHandler(
+		logger,
+		blockService,
+		gameplayService,
+		notificationService,
+		teamService,
+	)
+
+	// Admin routes
+	adminHandler := admin.NewAdminHandler(
+		logger,
+		assetGenerator,
+		authService,
+		blockService,
+		clueService,
+		gameManagerService,
+		gameplayService,
+		locationService,
+		notificationService,
+		teamService,
+		userService,
+	)
+	router = setupRouter(logger, publicHandler, playerHandler, adminHandler)
 
 	killSig := make(chan os.Signal, 1)
 

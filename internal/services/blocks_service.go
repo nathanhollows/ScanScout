@@ -76,12 +76,11 @@ func (s *blockService) NewBlock(ctx context.Context, locationID string, blockTyp
 
 // NewBlockState creates a new block state
 func (s *blockService) NewBlockState(ctx context.Context, blockID, teamCode string) (blocks.PlayerState, error) {
-	stateRepo := repositories.NewBlockStateRepository()
-	state, err := stateRepo.NewBlockState(ctx, blockID, teamCode)
+	state, err := s.blockStateRepo.NewBlockState(ctx, blockID, teamCode)
 	if err != nil {
 		return nil, fmt.Errorf("creating new block state: %w", err)
 	}
-	state, err = stateRepo.Create(ctx, state)
+	state, err = s.blockStateRepo.Create(ctx, state)
 	if err != nil {
 		return nil, fmt.Errorf("storing new block state: %w", err)
 	}
@@ -90,8 +89,7 @@ func (s *blockService) NewBlockState(ctx context.Context, blockID, teamCode stri
 
 // NewMockBlockState creates a new mock block state
 func (s *blockService) NewMockBlockState(ctx context.Context, blockID, teamCode string) (blocks.PlayerState, error) {
-	stateRepo := repositories.NewBlockStateRepository()
-	state, err := stateRepo.NewBlockState(ctx, blockID, teamCode)
+	state, err := s.blockStateRepo.NewBlockState(ctx, blockID, teamCode)
 	if err != nil {
 		return nil, fmt.Errorf("creating new block state: %w", err)
 	}

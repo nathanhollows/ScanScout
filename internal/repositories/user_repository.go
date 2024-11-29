@@ -5,7 +5,6 @@ import (
 	"errors"
 
 	"github.com/google/uuid"
-	"github.com/nathanhollows/Rapua/db"
 	"github.com/nathanhollows/Rapua/models"
 	"github.com/uptrace/bun"
 )
@@ -29,15 +28,19 @@ type UserRepository interface {
 	FindUserByEmailAndProvider(ctx context.Context, email, provider string) (*models.User, error)
 }
 
-type userRepository struct{}
+type userRepository struct {
+	db *bun.DB
+}
 
-func NewUserRepository() UserRepository {
-	return &userRepository{}
+func NewUserRepository(db *bun.DB) UserRepository {
+	return &userRepository{
+		db: db,
+	}
 }
 
 // Update the user in the database
 func (r *userRepository) Update(ctx context.Context, user *models.User) error {
-	_, err := db.DB.NewUpdate().
+	_, err := r.db.NewUpdate().
 		Model(user).
 		WherePK().
 		Exec(ctx)
@@ -51,14 +54,14 @@ func (r *userRepository) Create(ctx context.Context, user *models.User) error {
 		user.ID = uuid.String()
 	}
 
-	_, err := db.DB.NewInsert().Model(user).Exec(ctx)
+	_, err := r.db.NewInsert().Model(user).Exec(ctx)
 	return err
 }
 
 // FindUserByEmail retrieves a user by their email address
 func (r *userRepository) FindUserByEmail(ctx context.Context, email string) (*models.User, error) {
 	user := &models.User{}
-	err := db.DB.NewSelect().
+	err := r.db.NewSelect().
 		Model(user).
 		Where("email = ?", email).
 		Relation("CurrentInstance").
@@ -70,7 +73,7 @@ func (r *userRepository) FindUserByEmail(ctx context.Context, email string) (*mo
 // FindUserByEmailToken retrieves a user by their email token
 func (r *userRepository) FindUserByEmailToken(ctx context.Context, token string) (*models.User, error) {
 	user := &models.User{}
-	err := db.DB.NewSelect().
+	err := r.db.NewSelect().
 		Model(user).
 		Where("email_token = ?", token).
 		Scan(ctx)
@@ -80,7 +83,7 @@ func (r *userRepository) FindUserByEmailToken(ctx context.Context, token string)
 // FindUserByID fetches a user by their ID from the database.
 func (r *userRepository) FindUserByID(ctx context.Context, userID string) (*models.User, error) {
 	var user models.User
-	err := db.DB.NewSelect().
+	err := r.db.NewSelect().
 		Model(&user).
 		Where("user.id = ?", userID).
 		Relation("CurrentInstance").
@@ -102,7 +105,7 @@ func (r *userRepository) FindUserByID(ctx context.Context, userID string) (*mode
 // FindUserByEmailAndProvider retrieves a user by their email address and provider
 func (r *userRepository) FindUserByEmailAndProvider(ctx context.Context, email, provider string) (*models.User, error) {
 	user := &models.User{}
-	err := db.DB.NewSelect().
+	err := r.db.NewSelect().
 		Model(user).
 		Where("email = ?", email).
 		Where("provider = ? OR provider = ''", provider).
