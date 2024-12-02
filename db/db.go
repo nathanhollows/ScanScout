@@ -12,11 +12,10 @@ import (
 	"github.com/uptrace/bun/extra/bundebug"
 )
 
-var DB *bun.DB
-
 func MustOpen() *bun.DB {
 	var sqldb *sql.DB
 	var err error
+	var db *bun.DB
 
 	dataSourceName := os.Getenv("DB_CONNECTION")
 	if dataSourceName == "" {
@@ -27,10 +26,10 @@ func MustOpen() *bun.DB {
 	switch driverName {
 	case "mysql":
 		sqldb, err = sql.Open(driverName, dataSourceName)
-		DB = bun.NewDB(sqldb, mysqldialect.New())
+		db = bun.NewDB(sqldb, mysqldialect.New())
 	case "sqlite3":
 		sqldb, err = sql.Open(sqliteshim.ShimName, dataSourceName)
-		DB = bun.NewDB(sqldb, sqlitedialect.New())
+		db = bun.NewDB(sqldb, sqlitedialect.New())
 	default:
 		panic("unsupported DB_TYPE: " + driverName + ". Supported types are mysql and sqlite3")
 	}
@@ -40,7 +39,7 @@ func MustOpen() *bun.DB {
 	}
 
 	debugEnabled := os.Getenv("BUNDEBUG") == "1" || os.Getenv("BUNDEBUG") == "2"
-	DB.AddQueryHook(bundebug.NewQueryHook(
+	db.AddQueryHook(bundebug.NewQueryHook(
 		// disable the hook
 		bundebug.WithEnabled(debugEnabled),
 
@@ -49,5 +48,5 @@ func MustOpen() *bun.DB {
 		bundebug.FromEnv("BUNDEBUG"),
 	))
 
-	return DB
+	return db
 }
