@@ -5,7 +5,6 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/nathanhollows/Rapua/blocks"
-	"github.com/nathanhollows/Rapua/db"
 	"github.com/nathanhollows/Rapua/models"
 	"github.com/uptrace/bun"
 )
@@ -42,7 +41,7 @@ func NewBlockRepository(db *bun.DB, stateRepo BlockStateRepository) BlockReposit
 // GetByLocationID fetches all blocks for a location
 func (r *blockRepository) GetByLocationID(ctx context.Context, locationID string) (blocks.Blocks, error) {
 	modelBlocks := []models.Block{}
-	err := db.DB.NewSelect().
+	err := r.db.NewSelect().
 		Model(&modelBlocks).
 		Where("location_id = ?", locationID).
 		Order("ordering ASC").
@@ -56,7 +55,7 @@ func (r *blockRepository) GetByLocationID(ctx context.Context, locationID string
 // GetByID fetches a block by its ID
 func (r *blockRepository) GetByID(ctx context.Context, blockID string) (blocks.Block, error) {
 	modelBlock := &models.Block{}
-	err := db.DB.NewSelect().
+	err := r.db.NewSelect().
 		Model(modelBlock).
 		Where("id = ?", blockID).
 		Scan(ctx)
@@ -71,12 +70,12 @@ func (r *blockRepository) Save(ctx context.Context, block blocks.Block) (blocks.
 	model := convertBlockToModel(block)
 	if model.ID == "" {
 		model.ID = uuid.New().String()
-		_, err := db.DB.NewInsert().Model(&model).Exec(ctx)
+		_, err := r.db.NewInsert().Model(&model).Exec(ctx)
 		if err != nil {
 			return nil, err
 		}
 	} else {
-		_, err := db.DB.NewUpdate().Model(&model).WherePK().Exec(ctx)
+		_, err := r.db.NewUpdate().Model(&model).WherePK().Exec(ctx)
 		if err != nil {
 			return nil, err
 		}
@@ -100,7 +99,7 @@ func (r *blockRepository) Create(ctx context.Context, block blocks.Block, locati
 		Points:             block.GetPoints(),
 		ValidationRequired: block.RequiresValidation(),
 	}
-	_, err := db.DB.NewInsert().Model(&modelBlock).Exec(ctx)
+	_, err := r.db.NewInsert().Model(&modelBlock).Exec(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -115,7 +114,7 @@ func (r *blockRepository) Create(ctx context.Context, block blocks.Block, locati
 // Update saves an existing block to the database
 func (r *blockRepository) Update(ctx context.Context, block blocks.Block) (blocks.Block, error) {
 	modelBlock := convertBlockToModel(block)
-	_, err := db.DB.NewUpdate().Model(&modelBlock).WherePK().Exec(ctx)
+	_, err := r.db.NewUpdate().Model(&modelBlock).WherePK().Exec(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -174,20 +173,20 @@ func convertModelToBlock(model *models.Block) (blocks.Block, error) {
 
 // Delete deletes a block from the database
 func (r *blockRepository) Delete(ctx context.Context, blockID string) error {
-	_, err := db.DB.NewDelete().Model(&models.Block{}).Where("id = ?", blockID).Exec(ctx)
+	_, err := r.db.NewDelete().Model(&models.Block{}).Where("id = ?", blockID).Exec(ctx)
 	return err
 }
 
 // DeleteByLocationID deletes all blocks for a location
 func (r *blockRepository) DeleteByLocationID(ctx context.Context, locationID string) error {
-	_, err := db.DB.NewDelete().Model(&models.Block{}).Where("location_id = ?", locationID).Exec(ctx)
+	_, err := r.db.NewDelete().Model(&models.Block{}).Where("location_id = ?", locationID).Exec(ctx)
 	return err
 }
 
 // Reorder reorders the blocks
 func (r *blockRepository) Reorder(ctx context.Context, locationID string, blockIDs []string) error {
 	for i, blockID := range blockIDs {
-		_, err := db.DB.NewUpdate().
+		_, err := r.db.NewUpdate().
 			Model(&models.Block{}).
 			Set("ordering = ?", i).
 			Where("id = ?", blockID).
@@ -204,7 +203,7 @@ func (r *blockRepository) GetBlocksAndStatesByLocationIDAndTeamCode(ctx context.
 	modelBlocks := []models.Block{}
 	states := []models.TeamBlockState{}
 
-	err := db.DB.NewSelect().
+	err := r.db.NewSelect().
 		Model(&modelBlocks).
 		Where("location_id = ?", locationID).
 		Order("ordering ASC").
@@ -214,9 +213,9 @@ func (r *blockRepository) GetBlocksAndStatesByLocationIDAndTeamCode(ctx context.
 	}
 
 	if teamCode != "" {
-		err = db.DB.NewSelect().
+		err = r.db.NewSelect().
 			Model(&states).
-			Where("block_id IN (?)", db.DB.NewSelect().Model((*models.Block)(nil)).Column("id").Where("location_id = ?", locationID)).
+			Where("block_id IN (?)", r.db.NewSelect().Model((*models.Block)(nil)).Column("id").Where("location_id = ?", locationID)).
 			Where("team_code = ?", teamCode).
 			Scan(ctx)
 		if err != nil {
@@ -259,7 +258,7 @@ func (r *blockRepository) GetBlocksAndStatesByLocationIDAndTeamCode(ctx context.
 // GetBlockAndStateByBlockIDAndTeamCode fetches a block by its ID with the player state for a given team
 func (r *blockRepository) GetBlockAndStateByBlockIDAndTeamCode(ctx context.Context, blockID string, teamCode string) (blocks.Block, blocks.PlayerState, error) {
 	modelBlock := models.Block{}
-	err := db.DB.NewSelect().
+	err := r.db.NewSelect().
 		Model(&modelBlock).
 		Where("id = ?", blockID).
 		Scan(ctx)

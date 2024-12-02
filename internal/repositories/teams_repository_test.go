@@ -2,18 +2,36 @@ package repositories_test
 
 import (
 	"context"
+	"log/slog"
+	"os"
 	"testing"
 
+	"github.com/nathanhollows/Rapua/db"
+	"github.com/nathanhollows/Rapua/internal/migrate"
 	"github.com/nathanhollows/Rapua/internal/repositories"
 	"github.com/nathanhollows/Rapua/models"
 	"github.com/stretchr/testify/assert"
 )
 
-func TestTeamRepository_Update(t *testing.T) {
-	cleanup := models.SetupTestDB(t)
-	defer cleanup()
+func setupTeamRepo(t *testing.T) (repositories.TeamRepository, func()) {
+	t.Helper()
+	os.Setenv("DB_CONNECTION", "file::memory:?cache=shared")
+	os.Setenv("DB_TYPE", "sqlite3")
+	db := db.MustOpen()
 
-	repo := repositories.NewTeamRepository()
+	// Create tables
+	logger := slog.New(slog.NewTextHandler(os.Stderr, nil))
+	migrate.CreateTables(logger, db)
+
+	teamRepository := repositories.NewTeamRepository(db)
+	return teamRepository, func() {
+		db.Close()
+	}
+}
+
+func TestTeamRepository_Update(t *testing.T) {
+	repo, cleanup := setupTeamRepo(t)
+	defer cleanup()
 	ctx := context.Background()
 
 	sampleTeam := &models.Team{Code: "team1", InstanceID: "instance-1"}
@@ -22,10 +40,8 @@ func TestTeamRepository_Update(t *testing.T) {
 }
 
 func TestTeamRepository_Delete(t *testing.T) {
-	cleanup := models.SetupTestDB(t)
+	repo, cleanup := setupTeamRepo(t)
 	defer cleanup()
-
-	repo := repositories.NewTeamRepository()
 	ctx := context.Background()
 
 	sampleTeam := &models.Team{Code: "team1", InstanceID: "instance-1"}
@@ -40,10 +56,8 @@ func TestTeamRepository_Delete(t *testing.T) {
 }
 
 func TestTeamRepository_FindAll(t *testing.T) {
-	cleanup := models.SetupTestDB(t)
+	repo, cleanup := setupTeamRepo(t)
 	defer cleanup()
-
-	repo := repositories.NewTeamRepository()
 	ctx := context.Background()
 
 	instanceID := "instance-1"
@@ -62,10 +76,8 @@ func TestTeamRepository_FindAll(t *testing.T) {
 }
 
 func TestTeamRepository_FindAllWithScans(t *testing.T) {
-	cleanup := models.SetupTestDB(t)
+	repo, cleanup := setupTeamRepo(t)
 	defer cleanup()
-
-	repo := repositories.NewTeamRepository()
 	ctx := context.Background()
 
 	instanceID := "instance-1"
@@ -85,10 +97,8 @@ func TestTeamRepository_FindAllWithScans(t *testing.T) {
 }
 
 func TestTeamRepository_InsertBatch(t *testing.T) {
-	cleanup := models.SetupTestDB(t)
+	repo, cleanup := setupTeamRepo(t)
 	defer cleanup()
-
-	repo := repositories.NewTeamRepository()
 	ctx := context.Background()
 
 	sampleTeams := []models.Team{{Code: "team1"}, {Code: "team2"}}
@@ -97,10 +107,8 @@ func TestTeamRepository_InsertBatch(t *testing.T) {
 }
 
 func TestTeamRepository_InsertBatch_UniqueConstraintError(t *testing.T) {
-	cleanup := models.SetupTestDB(t)
+	repo, cleanup := setupTeamRepo(t)
 	defer cleanup()
-
-	repo := repositories.NewTeamRepository()
 	ctx := context.Background()
 
 	sampleTeams := []models.Team{{Code: "team1"}, {Code: "team2"}}
