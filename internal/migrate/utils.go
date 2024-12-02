@@ -5,11 +5,11 @@ import (
 	"log"
 	"log/slog"
 
-	"github.com/nathanhollows/Rapua/db"
 	"github.com/nathanhollows/Rapua/models"
+	"github.com/uptrace/bun"
 )
 
-func CreateTables(logger *slog.Logger) {
+func CreateTables(logger *slog.Logger, db *bun.DB) {
 	var models = []interface{}{
 		(*models.Notification)(nil),
 		(*models.InstanceSettings)(nil),
@@ -25,7 +25,7 @@ func CreateTables(logger *slog.Logger) {
 	}
 
 	for _, model := range models {
-		_, err := db.DB.NewCreateTable().Model(model).IfNotExists().Exec(context.Background())
+		_, err := db.NewCreateTable().Model(model).IfNotExists().Exec(context.Background())
 		if err != nil {
 			log.Fatal(err)
 		}

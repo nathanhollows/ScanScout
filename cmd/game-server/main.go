@@ -25,7 +25,7 @@ func main() {
 	initialiseFolders(logger)
 
 	db := db.MustOpen()
-	migrate.CreateTables(logger)
+	migrate.CreateTables(logger, db)
 
 	// Initialise the repos
 	blockStateRepo := repositories.NewBlockStateRepository(db)
