@@ -12,8 +12,8 @@ import (
 	"time"
 
 	"github.com/nathanhollows/Rapua/internal/flash"
-	"github.com/nathanhollows/Rapua/internal/repositories"
 	"github.com/nathanhollows/Rapua/models"
+	"github.com/nathanhollows/Rapua/repositories"
 	"github.com/uptrace/bun"
 )
 
@@ -61,7 +61,7 @@ func (s *GameManagerService) CreateInstance(ctx context.Context, name string, us
 		UserID: user.ID,
 	}
 
-	if err := s.instanceRepo.Save(ctx, instance); err != nil {
+	if err := s.instanceRepo.Create(ctx, instance); err != nil {
 		response.AddFlashMessage(*flash.NewError("Error saving instance"))
 		response.Error = fmt.Errorf("saving instance: %w", err)
 		return response
@@ -78,7 +78,7 @@ func (s *GameManagerService) CreateInstance(ctx context.Context, name string, us
 	settings := &models.InstanceSettings{
 		InstanceID: instance.ID,
 	}
-	if err := s.instanceSettingsRepo.Save(ctx, settings); err != nil {
+	if err := s.instanceSettingsRepo.Create(ctx, settings); err != nil {
 		response.AddFlashMessage(*flash.NewError("Error saving settings"))
 		response.Error = fmt.Errorf("saving settings: %w", err)
 		return response
@@ -130,7 +130,7 @@ func (s *GameManagerService) DuplicateInstance(ctx context.Context, user *models
 		UserID: user.ID,
 	}
 
-	if err := s.instanceRepo.Save(ctx, newInstance); err != nil {
+	if err := s.instanceRepo.Create(ctx, newInstance); err != nil {
 		response.AddFlashMessage(*flash.NewError("Error saving new instance"))
 		response.Error = fmt.Errorf("saving new instance: %w", err)
 		return response
@@ -149,7 +149,7 @@ func (s *GameManagerService) DuplicateInstance(ctx context.Context, user *models
 	// Copy settings
 	settings := oldInstance.Settings
 	settings.InstanceID = newInstance.ID
-	if err := s.instanceSettingsRepo.Save(ctx, &settings); err != nil {
+	if err := s.instanceSettingsRepo.Create(ctx, &settings); err != nil {
 		response.AddFlashMessage(*flash.NewError("Error saving settings"))
 		response.Error = fmt.Errorf("saving settings: %w", err)
 		return response

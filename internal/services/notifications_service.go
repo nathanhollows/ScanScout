@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/nathanhollows/Rapua/internal/repositories"
 	"github.com/nathanhollows/Rapua/models"
+	"github.com/nathanhollows/Rapua/repositories"
 )
 
 type NotificationService interface {
@@ -37,7 +37,7 @@ func (s *notificationService) SendNotification(ctx context.Context, teamCode str
 		Content:  content,
 	}
 
-	err := s.notificationRepository.Save(ctx, &notification)
+	err := s.notificationRepository.Create(ctx, &notification)
 	return notification, err
 }
 

@@ -8,8 +8,8 @@ import (
 
 	"github.com/nathanhollows/Rapua/db"
 	"github.com/nathanhollows/Rapua/internal/migrate"
-	"github.com/nathanhollows/Rapua/internal/repositories"
 	"github.com/nathanhollows/Rapua/models"
+	"github.com/nathanhollows/Rapua/repositories"
 	"github.com/stretchr/testify/assert"
 )
 

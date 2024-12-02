@@ -5,8 +5,8 @@ import (
 	"fmt"
 
 	"github.com/nathanhollows/Rapua/blocks"
-	"github.com/nathanhollows/Rapua/internal/repositories"
 	"github.com/nathanhollows/Rapua/models"
+	"github.com/nathanhollows/Rapua/repositories"
 )
 
 type BlockService interface {

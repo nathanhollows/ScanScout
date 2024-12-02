@@ -11,7 +11,7 @@ import (
 
 type MarkerRepository interface {
 	// Create a new marker in the database
-	Save(ctx context.Context, marker *models.Marker) error
+	Create(ctx context.Context, marker *models.Marker) error
 	// Update a marker in the database
 	Update(ctx context.Context, marker *models.Marker) error
 	// Delete
@@ -36,8 +36,8 @@ func NewMarkerRepository(db *bun.DB) MarkerRepository {
 	}
 }
 
-// Save saves or updates a marker in the database
-func (r *markerRepository) Save(ctx context.Context, marker *models.Marker) error {
+// Create saves or updates a marker in the database
+func (r *markerRepository) Create(ctx context.Context, marker *models.Marker) error {
 	if marker.Code == "" {
 		// TODO: Remove magic number
 		marker.Code = helpers.NewCode(5)

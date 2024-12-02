@@ -11,8 +11,8 @@ import (
 )
 
 type InstanceRepository interface {
-	// Save saves an instance to the database
-	Save(ctx context.Context, instance *models.Instance) error
+	// Create saves an instance to the database
+	Create(ctx context.Context, instance *models.Instance) error
 	// Update updates an instance in the database
 	Update(ctx context.Context, instance *models.Instance) error
 	// Delete deletes an instance from the database
@@ -35,7 +35,7 @@ func NewInstanceRepository(db *bun.DB) InstanceRepository {
 	}
 }
 
-func (r *instanceRepository) Save(ctx context.Context, instance *models.Instance) error {
+func (r *instanceRepository) Create(ctx context.Context, instance *models.Instance) error {
 	if instance.ID == "" {
 		instance.ID = uuid.New().String()
 	}

@@ -7,10 +7,10 @@ import (
 
 	"github.com/nathanhollows/Rapua/db"
 	"github.com/nathanhollows/Rapua/internal/migrate"
-	"github.com/nathanhollows/Rapua/internal/repositories"
+	"github.com/nathanhollows/Rapua/repositories"
 )
 
-func setupMarkerRepo(t *testing.T) (repositories.MarkerRepository, func()) {
+func setupLocationRepo(t *testing.T) (repositories.LocationRepository, func()) {
 	t.Helper()
 	os.Setenv("DB_CONNECTION", "file::memory:?cache=shared")
 	os.Setenv("DB_TYPE", "sqlite3")
@@ -20,8 +20,8 @@ func setupMarkerRepo(t *testing.T) (repositories.MarkerRepository, func()) {
 	logger := slog.New(slog.NewTextHandler(os.Stderr, nil))
 	migrate.CreateTables(logger, db)
 
-	markerRepo := repositories.NewMarkerRepository(db)
-	return markerRepo, func() {
+	locationRepo := repositories.NewLocationRepository(db)
+	return locationRepo, func() {
 		db.Close()
 	}
 }

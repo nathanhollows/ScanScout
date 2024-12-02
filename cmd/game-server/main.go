@@ -9,10 +9,10 @@ import (
 	"github.com/joho/godotenv"
 	"github.com/nathanhollows/Rapua/db"
 	"github.com/nathanhollows/Rapua/internal/migrate"
-	"github.com/nathanhollows/Rapua/internal/repositories"
 	"github.com/nathanhollows/Rapua/internal/server"
 	"github.com/nathanhollows/Rapua/internal/services"
 	"github.com/nathanhollows/Rapua/internal/sessions"
+	"github.com/nathanhollows/Rapua/repositories"
 )
 
 func main() {

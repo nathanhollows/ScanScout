@@ -14,8 +14,6 @@ type BlockRepository interface {
 	GetByLocationID(ctx context.Context, locationID string) (blocks.Blocks, error)
 	// GetBlockByID fetches a block by its ID
 	GetByID(ctx context.Context, blockID string) (blocks.Block, error)
-	// Saveblock saves a block to the database
-	Save(ctx context.Context, block blocks.Block) (blocks.Block, error)
 	Create(ctx context.Context, block blocks.Block, locationID string) (blocks.Block, error)
 	Update(ctx context.Context, block blocks.Block) (blocks.Block, error)
 	Delete(ctx context.Context, blockID string) error
@@ -63,29 +61,6 @@ func (r *blockRepository) GetByID(ctx context.Context, blockID string) (blocks.B
 		return nil, err
 	}
 	return convertModelToBlock(modelBlock)
-}
-
-// Save saves a block to the database
-func (r *blockRepository) Save(ctx context.Context, block blocks.Block) (blocks.Block, error) {
-	model := convertBlockToModel(block)
-	if model.ID == "" {
-		model.ID = uuid.New().String()
-		_, err := r.db.NewInsert().Model(&model).Exec(ctx)
-		if err != nil {
-			return nil, err
-		}
-	} else {
-		_, err := r.db.NewUpdate().Model(&model).WherePK().Exec(ctx)
-		if err != nil {
-			return nil, err
-		}
-	}
-	// Convert back to block and return
-	updatedBlock, err := convertModelToBlock(&model)
-	if err != nil {
-		return nil, err
-	}
-	return updatedBlock, nil
 }
 
 // Create saves a new block to the database

@@ -10,20 +10,23 @@ import (
 )
 
 type LocationRepository interface {
+	// Create saves or updates a location
+	Create(ctx context.Context, location *models.Location) error
+	// Update updates a location in the database
+	Update(ctx context.Context, location *models.Location) error
+
 	// Find finds a location by ID
 	Find(ctx context.Context, locationID string) (*models.Location, error)
 	// FindByInstance finds a location by instance and code
 	FindByInstanceAndCode(ctx context.Context, instanceID string, code string) (*models.Location, error)
 	// Find all locations for an instance
 	FindByInstance(ctx context.Context, instanceID string) ([]models.Location, error)
-	// Update updates a location in the database
-	// FindLocationsByMarkerID(ctx context.Context, markerID string) ([]models.Location, error)
+	// FindLocationsByMarkerID finds all locations by marker ID
 	FindLocationsByMarkerID(ctx context.Context, markerID string) ([]models.Location, error)
-	Update(ctx context.Context, location *models.Location) error
-	// Save saves or updates a location
-	Save(ctx context.Context, location *models.Location) error
+
 	// Delete deletes a location from the database
 	Delete(ctx context.Context, locationID string) error
+
 	// LoadRelations loads all relations for a location
 	LoadRelations(ctx context.Context, location *models.Location) error
 	// LoadClues loads all clues for a location
@@ -103,8 +106,8 @@ func (r *locationRepository) Update(ctx context.Context, location *models.Locati
 	return err
 }
 
-// Save saves or updates a location
-func (r *locationRepository) Save(ctx context.Context, location *models.Location) error {
+// Create saves or updates a location
+func (r *locationRepository) Create(ctx context.Context, location *models.Location) error {
 	var err error
 	if location.ID == "" {
 		location.ID = uuid.New().String()

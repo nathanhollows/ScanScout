@@ -10,8 +10,8 @@ import (
 )
 
 type InstanceSettingsRepository interface {
-	// Save new instance settings to the database
-	Save(ctx context.Context, settings *models.InstanceSettings) error
+	// Create new instance settings to the database
+	Create(ctx context.Context, settings *models.InstanceSettings) error
 	// Update updates an instance in the database
 	Update(ctx context.Context, settings *models.InstanceSettings) error
 }
@@ -26,7 +26,7 @@ func NewInstanceSettingsRepository(db *bun.DB) InstanceSettingsRepository {
 	}
 }
 
-func (r *instanceSettingsRepository) Save(ctx context.Context, settings *models.InstanceSettings) error {
+func (r *instanceSettingsRepository) Create(ctx context.Context, settings *models.InstanceSettings) error {
 	if settings.InstanceID == "" {
 		return fmt.Errorf("instance ID is required")
 	}

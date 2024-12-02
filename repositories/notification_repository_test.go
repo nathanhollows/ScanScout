@@ -7,10 +7,10 @@ import (
 
 	"github.com/nathanhollows/Rapua/db"
 	"github.com/nathanhollows/Rapua/internal/migrate"
-	"github.com/nathanhollows/Rapua/internal/repositories"
+	"github.com/nathanhollows/Rapua/repositories"
 )
 
-func setupBlockStateRepo(t *testing.T) (repositories.BlockStateRepository, func()) {
+func setupNotificationRepo(t *testing.T) (repositories.NotificationRepository, func()) {
 	t.Helper()
 	os.Setenv("DB_CONNECTION", "file::memory:?cache=shared")
 	os.Setenv("DB_TYPE", "sqlite3")
@@ -20,8 +20,8 @@ func setupBlockStateRepo(t *testing.T) (repositories.BlockStateRepository, func(
 	logger := slog.New(slog.NewTextHandler(os.Stderr, nil))
 	migrate.CreateTables(logger, db)
 
-	blockStateRepository := repositories.NewBlockStateRepository(db)
-	return blockStateRepository, func() {
+	notificationRepo := repositories.NewNotificationRepository(db)
+	return notificationRepo, func() {
 		db.Close()
 	}
 }

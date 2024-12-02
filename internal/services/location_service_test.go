@@ -4,10 +4,10 @@ import (
 	"context"
 	"testing"
 
-	"github.com/nathanhollows/Rapua/internal/repositories"
 	"github.com/nathanhollows/Rapua/internal/services"
 	"github.com/nathanhollows/Rapua/models"
 	"github.com/stretchr/testify/assert"
+	"github.com/nathanhollows/Rapua/repositories"
 )
 
 func setupLocationService(t *testing.T) (services.LocationService, func()) {

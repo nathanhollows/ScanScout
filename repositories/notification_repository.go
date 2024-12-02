@@ -10,8 +10,8 @@ import (
 )
 
 type NotificationRepository interface {
-	//	Save saves a notification to the database
-	Save(context.Context, *models.Notification) error
+	//	Create saves a notification to the database
+	Create(context.Context, *models.Notification) error
 	//	Update updates a notification in the database
 	Update(context.Context, *models.Notification) error
 	//	Delete deletes a notification from the database
@@ -30,8 +30,8 @@ func NewNotificationRepository(db *bun.DB) NotificationRepository {
 	}
 }
 
-// Save inserts a new notification into the database
-func (r *notificationRepository) Save(ctx context.Context, notification *models.Notification) error {
+// Create inserts a new notification into the database
+func (r *notificationRepository) Create(ctx context.Context, notification *models.Notification) error {
 	// Validate the notification
 	if notification.Content == "" {
 		return fmt.Errorf("message is required")

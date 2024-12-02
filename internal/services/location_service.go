@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/nathanhollows/Rapua/internal/repositories"
 	"github.com/nathanhollows/Rapua/models"
+	"github.com/nathanhollows/Rapua/repositories"
 )
 
 type LocationService interface {
@@ -219,7 +219,7 @@ func (s locationService) CreateLocation(ctx context.Context, instanceID, name st
 		MarkerID:   marker.Code,
 		Points:     points,
 	}
-	err = s.locationRepo.Save(ctx, &location)
+	err = s.locationRepo.Create(ctx, &location)
 	if err != nil {
 		return models.Location{}, fmt.Errorf("saving location: %v", err)
 	}
@@ -240,7 +240,7 @@ func (s locationService) CreateLocationFromMarker(ctx context.Context, instanceI
 		MarkerID:   marker.Code,
 		Points:     points,
 	}
-	err = s.locationRepo.Save(ctx, &location)
+	err = s.locationRepo.Create(ctx, &location)
 	if err != nil {
 		return models.Location{}, fmt.Errorf("saving location: %v", err)
 	}
@@ -255,7 +255,7 @@ func (s locationService) CreateMarker(ctx context.Context, name string, lat, lng
 		Lat:  lat,
 		Lng:  lng,
 	}
-	err := s.markerRepo.Save(ctx, &marker)
+	err := s.markerRepo.Create(ctx, &marker)
 	if err != nil {
 		return models.Marker{}, fmt.Errorf("saving marker: %v", err)
 	}
@@ -267,7 +267,7 @@ func (s locationService) DuplicateLocation(ctx context.Context, location *models
 	newLocation := *location
 	newLocation.ID = ""
 	newLocation.InstanceID = newInstanceID
-	err := s.locationRepo.Save(ctx, &newLocation)
+	err := s.locationRepo.Create(ctx, &newLocation)
 	if err != nil {
 		return models.Location{}, fmt.Errorf("saving location: %v", err)
 	}
