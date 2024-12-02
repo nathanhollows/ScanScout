@@ -11,7 +11,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/nathanhollows/Rapua/db"
 	"github.com/nathanhollows/Rapua/internal/flash"
 	"github.com/nathanhollows/Rapua/internal/repositories"
 	"github.com/nathanhollows/Rapua/models"
@@ -308,14 +307,11 @@ func (s *GameManagerService) CreateLocation(ctx context.Context, user *models.Us
 }
 
 func (s *GameManagerService) isMarkerShared(ctx context.Context, markerID, instanceID string) (bool, error) {
-	count, err := db.DB.NewSelect().
-		Model((*models.Location)(nil)).
-		Where("marker_id = ? AND instance_id != ?", markerID, instanceID).
-		Count(ctx)
+	shared, err := s.markerRepo.IsShared(ctx, markerID)
 	if err != nil {
-		return false, err
+		return false, fmt.Errorf("checking if marker is shared: %w", err)
 	}
-	return count > 0, nil
+	return shared, nil
 }
 
 func (s *GameManagerService) ValidateLocationMarker(user *models.User, id string) bool {
