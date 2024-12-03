@@ -10,10 +10,16 @@ import (
 )
 
 type CheckInRepository interface {
+	// FindCheckInByTeamAndLocation finds a check-in by team and location
 	FindCheckInByTeamAndLocation(ctx context.Context, teamCode string, locationID string) (*models.CheckIn, error)
-	Update(ctx context.Context, checkIn *models.CheckIn) error
+
+	// LogCheckIn logs a new check-in for a team at a location
 	LogCheckIn(ctx context.Context, team models.Team, location models.Location, mustCheckOut bool, validationRequired bool) (models.CheckIn, error)
-	CheckOut(ctx context.Context, team *models.Team, location *models.Location) (models.CheckIn, error)
+	// LogCheckOut checks out a team from a location
+	LogCheckOut(ctx context.Context, team *models.Team, location *models.Location) (models.CheckIn, error)
+
+	// Update updates an existing check-in
+	Update(ctx context.Context, checkIn *models.CheckIn) error
 }
 
 type checkInRepository struct {
@@ -63,8 +69,8 @@ func (r *checkInRepository) LogCheckIn(ctx context.Context, team models.Team, lo
 	return *scan, nil
 }
 
-// CheckOut logs a check out for a team at a location
-func (r *checkInRepository) CheckOut(ctx context.Context, team *models.Team, location *models.Location) (models.CheckIn, error) {
+// LogCheckOut logs a check out for a team at a location
+func (r *checkInRepository) LogCheckOut(ctx context.Context, team *models.Team, location *models.Location) (models.CheckIn, error) {
 	if team == nil {
 		return models.CheckIn{}, fmt.Errorf("team is required")
 	}

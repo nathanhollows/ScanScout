@@ -12,15 +12,21 @@ import (
 type MarkerRepository interface {
 	// Create a new marker in the database
 	Create(ctx context.Context, marker *models.Marker) error
-	// Update a marker in the database
-	Update(ctx context.Context, marker *models.Marker) error
-	// Delete
-	Delete(ctx context.Context, code string) error
+
+	// FindByCode finds a marker by its code
 	FindByCode(ctx context.Context, code string) (*models.Marker, error)
 	// FindNotInInstance finds markers that are not in an instance
 	FindNotInInstance(ctx context.Context, instanceID string, otherInstances []string) ([]models.Marker, error)
+
+	// Update updates a marker in the database
+	Update(ctx context.Context, marker *models.Marker) error
+	// UpdateCoords updates the latitude and longitude of a marker
 	UpdateCoords(ctx context.Context, marker *models.Marker, lat, lng float64) error
-	// Is Shared checks if a marker is used by more than one location
+
+	// Delete deletes a marker from the database
+	Delete(ctx context.Context, code string) error
+
+	// IsShared checks if a marker is used by more than one location
 	IsShared(ctx context.Context, code string) (bool, error)
 	// UserOwnsMarker checks if a user owns a marker
 	UserOwnsMarker(ctx context.Context, userID, markerCode string) (bool, error)

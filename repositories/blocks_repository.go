@@ -10,18 +10,28 @@ import (
 )
 
 type BlockRepository interface {
-	// GetBlocksByLocationID fetches all blocks for a location
-	GetByLocationID(ctx context.Context, locationID string) (blocks.Blocks, error)
-	// GetBlockByID fetches a block by its ID
-	GetByID(ctx context.Context, blockID string) (blocks.Block, error)
+	// Create creates a new block for a location
 	Create(ctx context.Context, block blocks.Block, locationID string) (blocks.Block, error)
-	Update(ctx context.Context, block blocks.Block) (blocks.Block, error)
-	Delete(ctx context.Context, blockID string) error
-	// Delete by location ID
-	DeleteByLocationID(ctx context.Context, locationID string) error
-	Reorder(ctx context.Context, locationID string, blockIDs []string) error
+
+	// GetByLocationID fetches all blocks for a location
+	GetByLocationID(ctx context.Context, locationID string) (blocks.Blocks, error)
+	// GetByID fetches a block by its ID
+	GetByID(ctx context.Context, blockID string) (blocks.Block, error)
+	// GetBlocksAndStatesByLocationIDAndTeamCode fetches blocks and their states by location and team code
 	GetBlocksAndStatesByLocationIDAndTeamCode(ctx context.Context, locationID string, teamCode string) ([]blocks.Block, []blocks.PlayerState, error)
+	// GetBlockAndStateByBlockIDAndTeamCode fetches a block and its state by block ID and team code
 	GetBlockAndStateByBlockIDAndTeamCode(ctx context.Context, blockID string, teamCode string) (blocks.Block, blocks.PlayerState, error)
+
+	// Update updates an existing block
+	Update(ctx context.Context, block blocks.Block) (blocks.Block, error)
+
+	// Delete deletes a block by its ID
+	Delete(ctx context.Context, blockID string) error
+	// DeleteByLocationID deletes all blocks associated with a location ID
+	DeleteByLocationID(ctx context.Context, locationID string) error
+
+	// Reorder reorders the blocks for a specific location
+	Reorder(ctx context.Context, locationID string, blockIDs []string) error
 }
 
 type blockRepository struct {

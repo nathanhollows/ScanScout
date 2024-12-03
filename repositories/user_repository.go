@@ -16,8 +16,7 @@ var (
 type UserRepository interface {
 	// Create creates a new user in the database
 	Create(ctx context.Context, user *models.User) error
-	// Update updates a user in the database
-	Update(ctx context.Context, user *models.User) error
+
 	// FindUserByEmail retrieves a user by their email address
 	FindUserByEmail(ctx context.Context, email string) (*models.User, error)
 	// FindUserByEmailToken retrieves a user by their email token
@@ -26,6 +25,9 @@ type UserRepository interface {
 	FindUserByID(ctx context.Context, userID string) (*models.User, error)
 	// FindUserByEmailAndProvider retrieves a user by their email address and provider
 	FindUserByEmailAndProvider(ctx context.Context, email, provider string) (*models.User, error)
+
+	// Update updates a user in the database
+	Update(ctx context.Context, user *models.User) error
 }
 
 type userRepository struct {

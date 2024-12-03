@@ -12,11 +12,19 @@ import (
 )
 
 type BlockStateRepository interface {
-	GetByBlockAndTeam(ctx context.Context, blockID string, teamCode string) (blocks.PlayerState, error)
+	// Create creates a new player state
 	Create(ctx context.Context, state blocks.PlayerState) (blocks.PlayerState, error)
-	Update(ctx context.Context, block blocks.PlayerState) (blocks.PlayerState, error)
-	Delete(ctx context.Context, block_id string, team_code string) error
+	// NewBlockState creates a new block state for a specified block and team
 	NewBlockState(ctx context.Context, blockID, teamCode string) (blocks.PlayerState, error)
+
+	// GetByBlockAndTeam gets a player state by block ID and team code
+	GetByBlockAndTeam(ctx context.Context, blockID string, teamCode string) (blocks.PlayerState, error)
+
+	// Update updates an existing player state
+	Update(ctx context.Context, block blocks.PlayerState) (blocks.PlayerState, error)
+
+	// Delete deletes a player state by block ID and team code
+	Delete(ctx context.Context, block_id string, team_code string) error
 }
 
 type blockStateRepository struct {

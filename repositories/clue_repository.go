@@ -12,12 +12,14 @@ import (
 type ClueRepository interface {
 	// Save saves or updates a clue in the database
 	Save(ctx context.Context, c *models.Clue) error
+
+	// FindCluesByLocation returns all clues for a given location
+	FindCluesByLocation(ctx context.Context, locationID string) ([]models.Clue, error)
+
 	// Delete removes the clue from the database
 	Delete(ctx context.Context, clueID string) error
 	// DeleteByLocationID removes all clues for a location
 	DeleteByLocationID(ctx context.Context, locationID string) error
-	// FindCluesByLocation returns all clues for a given location
-	FindCluesByLocation(ctx context.Context, locationID string) ([]models.Clue, error)
 }
 
 type clueRepository struct {

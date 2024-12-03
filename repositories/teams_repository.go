@@ -11,28 +11,30 @@ import (
 )
 
 type TeamRepository interface {
-	// Update saves or updates a team in the database
-	Update(ctx context.Context, t *models.Team) error
-	// Delete removes the team from the database
-	Delete(ctx context.Context, instanceID string, teamCode string) error
-	// DeleteByInstanceID removes all teams for an instance
-	DeleteByInstanceID(ctx context.Context, instanceID string) error
+	// InsertBatch adds multiple teams to the database
+	InsertBatch(ctx context.Context, teams []models.Team) error
+
 	// FindAll returns all teams for an instance
 	FindAll(ctx context.Context, instanceID string) ([]models.Team, error)
 	// FindAllWithScans returns all teams for an instance with scans
 	FindAllWithScans(ctx context.Context, instanceID string) ([]models.Team, error)
-	// FindTeamByCode returns a team by code
+	// FindTeamByCode returns a team by its code
 	FindTeamByCode(ctx context.Context, code string) (*models.Team, error)
-	// AddTeams adds teams to the database
-	InsertBatch(ctx context.Context, teams []models.Team) error
+
+	// Update saves or updates a team in the database
+	Update(ctx context.Context, t *models.Team) error
+
+	// Delete removes the team from the database
+	Delete(ctx context.Context, instanceID string, teamCode string) error
+	// DeleteByInstanceID removes all teams for a specific instance
+	DeleteByInstanceID(ctx context.Context, instanceID string) error
+
 	// LoadInstance loads the instance for a team
 	LoadInstance(ctx context.Context, team *models.Team) error
-	// LoadCheckIns loads the scans for a team
+	// LoadCheckIns loads the check-ins for a team
 	LoadCheckIns(ctx context.Context, team *models.Team) error
 	// LoadBlockingLocation loads the blocking location for a team
 	LoadBlockingLocation(ctx context.Context, team *models.Team) error
-	// // LoadNotifications loads the notifications for a team
-	// LoadNotifications(ctx context.Context, team *models.Team) error
 	// LoadRelations loads all relations for a team
 	LoadRelations(ctx context.Context, team *models.Team) error
 }

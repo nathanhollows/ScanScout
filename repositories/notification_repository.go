@@ -12,12 +12,17 @@ import (
 type NotificationRepository interface {
 	//	Create saves a notification to the database
 	Create(context.Context, *models.Notification) error
+
+	//	FindByID finds a notification by its ID
+	FindByID(ctx context.Context, id string) (models.Notification, error)
+	// FindByTeamCode finds all notifications for a specific team code
+	FindByTeamCode(ctx context.Context, teamCode string) ([]models.Notification, error)
+
 	//	Update updates a notification in the database
 	Update(context.Context, *models.Notification) error
+
 	//	Delete deletes a notification from the database
 	Delete(ctx context.Context, id string) error
-	FindByID(ctx context.Context, id string) (models.Notification, error)
-	FindByTeamCode(ctx context.Context, teamCode string) ([]models.Notification, error)
 }
 
 type notificationRepository struct {

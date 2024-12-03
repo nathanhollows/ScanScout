@@ -12,6 +12,7 @@ import (
 type InstanceSettingsRepository interface {
 	// Create new instance settings to the database
 	Create(ctx context.Context, settings *models.InstanceSettings) error
+
 	// Update updates an instance in the database
 	Update(ctx context.Context, settings *models.InstanceSettings) error
 }

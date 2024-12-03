@@ -67,7 +67,7 @@ func (s *checkInService) CheckIn(ctx context.Context, team models.Team, location
 
 // CheckOut logs a check out for a team at a location
 func (s *checkInService) CheckOut(ctx context.Context, team *models.Team, location *models.Location) (models.CheckIn, error) {
-	scan, err := s.checkInRepo.CheckOut(ctx, team, location)
+	scan, err := s.checkInRepo.LogCheckOut(ctx, team, location)
 	if err != nil {
 		return models.CheckIn{}, fmt.Errorf("checking out: %w", err)
 	}

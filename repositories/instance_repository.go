@@ -13,14 +13,18 @@ import (
 type InstanceRepository interface {
 	// Create saves an instance to the database
 	Create(ctx context.Context, instance *models.Instance) error
-	// Update updates an instance in the database
-	Update(ctx context.Context, instance *models.Instance) error
-	// Delete deletes an instance from the database
-	Delete(ctx context.Context, instanceID string) error
+
 	// FindByID finds an instance by ID
 	FindByID(ctx context.Context, id string) (*models.Instance, error)
-	// FindByUserID(ctx context.Context, userID string) (*models.Instance, error)
+	// FindByUserID finds all instances associated with a user ID
 	FindByUserID(ctx context.Context, userID string) ([]models.Instance, error)
+
+	// Update updates an instance in the database
+	Update(ctx context.Context, instance *models.Instance) error
+
+	// Delete deletes an instance from the database
+	Delete(ctx context.Context, instanceID string) error
+
 	// DismissQuickstart marks the user as having dismissed the quickstart
 	DismissQuickstart(ctx context.Context, userID string) error
 }
