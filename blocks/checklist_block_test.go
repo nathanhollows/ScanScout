@@ -107,32 +107,3 @@ func TestChecklistBlock_ValidatePlayerInput(t *testing.T) {
 	assert.True(t, newState.IsComplete())
 	assert.Equal(t, 10, newState.GetPointsAwarded())
 }
-
-func TestChecklistBlock_CalculatePoints(t *testing.T) {
-	block := ChecklistBlock{
-		BaseBlock: BaseBlock{
-			Points: 10,
-		},
-		List: []ChecklistItem{
-			{ID: "item-1", Description: "Item 1", Checked: false},
-			{ID: "item-2", Description: "Item 2", Checked: false},
-		},
-	}
-
-	// Test when not all items are checked
-	input := map[string][]string{
-		"item-1": {"true"},
-	}
-	points, err := block.CalculatePoints(input)
-	require.NoError(t, err)
-	assert.Equal(t, 0, points)
-
-	// Test when all items are checked
-	input = map[string][]string{
-		"item-1": {"true"},
-		"item-2": {"true"},
-	}
-	points, err = block.CalculatePoints(input)
-	require.NoError(t, err)
-	assert.Equal(t, 10, points)
-}

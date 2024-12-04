@@ -163,18 +163,3 @@ func (b *ChecklistBlock) ValidatePlayerInput(state PlayerState, input map[string
 
 	return newState, nil
 }
-
-func (b *ChecklistBlock) CalculatePoints(input map[string][]string) (int, error) {
-	// For ChecklistBlock, return full points if all items are checked, otherwise 0 points
-	allChecked := true
-	for _, item := range b.List {
-		if _, exists := input[item.ID]; !exists {
-			allChecked = false
-			break
-		}
-	}
-	if allChecked {
-		return b.Points, nil
-	}
-	return 0, nil
-}

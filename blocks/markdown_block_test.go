@@ -67,17 +67,3 @@ func TestMarkdownBlock_ValidatePlayerInput(t *testing.T) {
 	assert.True(t, newState.IsComplete())
 	assert.Equal(t, 0, newState.GetPointsAwarded())
 }
-
-func TestMarkdownBlock_CalculatePoints(t *testing.T) {
-	block := MarkdownBlock{
-		BaseBlock: BaseBlock{
-			Points: 5,
-		},
-		Content: "Test Content",
-	}
-
-	input := map[string][]string{}
-	points, err := block.CalculatePoints(input)
-	require.NoError(t, err)
-	assert.Equal(t, 0, points) // MarkdownBlock has no points to calculate
-}

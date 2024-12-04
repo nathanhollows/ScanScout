@@ -92,8 +92,3 @@ func (b *ImageBlock) ValidatePlayerInput(state PlayerState, input map[string][]s
 	state.SetComplete(true)
 	return state, nil
 }
-
-func (b *ImageBlock) CalculatePoints(input map[string][]string) (int, error) {
-	// ImageBlock has no points to calculate
-	return 0, nil
-}

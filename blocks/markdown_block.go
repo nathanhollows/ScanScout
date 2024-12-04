@@ -52,8 +52,3 @@ func (b *MarkdownBlock) ValidatePlayerInput(state PlayerState, input map[string]
 	state.SetComplete(true)
 	return state, nil
 }
-
-func (b *MarkdownBlock) CalculatePoints(input map[string][]string) (int, error) {
-	// MarkdownBlock has no points to calculate
-	return 0, nil
-}
