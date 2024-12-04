@@ -81,14 +81,20 @@ func RenderPlayerUpdate(settings models.InstanceSettings, block blocks.Block, st
 templ RenderAdminError() {
 }
 
-templ RenderAdminBlock(settings models.InstanceSettings, block blocks.Block) {
+templ RenderAdminBlock(settings models.InstanceSettings, block blocks.Block, open bool) {
 	<div
 		id={ fmt.Sprint("block-", block.GetID()) }
-		class="content-block card card-compact flex flex-col rounded-2xl bg-base-200 p-5"
+		class="overflow-visible collapse collapse-arrow content-block card card-compact rounded-2xl bg-base-200"
 		tabindex="0"
 		data-block-id={ block.GetID() }
 	>
-		<div class="flex flex-row">
+		<input
+			type="checkbox"
+			if open {
+				checked
+			}
+		/>
+		<div class="flex flex-row collapse-title">
 			<div class="flex flex-1 flex-row gap-5">
 				<h3 class="text-lg font-bold flex flex-row gap-3 items-center">
 					<span class="">
@@ -101,7 +107,7 @@ templ RenderAdminBlock(settings models.InstanceSettings, block blocks.Block) {
 					<span class="loading loading-dots loading-md htmx-indicator"></span>
 				</h3>
 			</div>
-			<div class="flex gap-3">
+			<div class="flex gap-3 z-10">
 				<button
 					type="button"
 					class="block-delete btn btn-sm btn-circle shadow-none hover:btn-error tooltip flex"
@@ -141,7 +147,9 @@ templ RenderAdminBlock(settings models.InstanceSettings, block blocks.Block) {
 			</div>
 			<input type="hidden" name="block_id" value={ block.GetID() }/>
 		</div>
-		@RenderAdminEdit(settings, block)
+		<div class="collapse-content">
+			@RenderAdminEdit(settings, block)
+		</div>
 	</div>
 }
 
