@@ -115,6 +115,7 @@ func setupPublicRoutes(router chi.Router, publicHandler *public.PublicHandler) {
 	router.Get("/pricing", publicHandler.Pricing)
 	router.Get("/about", publicHandler.About)
 	router.Get("/contact", publicHandler.Contact)
+	router.Post("/contact", publicHandler.ContactPost)
 	router.Get("/privacy", publicHandler.Privacy)
 
 	router.Route("/login", func(r chi.Router) {

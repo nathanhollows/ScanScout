@@ -17,12 +17,31 @@ import (
 type EmailService interface {
 	// SendPasswordReset(ctx context.Context, user models.User) (*rest.Response, error)
 	SendVerificationEmail(ctx context.Context, user models.User) (*rest.Response, error)
+	SendContactEmail(ctx context.Context, name, email, content string) (*rest.Response, error)
 }
 
 type emailService struct{}
 
 func NewEmailService() EmailService {
 	return &emailService{}
+}
+
+func (s emailService) SendContactEmail(ctx context.Context, name, email, content string) (*rest.Response, error) {
+	from := mail.NewEmail("Rapua Contact Form", os.Getenv("CONTACT_EMAIL"))
+	to := mail.NewEmail("Rapua", os.Getenv("CONTACT_EMAIL"))
+	subject := "New message from Rapua contact form"
+
+	htmlTemplate := `
+	<p><strong>Name:</strong> %v</p>
+	<p><strong>Email:</strong> %v</p>
+	<p>%v</p>
+	`
+
+	message := mail.NewSingleEmail(from, subject, to, content, fmt.Sprintf(htmlTemplate, name, email, content))
+
+	client := sendgrid.NewSendClient(os.Getenv("SENDGRID_API_KEY"))
+	response, err := client.Send(message)
+	return response, err
 }
 
 func (s emailService) SendVerificationEmail(ctx context.Context, user models.User) (*rest.Response, error) {
