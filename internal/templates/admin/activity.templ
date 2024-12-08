@@ -477,28 +477,28 @@ templ TeamActivity(settings models.InstanceSettings, team models.Team, notificat
 		}
 	</div>
 	<!-- Check-ins -->
-	<div class="w-full">
-		<p class="py-3 font-bold">Check-ins</p>
-		if len(team.CheckIns) > 0 {
-			<div class="prose">
-				<ul>
-					for _, scan := range team.CheckIns {
-						<li>
+	if len(team.CheckIns) > 0 {
+		<div class="collapse collapse-arrow border-base-300 bg-base-200 border">
+			<input type="checkbox"/>
+			<div class="collapse-title font-medium">
+				Check-ins
+				<badge class="badge badge-secondary">{ fmt.Sprint(len(team.CheckIns)) }</badge>
+			</div>
+			<div class="collapse-content">
+				for _, scan := range team.CheckIns {
+					<div class="py-2">
+						<span>
+							{ scan.Location.Name }
 							if scan.MustCheckOut {
 								<span class="badge badge-info">Current</span>
 							}
-							<span>
-								{ scan.Location.Name }
-							</span>
-							<span class="convert-time badge badge-sm badge-ghost" data-datetime={ fmt.Sprint(scan.CreatedAt.UTC()) }></span>
-						</li>
-					}
-				</ul>
+						</span>
+						<span class="convert-time badge badge-sm badge-ghost" data-datetime={ fmt.Sprint(scan.CreatedAt.UTC()) }></span>
+					</div>
+				}
 			</div>
-		} else {
-			<p>No activity</p>
-		}
-	</div>
+		</div>
+	}
 	if len(notifications) > 0 {
 		<p class="py-3 font-bold">Unread Notifications</p>
 		for _, notification := range notifications {

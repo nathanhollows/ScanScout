@@ -50,16 +50,15 @@
 </li>
 </ul></div>
 <p>No activity</p>
-</div><!-- Check-ins --><div class=\"w-full\"><p class=\"py-3 font-bold\">Check-ins</p>
-<div class=\"prose\"><ul>
-<li>
-<span class=\"badge badge-info\">Current</span> 
-<span>
+</div><!-- Check-ins -->
+<div class=\"collapse collapse-arrow border-base-300 bg-base-200 border\"><input type=\"checkbox\"><div class=\"collapse-title font-medium\">Check-ins <badge class=\"badge badge-secondary\">
+</badge></div><div class=\"collapse-content\">
+<div class=\"py-2\"><span>
+ 
+<span class=\"badge badge-info\">Current</span>
 </span> <span class=\"convert-time badge badge-sm badge-ghost\" data-datetime=\"
-\"></span></li>
-</ul></div>
-<p>No activity</p>
-</div>
+\"></span></div>
+</div></div>
 <p class=\"py-3 font-bold\">Unread Notifications</p>
 <div role=\"alert\" class=\"alert mb-3\" id=\"alert-{{ .ID }}\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"lucide lucide-megaphone\"><path d=\"m3 11 18-5v12L3 14v-3z\"></path><path d=\"M11.6 16.8a3 3 0 1 1-5.8-1.6\"></path></svg><div><div class=\"\">
 </div></div><div class=\"badge\">Sent 
