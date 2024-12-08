@@ -22,6 +22,8 @@ If you find a bug in the project, please report it on GitHub.
 
 If you're a developer, you can contribute to the project by submitting a pull request.
 
+A good starting point would be any of the [new content blocks](/docs/developer/roadmap#new-content-blocks) listed in the roadmap/wishlist.
+
 ### Contributing Documentation
 
 If you're a writer or editor, you can help improve the documentation for Rapua. Here are some ways to contribute:
