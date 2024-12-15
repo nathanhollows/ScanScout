@@ -29,6 +29,7 @@ func main() {
 	}
 
 	db := db.MustOpen()
+	defer db.Close()
 
 	// Initialize the migrator
 	migrator := migrate.NewMigrator(db, migrations.Migrations)
