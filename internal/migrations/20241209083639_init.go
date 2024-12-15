@@ -9,12 +9,6 @@ import (
 	"github.com/uptrace/bun"
 )
 
-type baseModel struct {
-	CreatedAt time.Time `bun:"created_at,nullzero,notnull,default:current_timestamp"`
-	UpdatedAt time.Time `bun:"updated_at,nullzero,notnull,default:current_timestamp"`
-	DeletedAt time.Time `bun:"deleted_at,soft_delete,nullzero"`
-}
-
 type m20241209135319_NavigationMode int
 type m20241209135319_NavigationMethod int
 type m20241209135319_CompletionMethod int
@@ -22,7 +16,9 @@ type m20241209135319_GameStatus int
 
 type m20241209135319_Notification struct {
 	bun.BaseModel `bun:"table:notifications"`
-	baseModel
+
+	CreatedAt time.Time `bun:"created_at,nullzero,notnull,default:current_timestamp"`
+	UpdatedAt time.Time `bun:"updated_at,nullzero,notnull,default:current_timestamp"`
 
 	ID        string `bun:"id,pk,notnull"`
 	Content   string `bun:"content,type:varchar(255)"`
@@ -33,7 +29,9 @@ type m20241209135319_Notification struct {
 
 type m20241209135319_InstanceSettings struct {
 	bun.BaseModel `bun:"table:instance_settings"`
-	baseModel
+
+	CreatedAt time.Time `bun:"created_at,nullzero,notnull,default:current_timestamp"`
+	UpdatedAt time.Time `bun:"updated_at,nullzero,notnull,default:current_timestamp"`
 
 	InstanceID        string                           `bun:"instance_id,pk,type:varchar(36)"`
 	NavigationMode    m20241209135319_NavigationMode   `bun:"navigation_mode,type:int"`
@@ -60,7 +58,9 @@ type m20241209135319_Block struct {
 
 type m20241209135319_TeamBlockState struct {
 	bun.BaseModel `bun:"table:team_block_states"`
-	baseModel
+
+	CreatedAt time.Time `bun:"created_at,nullzero,notnull,default:current_timestamp"`
+	UpdatedAt time.Time `bun:"updated_at,nullzero,notnull,default:current_timestamp"`
 
 	TeamCode      string          `bun:"team_code,pk,notnull"`
 	BlockID       string          `bun:"block_id,pk,notnull"`
@@ -71,7 +71,9 @@ type m20241209135319_TeamBlockState struct {
 
 type m20241209135319_Location struct {
 	bun.BaseModel `bun:"table:locations"`
-	baseModel
+
+	CreatedAt time.Time `bun:"created_at,nullzero,notnull,default:current_timestamp"`
+	UpdatedAt time.Time `bun:"updated_at,nullzero,notnull,default:current_timestamp"`
 
 	ID           string                           `bun:"id,pk,notnull"`
 	Name         string                           `bun:"name,type:varchar(255)"`
@@ -94,7 +96,9 @@ type m20241209135319_Location struct {
 
 type m20241209135319_Clue struct {
 	bun.BaseModel `bun:"table:clues"`
-	baseModel
+
+	CreatedAt time.Time `bun:"created_at,nullzero,notnull,default:current_timestamp"`
+	UpdatedAt time.Time `bun:"updated_at,nullzero,notnull,default:current_timestamp"`
 
 	ID         string `bun:"id,pk,type:varchar(36)"`
 	InstanceID string `bun:"instance_id,notnull"`
@@ -104,7 +108,9 @@ type m20241209135319_Clue struct {
 
 type m20241209135319_Marker struct {
 	bun.BaseModel `bun:"table:markers"`
-	baseModel
+
+	CreatedAt time.Time `bun:"created_at,nullzero,notnull,default:current_timestamp"`
+	UpdatedAt time.Time `bun:"updated_at,nullzero,notnull,default:current_timestamp"`
 
 	Code         string  `bun:"code,unique,pk"`
 	Lat          float64 `bun:"lat,type:float"`
@@ -119,7 +125,9 @@ type m20241209135319_Marker struct {
 
 type m20241209135319_CheckIn struct {
 	bun.BaseModel `bun:"table:check_ins"`
-	baseModel
+
+	CreatedAt time.Time `bun:"created_at,nullzero,notnull,default:current_timestamp"`
+	UpdatedAt time.Time `bun:"updated_at,nullzero,notnull,default:current_timestamp"`
 
 	InstanceID      string    `bun:"instance_id,notnull"`
 	TeamID          string    `bun:"team_code,pk,type:string"`
@@ -135,7 +143,9 @@ type m20241209135319_CheckIn struct {
 
 type m20241209135319_Instance struct {
 	bun.BaseModel `bun:"table:instances"`
-	baseModel
+
+	CreatedAt time.Time `bun:"created_at,nullzero,notnull,default:current_timestamp"`
+	UpdatedAt time.Time `bun:"updated_at,nullzero,notnull,default:current_timestamp"`
 
 	ID                    string                     `bun:"id,pk,type:varchar(36)"`
 	Name                  string                     `bun:"name,type:varchar(255)"`
@@ -151,7 +161,9 @@ type m20241209135319_Instance struct {
 }
 type m20241209135319_Team struct {
 	bun.BaseModel `bun:"table:teams"`
-	baseModel
+
+	CreatedAt time.Time `bun:"created_at,nullzero,notnull,default:current_timestamp"`
+	UpdatedAt time.Time `bun:"updated_at,nullzero,notnull,default:current_timestamp"`
 
 	// ID string `bun:"id,pk"
 
@@ -171,7 +183,9 @@ type m20241209135319_Team struct {
 
 type m20241209135319_User struct {
 	bun.BaseModel `bun:"table:users"`
-	baseModel
+
+	CreatedAt time.Time `bun:"created_at,nullzero,notnull,default:current_timestamp"`
+	UpdatedAt time.Time `bun:"updated_at,nullzero,notnull,default:current_timestamp"`
 
 	ID               string       `bun:"id,unique,pk,type:varchar(36)"`
 	Name             string       `bun:"name,type:varchar(255)"`
@@ -202,21 +216,22 @@ func init() {
 		(*m20241209135319_User)(nil),
 	}
 
-	Migrations.MustRegister(func(ctx context.Context, db *bun.DB) error {
-		for _, model := range models {
-			_, err := db.NewCreateTable().Model(model).IfNotExists().Exec(context.Background())
-			if err != nil {
-				return err
+	Migrations.MustRegister(
+		func(ctx context.Context, db *bun.DB) error {
+			for _, model := range models {
+				_, err := db.NewCreateTable().Model(model).IfNotExists().Exec(context.Background())
+				if err != nil {
+					return err
+				}
 			}
-		}
-		return nil
-	}, func(ctx context.Context, db *bun.DB) error {
-		for _, model := range models {
-			_, err := db.NewDropTable().Model(model).IfExists().Exec(context.Background())
-			if err != nil {
-				return err
+			return nil
+		}, func(ctx context.Context, db *bun.DB) error {
+			for _, model := range models {
+				_, err := db.NewDropTable().Model(model).IfExists().Exec(context.Background())
+				if err != nil {
+					return err
+				}
 			}
-		}
-		return nil
-	})
+			return nil
+		})
 }
