@@ -47,7 +47,7 @@ You will also need to have SQLite installed on your machine. If you don't have i
     make build
     ```
     Other build options are available including `make dev`, `make tailwind-build`, `make tailwind-watch`, `make templ-watch`, `make templ-generate`, and `make test`.
-5. Run database migrations
+5. Run [database migrations](/docs/developer/migrations)
     ```sh
     ./rapua db migrate
     ```
