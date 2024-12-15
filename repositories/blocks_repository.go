@@ -2,6 +2,7 @@ package repositories
 
 import (
 	"context"
+	"errors"
 
 	"github.com/google/uuid"
 	"github.com/nathanhollows/Rapua/blocks"
@@ -158,7 +159,21 @@ func convertModelToBlock(model *models.Block) (blocks.Block, error) {
 
 // Delete deletes a block from the database
 func (r *blockRepository) Delete(ctx context.Context, blockID string) error {
-	_, err := r.db.NewDelete().Model(&models.Block{}).Where("id = ?", blockID).Exec(ctx)
+	tx, err := r.db.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+	_, err = tx.NewDelete().Model(&models.Block{}).Where("id = ?", blockID).Exec(ctx)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+	_, err = tx.NewDelete().Model(&models.TeamBlockState{}).Where("block_id = ?", blockID).Exec(ctx)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+	err = tx.Commit()
 	return err
 }
 
@@ -185,6 +200,10 @@ func (r *blockRepository) Reorder(ctx context.Context, locationID string, blockI
 
 // GetBlocksAndStatesByLocationIDAndTeamCode fetches all blocks for a location with their player states
 func (r *blockRepository) GetBlocksAndStatesByLocationIDAndTeamCode(ctx context.Context, locationID string, teamCode string) ([]blocks.Block, []blocks.PlayerState, error) {
+	if teamCode == "" {
+		return nil, nil, errors.New("team code must be set")
+	}
+
 	modelBlocks := []models.Block{}
 	states := []models.TeamBlockState{}
 
@@ -197,15 +216,13 @@ func (r *blockRepository) GetBlocksAndStatesByLocationIDAndTeamCode(ctx context.
 		return nil, nil, err
 	}
 
-	if teamCode != "" {
-		err = r.db.NewSelect().
-			Model(&states).
-			Where("block_id IN (?)", r.db.NewSelect().Model((*models.Block)(nil)).Column("id").Where("location_id = ?", locationID)).
-			Where("team_code = ?", teamCode).
-			Scan(ctx)
-		if err != nil {
-			return nil, nil, err
-		}
+	err = r.db.NewSelect().
+		Model(&states).
+		Where("block_id IN (?)", r.db.NewSelect().Model((*models.Block)(nil)).Column("id").Where("location_id = ?", locationID)).
+		Where("team_code = ?", teamCode).
+		Scan(ctx)
+	if err != nil {
+		return nil, nil, err
 	}
 
 	foundBlocks, err := convertModelsToBlocks(modelBlocks)
@@ -228,12 +245,23 @@ func (r *blockRepository) GetBlocksAndStatesByLocationIDAndTeamCode(ctx context.
 			}
 		}
 		if !found {
-			playerStates = append(playerStates, &PlayerStateData{
-				blockID:    block.GetID(),
-				playerID:   "",
-				playerData: []byte("{}"),
-			})
-
+			if block.RequiresValidation() && teamCode != "" {
+				newState, err := r.stateRepo.NewBlockState(ctx, block.GetID(), teamCode)
+				if err != nil {
+					return nil, nil, err
+				}
+				newState, err = r.stateRepo.Create(ctx, newState)
+				if err != nil {
+					return nil, nil, err
+				}
+				playerStates = append(playerStates, newState)
+			} else {
+				newState, err := r.stateRepo.NewBlockState(ctx, block.GetID(), "")
+				if err != nil {
+					return nil, nil, err
+				}
+				playerStates = append(playerStates, newState)
+			}
 		}
 	}
 

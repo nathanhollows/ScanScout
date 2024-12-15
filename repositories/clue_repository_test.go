@@ -2,13 +2,9 @@ package repositories_test
 
 import (
 	"context"
-	"log/slog"
-	"os"
 	"testing"
 
 	"github.com/google/uuid"
-	"github.com/nathanhollows/Rapua/db"
-	"github.com/nathanhollows/Rapua/internal/migrate"
 	"github.com/nathanhollows/Rapua/models"
 	"github.com/nathanhollows/Rapua/repositories"
 	"github.com/stretchr/testify/assert"
@@ -16,18 +12,10 @@ import (
 
 func setupClueRepo(t *testing.T) (repositories.ClueRepository, func()) {
 	t.Helper()
-	os.Setenv("DB_CONNECTION", "file::memory:?cache=shared")
-	os.Setenv("DB_TYPE", "sqlite3")
-	db := db.MustOpen()
-
-	// Create tables
-	logger := slog.New(slog.NewTextHandler(os.Stderr, nil))
-	migrate.CreateTables(logger, db)
+	db, cleanup := setupDB(t)
 
 	clueRepo := repositories.NewClueRepository(db)
-	return clueRepo, func() {
-		db.Close()
-	}
+	return clueRepo, cleanup
 }
 
 func TestClueRepository_Save(t *testing.T) {

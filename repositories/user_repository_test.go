@@ -2,12 +2,9 @@ package repositories_test
 
 import (
 	"context"
-	"log/slog"
-	"os"
 	"testing"
 
-	"github.com/nathanhollows/Rapua/db"
-	"github.com/nathanhollows/Rapua/internal/migrate"
+	"github.com/brianvoe/gofakeit/v7"
 	"github.com/nathanhollows/Rapua/models"
 	"github.com/nathanhollows/Rapua/repositories"
 	"github.com/stretchr/testify/assert"
@@ -15,18 +12,10 @@ import (
 
 func setupUserRepo(t *testing.T) (repositories.UserRepository, func()) {
 	t.Helper()
-	os.Setenv("DB_CONNECTION", "file::memory:?cache=shared")
-	os.Setenv("DB_TYPE", "sqlite3")
-	db := db.MustOpen()
-
-	// Create tables
-	logger := slog.New(slog.NewTextHandler(os.Stderr, nil))
-	migrate.CreateTables(logger, db)
+	db, cleanup := setupDB(t)
 
 	userRepository := repositories.NewUserRepository(db)
-	return userRepository, func() {
-		db.Close()
-	}
+	return userRepository, cleanup
 }
 
 func TestUserRepository_Create(t *testing.T) {
@@ -35,9 +24,9 @@ func TestUserRepository_Create(t *testing.T) {
 	ctx := context.Background()
 
 	user := &models.User{
-		Name:     "John Doe",
-		Email:    "john.doe@example.com",
-		Password: "hashed_password",
+		Name:     gofakeit.Name(),
+		Email:    gofakeit.Email(),
+		Password: gofakeit.Password(true, true, true, true, true, 12),
 		Provider: "local",
 	}
 
@@ -53,16 +42,16 @@ func TestUserRepository_GetUserByEmail(t *testing.T) {
 
 	// Seed user
 	user := &models.User{
-		Name:     "John Doe",
-		Email:    "john.doe@example.com",
-		Password: "hashed_password",
+		Name:     gofakeit.Name(),
+		Email:    gofakeit.Email(),
+		Password: gofakeit.Password(true, true, true, true, true, 12),
 		Provider: "local",
 	}
 	err := repo.Create(ctx, user)
 	assert.NoError(t, err)
 
 	// Test GetUserByEmail
-	fetchedUser, err := repo.FindUserByEmail(ctx, "john.doe@example.com")
+	fetchedUser, err := repo.FindUserByEmail(ctx, user.Email)
 	assert.NoError(t, err)
 	assert.Equal(t, user.Email, fetchedUser.Email)
 	assert.Equal(t, user.Name, fetchedUser.Name)
@@ -75,23 +64,24 @@ func TestUserRepository_Update(t *testing.T) {
 
 	// Seed user
 	user := &models.User{
-		Name:     "John Doe",
-		Email:    "john.doe@example.com",
-		Password: "hashed_password",
+		Name:     gofakeit.Name(),
+		Email:    gofakeit.Email(),
+		Password: gofakeit.Password(true, true, true, true, true, 12),
 		Provider: "local",
 	}
 	err := repo.Create(ctx, user)
 	assert.NoError(t, err)
 
 	// Update user
-	user.Name = "John Updated"
+	newName := gofakeit.Name()
+	user.Name = newName
 	err = repo.Update(ctx, user)
 	assert.NoError(t, err)
 
 	// Verify update
-	fetchedUser, err := repo.FindUserByEmail(ctx, "john.doe@example.com")
+	fetchedUser, err := repo.FindUserByEmail(ctx, user.Email)
 	assert.NoError(t, err)
-	assert.Equal(t, "John Updated", fetchedUser.Name)
+	assert.Equal(t, newName, fetchedUser.Name)
 }
 
 func TestUserRepository_FindUserByID(t *testing.T) {
@@ -101,9 +91,9 @@ func TestUserRepository_FindUserByID(t *testing.T) {
 
 	// Seed user
 	user := &models.User{
-		Name:     "John Doe",
-		Email:    "john.doe@example.com",
-		Password: "hashed_password",
+		Name:     gofakeit.Name(),
+		Email:    gofakeit.Email(),
+		Password: gofakeit.Password(true, true, true, true, true, 12),
 		Provider: "local",
 	}
 	err := repo.Create(ctx, user)
@@ -123,16 +113,16 @@ func TestUserRepository_GetUserByEmailAndProvider(t *testing.T) {
 
 	// Seed user
 	user := &models.User{
-		Name:     "John Doe",
-		Email:    "john.doe@example.com",
-		Password: "hashed_password",
+		Name:     gofakeit.Name(),
+		Email:    gofakeit.Email(),
+		Password: gofakeit.Password(true, true, true, true, true, 12),
 		Provider: "local",
 	}
 	err := repo.Create(ctx, user)
 	assert.NoError(t, err)
 
 	// Test GetUserByEmailAndProvider
-	fetchedUser, err := repo.FindUserByEmailAndProvider(ctx, "john.doe@example.com", "local")
+	fetchedUser, err := repo.FindUserByEmailAndProvider(ctx, user.Email, "local")
 	assert.NoError(t, err)
 	assert.Equal(t, user.Email, fetchedUser.Email)
 	assert.Equal(t, user.Provider, fetchedUser.Provider)
