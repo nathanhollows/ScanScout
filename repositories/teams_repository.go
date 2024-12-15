@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/google/uuid"
 	"github.com/nathanhollows/Rapua/models"
 	"github.com/uptrace/bun"
 )
@@ -117,6 +118,11 @@ func (r *teamRepository) FindTeamByCode(ctx context.Context, code string) (*mode
 
 // InsertBatch inserts a batch of teams and returns an error if there's a unique constraint conflict
 func (r *teamRepository) InsertBatch(ctx context.Context, teams []models.Team) error {
+	for teamIndex := range teams {
+		if teams[teamIndex].ID == "" {
+			teams[teamIndex].ID = uuid.New().String()
+		}
+	}
 	_, err := r.db.NewInsert().Model(&teams).Exec(ctx)
 	if err != nil && isUniqueConstraintError(err) {
 		return errors.New("unique constraint error")
