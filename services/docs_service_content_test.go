@@ -72,3 +72,29 @@ func TestDocs_LinksResolve(t *testing.T) {
 	}
 	walkPages(docsService.Pages)
 }
+
+// Make sure the body is not empty.
+func TestDocs_BodyNotEmpty(t *testing.T) {
+	// TestDocs_Links is a placeholder for the test links test.
+	dir := "../docs"
+	docsService, err := services.NewDocsService(dir)
+	if err != nil {
+		t.Fatalf("failed to create DocsService: %v", err)
+	}
+
+	var walkPages func(pages []*services.DocPage)
+	walkPages = func(pages []*services.DocPage) {
+		for _, page := range pages {
+			if len(page.Children) > 0 {
+				walkPages(page.Children)
+			}
+			if !strings.HasSuffix(page.Path, ".md") {
+				continue
+			}
+			if strings.TrimSpace(page.Content) == "" {
+				t.Errorf("empty body in /docs/%s", page.Path)
+			}
+		}
+	}
+	walkPages(docsService.Pages)
+}
