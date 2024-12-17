@@ -57,14 +57,26 @@ func TestDocs_LinksResolve(t *testing.T) {
 				if n.Kind() == ast.KindLink {
 					link := n.(*ast.Link)
 					dest := (string)(link.Destination)
+
 					// Only check internal links
 					if !strings.HasPrefix(dest, "/docs/") {
-						return ast.WalkStop, nil
+						return ast.WalkContinue, nil
 					}
+
+					// Trim any anchor links
+					// var anchor string
+					if i := strings.Index(dest, "#"); i != -1 {
+						// anchor = dest[i:]
+						dest = dest[:i]
+					}
+
 					// Complain if the link doesn't resolve to a doc page
-					if _, err := docsService.GetPage(dest); err != nil {
+					_, err := docsService.GetPage(dest)
+					if err != nil {
 						t.Errorf("invalid link (%s) in /docs/%s", dest, page.Path)
 					}
+
+					// TODO: Check for anchor links
 				}
 				return ast.WalkContinue, nil
 			})
@@ -97,4 +109,19 @@ func TestDocs_BodyNotEmpty(t *testing.T) {
 		}
 	}
 	walkPages(docsService.Pages)
+}
+
+// Make sure headers use title case.
+func TestDocs_HeadersTitleCase(t *testing.T) {
+	// TestDocs_HeadersTitleCase is a placeholder for the headers title case test.
+}
+
+// Make sure no pages have the same order number.
+func TestDocs_OrderNumbersUnique(t *testing.T) {
+	// TestDocs_OrderNumbersUnique is a placeholder for the order numbers unique test.
+}
+
+// Make sure no pages have the same title.
+func TestDocs_TitlesUnique(t *testing.T) {
+	// TestDocs_TitlesUnique is a placeholder for the titles unique test.
 }
