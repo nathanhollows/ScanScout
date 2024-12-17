@@ -10,7 +10,7 @@ Rapua is an open-source project, and I welcome contributions from the community.
 
 I develop Rapua on a needs-driven basis, so if you have a feature request or bug report, please let me know by opening an issue on GitHub.
 
-### Reporting Issues and Requesting Features
+## Reporting Issues and Requesting Features
 
 If you find a bug in the project, please report it on GitHub.
 
@@ -18,13 +18,13 @@ If you find a bug in the project, please report it on GitHub.
 - [Report an Issue](https://github.com/nathanhollows/Rapua/issues/new?assignees=&labels=&projects=&template=bug_report.md)
 - [Request a Feature](https://github.com/nathanhollows/Rapua/issues/new?assignees=&labels=&projects=&template=feature_request.md)
 
-### Contributing Code
+## Contributing Code
 
 If you're a developer, you can contribute to the project by submitting a pull request.
 
 A good starting point would be any of the [new content blocks](/docs/developer/roadmap#new-content-blocks) listed in the roadmap/wishlist.
 
-### Contributing Documentation
+## Contributing Documentation
 
 If you're a writer or editor, you can help improve the documentation for Rapua. Here are some ways to contribute:
 
