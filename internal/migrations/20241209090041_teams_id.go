@@ -22,11 +22,12 @@ type m202412090041_Team struct {
 	MustCheckOut string `bun:"must_scan_out"`
 	Points       int    `bun:"points"`
 
-	Instance         m20241209135319_Instance         `bun:"rel:has-one,join:instance_id=id"`
-	CheckIns         []m20241209135319_CheckIn        `bun:"rel:has-many,join:code=team_code"`
-	BlockingLocation m20241209135319_Location         `bun:"rel:has-one,join:must_scan_out=marker_id,join:instance_id=instance_id"`
-	Messages         []m20241209135319_Notification   `bun:"rel:has-many,join:code=team_code"`
-	Blocks           []m20241209135319_TeamBlockState `bun:"rel:has-many,join:code=team_code"`
+	// Relationships with reference to previous migrations.
+	Instance         m20241209083639_Instance         `bun:"rel:has-one,join:instance_id=id"`
+	CheckIns         []m20241209083639_CheckIn        `bun:"rel:has-many,join:code=team_code"`
+	BlockingLocation m20241209083639_Location         `bun:"rel:has-one,join:must_scan_out=marker_id,join:instance_id=instance_id"`
+	Messages         []m20241209083639_Notification   `bun:"rel:has-many,join:code=team_code"`
+	Blocks           []m20241209083639_TeamBlockState `bun:"rel:has-many,join:code=team_code"`
 }
 
 func init() {
