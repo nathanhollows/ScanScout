@@ -264,7 +264,7 @@ func (ds *DocsService) GetPage(urlPath string) (*DocPage, error) {
 	var currentPages []*DocPage = ds.Pages
 	var foundPage *DocPage
 
-	for i, part := range parts {
+	for _, part := range parts {
 		found := false
 		for _, page := range currentPages {
 			pageBaseName := strings.TrimSuffix(filepath.Base(page.Path), ".md")
@@ -276,21 +276,6 @@ func (ds *DocsService) GetPage(urlPath string) (*DocPage, error) {
 			}
 		}
 		if !found {
-			// At the last segment, attempt to find index.md or first ordered page
-			if i == len(parts)-1 {
-				// Try to find index.md
-				for _, page := range currentPages {
-					pageBaseName := strings.TrimSuffix(filepath.Base(page.Path), ".md")
-					if pageBaseName == "index" {
-						return page, nil
-					}
-				}
-				// If no index.md, find the page with lowest order
-				if len(currentPages) > 0 {
-					sortPages(currentPages)
-					return currentPages[0], nil // Return the page with lowest order
-				}
-			}
 			return nil, os.ErrNotExist
 		}
 	}
