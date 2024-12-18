@@ -87,7 +87,6 @@ func TestDocs_LinksResolve(t *testing.T) {
 
 // Make sure the body is not empty.
 func TestDocs_BodyNotEmpty(t *testing.T) {
-	// TestDocs_Links is a placeholder for the test links test.
 	dir := "../docs"
 	docsService, err := services.NewDocsService(dir)
 	if err != nil {
@@ -113,15 +112,57 @@ func TestDocs_BodyNotEmpty(t *testing.T) {
 
 // Make sure headers use title case.
 func TestDocs_HeadersTitleCase(t *testing.T) {
-	// TestDocs_HeadersTitleCase is a placeholder for the headers title case test.
 }
 
 // Make sure no pages have the same order number.
 func TestDocs_OrderNumbersUnique(t *testing.T) {
-	// TestDocs_OrderNumbersUnique is a placeholder for the order numbers unique test.
+	dir := "../docs"
+	docsService, err := services.NewDocsService(dir)
+	if err != nil {
+		t.Fatalf("failed to create DocsService: %v", err)
+	}
+
+	var walkPages func(pages []*services.DocPage)
+	walkPages = func(pages []*services.DocPage) {
+		orderset := make(map[int]string)
+		for _, page := range pages {
+			if len(page.Children) > 0 {
+				walkPages(page.Children)
+			}
+			// Index pages order denote where the folder is placed in the sidebar.
+			// However, the index page itself should always be at the top.
+			if strings.HasSuffix(page.Path, "index.md") {
+				page.Order = -1
+			}
+			if orderset[page.Order] != "" {
+				t.Errorf("duplicate order number %d in /docs/%s and /docs/%s", page.Order, orderset[page.Order], page.Path)
+			}
+			orderset[page.Order] = page.Path
+		}
+	}
+	walkPages(docsService.Pages)
 }
 
-// Make sure no pages have the same title.
+// Make sure no pages have the same title within the same level.
 func TestDocs_TitlesUnique(t *testing.T) {
-	// TestDocs_TitlesUnique is a placeholder for the titles unique test.
+	dir := "../docs"
+	docsService, err := services.NewDocsService(dir)
+	if err != nil {
+		t.Fatalf("failed to create DocsService: %v", err)
+	}
+
+	var walkPages func(pages []*services.DocPage)
+	walkPages = func(pages []*services.DocPage) {
+		titleset := make(map[string]string)
+		for _, page := range pages {
+			if len(page.Children) > 0 {
+				walkPages(page.Children)
+			}
+			if titleset[page.Title] != "" {
+				t.Errorf("duplicate title %s in /docs/%s and /docs/%s", page.Title, titleset[page.Title], page.Path)
+			}
+			titleset[page.Title] = page.Path
+		}
+	}
+	walkPages(docsService.Pages)
 }
