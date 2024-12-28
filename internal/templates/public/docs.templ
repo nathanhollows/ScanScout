@@ -52,21 +52,35 @@ templ recursiveSidebar(topPage *services.DocPage, page *services.DocPage, sideba
 
 templ Docs(page *services.DocPage, sidebar []*services.DocPage) {
 	<main class="max-w-7xl m-auto pb-8">
-		<!-- Menu and content w/ flex-->
-		<div class="flex flex-col md:flex-row w-full gap-8 p-5">
-			<div class="w-min-content">
-				<ul hx-boost="true" class="menu rounded-box w-72">
+		<div class="drawer">
+			<input id="my-drawer" type="checkbox" class="drawer-toggle"/>
+			<div class="drawer-side z-20">
+				<label for="my-drawer" aria-label="close sidebar" class="drawer-overlay"></label>
+				<ul hx-boost="true" class="menu bg-base-200 w-80 min-h-full overflow-y-scroll">
+					<li>
+						<a href="/about"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-book-open w-4 h-4"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg> About</a>
+					</li>
+					<li>
+						<a href="/pricing"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-dollar-sign w-4 h-4"><line x1="12" x2="12" y1="2" y2="22"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg> Pricing</a>
+					</li>
+					<div class="divider px-4">Docs</div>
 					for _, item := range sidebar {
 						@recursiveSidebar(page, item, sidebar, false)
 					}
 				</ul>
 			</div>
-			<section class="w-full prose prose-sm md:prose-base">
-				@templ.Raw(stringToMarkdown(page.Content))
-			</section>
+		</div>
+		<div class="flex flex-col md:flex-row w-full gap-8 p-5">
+			<div class="md:w-min-content hidden lg:block">
+				<ul hx-boost="true" class="menu rounded-box w-full md:w-72">
+					for _, item := range sidebar {
+						@recursiveSidebar(page, item, sidebar, false)
+					}
+				</ul>
+			</div>
 			if len(page.Headings) > 2 {
-				<div class="w-min-content">
-					<ul id="toc" class="menu bg-base-200 rounded-box w-72 sticky top-12">
+				<div class="md:w-min-content order-2 md:order-4">
+					<ul id="toc" class="menu bg-base-200 rounded-box w-full md:w-72 sticky top-12">
 						<li>
 							<a class="menu-title">Table of Contents</a>
 						</li>
@@ -78,6 +92,9 @@ templ Docs(page *services.DocPage, sidebar []*services.DocPage) {
 					</ul>
 				</div>
 			}
+			<section class="w-full prose prose-sm md:prose-base order-3">
+				@templ.Raw(stringToMarkdown(page.Content))
+			</section>
 		</div>
 	</main>
 	<style>
