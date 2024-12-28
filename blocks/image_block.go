@@ -57,11 +57,7 @@ func (b *ImageBlock) UpdateBlockData(input map[string][]string) error {
 	}
 
 	if link, exists := input["link"]; exists && len(link) > 0 {
-		linkURL, err := b.parseURL(input)
-		if err != nil {
-			return fmt.Errorf("parsing link URL: %w", err)
-		}
-		b.Link = linkURL
+		b.Link = link[0]
 	}
 
 	return nil

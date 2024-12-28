@@ -36,8 +36,9 @@ templ imagePlayer(_ models.InstanceSettings, block blocks.ImageBlock) {
 
 templ imageAdmin(_ models.InstanceSettings, block blocks.ImageBlock) {
 	<form
+		id={ fmt.Sprintf("form-%s", block.ID) }
 		hx-post={ fmt.Sprint("/admin/locations/", block.LocationID, "/blocks/", block.ID, "/update") }
-		hx-trigger={ fmt.Sprintf("submit, keyup change from:#url-%s delay:500ms", block.ID) }
+		hx-trigger={ fmt.Sprintf("submit, keyup change from:(#form-%s input) delay:500ms", block.ID) }
 		hx-swap="none"
 	>
 		<label
@@ -73,7 +74,7 @@ templ imageAdmin(_ models.InstanceSettings, block blocks.ImageBlock) {
 					type="text"
 					class="input input-bordered w-full"
 					placeholder="Caption below image"
-					value={ block.URL }
+					value={ block.Caption }
 				/>
 			</label>
 			<label
@@ -92,7 +93,7 @@ templ imageAdmin(_ models.InstanceSettings, block blocks.ImageBlock) {
 					type="url"
 					class="input input-bordered w-full"
 					placeholder="Link when clicked"
-					value={ block.URL }
+					value={ block.Link }
 				/>
 			</label>
 		</div>
