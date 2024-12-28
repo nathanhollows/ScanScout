@@ -891,7 +891,7 @@ templ locationScript() {
   // Delete block confirmation dialog
   function confirmDeleteBlock(event) {
     modal = document.getElementById("confirm_delete_block");
-    url = "/admin/locations/" + event.target.dataset.location + "/blocks/" + event.target.dataset.block + "/delete";
+    url = "/admin/locations/" + event.currentTarget.dataset.location + "/blocks/" + event.currentTarget.dataset.block + "/delete";
     btn = modal.querySelector("button.btn-error")
     btn.setAttribute("hx-delete", url);
     btn.setAttribute("hx-swap", "outerHTML");
