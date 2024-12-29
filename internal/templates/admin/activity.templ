@@ -100,14 +100,14 @@ templ ActivityTracker(instance models.Instance) {
     let coords = [170.5111643, -45.8650509];
     let zoom = 17;
     for (let i = 0; i < locations.length; i++) {
-      lat = parseFloat(locations[i].dataset.lat);
-      lng = parseFloat(locations[i].dataset.lng);
+      const lat = parseFloat(locations[i].dataset.lat);
+      const lng = parseFloat(locations[i].dataset.lng);
       if (lat !== 0 && lng !== 0) {
         coords = [lng, lat];
         break;
       }
     }
-    
+
     // Clear any existing markers
     markerArray.forEach(marker => marker.remove());
     markerArray = [];
@@ -135,13 +135,12 @@ templ ActivityTracker(instance models.Instance) {
       cooperativeGestures: true,
     });
 
-	map.on('load',function(){
-	  map.resize()
-      map.fitBounds(bounds, { padding: 50 });
-	})
+    map.on('load', function () {
+      map.resize();
+    });
 
-    // Find and loop through .location-name elements to create markers with numbers
-    locations.forEach(function(location, index) {
+    // Find and loop through .location-name elements to create markers with original numbers
+    locations.forEach(function (location, index) {
       // Create a HTML element for each marker
       const el = document.createElement('div');
       el.className = 'marker';
@@ -157,14 +156,12 @@ templ ActivityTracker(instance models.Instance) {
     });
 
     // Sort markers by latitude
-    markerArray.sort(function(a, b) {
+    markerArray.sort(function (a, b) {
       return parseFloat(b.getLngLat().lat) - parseFloat(a.getLngLat().lat);
     });
 
-    // Add markers to the map in the sorted order
-    markerArray.forEach((marker, index) => {
-      // Update the marker number to match the sorted order
-      marker.getElement().querySelector('b').textContent = index + 1;
+    // Add markers to the map in the sorted order without changing their displayed numbers
+    markerArray.forEach(marker => {
       marker.addTo(map);
     });
 
