@@ -103,6 +103,7 @@ func (h *PublicHandler) RegisterPost(w http.ResponseWriter, r *http.Request) {
 
 	confirmPassword := r.Form.Get("password-confirm")
 
+	// Create the user
 	err := h.UserService.CreateUser(r.Context(), &user, confirmPassword)
 	if err != nil {
 		h.Logger.Error("creating user", "err", err)
@@ -115,6 +116,18 @@ func (h *PublicHandler) RegisterPost(w http.ResponseWriter, r *http.Request) {
 		c := templates.RegisterError("Something went wrong! Please try again.")
 		c.Render(r.Context(), w)
 		return
+	}
+
+	// Send the email verification
+	err = h.AuthService.SendEmailVerification(r.Context(), &user)
+	if err != nil {
+		if !errors.Is(err, services.ErrUserAlreadyVerified) {
+			h.UserService.DeleteUser(r.Context(), &user)
+			h.Logger.Error("sending email verification", "err", err)
+			c := templates.RegisterError("Your account was created, but an error occurred while trying to send the email verification. Please try again.")
+			c.Render(r.Context(), w)
+			return
+		}
 	}
 
 	c := templates.RegisterSuccess()
@@ -219,7 +232,7 @@ func (h *PublicHandler) AuthCallback(w http.ResponseWriter, r *http.Request) {
 		`))
 }
 
-// VerifyEmail is the handler for verifying a user's email address
+// VerifyEmail shows the user the verify email page, the first step in the email verification process
 func (h *PublicHandler) VerifyEmail(w http.ResponseWriter, r *http.Request) {
 	// If the user is authenticated without error, we will redirect them to the admin page
 	user, err := h.AuthService.GetAuthenticatedUser(r)
@@ -236,7 +249,7 @@ func (h *PublicHandler) VerifyEmail(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// VerifyEmailWithToken is the handler for verifying a user's email address
+// VerifyEmailWithToken verifies the user's email address and redirects upon error or success
 func (h *PublicHandler) VerifyEmailWithToken(w http.ResponseWriter, r *http.Request) {
 	// If the user is authenticated without error, we will redirect them to the admin page
 	user, err := h.AuthService.GetAuthenticatedUser(r)
@@ -268,7 +281,7 @@ func (h *PublicHandler) VerifyEmailWithToken(w http.ResponseWriter, r *http.Requ
 	w.Write([]byte(`<html><head><meta http-equiv="refresh" content="2; url='/admin'"></head><body></body></html>`))
 }
 
-// Poll for email verification for HTMX
+// VerifyEmailStatus checks the status of the email verification and redirects accordingly
 func (h *PublicHandler) VerifyEmailStatus(w http.ResponseWriter, r *http.Request) {
 	user, err := h.AuthService.GetAuthenticatedUser(r)
 	if err != nil || user == nil {
