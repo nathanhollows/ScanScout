@@ -17,8 +17,9 @@ var (
 
 type UserService interface {
 	CreateUser(ctx context.Context, user *models.User, passwordConfirm string) error
-	UpdateUser(ctx context.Context, user *models.User) error
 	GetUserByEmail(ctx context.Context, email string) (*models.User, error)
+	UpdateUser(ctx context.Context, user *models.User) error
+	DeleteUser(ctx context.Context, user *models.User) error
 }
 
 type userService struct {
@@ -59,4 +60,9 @@ func (s *userService) CreateUser(ctx context.Context, user *models.User, passwor
 	user.ID = uuid.New().String()
 
 	return s.userRepository.Create(ctx, user)
+}
+
+// DeleteUser deletes a user from the database
+func (s *userService) DeleteUser(ctx context.Context, user *models.User) error {
+	return s.userRepository.Delete(ctx, user.ID)
 }
