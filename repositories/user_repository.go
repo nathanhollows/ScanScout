@@ -28,6 +28,9 @@ type UserRepository interface {
 
 	// Update updates a user in the database
 	Update(ctx context.Context, user *models.User) error
+
+	// Delete deletes a user from the database
+	Delete(ctx context.Context, userID string) error
 }
 
 type userRepository struct {
@@ -42,10 +45,15 @@ func NewUserRepository(db *bun.DB) UserRepository {
 
 // Update the user in the database
 func (r *userRepository) Update(ctx context.Context, user *models.User) error {
-	_, err := r.db.NewUpdate().
+	res, err := r.db.NewUpdate().
 		Model(user).
+		Column("name").
 		WherePK().
 		Exec(ctx)
+	rows, err := res.RowsAffected()
+	if rows == 0 {
+		return ErrUserNotFound
+	}
 	return err
 }
 
@@ -115,4 +123,18 @@ func (r *userRepository) FindUserByEmailAndProvider(ctx context.Context, email, 
 		Relation("Instances").
 		Scan(ctx)
 	return user, err
+}
+
+// Delete deletes a user from the database
+func (r *userRepository) Delete(ctx context.Context, userID string) error {
+	user := &models.User{ID: userID}
+	res, err := r.db.NewDelete().
+		Model(user).
+		Where("id = ?", userID).
+		Exec(ctx)
+	rows, err := res.RowsAffected()
+	if rows == 0 {
+		return ErrUserNotFound
+	}
+	return err
 }
