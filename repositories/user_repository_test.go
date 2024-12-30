@@ -127,3 +127,28 @@ func TestUserRepository_GetUserByEmailAndProvider(t *testing.T) {
 	assert.Equal(t, user.Email, fetchedUser.Email)
 	assert.Equal(t, user.Provider, fetchedUser.Provider)
 }
+
+func TestUserRepository_Delete(t *testing.T) {
+	repo, cleanup := setupUserRepo(t)
+	defer cleanup()
+	ctx := context.Background()
+
+	// Seed user
+	user := &models.User{
+		Name:     gofakeit.Name(),
+		Email:    gofakeit.Email(),
+		Password: gofakeit.Password(true, true, true, true, true, 12),
+		Provider: "local",
+	}
+	err := repo.Create(ctx, user)
+	assert.NoError(t, err)
+
+	// Delete user
+	err = repo.Delete(ctx, user.ID)
+	assert.NoError(t, err)
+
+	// Verify user is deleted
+	fetchedUser, err := repo.FindUserByEmail(ctx, user.Email)
+	assert.Error(t, err)
+	assert.Empty(t, fetchedUser)
+}
