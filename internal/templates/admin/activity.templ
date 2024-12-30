@@ -65,7 +65,7 @@ templ ActivityTracker(instance models.Instance) {
 				if len(instance.Locations) > 0 {
 					for i, location := range instance.Locations {
 						<div
-							class="flex flex-row justify-between items-center space-x-3 bg-base-200 hover:bg-base-300 border-base-300 rounded-lg p-4 join-item"
+							class="location-item flex flex-row justify-between items-center space-x-3 bg-base-200 hover:bg-base-300 border-base-300 rounded-lg p-4 join-item"
 						>
 							<div class="flex flex-row items-center space-x-3 grow">
 								<strong>{ intToString(i + 1) }</strong>
@@ -152,7 +152,33 @@ templ ActivityTracker(instance models.Instance) {
         .setPopup(new mapboxgl.Popup({ offset: 25 }) // Add popups
           .setHTML('<h3>' + location.textContent + '</h3>'));
 
+				marker.getElement().addEventListener('mouseenter', function () {
+				  popup = marker.getPopup();
+					if (!popup.isOpen()) {
+						marker.togglePopup();
+					}
+				});
+
+				marker.getElement().addEventListener('mouseleave', function () {
+					marker.togglePopup();	
+				});
+
       markerArray.push(marker);
+
+			let locationContainer = location.parentElement.parentElement;
+
+      // Add hover event listener to open the marker popup when hovering over the list item
+      locationContainer.addEventListener('mouseenter', () => {
+				if (!marker.getPopup().isOpen()) {
+							marker.togglePopup();
+						}
+      });
+
+      locationContainer.addEventListener('mouseleave', () => {
+				if (marker.getPopup().isOpen()) {
+							marker.togglePopup();
+						}
+      });
     });
 
     // Sort markers by latitude
