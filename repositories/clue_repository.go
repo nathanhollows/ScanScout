@@ -19,7 +19,10 @@ type ClueRepository interface {
 	// Delete removes the clue from the database
 	Delete(ctx context.Context, clueID string) error
 	// DeleteByLocationID removes all clues for a location
+	// When deleting a location, please use DeleteByLocationIDWithTransaction instead
 	DeleteByLocationID(ctx context.Context, locationID string) error
+	// DeleteByLocationIDWithTransaction removes all clues for a location with a transaction
+	DeleteByLocationIDWithTransaction(ctx context.Context, tx *bun.Tx, locationID string) error
 }
 
 type clueRepository struct {
@@ -50,6 +53,20 @@ func (r *clueRepository) Save(ctx context.Context, c *models.Clue) error {
 	return err
 }
 
+// FindCluesByLocation returns all clues for a given location
+func (r *clueRepository) FindCluesByLocation(ctx context.Context, locationID string) ([]models.Clue, error) {
+	clues := []models.Clue{}
+	err := r.db.
+		NewSelect().
+		Model(&clues).
+		Where("location_id = ?", locationID).
+		Scan(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("finding clues by location: %w", err)
+	}
+	return clues, nil
+}
+
 // Delete removes the clue from the database
 func (r *clueRepository) Delete(ctx context.Context, clueID string) error {
 	_, err := r.db.
@@ -72,16 +89,13 @@ func (r *clueRepository) DeleteByLocationID(ctx context.Context, locationID stri
 	return err
 }
 
-// FindCluesByLocation returns all clues for a given location
-func (r *clueRepository) FindCluesByLocation(ctx context.Context, locationID string) ([]models.Clue, error) {
-	clues := []models.Clue{}
-	err := r.db.
-		NewSelect().
-		Model(&clues).
+// DeleteByLocationIDWithTransaction removes all clues for a location with a transaction
+func (r *clueRepository) DeleteByLocationIDWithTransaction(ctx context.Context, tx *bun.Tx, locationID string) error {
+	_, err := tx.
+		NewDelete().
+		Model(&models.Clue{}).
 		Where("location_id = ?", locationID).
-		Scan(ctx)
-	if err != nil {
-		return nil, fmt.Errorf("finding clues by location: %w", err)
-	}
-	return clues, nil
+		ForceDelete().
+		Exec(ctx)
+	return err
 }

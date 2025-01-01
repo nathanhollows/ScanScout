@@ -4,6 +4,7 @@ import (
 	"context"
 	"testing"
 
+	"github.com/brianvoe/gofakeit/v7"
 	"github.com/google/uuid"
 	"github.com/nathanhollows/Rapua/models"
 	"github.com/nathanhollows/Rapua/repositories"
@@ -34,27 +35,6 @@ func TestClueRepository_Save(t *testing.T) {
 	assert.NoError(t, err, "expected no error when saving clue")
 }
 
-func TestClueRepository_Delete(t *testing.T) {
-	repo, cleanup := setupClueRepo(t)
-	defer cleanup()
-	ctx := context.Background()
-
-	clue := &models.Clue{
-		ID:         uuid.New().String(),
-		InstanceID: "instance-1",
-		LocationID: "location-1",
-		Content:    "This is a test clue.",
-	}
-
-	// Save clue first
-	err := repo.Save(ctx, clue)
-	assert.NoError(t, err, "expected no error when saving clue")
-
-	// Now delete it
-	err = repo.Delete(ctx, clue.ID)
-	assert.NoError(t, err, "expected no error when deleting clue")
-}
-
 func TestClueRepository_FindCluesByLocation(t *testing.T) {
 	repo, cleanup := setupClueRepo(t)
 	defer cleanup()
@@ -81,4 +61,31 @@ func TestClueRepository_FindCluesByLocation(t *testing.T) {
 	clues, err := repo.FindCluesByLocation(ctx, locationID)
 	assert.NoError(t, err, "expected no error when finding clues by location")
 	assert.Len(t, clues, 2, "expected two clues to be found")
+}
+
+func TestClueRepository_DeleteByLocationID(t *testing.T) {
+	repo, cleanup := setupClueRepo(t)
+	defer cleanup()
+	ctx := context.Background()
+
+	locationID := gofakeit.UUID()
+	instanceID := gofakeit.UUID()
+	clues := []models.Clue{}
+	for i := 0; i < 3; i++ {
+		clue := &models.Clue{
+			InstanceID: instanceID,
+			LocationID: locationID,
+			Content:    gofakeit.Sentence(5),
+		}
+		err := repo.Save(ctx, clue)
+		assert.NoError(t, err, "expected no error when saving clue")
+		clues = append(clues, *clue)
+	}
+
+	err := repo.DeleteByLocationID(ctx, locationID)
+	assert.NoError(t, err, "expected no error when deleting clues by location ID")
+
+	clues, err = repo.FindCluesByLocation(ctx, locationID)
+	assert.NoError(t, err, "expected no error when finding clues by location")
+	assert.Len(t, clues, 0, "expected no clues to be found")
 }
