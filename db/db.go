@@ -1,7 +1,9 @@
 package db
 
 import (
+	"context"
 	"database/sql"
+	"fmt"
 	"log"
 	"os"
 
@@ -11,6 +13,28 @@ import (
 	"github.com/uptrace/bun/driver/sqliteshim"
 	"github.com/uptrace/bun/extra/bundebug"
 )
+
+type transactor struct {
+	db *bun.DB
+}
+
+type Transactor interface {
+	BeginTx(ctx context.Context, opts *sql.TxOptions) (*bun.Tx, error)
+}
+
+func NewTransactor(db *bun.DB) Transactor {
+	return &transactor{
+		db: db,
+	}
+}
+
+func (t *transactor) BeginTx(ctx context.Context, opts *sql.TxOptions) (*bun.Tx, error) {
+	tx, err := t.db.BeginTx(ctx, opts)
+	if err != nil {
+		return nil, fmt.Errorf("beginning transaction: %w", err)
+	}
+	return &tx, nil
+}
 
 func MustOpen() *bun.DB {
 	var sqldb *sql.DB
