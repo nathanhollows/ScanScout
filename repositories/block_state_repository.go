@@ -25,6 +25,9 @@ type BlockStateRepository interface {
 
 	// Delete deletes a player state by block ID and team code
 	Delete(ctx context.Context, block_id string, team_code string) error
+	// DeleteByBlockID deletes all player states for a block
+	// Requires a transaction as this implies a cascade delete
+	DeleteByBlockID(ctx context.Context, tx *bun.Tx, blockID string) error
 }
 
 type blockStateRepository struct {
@@ -149,6 +152,18 @@ func (r *blockStateRepository) Update(ctx context.Context, state blocks.PlayerSt
 	return state, err
 }
 
+// NewBlockState creates a new block state
+func (r *blockStateRepository) NewBlockState(ctx context.Context, blockID, teamCode string) (blocks.PlayerState, error) {
+	state := &PlayerStateData{
+		blockID:       blockID,
+		playerID:      teamCode,
+		playerData:    nil,
+		isComplete:    false,
+		pointsAwarded: 0,
+	}
+	return state, nil
+}
+
 // Delete removes a team block state from the database by its ID
 func (r *blockStateRepository) Delete(ctx context.Context, block_id string, team_code string) error {
 	_, err := r.db.NewDelete().
@@ -162,14 +177,11 @@ func (r *blockStateRepository) Delete(ctx context.Context, block_id string, team
 	return nil
 }
 
-// NewBlockState creates a new block state
-func (r *blockStateRepository) NewBlockState(ctx context.Context, blockID, teamCode string) (blocks.PlayerState, error) {
-	state := &PlayerStateData{
-		blockID:       blockID,
-		playerID:      teamCode,
-		playerData:    nil,
-		isComplete:    false,
-		pointsAwarded: 0,
-	}
-	return state, nil
+// DeleteByBlockID removes all team block states for a block from the database
+func (r *blockStateRepository) DeleteByBlockID(ctx context.Context, tx *bun.Tx, blockID string) error {
+	_, err := tx.NewDelete().
+		Model(&models.TeamBlockState{}).
+		Where("block_id = ?", blockID).
+		Exec(ctx)
+	return err
 }

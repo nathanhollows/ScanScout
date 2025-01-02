@@ -2,24 +2,28 @@ package repositories_test
 
 import (
 	"context"
+	"database/sql"
 	"testing"
 
 	"github.com/brianvoe/gofakeit/v7"
 	"github.com/nathanhollows/Rapua/blocks"
+	"github.com/nathanhollows/Rapua/db"
 	"github.com/nathanhollows/Rapua/repositories"
 	"github.com/stretchr/testify/assert"
 )
 
-func setupBlockStateRepo(t *testing.T) (repositories.BlockStateRepository, func()) {
+func setupBlockStateRepo(t *testing.T) (repositories.BlockStateRepository, db.Transactor, func()) {
 	t.Helper()
-	db, cleanup := setupDB(t)
+	dbc, cleanup := setupDB(t)
 
-	blockStateRepository := repositories.NewBlockStateRepository(db)
-	return blockStateRepository, cleanup
+	transactor := db.NewTransactor(dbc)
+
+	blockStateRepository := repositories.NewBlockStateRepository(dbc)
+	return blockStateRepository, transactor, cleanup
 }
 
 func TestBlockStateRepository(t *testing.T) {
-	repo, cleanup := setupBlockStateRepo(t)
+	repo, _, cleanup := setupBlockStateRepo(t)
 	defer cleanup()
 
 	tests := []struct {
@@ -98,6 +102,78 @@ func TestBlockStateRepository(t *testing.T) {
 				assert.NoError(t, err)
 			},
 			cleanupFunc: func(state blocks.PlayerState) {},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			state, err := tt.setup()
+			assert.NoError(t, err)
+			result, err := tt.action(state)
+			tt.assertion(result, err)
+			if tt.cleanupFunc != nil {
+				tt.cleanupFunc(state)
+			}
+		})
+	}
+}
+
+func TestBlockStateRepository_Bulk(t *testing.T) {
+	repo, transactor, cleanup := setupBlockStateRepo(t)
+	defer cleanup()
+
+	tests := []struct {
+		name        string
+		setup       func() ([]blocks.PlayerState, error)
+		action      func(state []blocks.PlayerState) (interface{}, error)
+		assertion   func(result interface{}, err error)
+		cleanupFunc func(state []blocks.PlayerState)
+	}{
+		{
+			name: "Delete player states by block ID",
+			setup: func() ([]blocks.PlayerState, error) {
+				blockID := gofakeit.UUID()
+				playerStates := make([]blocks.PlayerState, 3)
+				for i := 0; i < 3; i++ {
+					state, _ := repo.NewBlockState(context.Background(), blockID, gofakeit.UUID())
+					ps, err := repo.Create(context.Background(), state)
+					playerStates[i] = ps
+					if err != nil {
+						return nil, err
+					}
+				}
+				return playerStates, nil
+			},
+			action: func(state []blocks.PlayerState) (interface{}, error) {
+				tx, err := transactor.BeginTx(context.Background(), &sql.TxOptions{})
+				if err != nil {
+					return nil, err
+				}
+
+				err = repo.DeleteByBlockID(context.Background(), tx, state[0].GetBlockID())
+				if err != nil {
+					tx.Rollback()
+					return nil, err
+				} else {
+					tx.Commit()
+				}
+
+				// Check that the states have been deleted
+				for _, s := range state {
+					_, err := repo.GetByBlockAndTeam(context.Background(), s.GetBlockID(), s.GetPlayerID())
+					if err.Error() != "sql: no rows in result set" {
+						return nil, err
+					}
+				}
+
+				return nil, nil
+
+			},
+			assertion: func(result interface{}, err error) {
+				assert.NoError(t, err)
+			},
+			// cleanup is what we're testing
+			cleanupFunc: func(state []blocks.PlayerState) {},
 		},
 	}
 

@@ -14,22 +14,24 @@ type BlockRepository interface {
 	// Create creates a new block for a location
 	Create(ctx context.Context, block blocks.Block, locationID string) (blocks.Block, error)
 
-	// GetByLocationID fetches all blocks for a location
-	GetByLocationID(ctx context.Context, locationID string) (blocks.Blocks, error)
 	// GetByID fetches a block by its ID
 	GetByID(ctx context.Context, blockID string) (blocks.Block, error)
-	// GetBlocksAndStatesByLocationIDAndTeamCode fetches blocks and their states by location and team code
-	GetBlocksAndStatesByLocationIDAndTeamCode(ctx context.Context, locationID string, teamCode string) ([]blocks.Block, []blocks.PlayerState, error)
 	// GetBlockAndStateByBlockIDAndTeamCode fetches a block and its state by block ID and team code
 	GetBlockAndStateByBlockIDAndTeamCode(ctx context.Context, blockID string, teamCode string) (blocks.Block, blocks.PlayerState, error)
+	// FindByLocationID fetches all blocks for a location
+	FindByLocationID(ctx context.Context, locationID string) (blocks.Blocks, error)
+	// FindBlocksAndStatesByLocationIDAndTeamCode fetches blocks and their states by location and team code
+	FindBlocksAndStatesByLocationIDAndTeamCode(ctx context.Context, locationID string, teamCode string) ([]blocks.Block, []blocks.PlayerState, error)
 
 	// Update updates an existing block
 	Update(ctx context.Context, block blocks.Block) (blocks.Block, error)
 
 	// Delete deletes a block by its ID
-	Delete(ctx context.Context, blockID string) error
+	// Requires a transaction as related data will also need to be deleted
+	Delete(ctx context.Context, tx *bun.Tx, blockID string) error
 	// DeleteByLocationID deletes all blocks associated with a location ID
-	DeleteByLocationID(ctx context.Context, locationID string) error
+	// Requires a transaction as related data will also need to be deleted
+	DeleteByLocationID(ctx context.Context, tx *bun.Tx, locationID string) error
 
 	// Reorder reorders the blocks for a specific location
 	Reorder(ctx context.Context, locationID string, blockIDs []string) error
@@ -47,8 +49,8 @@ func NewBlockRepository(db *bun.DB, stateRepo BlockStateRepository) BlockReposit
 	}
 }
 
-// GetByLocationID fetches all blocks for a location
-func (r *blockRepository) GetByLocationID(ctx context.Context, locationID string) (blocks.Blocks, error) {
+// FindByLocationID fetches all blocks for a location
+func (r *blockRepository) FindByLocationID(ctx context.Context, locationID string) (blocks.Blocks, error) {
 	modelBlocks := []models.Block{}
 	err := r.db.NewSelect().
 		Model(&modelBlocks).
@@ -158,28 +160,14 @@ func convertModelToBlock(model *models.Block) (blocks.Block, error) {
 }
 
 // Delete deletes a block from the database
-func (r *blockRepository) Delete(ctx context.Context, blockID string) error {
-	tx, err := r.db.BeginTx(ctx, nil)
-	if err != nil {
-		return err
-	}
-	_, err = tx.NewDelete().Model(&models.Block{}).Where("id = ?", blockID).Exec(ctx)
-	if err != nil {
-		tx.Rollback()
-		return err
-	}
-	_, err = tx.NewDelete().Model(&models.TeamBlockState{}).Where("block_id = ?", blockID).Exec(ctx)
-	if err != nil {
-		tx.Rollback()
-		return err
-	}
-	err = tx.Commit()
+func (r *blockRepository) Delete(ctx context.Context, tx *bun.Tx, blockID string) error {
+	_, err := tx.NewDelete().Model(&models.Block{}).Where("id = ?", blockID).Exec(ctx)
 	return err
 }
 
 // DeleteByLocationID deletes all blocks for a location
-func (r *blockRepository) DeleteByLocationID(ctx context.Context, locationID string) error {
-	_, err := r.db.NewDelete().Model(&models.Block{}).Where("location_id = ?", locationID).Exec(ctx)
+func (r *blockRepository) DeleteByLocationID(ctx context.Context, tx *bun.Tx, locationID string) error {
+	_, err := tx.NewDelete().Model(&models.Block{}).Where("location_id = ?", locationID).Exec(ctx)
 	return err
 }
 
@@ -198,8 +186,8 @@ func (r *blockRepository) Reorder(ctx context.Context, locationID string, blockI
 	return nil
 }
 
-// GetBlocksAndStatesByLocationIDAndTeamCode fetches all blocks for a location with their player states
-func (r *blockRepository) GetBlocksAndStatesByLocationIDAndTeamCode(ctx context.Context, locationID string, teamCode string) ([]blocks.Block, []blocks.PlayerState, error) {
+// FindBlocksAndStatesByLocationIDAndTeamCode fetches all blocks for a location with their player states
+func (r *blockRepository) FindBlocksAndStatesByLocationIDAndTeamCode(ctx context.Context, locationID string, teamCode string) ([]blocks.Block, []blocks.PlayerState, error) {
 	if teamCode == "" {
 		return nil, nil, errors.New("team code must be set")
 	}
