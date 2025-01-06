@@ -123,7 +123,7 @@ func (h *AdminHandler) LocationEdit(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	blocks, err := h.BlockService.GetByLocationID(r.Context(), location.ID)
+	blocks, err := h.BlockService.FindByLocationID(r.Context(), location.ID)
 	if err != nil {
 		h.Logger.Error("LocationEdit: getting blocks", "error", err, "instance_id", user.CurrentInstanceID, "location_id", location.ID)
 		h.redirect(w, r, "/admin/locations")
@@ -269,7 +269,7 @@ func (h *AdminHandler) LocationPreview(w http.ResponseWriter, r *http.Request) {
 		Location: *location,
 	}
 
-	contentBlocks, err := h.BlockService.GetByLocationID(r.Context(), location.ID)
+	contentBlocks, err := h.BlockService.FindByLocationID(r.Context(), location.ID)
 
 	blockStates := make(map[string]blocks.PlayerState, len(contentBlocks))
 	for _, block := range contentBlocks {
