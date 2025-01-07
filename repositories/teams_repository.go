@@ -26,9 +26,12 @@ type TeamRepository interface {
 	Update(ctx context.Context, t *models.Team) error
 
 	// Delete removes the team from the database
-	Delete(ctx context.Context, instanceID string, teamCode string) error
+	// Requires a transaction as related data will also need to be deleted
+	Delete(ctx context.Context, tx *bun.Tx, instanceID string, teamCode string) error
 	// DeleteByInstanceID removes all teams for a specific instance
-	DeleteByInstanceID(ctx context.Context, instanceID string) error
+	// Requires a transaction as this implies a cascade delete and related data
+	// will also need to be deleted
+	DeleteByInstanceID(ctx context.Context, tx *bun.Tx, instanceID string) error
 
 	// LoadInstance loads the instance for a team
 	LoadInstance(ctx context.Context, team *models.Team) error
@@ -57,8 +60,8 @@ func (r *teamRepository) Update(ctx context.Context, t *models.Team) error {
 	return err
 }
 
-func (r *teamRepository) Delete(ctx context.Context, instanceID string, teamCode string) error {
-	_, err := r.db.
+func (r *teamRepository) Delete(ctx context.Context, tx *bun.Tx, instanceID string, teamCode string) error {
+	_, err := tx.
 		NewDelete().
 		Model(&models.Team{}).
 		Where("code = ? AND instance_id = ?", teamCode, instanceID).
@@ -66,8 +69,8 @@ func (r *teamRepository) Delete(ctx context.Context, instanceID string, teamCode
 	return err
 }
 
-func (r *teamRepository) DeleteByInstanceID(ctx context.Context, instanceID string) error {
-	_, err := r.db.NewDelete().Model(&models.Team{}).Where("instance_id = ?", instanceID).Exec(ctx)
+func (r *teamRepository) DeleteByInstanceID(ctx context.Context, tx *bun.Tx, instanceID string) error {
+	_, err := tx.NewDelete().Model(&models.Team{}).Where("instance_id = ?", instanceID).Exec(ctx)
 	return err
 }
 

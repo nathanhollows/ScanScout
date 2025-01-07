@@ -2,25 +2,29 @@ package repositories_test
 
 import (
 	"context"
+	"database/sql"
 	"testing"
 
 	"github.com/brianvoe/gofakeit/v7"
 	"github.com/google/uuid"
+	"github.com/nathanhollows/Rapua/db"
 	"github.com/nathanhollows/Rapua/models"
 	"github.com/nathanhollows/Rapua/repositories"
 	"github.com/stretchr/testify/assert"
 )
 
-func setupTeamRepo(t *testing.T) (repositories.TeamRepository, func()) {
+func setupTeamRepo(t *testing.T) (repositories.TeamRepository, db.Transactor, func()) {
 	t.Helper()
-	db, cleanup := setupDB(t)
+	dbc, cleanup := setupDB(t)
 
-	teamRepository := repositories.NewTeamRepository(db)
-	return teamRepository, cleanup
+	transactor := db.NewTransactor(dbc)
+
+	teamRepository := repositories.NewTeamRepository(dbc)
+	return teamRepository, transactor, cleanup
 }
 
 func TestTeamRepository_InsertTeam(t *testing.T) {
-	repo, cleanup := setupTeamRepo(t)
+	repo, transactor, cleanup := setupTeamRepo(t)
 	defer cleanup()
 	ctx := context.Background()
 
@@ -47,12 +51,22 @@ func TestTeamRepository_InsertTeam(t *testing.T) {
 	assert.Error(t, err, "expected error when saving teams with duplicate codes")
 
 	// Cleanup
-	err = repo.DeleteByInstanceID(ctx, sampleTeam.InstanceID)
-	assert.NoError(t, err, "expected no error when deleting team")
+	for _, team := range []models.Team{*sampleTeam} {
+		tx, err := transactor.BeginTx(ctx, &sql.TxOptions{})
+		assert.NoError(t, err, "expected no error when starting transaction")
+
+		err = repo.Delete(ctx, tx, team.InstanceID, team.Code)
+		if err != nil {
+			tx.Rollback()
+		} else {
+			tx.Commit()
+		}
+		assert.NoError(t, err, "expected no error when deleting team")
+	}
 }
 
 func TestTeamRepository_InsertAndUpdate(t *testing.T) {
-	repo, cleanup := setupTeamRepo(t)
+	repo, transactor, cleanup := setupTeamRepo(t)
 	defer cleanup()
 	ctx := context.Background()
 
@@ -75,12 +89,22 @@ func TestTeamRepository_InsertAndUpdate(t *testing.T) {
 	assert.NoError(t, err, "expected no error when updating team")
 
 	// Cleanup
-	err = repo.Delete(ctx, sampleTeam.InstanceID, sampleTeam.Code)
-	assert.NoError(t, err, "expected no error when deleting team")
+	tx, err := transactor.BeginTx(ctx, &sql.TxOptions{})
+	if err != nil {
+		tx.Rollback()
+		assert.NoError(t, err, "expected no error when starting transaction")
+	}
+
+	if err := repo.Delete(ctx, tx, sampleTeam.InstanceID, sampleTeam.Code); err != nil {
+		tx.Rollback()
+		assert.NoError(t, err, "expected no error when deleting team")
+	} else {
+		tx.Commit()
+	}
 }
 
 func TestTeamRepository_Delete(t *testing.T) {
-	repo, cleanup := setupTeamRepo(t)
+	repo, transactor, cleanup := setupTeamRepo(t)
 	defer cleanup()
 	ctx := context.Background()
 
@@ -95,12 +119,21 @@ func TestTeamRepository_Delete(t *testing.T) {
 	assert.NoError(t, err, "expected no error when saving team")
 
 	// Now delete it
-	err = repo.Delete(ctx, "instance-1", sampleTeam[0].Code)
-	assert.NoError(t, err, "expected no error when deleting team")
+	tx, err := transactor.BeginTx(ctx, &sql.TxOptions{})
+	if err != nil {
+		tx.Rollback()
+		assert.NoError(t, err, "expected no error when starting transaction")
+	}
+	if err := repo.Delete(ctx, tx, sampleTeam[0].InstanceID, sampleTeam[0].Code); err != nil {
+		tx.Rollback()
+		assert.NoError(t, err, "expected no error when deleting team")
+	} else {
+		tx.Commit()
+	}
 }
 
 func TestTeamRepository_FindAll(t *testing.T) {
-	repo, cleanup := setupTeamRepo(t)
+	repo, transactor, cleanup := setupTeamRepo(t)
 	defer cleanup()
 	ctx := context.Background()
 
@@ -127,14 +160,23 @@ func TestTeamRepository_FindAll(t *testing.T) {
 	assert.Len(t, teams, len(sampleTeams), "expected correct number of teams to be found")
 
 	// Cleanup
-	for _, team := range teams {
-		err = repo.Delete(ctx, instanceID, team.Code)
-		assert.NoError(t, err, "expected no error when deleting team")
+	tx, err := transactor.BeginTx(ctx, &sql.TxOptions{})
+	if err != nil {
+		tx.Rollback()
+		assert.NoError(t, err, "expected no error when starting transaction")
 	}
+	for _, team := range teams {
+		if err := repo.Delete(ctx, tx, instanceID, team.Code); err != nil {
+			tx.Rollback()
+			assert.NoError(t, err, "expected no error when deleting team")
+			break
+		}
+	}
+	tx.Commit()
 }
 
 func TestTeamRepository_FindAllWithScans(t *testing.T) {
-	repo, cleanup := setupTeamRepo(t)
+	repo, transactor, cleanup := setupTeamRepo(t)
 	defer cleanup()
 	ctx := context.Background()
 
@@ -162,14 +204,23 @@ func TestTeamRepository_FindAllWithScans(t *testing.T) {
 	assert.Len(t, teams, len(sampleTeams), "expected correct number of teams to be found")
 
 	// Cleanup
-	for _, team := range teams {
-		err = repo.Delete(ctx, instanceID, team.Code)
-		assert.NoError(t, err, "expected no error when deleting team")
+	tx, err := transactor.BeginTx(ctx, &sql.TxOptions{})
+	if err != nil {
+		tx.Rollback()
+		assert.NoError(t, err, "expected no error when starting transaction")
 	}
+	for _, team := range teams {
+		if err := repo.Delete(ctx, tx, instanceID, team.Code); err != nil {
+			tx.Rollback()
+			assert.NoError(t, err, "expected no error when deleting team")
+			break
+		}
+	}
+	tx.Commit()
 }
 
 func TestTeamRepository_InsertBatch(t *testing.T) {
-	repo, cleanup := setupTeamRepo(t)
+	repo, transactor, cleanup := setupTeamRepo(t)
 	defer cleanup()
 	ctx := context.Background()
 
@@ -195,14 +246,23 @@ func TestTeamRepository_InsertBatch(t *testing.T) {
 	}
 
 	// Cleanup
-	for _, team := range sampleTeams {
-		err = repo.Delete(ctx, team.InstanceID, team.Code)
-		assert.NoError(t, err, "expected no error when deleting team")
+	tx, err := transactor.BeginTx(ctx, &sql.TxOptions{})
+	if err != nil {
+		tx.Rollback()
+		assert.NoError(t, err, "expected no error when starting transaction")
 	}
+	for _, team := range sampleTeams {
+		if err := repo.Delete(ctx, tx, team.InstanceID, team.Code); err != nil {
+			tx.Rollback()
+			assert.NoError(t, err, "expected no error when deleting team")
+			break
+		}
+	}
+	tx.Commit()
 }
 
 func TestTeamRepository_InsertBatch_UniqueConstraintError(t *testing.T) {
-	repo, cleanup := setupTeamRepo(t)
+	repo, _, cleanup := setupTeamRepo(t)
 	defer cleanup()
 	ctx := context.Background()
 
