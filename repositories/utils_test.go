@@ -12,6 +12,7 @@ import (
 )
 
 func setupDB(t *testing.T) (*bun.DB, func()) {
+	t.Helper()
 	os.Setenv("DB_CONNECTION", "file::memory:?cache=shared")
 	os.Setenv("DB_TYPE", "sqlite3")
 	db := db.MustOpen()
