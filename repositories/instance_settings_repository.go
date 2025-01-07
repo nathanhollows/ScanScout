@@ -15,6 +15,9 @@ type InstanceSettingsRepository interface {
 
 	// Update updates an instance in the database
 	Update(ctx context.Context, settings *models.InstanceSettings) error
+
+	// Delete removes and instance from the database given the instanceID
+	Delete(ctx context.Context, tx *bun.Tx, instanceID string) error
 }
 
 type instanceSettingsRepository struct {
@@ -46,6 +49,17 @@ func (r *instanceSettingsRepository) Update(ctx context.Context, settings *model
 	}
 	settings.UpdatedAt = time.Now()
 	_, err := r.db.NewUpdate().Model(settings).WherePK().Exec(ctx)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (r *instanceSettingsRepository) Delete(ctx context.Context, tx *bun.Tx, instanceID string) error {
+	_, err := tx.NewDelete().
+		Model(&models.InstanceSettings{}).
+		Where("instance_id = ?", instanceID).
+		Exec(ctx)
 	if err != nil {
 		return err
 	}
