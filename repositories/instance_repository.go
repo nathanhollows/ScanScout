@@ -2,7 +2,6 @@ package repositories
 
 import (
 	"context"
-	"database/sql"
 	"fmt"
 
 	"github.com/google/uuid"
@@ -22,11 +21,14 @@ type InstanceRepository interface {
 	// Update updates an instance in the database
 	Update(ctx context.Context, instance *models.Instance) error
 
-	// Delete deletes an instance from the database
-	Delete(ctx context.Context, instanceID string) error
+	// Delete deletes an instance from the database.
+	// Deleting an instance cascades to all related data.
+	Delete(ctx context.Context, tx *bun.Tx, id string) error
+	// DeleteByUserID removes all instances associated with a user ID
+	DeleteByUser(ctx context.Context, tx *bun.Tx, userID string) error
 
 	// DismissQuickstart marks the user as having dismissed the quickstart
-	DismissQuickstart(ctx context.Context, userID string) error
+	DismissQuickstart(ctx context.Context, instanceID string) error
 }
 
 type instanceRepository struct {
@@ -43,6 +45,9 @@ func (r *instanceRepository) Create(ctx context.Context, instance *models.Instan
 	if instance.ID == "" {
 		instance.ID = uuid.New().String()
 	}
+	if instance.UserID == "" {
+		return fmt.Errorf("UserID is required")
+	}
 	_, err := r.db.NewInsert().Model(instance).Exec(ctx)
 	if err != nil {
 		return err
@@ -54,68 +59,15 @@ func (r *instanceRepository) Update(ctx context.Context, instance *models.Instan
 	if instance.ID == "" {
 		return fmt.Errorf("ID is required")
 	}
-	_, err := r.db.NewUpdate().Model(instance).WherePK().Exec(ctx)
+	res, err := r.db.NewUpdate().Model(instance).WherePK().Exec(ctx)
 	if err != nil {
 		return err
+	}
+	affected, err := res.RowsAffected()
+	if err != nil || affected == 0 {
+		return fmt.Errorf("instance not found")
 	}
 	return nil
-}
-
-// TODO: Ensure all related data is deleted
-func (r *instanceRepository) Delete(ctx context.Context, instanceID string) error {
-	type Tx struct {
-		*sql.Tx
-		db *bun.DB
-	}
-
-	tx, err := r.db.BeginTx(ctx, &sql.TxOptions{})
-	if err != nil {
-		return err
-	}
-
-	// Delete settings
-	_, err = tx.NewDelete().Model(&models.InstanceSettings{}).Where("instance_id = ?", instanceID).Exec(ctx)
-	if err != nil {
-		tx.Rollback()
-		return err
-	}
-
-	// Delete instance
-	_, err = tx.NewDelete().Model(&models.Instance{}).Where("id = ?", instanceID).Exec(ctx)
-	if err != nil {
-		tx.Rollback()
-		return err
-	}
-
-	// Delete teams
-	_, err = tx.NewDelete().Model(&models.Team{}).Where("instance_id = ?", instanceID).Exec(ctx)
-	if err != nil {
-		tx.Rollback()
-		return err
-	}
-
-	// Delete Clues
-	_, err = tx.NewDelete().Model(&models.Clue{}).Where("instance_id = ?", instanceID).Exec(ctx)
-	if err != nil {
-		tx.Rollback()
-		return err
-	}
-
-	// Delete CheckIns
-	_, err = tx.NewDelete().Model(&models.CheckIn{}).Where("instance_id = ?", instanceID).Exec(ctx)
-	if err != nil {
-		tx.Rollback()
-		return err
-	}
-
-	// Delete locations
-	_, err = tx.NewDelete().Model(&models.Location{}).Where("instance_id = ?", instanceID).Exec(ctx)
-	if err != nil {
-		tx.Rollback()
-		return err
-	}
-
-	return tx.Commit()
 }
 
 func (r *instanceRepository) FindByID(ctx context.Context, id string) (*models.Instance, error) {
@@ -142,6 +94,48 @@ func (r *instanceRepository) FindByUserID(ctx context.Context, userID string) ([
 		return nil, err
 	}
 	return instances, nil
+}
+
+func (r *instanceRepository) Delete(ctx context.Context, tx *bun.Tx, id string) error {
+	// Delete instance
+	_, err := tx.NewDelete().Model(&models.Instance{}).Where("id = ?", id).Exec(ctx)
+	if err != nil {
+		return err
+	}
+
+	// Delete Clues
+	_, err = tx.NewDelete().Model(&models.Clue{}).Where("instance_id = ?", id).Exec(ctx)
+	if err != nil {
+		return err
+	}
+
+	// Delete CheckIns
+	_, err = tx.NewDelete().Model(&models.CheckIn{}).Where("instance_id = ?", id).Exec(ctx)
+	if err != nil {
+		return err
+	}
+
+	// Delete locations
+	_, err = tx.NewDelete().Model(&models.Location{}).Where("instance_id = ?", id).Exec(ctx)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// DeleteByUserID removes all instances associated with a user ID
+func (r *instanceRepository) DeleteByUser(ctx context.Context, tx *bun.Tx, userID string) error {
+	instances, err := r.FindByUserID(ctx, userID)
+	if err != nil {
+		return fmt.Errorf("finding instances by user ID: %w", err)
+	}
+	for _, instance := range instances {
+		if err := r.Delete(ctx, tx, instance.ID); err != nil {
+			return fmt.Errorf("deleting instance: %w", err)
+		}
+	}
+	return nil
 }
 
 // DismissQuickstart marks the user as having dismissed the quickstart
