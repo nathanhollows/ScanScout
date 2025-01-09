@@ -2,6 +2,7 @@ package services
 
 import (
 	"context"
+	"database/sql"
 	"errors"
 	"fmt"
 	"net/url"
@@ -11,6 +12,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/nathanhollows/Rapua/db"
 	"github.com/nathanhollows/Rapua/internal/flash"
 	"github.com/nathanhollows/Rapua/models"
 	"github.com/nathanhollows/Rapua/repositories"
@@ -18,6 +20,7 @@ import (
 )
 
 type GameManagerService struct {
+	transactor           db.Transactor
 	locationService      LocationService
 	userService          UserService
 	teamService          TeamService
@@ -28,6 +31,7 @@ type GameManagerService struct {
 }
 
 func NewGameManagerService(
+	transactor db.Transactor,
 	locationService LocationService,
 	userService UserService,
 	teamService TeamService,
@@ -37,6 +41,7 @@ func NewGameManagerService(
 	instanceSettingsRepo repositories.InstanceSettingsRepository,
 ) GameManagerService {
 	return GameManagerService{
+		transactor:           transactor,
 		locationService:      locationService,
 		userService:          userService,
 		teamService:          teamService,
@@ -172,6 +177,7 @@ func (s *GameManagerService) LoadTeams(ctx context.Context, teams *[]models.Team
 
 func (s *GameManagerService) DeleteInstance(ctx context.Context, user *models.User, instanceID, confirmName string) (response ServiceResponse) {
 	response = ServiceResponse{}
+	// Check if the user has permission to delete the instance
 	instance, err := s.instanceRepo.FindByID(ctx, instanceID)
 	if err != nil {
 		response.AddFlashMessage(*flash.NewError("Instance not found"))
@@ -185,12 +191,14 @@ func (s *GameManagerService) DeleteInstance(ctx context.Context, user *models.Us
 		return response
 	}
 
+	// If the name does not match the confirmation, return an error
 	if confirmName != instance.Name {
 		response.AddFlashMessage(*flash.NewError("Instance name does not match confirmation"))
 		response.Error = errors.New("instance name does not match confirmation")
 		return response
 	}
 
+	// Check if the user is currently using this instance
 	if user.CurrentInstanceID == instance.ID {
 		user.CurrentInstanceID = ""
 		err := s.userService.UpdateUser(ctx, user)
@@ -201,10 +209,44 @@ func (s *GameManagerService) DeleteInstance(ctx context.Context, user *models.Us
 		}
 	}
 
-	err = s.instanceRepo.Delete(ctx, instanceID)
+	// Start transaction
+	tx, err := s.transactor.BeginTx(ctx, &sql.TxOptions{})
 	if err != nil {
+		tx.Rollback()
+		response.AddFlashMessage(*flash.NewError("Error starting transaction"))
+		response.Error = fmt.Errorf("starting transaction: %w", err)
+		return response
+	}
+
+	err = s.instanceRepo.Delete(ctx, tx, instanceID)
+	if err != nil {
+		tx.Rollback()
 		response.AddFlashMessage(*flash.NewError("Error deleting instance"))
 		response.Error = fmt.Errorf("deleting instance: %w", err)
+		return response
+	}
+
+	err = s.instanceSettingsRepo.Delete(ctx, tx, instanceID)
+	if err != nil {
+		tx.Rollback()
+		response.AddFlashMessage(*flash.NewError("Error deleting settings"))
+		response.Error = fmt.Errorf("deleting settings: %w", err)
+		return response
+	}
+
+	err = s.teamService.DeleteByInstanceID(ctx, tx, instanceID)
+	if err != nil {
+		tx.Rollback()
+		response.AddFlashMessage(*flash.NewError("Error deleting teams"))
+		response.Error = fmt.Errorf("deleting teams: %w", err)
+		return response
+	}
+
+	err = tx.Commit()
+	if err != nil {
+		tx.Rollback()
+		response.AddFlashMessage(*flash.NewError("Error committing transaction"))
+		response.Error = fmt.Errorf("committing transaction: %w", err)
 		return response
 	}
 
