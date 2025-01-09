@@ -1726,12 +1726,6 @@ html {
   pointer-events: none;
 }
 
-.btn-square {
-  height: 3rem;
-  width: 3rem;
-  padding: 0px;
-}
-
 .btn-circle {
   height: 3rem;
   width: 3rem;
@@ -1940,21 +1934,11 @@ html {
   background-color: var(--fallback-bc,oklch(var(--bc)/0.1));
 }
 
-.divider-start:before {
-  display: none;
-}
-
 .drawer {
   position: relative;
   display: grid;
   grid-auto-columns: max-content auto;
   width: 100%;
-}
-
-.drawer-content {
-  grid-column-start: 2;
-  grid-row-start: 1;
-  min-width: 0px;
 }
 
 .drawer-side {
@@ -5041,18 +5025,6 @@ details.collapse summary::-webkit-details-marker {
   padding: 0px;
 }
 
-.btn-square:where(.btn-md) {
-  height: 3rem;
-  width: 3rem;
-  padding: 0px;
-}
-
-.btn-square:where(.btn-lg) {
-  height: 4rem;
-  width: 4rem;
-  padding: 0px;
-}
-
 .btn-circle:where(.btn-xs) {
   height: 1.5rem;
   width: 1.5rem;
@@ -5827,10 +5799,6 @@ html:has(.drawer-toggle:checked) {
   z-index: 1;
 }
 
-.order-1 {
-  order: 1;
-}
-
 .order-2 {
   order: 2;
 }
@@ -5880,11 +5848,6 @@ html:has(.drawer-toggle:checked) {
 .my-8 {
   margin-top: 2rem;
   margin-bottom: 2rem;
-}
-
-.mx-2 {
-  margin-left: 0.5rem;
-  margin-right: 0.5rem;
 }
 
 .-mb-1 {
@@ -6157,6 +6120,10 @@ html:has(.drawer-toggle:checked) {
   width: 2rem;
 }
 
+.w-80 {
+  width: 20rem;
+}
+
 .w-96 {
   width: 24rem;
 }
@@ -6172,10 +6139,6 @@ html:has(.drawer-toggle:checked) {
 .w-min {
   width: -moz-min-content;
   width: min-content;
-}
-
-.w-80 {
-  width: 20rem;
 }
 
 .min-w-80 {
@@ -6216,10 +6179,6 @@ html:has(.drawer-toggle:checked) {
 
 .flex-1 {
   flex: 1 1 0%;
-}
-
-.flex-none {
-  flex: none;
 }
 
 .flex-shrink-0 {
@@ -6488,10 +6447,6 @@ html:has(.drawer-toggle:checked) {
 
 .overflow-y-auto {
   overflow-y: auto;
-}
-
-.overflow-x-scroll {
-  overflow-x: scroll;
 }
 
 .overflow-y-scroll {
@@ -8738,10 +8693,6 @@ html:has(.drawer-toggle:checked) {
     margin-top: 0px;
   }
 
-  .md\:block {
-    display: block;
-  }
-
   .md\:flex {
     display: flex;
   }
@@ -8758,12 +8709,12 @@ html:has(.drawer-toggle:checked) {
     width: 41.666667%;
   }
 
-  .md\:w-full {
-    width: 100%;
-  }
-
   .md\:w-72 {
     width: 18rem;
+  }
+
+  .md\:w-full {
+    width: 100%;
   }
 
   .md\:grid-cols-3 {
