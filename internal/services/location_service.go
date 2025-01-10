@@ -2,8 +2,10 @@ package services
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 
+	"github.com/nathanhollows/Rapua/db"
 	"github.com/nathanhollows/Rapua/models"
 	"github.com/nathanhollows/Rapua/repositories"
 )
@@ -30,6 +32,7 @@ type LocationService interface {
 }
 
 type locationService struct {
+	transactor   db.Transactor
 	locationRepo repositories.LocationRepository
 	clueRepo     repositories.ClueRepository
 	markerRepo   repositories.MarkerRepository
@@ -38,12 +41,14 @@ type locationService struct {
 
 // NewLocationService creates a new instance of LocationService
 func NewLocationService(
+	transactor db.Transactor,
 	clueRepo repositories.ClueRepository,
 	locationRepo repositories.LocationRepository,
 	markerRepo repositories.MarkerRepository,
 	blockRepo repositories.BlockRepository,
 ) LocationService {
 	return locationService{
+		transactor:   transactor,
 		clueRepo:     clueRepo,
 		locationRepo: locationRepo,
 		markerRepo:   markerRepo,
@@ -278,42 +283,60 @@ func (s locationService) DuplicateLocation(ctx context.Context, location *models
 // It also deletes all related clues, blocks, and scans
 // If the marker is not used by any other locations, it is also deleted
 func (s locationService) DeleteLocation(ctx context.Context, locationID string) error {
+	tx, err := s.transactor.BeginTx(ctx, &sql.TxOptions{})
+	if err != nil {
+		return fmt.Errorf("beginning transaction: %v", err)
+	}
+
+	defer func() {
+		if p := recover(); p != nil {
+			tx.Rollback()
+			panic(p)
+		}
+	}()
+
 	location, err := s.locationRepo.Find(ctx, locationID)
 	if err != nil {
+		tx.Rollback()
 		return fmt.Errorf("finding location: %v", err)
 	}
 
 	// Delete all related clues
 	err = s.clueRepo.DeleteByLocationID(ctx, locationID)
 	if err != nil {
+		tx.Rollback()
 		return fmt.Errorf("deleting clues: %v", err)
 	}
 
 	// Delete all related blocks
-	err = s.blockRepo.DeleteByLocationID(ctx, locationID)
+	err = s.blockRepo.DeleteByLocationID(ctx, tx, locationID)
 	if err != nil {
+		tx.Rollback()
 		return fmt.Errorf("deleting blocks: %v", err)
 	}
 
 	// Delete the location
-	err = s.locationRepo.Delete(ctx, locationID)
+	err = s.locationRepo.Delete(ctx, tx, locationID)
 	if err != nil {
+		tx.Rollback()
 		return fmt.Errorf("deleting location: %v", err)
 	}
 
 	// Delete the marker if it is not used by any other locations
 	locations, err := s.locationRepo.FindLocationsByMarkerID(ctx, location.MarkerID)
 	if err != nil {
+		tx.Rollback()
 		return fmt.Errorf("finding locations by marker: %v", err)
 	}
 	if len(locations) == 0 {
 		err = s.markerRepo.Delete(ctx, location.MarkerID)
 		if err != nil {
+			tx.Rollback()
 			return fmt.Errorf("deleting marker: %v", err)
 		}
 	}
 
-	return nil
+	return tx.Commit()
 }
 
 // ReorderLocations reorders locations

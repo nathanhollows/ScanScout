@@ -25,7 +25,11 @@ type LocationRepository interface {
 	FindLocationsByMarkerID(ctx context.Context, markerID string) ([]models.Location, error)
 
 	// Delete deletes a location from the database
-	Delete(ctx context.Context, locationID string) error
+	// Requires a transaction as related data will also need to be deleted
+	Delete(ctx context.Context, tx *bun.Tx, locationID string) error
+	// DeleteByInstance deletes all locations for an instance
+	// Requires a transaction as related data will also need to be deleted
+	DeleteByInstance(ctx context.Context, tx *bun.Tx, instanceID string) error
 
 	// LoadRelations loads all relations for a location
 	LoadRelations(ctx context.Context, location *models.Location) error
@@ -48,6 +52,23 @@ func NewLocationRepository(db *bun.DB) LocationRepository {
 	return &locationRepository{
 		db: db,
 	}
+}
+
+// Create saves or updates a location
+func (r *locationRepository) Create(ctx context.Context, location *models.Location) error {
+	var err error
+	if location.ID == "" {
+		location.ID = uuid.New().String()
+		_, err = r.db.NewInsert().Model(location).Exec(ctx)
+		return err
+	}
+	return r.Update(ctx, location)
+}
+
+// Update updates a location in the database
+func (r *locationRepository) Update(ctx context.Context, location *models.Location) error {
+	_, err := r.db.NewUpdate().Model(location).WherePK().Exec(ctx)
+	return err
 }
 
 // Find finds a location by ID
@@ -100,28 +121,23 @@ func (r *locationRepository) FindLocationsByMarkerID(ctx context.Context, marker
 	return locations, nil
 }
 
-// Update updates a location in the database
-func (r *locationRepository) Update(ctx context.Context, location *models.Location) error {
-	_, err := r.db.NewUpdate().Model(location).WherePK().Exec(ctx)
+// Delete deletes a location from the database
+func (r *locationRepository) Delete(ctx context.Context, tx *bun.Tx, locationID string) error {
+	_, err := tx.NewDelete().Model(&models.Location{ID: locationID}).WherePK().Exec(ctx)
 	return err
 }
 
-// Create saves or updates a location
-func (r *locationRepository) Create(ctx context.Context, location *models.Location) error {
-	var err error
-	if location.ID == "" {
-		location.ID = uuid.New().String()
-		_, err = r.db.NewInsert().Model(location).Exec(ctx)
-		return err
-	}
-	return r.Update(ctx, location)
+// DeleteByInstance deletes all locations for an instance
+func (r *locationRepository) DeleteByInstance(ctx context.Context, tx *bun.Tx, instanceID string) error {
+	_, err := tx.NewDelete().Model(&models.Location{}).Where("instance_id = ?", instanceID).Exec(ctx)
+	return err
 }
 
-// Delete deletes a location from the database
-func (r *locationRepository) Delete(ctx context.Context, locationID string) error {
-	_, err := r.db.NewDelete().Model(&models.Location{ID: locationID}).WherePK().Exec(ctx)
+// DeleteByInstanceWithTransaction deletes all locations for an instance with a transaction
+func (r *locationRepository) DeleteByInstanceWithTransaction(ctx context.Context, tx *bun.Tx, instanceID string) error {
+	_, err := tx.NewDelete().Model(&models.Location{}).Where("instance_id = ?", instanceID).Exec(ctx)
 	if err != nil {
-		return fmt.Errorf("deleting location: %w", err)
+		return fmt.Errorf("deleting locations by instance ID: %w", err)
 	}
 	return nil
 }
