@@ -12,7 +12,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func setupBlocksService(t *testing.T) (services.BlockService, db.Transactor, func()) {
+func setupBlocksService(t *testing.T) (services.BlockService, func()) {
 	dbc, cleanup := setupDB(t)
 
 	transactor := db.NewTransactor(dbc)
@@ -22,7 +22,7 @@ func setupBlocksService(t *testing.T) (services.BlockService, db.Transactor, fun
 
 	blocksService := services.NewBlockService(transactor, blocksRepo, blockStateRepo)
 
-	return blocksService, transactor, func() { cleanup() }
+	return blocksService, cleanup
 }
 
 func TestBlockService_NewBlock(t *testing.T) {
@@ -52,8 +52,8 @@ func TestBlockService_NewBlock(t *testing.T) {
 		},
 	}
 
-	svc, _, teardown := setupBlocksService(t)
-	defer teardown()
+	svc, cleanup := setupBlocksService(t)
+	defer cleanup()
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 
@@ -97,8 +97,8 @@ func TestBlockService_NewBlockState(t *testing.T) {
 		},
 	}
 
-	svc, _, teardown := setupBlocksService(t)
-	defer teardown()
+	svc, cleanup := setupBlocksService(t)
+	defer cleanup()
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 
@@ -142,8 +142,8 @@ func TestBlockService_NewMockBlockState(t *testing.T) {
 		},
 	}
 
-	svc, _, teardown := setupBlocksService(t)
-	defer teardown()
+	svc, cleanup := setupBlocksService(t)
+	defer cleanup()
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 
@@ -191,8 +191,8 @@ func TestBlockService_GetByBlockID(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			svc, _, teardown := setupBlocksService(t)
-			defer teardown()
+			svc, cleanup := setupBlocksService(t)
+			defer cleanup()
 
 			blockID, err := tc.setupFn(svc)
 			assert.NoError(t, err, "setupFn should not fail")
@@ -248,8 +248,8 @@ func TestBlockService_GetBlockWithStateByBlockIDAndTeamCode(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			svc, _, teardown := setupBlocksService(t)
-			defer teardown()
+			svc, cleanup := setupBlocksService(t)
+			defer cleanup()
 
 			blockID, teamCode, err := tc.setupFn(svc)
 			assert.NoError(t, err, "setup should succeed")
@@ -295,8 +295,8 @@ func TestBlockService_FindByLocationID(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			svc, _, teardown := setupBlocksService(t)
-			defer teardown()
+			svc, cleanup := setupBlocksService(t)
+			defer cleanup()
 
 			// Setup: create tc.blockCount blocks (if locationID is not empty)
 			for i := 0; i < tc.blockCount; i++ {
@@ -343,8 +343,8 @@ func TestBlockService_FindByLocationIDAndTeamCodeWithState(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			svc, _, teardown := setupBlocksService(t)
-			defer teardown()
+			svc, cleanup := setupBlocksService(t)
+			defer cleanup()
 
 			if tc.locationID != "" {
 				// Create blocks
@@ -407,8 +407,8 @@ func TestBlockService_UpdateState(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			svc, _, teardown := setupBlocksService(t)
-			defer teardown()
+			svc, cleanup := setupBlocksService(t)
+			defer cleanup()
 
 			initialState, err := tc.setupFn(svc)
 			assert.NoError(t, err, "setup should not fail")
@@ -450,8 +450,8 @@ func TestBlockService_ReorderBlocks(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			svc, _, teardown := setupBlocksService(t)
-			defer teardown()
+			svc, cleanup := setupBlocksService(t)
+			defer cleanup()
 
 			// Create blocks
 			var ids []string
@@ -507,8 +507,8 @@ func TestBlockService_DeleteBlock(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			svc, _, teardown := setupBlocksService(t)
-			defer teardown()
+			svc, cleanup := setupBlocksService(t)
+			defer cleanup()
 
 			blockID, err := tc.setupFn(svc)
 			assert.NoError(t, err, "setup should not fail")
@@ -565,8 +565,8 @@ func TestBlockService_CheckValidationRequiredForLocation(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			svc, _, teardown := setupBlocksService(t)
-			defer teardown()
+			svc, cleanup := setupBlocksService(t)
+			defer cleanup()
 
 			err := tc.setupFn(svc, tc.locationID)
 			assert.NoError(t, err, "setup should not fail")
@@ -629,8 +629,8 @@ func TestBlockService_CheckValidationRequiredForCheckIn(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			svc, _, teardown := setupBlocksService(t)
-			defer teardown()
+			svc, cleanup := setupBlocksService(t)
+			defer cleanup()
 
 			err := tc.setupFn(svc, tc.locationID, tc.teamCode)
 			assert.NoError(t, err, "setup should not fail")
