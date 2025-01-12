@@ -2,43 +2,55 @@ package services
 
 import (
 	"context"
+	"database/sql"
 	"errors"
+	"fmt"
 	"time"
 
+	"github.com/nathanhollows/Rapua/db"
 	"github.com/nathanhollows/Rapua/helpers"
 	"github.com/nathanhollows/Rapua/models"
 	"github.com/nathanhollows/Rapua/repositories"
+	"github.com/uptrace/bun"
 )
 
 type TeamService interface {
-	// Update updates a team in the database
-	Update(ctx context.Context, team *models.Team) error
-	// Delete removes a team from the database
-	Delete(ctx context.Context, instanceID string, teamCode string) error
 	// AddTeams adds teams to the database
 	AddTeams(ctx context.Context, instanceID string, count int) ([]models.Team, error)
-	// AwardPoints awards points to a team
-	AwardPoints(ctx context.Context, team *models.Team, points int, reason string) error
-	// LoadRelation loads relations for a team
-	LoadRelation(ctx context.Context, team *models.Team, relation string) error
-	// LoadRelations loads all relations for a team
-	LoadRelations(ctx context.Context, team *models.Team) error
+
 	// FindTeamByCode returns a team by code
 	FindTeamByCode(ctx context.Context, code string) (*models.Team, error)
 	// GetTeamActivityOverview returns a list of teams and their activity
 	GetTeamActivityOverview(ctx context.Context, instanceID string, locations []models.Location) ([]TeamActivity, error)
+
+	// Update updates a team in the database
+	Update(ctx context.Context, team *models.Team) error
+	// AwardPoints awards points to a team
+	AwardPoints(ctx context.Context, team *models.Team, points int, reason string) error
+
+	// Delete removes a team from the database
+	Delete(ctx context.Context, instanceID string, teamCode string) error
+	// DeleteByInstanceID removes all teams for a specific instance
+	DeleteByInstanceID(ctx context.Context, tx *bun.Tx, instanceID string) error
+
+	// LoadRelation loads relations for a team
+	LoadRelation(ctx context.Context, team *models.Team, relation string) error
+	// LoadRelations loads all relations for a team
+	LoadRelations(ctx context.Context, team *models.Team) error
 }
 
 type teamService struct {
-	teamRepo  repositories.TeamRepository
-	batchSize int
+	transactor db.Transactor
+	teamRepo   repositories.TeamRepository
+	batchSize  int
 }
 
 // NewTeamService creates a new TeamService
-func NewTeamService(tr repositories.TeamRepository) TeamService {
+func NewTeamService(transactor db.Transactor, tr repositories.TeamRepository) TeamService {
 	return &teamService{
-		teamRepo:  tr,
-		batchSize: 100,
+		transactor: transactor,
+		teamRepo:   tr,
+		batchSize:  100,
 	}
 }
 
@@ -56,14 +68,14 @@ type LocationActivity struct {
 	TimeOut  time.Time
 }
 
-// Update updates a team in the database
-func (s *teamService) Update(ctx context.Context, team *models.Team) error {
-	return s.teamRepo.Update(ctx, team)
-}
-
-// Delete removes a team from the database
-func (s *teamService) Delete(ctx context.Context, instanceID string, teamCode string) error {
-	return s.teamRepo.Delete(ctx, instanceID, teamCode)
+// Helper function to check for code uniqueness within a batch
+func (s *teamService) containsCode(teams []models.Team, code string) bool {
+	for _, team := range teams {
+		if team.Code == code {
+			return true
+		}
+	}
+	return false
 }
 
 // AddTeams generates and inserts teams in batches, retrying if unique constraint errors occur
@@ -84,7 +96,7 @@ func (s *teamService) AddTeams(ctx context.Context, instanceID string, count int
 				}
 
 				// Ensure code uniqueness within the current batch
-				if !containsCode(teams, code) {
+				if !s.containsCode(teams, code) {
 					teams = append(teams, team)
 					break
 				}
@@ -104,53 +116,6 @@ func (s *teamService) AddTeams(ctx context.Context, instanceID string, count int
 	}
 
 	return newTeams, nil
-}
-
-// Helper function to check for code uniqueness within a batch
-func containsCode(teams []models.Team, code string) bool {
-	for _, team := range teams {
-		if team.Code == code {
-			return true
-		}
-	}
-	return false
-}
-
-func min(a, b int) int {
-	if a < b {
-		return a
-	}
-	return b
-}
-
-// AwardPoints awards points to a team
-func (s *teamService) AwardPoints(ctx context.Context, team *models.Team, points int, _ string) error {
-	team.Points += points
-	return s.teamRepo.Update(ctx, team)
-}
-
-// LoadRelation loads the specified relation for a team
-func (s *teamService) LoadRelation(ctx context.Context, team *models.Team, relation string) error {
-	switch relation {
-	case "Instance":
-		return s.teamRepo.LoadInstance(ctx, team)
-	case "Scans":
-		return s.teamRepo.LoadCheckIns(ctx, team)
-	case "BlockingLocation":
-		return s.teamRepo.LoadBlockingLocation(ctx, team)
-	default:
-		return errors.New("unknown relation")
-	}
-}
-
-// LoadRelations loads all relations for a team
-func (s *teamService) LoadRelations(ctx context.Context, team *models.Team) error {
-	err := s.teamRepo.LoadRelations(ctx, team)
-	if err != nil {
-		return err
-	}
-
-	return nil
 }
 
 // FindTeamByCode returns a team by code
@@ -210,4 +175,73 @@ func (s *teamService) GetTeamActivityOverview(ctx context.Context, instanceID st
 	}
 
 	return activity, nil
+}
+
+// Update updates a team in the database
+func (s *teamService) Update(ctx context.Context, team *models.Team) error {
+	return s.teamRepo.Update(ctx, team)
+}
+
+// AwardPoints awards points to a team
+func (s *teamService) AwardPoints(ctx context.Context, team *models.Team, points int, _ string) error {
+	team.Points += points
+	return s.teamRepo.Update(ctx, team)
+}
+
+// Delete removes a team from the database
+func (s *teamService) Delete(ctx context.Context, instanceID string, teamCode string) error {
+	tx, err := s.transactor.BeginTx(ctx, &sql.TxOptions{})
+	if err != nil {
+		tx.Rollback()
+		return fmt.Errorf("starting transaction: %w", err)
+	}
+
+	defer func() {
+		if p := recover(); p != nil {
+			tx.Rollback()
+			panic(p)
+		}
+	}()
+
+	err = s.teamRepo.Delete(ctx, tx, instanceID, teamCode)
+	if err != nil {
+		tx.Rollback()
+		return fmt.Errorf("deleting team: %w", err)
+	}
+
+	return tx.Commit()
+}
+
+// DeleteByInstanceID removes all teams for a specific instance
+func (s *teamService) DeleteByInstanceID(ctx context.Context, tx *bun.Tx, instanceID string) error {
+	err := s.teamRepo.DeleteByInstanceID(ctx, tx, instanceID)
+	if err != nil {
+		return fmt.Errorf("deleting teams by instance ID: %w", err)
+	}
+
+	return nil
+}
+
+// LoadRelation loads the specified relation for a team
+func (s *teamService) LoadRelation(ctx context.Context, team *models.Team, relation string) error {
+	switch relation {
+	case "Instance":
+		return s.teamRepo.LoadInstance(ctx, team)
+	case "Scans":
+		return s.teamRepo.LoadCheckIns(ctx, team)
+	case "BlockingLocation":
+		return s.teamRepo.LoadBlockingLocation(ctx, team)
+	default:
+		return errors.New("unknown relation")
+	}
+}
+
+// LoadRelations loads all relations for a team
+func (s *teamService) LoadRelations(ctx context.Context, team *models.Team) error {
+	err := s.teamRepo.LoadRelations(ctx, team)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
