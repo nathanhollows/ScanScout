@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/brianvoe/gofakeit/v7"
+	"github.com/nathanhollows/Rapua/db"
 	"github.com/nathanhollows/Rapua/internal/services"
 	"github.com/nathanhollows/Rapua/models"
 	"github.com/nathanhollows/Rapua/repositories"
@@ -13,10 +14,13 @@ import (
 
 func setupUserService(t *testing.T) (services.UserService, func()) {
 	t.Helper()
-	db, cleanup := setupDB(t)
+	dbc, cleanup := setupDB(t)
 
-	userRepo := repositories.NewUserRepository(db)
-	userService := services.NewUserService(userRepo)
+	transactor := db.NewTransactor(dbc)
+
+	instanceRepo := repositories.NewInstanceRepository(dbc)
+	userRepo := repositories.NewUserRepository(dbc)
+	userService := services.NewUserService(transactor, userRepo, instanceRepo)
 	return userService, cleanup
 }
 
@@ -122,7 +126,7 @@ func TestDeleteUser(t *testing.T) {
 	err := service.CreateUser(context.Background(), user, password)
 	assert.NoError(t, err)
 
-	err = service.DeleteUser(context.Background(), user)
+	err = service.DeleteUser(context.Background(), user.ID)
 	assert.NoError(t, err)
 
 	_, err = service.GetUserByEmail(context.Background(), email)
