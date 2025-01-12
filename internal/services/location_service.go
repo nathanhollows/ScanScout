@@ -100,7 +100,7 @@ func (s locationService) CreateLocation(ctx context.Context, instanceID, name st
 
 // CreateLocationFromMarker creates a new location from an existing marker
 func (s locationService) CreateLocationFromMarker(ctx context.Context, instanceID, name string, points int, markerCode string) (models.Location, error) {
-	marker, err := s.markerRepo.FindByCode(ctx, markerCode)
+	marker, err := s.markerRepo.GetByCode(ctx, markerCode)
 	if err != nil {
 		return models.Location{}, fmt.Errorf("finding marker: %v", err)
 	}

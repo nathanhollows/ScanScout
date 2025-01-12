@@ -17,14 +17,14 @@ type UserRepository interface {
 	// Create creates a new user in the database
 	Create(ctx context.Context, user *models.User) error
 
-	// FindUserByEmail retrieves a user by their email address
-	FindUserByEmail(ctx context.Context, email string) (*models.User, error)
-	// FindUserByEmailToken retrieves a user by their email token
-	FindUserByEmailToken(ctx context.Context, token string) (*models.User, error)
-	// FindUserByID fetches a user by their ID from the database.
-	FindUserByID(ctx context.Context, userID string) (*models.User, error)
-	// FindUserByEmailAndProvider retrieves a user by their email address and provider
-	FindUserByEmailAndProvider(ctx context.Context, email, provider string) (*models.User, error)
+	// GetByEmail retrieves a user by their email address
+	GetByEmail(ctx context.Context, email string) (*models.User, error)
+	// GetByEmailToken retrieves a user by their email token
+	GetByEmailToken(ctx context.Context, token string) (*models.User, error)
+	// GetByID fetches a user by their ID from the database.
+	GetByID(ctx context.Context, userID string) (*models.User, error)
+	// GetByEmailAndProvider retrieves a user by their email address and provider
+	GetByEmailAndProvider(ctx context.Context, email, provider string) (*models.User, error)
 
 	// Update updates a user in the database
 	Update(ctx context.Context, user *models.User) error
@@ -69,8 +69,8 @@ func (r *userRepository) Create(ctx context.Context, user *models.User) error {
 	return err
 }
 
-// FindUserByEmail retrieves a user by their email address
-func (r *userRepository) FindUserByEmail(ctx context.Context, email string) (*models.User, error) {
+// GetByEmail retrieves a user by their email address
+func (r *userRepository) GetByEmail(ctx context.Context, email string) (*models.User, error) {
 	user := &models.User{}
 	err := r.db.NewSelect().
 		Model(user).
@@ -81,8 +81,8 @@ func (r *userRepository) FindUserByEmail(ctx context.Context, email string) (*mo
 	return user, err
 }
 
-// FindUserByEmailToken retrieves a user by their email token
-func (r *userRepository) FindUserByEmailToken(ctx context.Context, token string) (*models.User, error) {
+// GetByEmailToken retrieves a user by their email token
+func (r *userRepository) GetByEmailToken(ctx context.Context, token string) (*models.User, error) {
 	user := &models.User{}
 	err := r.db.NewSelect().
 		Model(user).
@@ -91,8 +91,8 @@ func (r *userRepository) FindUserByEmailToken(ctx context.Context, token string)
 	return user, err
 }
 
-// FindUserByID fetches a user by their ID from the database.
-func (r *userRepository) FindUserByID(ctx context.Context, userID string) (*models.User, error) {
+// GetByID fetches a user by their ID from the database.
+func (r *userRepository) GetByID(ctx context.Context, userID string) (*models.User, error) {
 	var user models.User
 	err := r.db.NewSelect().
 		Model(&user).
@@ -113,8 +113,8 @@ func (r *userRepository) FindUserByID(ctx context.Context, userID string) (*mode
 	return &user, nil
 }
 
-// FindUserByEmailAndProvider retrieves a user by their email address and provider
-func (r *userRepository) FindUserByEmailAndProvider(ctx context.Context, email, provider string) (*models.User, error) {
+// GetByEmailAndProvider retrieves a user by their email address and provider
+func (r *userRepository) GetByEmailAndProvider(ctx context.Context, email, provider string) (*models.User, error) {
 	user := &models.User{}
 	err := r.db.NewSelect().
 		Model(user).

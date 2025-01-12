@@ -55,7 +55,7 @@ func TestUserRepository_GetUserByEmail(t *testing.T) {
 	assert.NoError(t, err)
 
 	// Test GetUserByEmail
-	fetchedUser, err := repo.FindUserByEmail(ctx, user.Email)
+	fetchedUser, err := repo.GetByEmail(ctx, user.Email)
 	assert.NoError(t, err)
 	assert.Equal(t, user.Email, fetchedUser.Email)
 	assert.Equal(t, user.Name, fetchedUser.Name)
@@ -83,7 +83,7 @@ func TestUserRepository_Update(t *testing.T) {
 	assert.NoError(t, err)
 
 	// Verify update
-	fetchedUser, err := repo.FindUserByEmail(ctx, user.Email)
+	fetchedUser, err := repo.GetByEmail(ctx, user.Email)
 	assert.NoError(t, err)
 	assert.Equal(t, newName, fetchedUser.Name)
 }
@@ -104,7 +104,7 @@ func TestUserRepository_FindUserByID(t *testing.T) {
 	assert.NoError(t, err)
 
 	// Test FindUserByID
-	fetchedUser, err := repo.FindUserByID(ctx, user.ID)
+	fetchedUser, err := repo.GetByID(ctx, user.ID)
 	assert.NoError(t, err)
 	assert.Equal(t, user.ID, fetchedUser.ID)
 	assert.Equal(t, user.Email, fetchedUser.Email)
@@ -126,7 +126,7 @@ func TestUserRepository_GetUserByEmailAndProvider(t *testing.T) {
 	assert.NoError(t, err)
 
 	// Test GetUserByEmailAndProvider
-	fetchedUser, err := repo.FindUserByEmailAndProvider(ctx, user.Email, "local")
+	fetchedUser, err := repo.GetByEmailAndProvider(ctx, user.Email, "local")
 	assert.NoError(t, err)
 	assert.Equal(t, user.Email, fetchedUser.Email)
 	assert.Equal(t, user.Provider, fetchedUser.Provider)
@@ -159,7 +159,7 @@ func TestUserRepository_Delete(t *testing.T) {
 	}
 
 	// Verify user is deleted
-	fetchedUser, err := repo.FindUserByEmail(ctx, user.Email)
+	fetchedUser, err := repo.GetByEmail(ctx, user.Email)
 	assert.Error(t, err)
 	assert.Empty(t, fetchedUser)
 }

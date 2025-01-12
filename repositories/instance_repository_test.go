@@ -106,7 +106,7 @@ func TestInstanceRepository_FindByID(t *testing.T) {
 			}
 			tc.setupFn(ctx, t, inst, t)
 
-			found, err := repo.FindByID(ctx, inst.ID)
+			found, err := repo.GetByID(ctx, inst.ID)
 			if tc.wantErr {
 				assert.Error(t, err)
 				assert.Nil(t, found)
@@ -224,7 +224,7 @@ func TestInstanceRepository_Update(t *testing.T) {
 			} else {
 				assert.NoError(t, err)
 				// Check that it's updated
-				updated, err := repo.FindByID(ctx, inst.ID)
+				updated, err := repo.GetByID(ctx, inst.ID)
 				assert.NoError(t, err)
 				assert.Equal(t, tc.updateName, updated.Name)
 			}
@@ -298,7 +298,7 @@ func TestInstanceRepository_Delete(t *testing.T) {
 				assert.NoError(t, err)
 
 				// Double-check that the instance no longer exists
-				found, findErr := repo.FindByID(ctx, inst.ID)
+				found, findErr := repo.GetByID(ctx, inst.ID)
 				assert.Error(t, findErr)
 				assert.Nil(t, found)
 			}

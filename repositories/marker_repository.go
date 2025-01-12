@@ -13,8 +13,8 @@ type MarkerRepository interface {
 	// Create a new marker in the database
 	Create(ctx context.Context, marker *models.Marker) error
 
-	// FindByCode finds a marker by its code
-	FindByCode(ctx context.Context, code string) (*models.Marker, error)
+	// GetByCode finds a marker by its code
+	GetByCode(ctx context.Context, code string) (*models.Marker, error)
 	// FindNotInInstance finds markers that are not in an instance
 	FindNotInInstance(ctx context.Context, instanceID string, otherInstances []string) ([]models.Marker, error)
 
@@ -72,8 +72,8 @@ func (r *markerRepository) Delete(ctx context.Context, markerCode string) error 
 	return err
 }
 
-// FindByCode finds a marker by its code
-func (r *markerRepository) FindByCode(ctx context.Context, code string) (*models.Marker, error) {
+// GetByCode finds a marker by its code
+func (r *markerRepository) GetByCode(ctx context.Context, code string) (*models.Marker, error) {
 	code = strings.ToUpper(strings.TrimSpace(code))
 	var marker models.Marker
 	err := r.db.NewSelect().Model(&marker).Where("code = ?", code).Scan(ctx)

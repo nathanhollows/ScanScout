@@ -13,8 +13,8 @@ type InstanceRepository interface {
 	// Create saves an instance to the database
 	Create(ctx context.Context, instance *models.Instance) error
 
-	// FindByID finds an instance by ID
-	FindByID(ctx context.Context, id string) (*models.Instance, error)
+	// GetByID finds an instance by ID
+	GetByID(ctx context.Context, id string) (*models.Instance, error)
 	// FindByUserID finds all instances associated with a user ID
 	FindByUserID(ctx context.Context, userID string) ([]models.Instance, error)
 
@@ -70,7 +70,7 @@ func (r *instanceRepository) Update(ctx context.Context, instance *models.Instan
 	return nil
 }
 
-func (r *instanceRepository) FindByID(ctx context.Context, id string) (*models.Instance, error) {
+func (r *instanceRepository) GetByID(ctx context.Context, id string) (*models.Instance, error) {
 	instance := &models.Instance{}
 	err := r.db.NewSelect().
 		Model(instance).

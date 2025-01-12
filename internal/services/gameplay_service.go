@@ -98,7 +98,7 @@ func (s *gameplayService) GetMarkerByCode(ctx context.Context, locationCode stri
 	response.Data = make(map[string]interface{})
 
 	locationCode = strings.TrimSpace(strings.ToUpper(locationCode))
-	marker, err := s.MarkerRepository.FindByCode(ctx, locationCode)
+	marker, err := s.MarkerRepository.GetByCode(ctx, locationCode)
 	if err != nil {
 		response.Error = fmt.Errorf("GetLocationByCode finding marker: %w", err)
 		return response

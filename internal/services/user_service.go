@@ -72,7 +72,7 @@ func (s *userService) UpdateUser(ctx context.Context, user *models.User) error {
 
 // GetUserByEmail retrieves a user by their email address
 func (s *userService) GetUserByEmail(ctx context.Context, email string) (*models.User, error) {
-	return s.userRepository.FindUserByEmail(ctx, email)
+	return s.userRepository.GetByEmail(ctx, email)
 }
 
 // DeleteUser deletes a user from the database

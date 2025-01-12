@@ -56,7 +56,7 @@ func (s *authService) AuthenticateUser(ctx context.Context, email, password stri
 		return nil, errors.New("email and password are required")
 	}
 
-	user, err := s.userRepository.FindUserByEmail(ctx, email)
+	user, err := s.userRepository.GetByEmail(ctx, email)
 	if err != nil {
 		return nil, fmt.Errorf("error getting user by email: %w", err)
 	}
@@ -80,7 +80,7 @@ func (s *authService) GetAuthenticatedUser(r *http.Request) (*models.User, error
 		return nil, errors.New("user not authenticated")
 	}
 
-	user, err := s.userRepository.FindUserByID(r.Context(), userID)
+	user, err := s.userRepository.GetByID(r.Context(), userID)
 	if err != nil {
 		return nil, err
 	}
@@ -96,7 +96,7 @@ func (s *authService) AllowGoogleLogin() bool {
 
 // OAuthLogin handles User Login via OAuth
 func (s *authService) OAuthLogin(ctx context.Context, provider string, oauthUser goth.User) (*models.User, error) {
-	existingUser, err := s.userRepository.FindUserByEmail(ctx, oauthUser.Email)
+	existingUser, err := s.userRepository.GetByEmail(ctx, oauthUser.Email)
 	if err != nil {
 		// User doesn't exist, create a new one
 		newUser, err := s.CreateUserWithOAuth(ctx, oauthUser)
@@ -111,7 +111,7 @@ func (s *authService) OAuthLogin(ctx context.Context, provider string, oauthUser
 
 // CheckUserRegisteredWithOAuth looks for user already registered with OAuth
 func (s *authService) CheckUserRegisteredWithOAuth(ctx context.Context, provider, email string) (*models.User, error) {
-	user, err := s.userRepository.FindUserByEmailAndProvider(ctx, email, provider)
+	user, err := s.userRepository.GetByEmailAndProvider(ctx, email, provider)
 	if err != nil {
 		return nil, fmt.Errorf("getting user by email and provider: %w", err)
 	}
@@ -155,7 +155,7 @@ func (s *authService) CompleteUserAuth(w http.ResponseWriter, r *http.Request) (
 
 // VerifyEmail verifies the user's email address
 func (s *authService) VerifyEmail(ctx context.Context, token string) error {
-	user, err := s.userRepository.FindUserByEmailToken(ctx, token)
+	user, err := s.userRepository.GetByEmailToken(ctx, token)
 	if err != nil {
 		return ErrInvalidToken
 	}

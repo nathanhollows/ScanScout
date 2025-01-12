@@ -37,7 +37,7 @@ func TestTeamRepository_InsertTeam(t *testing.T) {
 	err := repo.InsertBatch(ctx, []models.Team{*sampleTeam})
 	assert.NoError(t, err, "expected no error when saving team")
 
-	team, err := repo.FindTeamByCode(ctx, sampleTeam.Code)
+	team, err := repo.GetByCode(ctx, sampleTeam.Code)
 	assert.NoError(t, err, "expected no error when finding team")
 	assert.NotEmpty(t, team.ID, "expected team to have an ID")
 
@@ -81,7 +81,7 @@ func TestTeamRepository_InsertAndUpdate(t *testing.T) {
 	assert.NoError(t, err, "expected no error when saving team")
 
 	// Check that the team was saved
-	team, err := repo.FindTeamByCode(ctx, sampleTeam.Code)
+	team, err := repo.GetByCode(ctx, sampleTeam.Code)
 	assert.NoError(t, err, "expected no error when finding team")
 
 	// Update the team
@@ -241,7 +241,7 @@ func TestTeamRepository_InsertBatch(t *testing.T) {
 
 	// Check that the teams were saved
 	for _, team := range sampleTeams {
-		_, err = repo.FindTeamByCode(ctx, team.Code)
+		_, err = repo.GetByCode(ctx, team.Code)
 		assert.NoError(t, err, "expected no error when finding team")
 	}
 

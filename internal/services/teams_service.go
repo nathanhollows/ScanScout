@@ -120,7 +120,7 @@ func (s *teamService) AddTeams(ctx context.Context, instanceID string, count int
 
 // FindTeamByCode returns a team by code
 func (s *teamService) FindTeamByCode(ctx context.Context, code string) (*models.Team, error) {
-	return s.teamRepo.FindTeamByCode(ctx, code)
+	return s.teamRepo.GetByCode(ctx, code)
 }
 
 // GetTeamActivityOverview returns a list of teams and their activity

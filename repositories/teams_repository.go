@@ -15,12 +15,12 @@ type TeamRepository interface {
 	// InsertBatch adds multiple teams to the database
 	InsertBatch(ctx context.Context, teams []models.Team) error
 
+	// GetByCode returns a team by its code
+	GetByCode(ctx context.Context, code string) (*models.Team, error)
 	// FindAll returns all teams for an instance
 	FindAll(ctx context.Context, instanceID string) ([]models.Team, error)
 	// FindAllWithScans returns all teams for an instance with scans
 	FindAllWithScans(ctx context.Context, instanceID string) ([]models.Team, error)
-	// FindTeamByCode returns a team by its code
-	FindTeamByCode(ctx context.Context, code string) (*models.Team, error)
 
 	// Update saves or updates a team in the database
 	Update(ctx context.Context, t *models.Team) error
@@ -102,8 +102,8 @@ func (r *teamRepository) FindAllWithScans(ctx context.Context, instanceID string
 	return teams, nil
 }
 
-// FindTeamByCode returns a team by code
-func (r *teamRepository) FindTeamByCode(ctx context.Context, code string) (*models.Team, error) {
+// GetByCode returns a team by code
+func (r *teamRepository) GetByCode(ctx context.Context, code string) (*models.Team, error) {
 	code = strings.ToUpper(code)
 	var team models.Team
 	err := r.db.NewSelect().Model(&team).Where("team.code = ?", code).

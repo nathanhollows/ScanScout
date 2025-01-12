@@ -94,7 +94,7 @@ func (s *GameManagerService) CreateInstance(ctx context.Context, name string, us
 }
 
 func (s *GameManagerService) SwitchInstance(ctx context.Context, user *models.User, instanceID string) (*models.Instance, error) {
-	instance, err := s.instanceRepo.FindByID(ctx, instanceID)
+	instance, err := s.instanceRepo.GetByID(ctx, instanceID)
 	if err != nil {
 		return nil, errors.New("instance not found")
 	}
@@ -116,7 +116,7 @@ func (s *GameManagerService) SwitchInstance(ctx context.Context, user *models.Us
 // The teams will not be duplicated
 func (s *GameManagerService) DuplicateInstance(ctx context.Context, user *models.User, id, name string) (response ServiceResponse) {
 	response = ServiceResponse{}
-	oldInstance, err := s.instanceRepo.FindByID(ctx, id)
+	oldInstance, err := s.instanceRepo.GetByID(ctx, id)
 	if err != nil {
 		response.AddFlashMessage(*flash.NewError("Instance not found"))
 		response.Error = fmt.Errorf("finding instance: %w", err)
@@ -178,7 +178,7 @@ func (s *GameManagerService) LoadTeams(ctx context.Context, teams *[]models.Team
 func (s *GameManagerService) DeleteInstance(ctx context.Context, user *models.User, instanceID, confirmName string) (response ServiceResponse) {
 	response = ServiceResponse{}
 	// Check if the user has permission to delete the instance
-	instance, err := s.instanceRepo.FindByID(ctx, instanceID)
+	instance, err := s.instanceRepo.GetByID(ctx, instanceID)
 	if err != nil {
 		response.AddFlashMessage(*flash.NewError("Instance not found"))
 		response.Error = fmt.Errorf("finding instance: %w", err)

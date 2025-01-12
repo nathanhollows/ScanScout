@@ -13,8 +13,8 @@ type NotificationRepository interface {
 	//	Create saves a notification to the database
 	Create(context.Context, *models.Notification) error
 
-	//	FindByID finds a notification by its ID
-	FindByID(ctx context.Context, id string) (models.Notification, error)
+	//	GetByID finds a notification by its ID
+	GetByID(ctx context.Context, id string) (models.Notification, error)
 	// FindByTeamCode finds all notifications for a specific team code
 	FindByTeamCode(ctx context.Context, teamCode string) ([]models.Notification, error)
 
@@ -80,8 +80,8 @@ func (r *notificationRepository) Delete(ctx context.Context, id string) error {
 	return nil
 }
 
-// FindByID finds a notification by its ID
-func (r *notificationRepository) FindByID(ctx context.Context, id string) (models.Notification, error) {
+// GetByID finds a notification by its ID
+func (r *notificationRepository) GetByID(ctx context.Context, id string) (models.Notification, error) {
 	notification := models.Notification{}
 	err := r.db.NewSelect().Model(&notification).Where("id = ?", id).Scan(ctx)
 	if err != nil {
