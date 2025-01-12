@@ -290,52 +290,72 @@ func (s *GameManagerService) SaveLocation(ctx context.Context, location *models.
 	return nil
 }
 
-func (s *GameManagerService) CreateLocation(ctx context.Context, user *models.User, data map[string]string) (models.Location, error) {
-
+func (s *GameManagerService) CreateLocation(
+	ctx context.Context,
+	user *models.User,
+	data map[string]string,
+) (models.Location, error) {
+	// Extract input values
 	name := data["name"]
-	lat := data["latitude"]
-	lng := data["longitude"]
-	points := data["points"]
-	marker := data["marker"]
+	latStr := data["latitude"]
+	lngStr := data["longitude"]
+	pointsStr := data["points"]
+	markerCode := data["marker"]
 
-	var latFloat, lngFloat float64
-	var err error
-	if lat != "" && lng != "" {
-		latFloat, err = strconv.ParseFloat(lat, 64)
-		if err != nil {
-			return models.Location{}, err
-		}
-		lngFloat, err = strconv.ParseFloat(lng, 64)
-		if err != nil {
-			return models.Location{}, err
-		}
-	}
+	var (
+		lat float64
+		lng float64
+		err error
+	)
 
-	pointsInt := 10
-	if points != "" {
-		pointsInt, err = strconv.Atoi(points)
+	// Parse latitude / longitude if provided
+	if latStr != "" && lngStr != "" {
+		lat, err = strconv.ParseFloat(latStr, 64)
 		if err != nil {
-			return models.Location{}, err
+			return models.Location{}, fmt.Errorf("invalid latitude: %w", err)
+		}
+		lng, err = strconv.ParseFloat(lngStr, 64)
+		if err != nil {
+			return models.Location{}, fmt.Errorf("invalid longitude: %w", err)
 		}
 	}
 
-	if marker == "" {
-		return s.locationService.CreateLocation(ctx, user.CurrentInstanceID, name, latFloat, lngFloat, pointsInt)
+	// Parse points (default = 10)
+	points := 10
+	if pointsStr != "" {
+		points, err = strconv.Atoi(pointsStr)
+		if err != nil {
+			return models.Location{}, fmt.Errorf("invalid points value: %w", err)
+		}
 	}
 
-	instances, err := s.GetInstanceIDsForUser(ctx, user.ID)
+	// If no marker code given, create a location directly
+	if markerCode == "" {
+		return s.locationService.CreateLocation(
+			ctx,
+			user.CurrentInstanceID,
+			name,
+			lat,
+			lng,
+			points,
+		)
+	}
+
+	// Otherwise, verify that marker code exists in markers not already in the user’s current instance
+	instanceIDs, err := s.GetInstanceIDsForUser(ctx, user.ID)
 	if err != nil {
-		return models.Location{}, fmt.Errorf("getting instances for user: %w", err)
+		return models.Location{}, fmt.Errorf("getting instance IDs for user: %w", err)
 	}
 
-	markers, err := s.markerRepo.FindNotInInstance(ctx, user.CurrentInstanceID, instances)
+	markers, err := s.markerRepo.FindNotInInstance(ctx, user.CurrentInstanceID, instanceIDs)
 	if err != nil {
 		return models.Location{}, fmt.Errorf("finding markers not in instance: %w", err)
 	}
 
+	// Check if the requested marker code exists among returned markers
 	markerExists := false
 	for _, m := range markers {
-		if m.Code == marker {
+		if m.Code == markerCode {
 			markerExists = true
 			break
 		}
@@ -344,8 +364,14 @@ func (s *GameManagerService) CreateLocation(ctx context.Context, user *models.Us
 		return models.Location{}, errors.New("marker does not exist")
 	}
 
-	return s.locationService.CreateLocationFromMarker(ctx, user.CurrentInstanceID, name, latFloat, lngFloat, pointsInt, marker)
-
+	// Finally, create location from marker
+	return s.locationService.CreateLocationFromMarker(
+		ctx,
+		user.CurrentInstanceID,
+		name,
+		points,
+		markerCode,
+	)
 }
 
 func (s *GameManagerService) isMarkerShared(ctx context.Context, markerID, instanceID string) (bool, error) {

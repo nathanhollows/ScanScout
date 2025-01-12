@@ -15,10 +15,10 @@ type LocationRepository interface {
 	// Update updates a location in the database
 	Update(ctx context.Context, location *models.Location) error
 
-	// Find finds a location by ID
-	Find(ctx context.Context, locationID string) (*models.Location, error)
+	// GetByID finds a location by ID
+	GetByID(ctx context.Context, locationID string) (*models.Location, error)
 	// FindByInstance finds a location by instance and code
-	FindByInstanceAndCode(ctx context.Context, instanceID string, code string) (*models.Location, error)
+	GetByInstanceAndCode(ctx context.Context, instanceID string, code string) (*models.Location, error)
 	// Find all locations for an instance
 	FindByInstance(ctx context.Context, instanceID string) ([]models.Location, error)
 	// FindLocationsByMarkerID finds all locations by marker ID
@@ -71,8 +71,8 @@ func (r *locationRepository) Update(ctx context.Context, location *models.Locati
 	return err
 }
 
-// Find finds a location by ID
-func (r *locationRepository) Find(ctx context.Context, locationID string) (*models.Location, error) {
+// GetByID finds a location by ID
+func (r *locationRepository) GetByID(ctx context.Context, locationID string) (*models.Location, error) {
 	var location models.Location
 	err := r.db.NewSelect().Model(&location).Where("id = ?", locationID).Scan(ctx)
 	if err != nil {
@@ -82,7 +82,7 @@ func (r *locationRepository) Find(ctx context.Context, locationID string) (*mode
 }
 
 // FindByInstance finds a location by instance and code
-func (r *locationRepository) FindByInstanceAndCode(ctx context.Context, instanceID string, code string) (*models.Location, error) {
+func (r *locationRepository) GetByInstanceAndCode(ctx context.Context, instanceID string, code string) (*models.Location, error) {
 	var location models.Location
 	err := r.db.
 		NewSelect().

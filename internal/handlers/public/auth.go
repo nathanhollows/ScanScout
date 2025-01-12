@@ -122,7 +122,7 @@ func (h *PublicHandler) RegisterPost(w http.ResponseWriter, r *http.Request) {
 	err = h.AuthService.SendEmailVerification(r.Context(), &user)
 	if err != nil {
 		if !errors.Is(err, services.ErrUserAlreadyVerified) {
-			h.UserService.DeleteUser(r.Context(), &user)
+			h.UserService.DeleteUser(r.Context(), user.ID)
 			h.Logger.Error("sending email verification", "err", err)
 			c := templates.RegisterError("Your account was created, but an error occurred while trying to send the email verification. Please try again.")
 			c.Render(r.Context(), w)
