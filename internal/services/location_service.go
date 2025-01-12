@@ -11,24 +11,28 @@ import (
 )
 
 type LocationService interface {
-	FindByID(ctx context.Context, locationID string) (*models.Location, error)
-	FindByInstanceAndCode(ctx context.Context, instanceID string, code string) (*models.Location, error)
-	FindByInstance(ctx context.Context, instanceID string) ([]models.Location, error)
-	FindMarkersNotInInstance(ctx context.Context, instanceID string, otherInstances []string) ([]models.Marker, error)
-	LoadCluesForLocation(ctx context.Context, location *models.Location) error
-	LoadCluesForLocations(ctx context.Context, locations *[]models.Location) error
-	LoadRelations(ctx context.Context, location *models.Location) error
-	IncrementVisitorStats(ctx context.Context, location *models.Location) error
-	UpdateCoords(ctx context.Context, location *models.Location, lat, lng float64) error
-	UpdateName(ctx context.Context, location *models.Location, name string) error
-	UpdateLocation(ctx context.Context, location *models.Location, data LocationUpdateData) error
 	CreateLocation(ctx context.Context, instanceID, name string, lat, lng float64, points int) (models.Location, error)
 	CreateLocationFromMarker(ctx context.Context, instanceID, name string, lat, lng float64, points int, markerCode string) (models.Location, error)
 	CreateMarker(ctx context.Context, name string, lat, lng float64) (models.Marker, error)
 	DuplicateLocation(ctx context.Context, location *models.Location, newInstanceID string) (models.Location, error)
-	DeleteLocation(ctx context.Context, locationID string) error
+
+	FindByID(ctx context.Context, locationID string) (*models.Location, error)
+	FindByInstanceAndCode(ctx context.Context, instanceID string, code string) (*models.Location, error)
+	FindByInstance(ctx context.Context, instanceID string) ([]models.Location, error)
+	FindMarkersNotInInstance(ctx context.Context, instanceID string, otherInstances []string) ([]models.Marker, error)
+
+	IncrementVisitorStats(ctx context.Context, location *models.Location) error
+	UpdateCoords(ctx context.Context, location *models.Location, lat, lng float64) error
+	UpdateName(ctx context.Context, location *models.Location, name string) error
+	UpdateLocation(ctx context.Context, location *models.Location, data LocationUpdateData) error
 	// ReorderLocations accepts IDs of locations and reorders them
 	ReorderLocations(ctx context.Context, instanceID string, locationIDs []string) error
+
+	DeleteLocation(ctx context.Context, locationID string) error
+
+	LoadCluesForLocation(ctx context.Context, location *models.Location) error
+	LoadCluesForLocations(ctx context.Context, locations *[]models.Location) error
+	LoadRelations(ctx context.Context, location *models.Location) error
 }
 
 type locationService struct {
@@ -54,6 +58,75 @@ func NewLocationService(
 		markerRepo:   markerRepo,
 		blockRepo:    blockRepo,
 	}
+}
+
+// CreateLocation creates a new location
+func (s locationService) CreateLocation(ctx context.Context, instanceID, name string, lat, lng float64, points int) (models.Location, error) {
+	// Create the marker
+	marker, err := s.CreateMarker(ctx, name, lat, lng)
+	if err != nil {
+		return models.Location{}, fmt.Errorf("creating marker: %v", err)
+	}
+
+	location := models.Location{
+		Name:       name,
+		InstanceID: instanceID,
+		MarkerID:   marker.Code,
+		Points:     points,
+	}
+	err = s.locationRepo.Create(ctx, &location)
+	if err != nil {
+		return models.Location{}, fmt.Errorf("saving location: %v", err)
+	}
+
+	return location, nil
+}
+
+// CreateLocationFromMarker creates a new location from an existing marker
+func (s locationService) CreateLocationFromMarker(ctx context.Context, instanceID, name string, lat, lng float64, points int, markerCode string) (models.Location, error) {
+	marker, err := s.markerRepo.FindByCode(ctx, markerCode)
+	if err != nil {
+		return models.Location{}, fmt.Errorf("finding marker: %v", err)
+	}
+
+	location := models.Location{
+		Name:       name,
+		InstanceID: instanceID,
+		MarkerID:   marker.Code,
+		Points:     points,
+	}
+	err = s.locationRepo.Create(ctx, &location)
+	if err != nil {
+		return models.Location{}, fmt.Errorf("saving location: %v", err)
+	}
+
+	return location, nil
+}
+
+// CreateMarker creates a new marker
+func (s locationService) CreateMarker(ctx context.Context, name string, lat, lng float64) (models.Marker, error) {
+	marker := models.Marker{
+		Name: name,
+		Lat:  lat,
+		Lng:  lng,
+	}
+	err := s.markerRepo.Create(ctx, &marker)
+	if err != nil {
+		return models.Marker{}, fmt.Errorf("saving marker: %v", err)
+	}
+	return marker, nil
+}
+
+// DuplicateLocation duplicates a location
+func (s locationService) DuplicateLocation(ctx context.Context, location *models.Location, newInstanceID string) (models.Location, error) {
+	newLocation := *location
+	newLocation.ID = ""
+	newLocation.InstanceID = newInstanceID
+	err := s.locationRepo.Create(ctx, &newLocation)
+	if err != nil {
+		return models.Location{}, fmt.Errorf("saving location: %v", err)
+	}
+	return newLocation, nil
 }
 
 // FindByID finds a location by ID
@@ -90,38 +163,6 @@ func (s locationService) FindMarkersNotInInstance(ctx context.Context, instanceI
 		return nil, fmt.Errorf("finding markers not in instance: %v", err)
 	}
 	return markers, nil
-}
-
-// LoadCluesForLocation loads the clues for a specific location if they are not already loaded
-func (s locationService) LoadCluesForLocation(ctx context.Context, location *models.Location) error {
-	if len(location.Clues) == 0 {
-		clues, err := s.clueRepo.FindCluesByLocation(ctx, location.ID)
-		if err != nil {
-			return fmt.Errorf("finding clues: %v", err)
-		}
-		location.Clues = clues
-	}
-	return nil
-}
-
-// LoadCluesForLocations loads the clues for all given locations if they are not already loaded
-func (s locationService) LoadCluesForLocations(ctx context.Context, locations *[]models.Location) error {
-	for i := range *locations {
-		err := s.LoadCluesForLocation(ctx, &(*locations)[i])
-		if err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
-// LoadRelations loads the related data for a location
-func (s locationService) LoadRelations(ctx context.Context, location *models.Location) error {
-	err := s.locationRepo.LoadRelations(ctx, location)
-	if err != nil {
-		return fmt.Errorf("loading relations: %v", err)
-	}
-	return nil
 }
 
 // Update visitor stats for a location
@@ -210,73 +251,46 @@ func (s locationService) UpdateLocation(ctx context.Context, location *models.Lo
 
 }
 
-// CreateLocation creates a new location
-func (s locationService) CreateLocation(ctx context.Context, instanceID, name string, lat, lng float64, points int) (models.Location, error) {
-	// Create the marker
-	marker, err := s.CreateMarker(ctx, name, lat, lng)
+// ReorderLocations reorders locations
+func (s locationService) ReorderLocations(ctx context.Context, instanceID string, locationIDs []string) error {
+	locations, err := s.locationRepo.FindByInstance(ctx, instanceID)
 	if err != nil {
-		return models.Location{}, fmt.Errorf("creating marker: %v", err)
+		return fmt.Errorf("finding all locations: %v", err)
 	}
 
-	location := models.Location{
-		Name:       name,
-		InstanceID: instanceID,
-		MarkerID:   marker.Code,
-		Points:     points,
+	// Check that all location IDs are valid
+	locationMap := make(map[string]bool)
+	for _, location := range locations {
+		locationMap[location.ID] = true
 	}
-	err = s.locationRepo.Create(ctx, &location)
-	if err != nil {
-		return models.Location{}, fmt.Errorf("saving location: %v", err)
+	for _, locationID := range locationIDs {
+		if !locationMap[locationID] {
+			return fmt.Errorf("invalid location ID: %s", locationID)
+		}
 	}
-
-	return location, nil
-}
-
-// CreateLocationFromMarker creates a new location from an existing marker
-func (s locationService) CreateLocationFromMarker(ctx context.Context, instanceID, name string, lat, lng float64, points int, markerCode string) (models.Location, error) {
-	marker, err := s.markerRepo.FindByCode(ctx, markerCode)
-	if err != nil {
-		return models.Location{}, fmt.Errorf("finding marker: %v", err)
+	if len(locationMap) != len(locationIDs) {
+		return fmt.Errorf("list length does not match number of locations")
 	}
 
-	location := models.Location{
-		Name:       name,
-		InstanceID: instanceID,
-		MarkerID:   marker.Code,
-		Points:     points,
-	}
-	err = s.locationRepo.Create(ctx, &location)
-	if err != nil {
-		return models.Location{}, fmt.Errorf("saving location: %v", err)
+	// Reorder the locations
+	for i, locationID := range locationIDs {
+		for j, location := range locations {
+			if location.ID == locationID {
+				locations[j].Order = i
+				break
+			}
+		}
 	}
 
-	return location, nil
-}
+	// Save the locations
+	for _, location := range locations {
+		err = s.locationRepo.Update(ctx, &location)
+		if err != nil {
+			return fmt.Errorf("updating location: %v", err)
+		}
+	}
 
-// CreateMarker creates a new marker
-func (s locationService) CreateMarker(ctx context.Context, name string, lat, lng float64) (models.Marker, error) {
-	marker := models.Marker{
-		Name: name,
-		Lat:  lat,
-		Lng:  lng,
-	}
-	err := s.markerRepo.Create(ctx, &marker)
-	if err != nil {
-		return models.Marker{}, fmt.Errorf("saving marker: %v", err)
-	}
-	return marker, nil
-}
-
-// DuplicateLocation duplicates a location
-func (s locationService) DuplicateLocation(ctx context.Context, location *models.Location, newInstanceID string) (models.Location, error) {
-	newLocation := *location
-	newLocation.ID = ""
-	newLocation.InstanceID = newInstanceID
-	err := s.locationRepo.Create(ctx, &newLocation)
-	if err != nil {
-		return models.Location{}, fmt.Errorf("saving location: %v", err)
-	}
-	return newLocation, nil
+	return nil
 }
 
 // DeleteLocation deletes a location
@@ -339,44 +353,34 @@ func (s locationService) DeleteLocation(ctx context.Context, locationID string) 
 	return tx.Commit()
 }
 
-// ReorderLocations reorders locations
-func (s locationService) ReorderLocations(ctx context.Context, instanceID string, locationIDs []string) error {
-	locations, err := s.locationRepo.FindByInstance(ctx, instanceID)
-	if err != nil {
-		return fmt.Errorf("finding all locations: %v", err)
-	}
-
-	// Check that all location IDs are valid
-	locationMap := make(map[string]bool)
-	for _, location := range locations {
-		locationMap[location.ID] = true
-	}
-	for _, locationID := range locationIDs {
-		if !locationMap[locationID] {
-			return fmt.Errorf("invalid location ID: %s", locationID)
-		}
-	}
-	if len(locationMap) != len(locationIDs) {
-		return fmt.Errorf("list length does not match number of locations")
-	}
-
-	// Reorder the locations
-	for i, locationID := range locationIDs {
-		for j, location := range locations {
-			if location.ID == locationID {
-				locations[j].Order = i
-				break
-			}
-		}
-	}
-
-	// Save the locations
-	for _, location := range locations {
-		err = s.locationRepo.Update(ctx, &location)
+// LoadCluesForLocation loads the clues for a specific location if they are not already loaded
+func (s locationService) LoadCluesForLocation(ctx context.Context, location *models.Location) error {
+	if len(location.Clues) == 0 {
+		clues, err := s.clueRepo.FindCluesByLocation(ctx, location.ID)
 		if err != nil {
-			return fmt.Errorf("updating location: %v", err)
+			return fmt.Errorf("finding clues: %v", err)
+		}
+		location.Clues = clues
+	}
+	return nil
+}
+
+// LoadCluesForLocations loads the clues for all given locations if they are not already loaded
+func (s locationService) LoadCluesForLocations(ctx context.Context, locations *[]models.Location) error {
+	for i := range *locations {
+		err := s.LoadCluesForLocation(ctx, &(*locations)[i])
+		if err != nil {
+			return err
 		}
 	}
+	return nil
+}
 
+// LoadRelations loads the related data for a location
+func (s locationService) LoadRelations(ctx context.Context, location *models.Location) error {
+	err := s.locationRepo.LoadRelations(ctx, location)
+	if err != nil {
+		return fmt.Errorf("loading relations: %v", err)
+	}
 	return nil
 }
