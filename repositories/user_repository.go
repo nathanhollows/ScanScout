@@ -30,7 +30,8 @@ type UserRepository interface {
 	Update(ctx context.Context, user *models.User) error
 
 	// Delete deletes a user from the database
-	Delete(ctx context.Context, userID string) error
+	// Requires a transaction as related data will also need to be deleted
+	Delete(ctx context.Context, tx *bun.Tx, userID string) error
 }
 
 type userRepository struct {
@@ -126,9 +127,9 @@ func (r *userRepository) FindUserByEmailAndProvider(ctx context.Context, email, 
 }
 
 // Delete deletes a user from the database
-func (r *userRepository) Delete(ctx context.Context, userID string) error {
+func (r *userRepository) Delete(ctx context.Context, tx *bun.Tx, userID string) error {
 	user := &models.User{ID: userID}
-	res, err := r.db.NewDelete().
+	res, err := tx.NewDelete().
 		Model(user).
 		Where("id = ?", userID).
 		Exec(ctx)
@@ -136,5 +137,9 @@ func (r *userRepository) Delete(ctx context.Context, userID string) error {
 	if rows == 0 {
 		return ErrUserNotFound
 	}
-	return err
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
