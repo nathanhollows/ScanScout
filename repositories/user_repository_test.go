@@ -2,24 +2,28 @@ package repositories_test
 
 import (
 	"context"
+	"database/sql"
 	"testing"
 
 	"github.com/brianvoe/gofakeit/v7"
+	"github.com/nathanhollows/Rapua/db"
 	"github.com/nathanhollows/Rapua/models"
 	"github.com/nathanhollows/Rapua/repositories"
 	"github.com/stretchr/testify/assert"
 )
 
-func setupUserRepo(t *testing.T) (repositories.UserRepository, func()) {
+func setupUserRepo(t *testing.T) (repositories.UserRepository, db.Transactor, func()) {
 	t.Helper()
-	db, cleanup := setupDB(t)
+	dbc, cleanup := setupDB(t)
 
-	userRepository := repositories.NewUserRepository(db)
-	return userRepository, cleanup
+	transactor := db.NewTransactor(dbc)
+
+	userRepository := repositories.NewUserRepository(dbc)
+	return userRepository, transactor, cleanup
 }
 
 func TestUserRepository_Create(t *testing.T) {
-	repo, cleanup := setupUserRepo(t)
+	repo, _, cleanup := setupUserRepo(t)
 	defer cleanup()
 	ctx := context.Background()
 
@@ -36,7 +40,7 @@ func TestUserRepository_Create(t *testing.T) {
 }
 
 func TestUserRepository_GetUserByEmail(t *testing.T) {
-	repo, cleanup := setupUserRepo(t)
+	repo, _, cleanup := setupUserRepo(t)
 	defer cleanup()
 	ctx := context.Background()
 
@@ -58,7 +62,7 @@ func TestUserRepository_GetUserByEmail(t *testing.T) {
 }
 
 func TestUserRepository_Update(t *testing.T) {
-	repo, cleanup := setupUserRepo(t)
+	repo, _, cleanup := setupUserRepo(t)
 	defer cleanup()
 	ctx := context.Background()
 
@@ -85,7 +89,7 @@ func TestUserRepository_Update(t *testing.T) {
 }
 
 func TestUserRepository_FindUserByID(t *testing.T) {
-	repo, cleanup := setupUserRepo(t)
+	repo, _, cleanup := setupUserRepo(t)
 	defer cleanup()
 	ctx := context.Background()
 
@@ -107,7 +111,7 @@ func TestUserRepository_FindUserByID(t *testing.T) {
 }
 
 func TestUserRepository_GetUserByEmailAndProvider(t *testing.T) {
-	repo, cleanup := setupUserRepo(t)
+	repo, _, cleanup := setupUserRepo(t)
 	defer cleanup()
 	ctx := context.Background()
 
@@ -129,7 +133,7 @@ func TestUserRepository_GetUserByEmailAndProvider(t *testing.T) {
 }
 
 func TestUserRepository_Delete(t *testing.T) {
-	repo, cleanup := setupUserRepo(t)
+	repo, transactor, cleanup := setupUserRepo(t)
 	defer cleanup()
 	ctx := context.Background()
 
@@ -144,8 +148,15 @@ func TestUserRepository_Delete(t *testing.T) {
 	assert.NoError(t, err)
 
 	// Delete user
-	err = repo.Delete(ctx, user.ID)
+	tx, err := transactor.BeginTx(ctx, &sql.TxOptions{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = repo.Delete(ctx, tx, user.ID)
 	assert.NoError(t, err)
+	if err := tx.Commit(); err != nil {
+		t.Fatal(err)
+	}
 
 	// Verify user is deleted
 	fetchedUser, err := repo.FindUserByEmail(ctx, user.Email)
