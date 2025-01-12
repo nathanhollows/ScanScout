@@ -31,7 +31,7 @@ func TestTeamRepository_InsertTeam(t *testing.T) {
 	// Check that teams without an ID are assigned a UUID
 	sampleTeam := &models.Team{
 		Code:       gofakeit.Password(false, true, false, false, false, 5),
-		InstanceID: "instance-1",
+		InstanceID: gofakeit.UUID(),
 	}
 
 	err := repo.InsertBatch(ctx, []models.Team{*sampleTeam})
@@ -44,7 +44,7 @@ func TestTeamRepository_InsertTeam(t *testing.T) {
 	// Check that teams with duplicate codes are not allowed
 	sampleTeam = &models.Team{
 		ID:         gofakeit.UUID(),
-		InstanceID: "instance-1",
+		InstanceID: gofakeit.UUID(),
 	}
 
 	err = repo.InsertBatch(ctx, []models.Team{*sampleTeam, *sampleTeam})
@@ -73,7 +73,7 @@ func TestTeamRepository_InsertAndUpdate(t *testing.T) {
 	sampleTeam := &models.Team{
 		ID:         uuid.New().String(),
 		Code:       gofakeit.Password(false, true, false, false, false, 5),
-		InstanceID: "instance-1",
+		InstanceID: gofakeit.UUID(),
 	}
 
 	// Insert team first
@@ -111,7 +111,7 @@ func TestTeamRepository_Delete(t *testing.T) {
 	sampleTeam := []models.Team{{
 		ID:         uuid.New().String(),
 		Code:       gofakeit.Password(false, true, false, false, false, 5),
-		InstanceID: "instance-1",
+		InstanceID: gofakeit.UUID(),
 	}}
 
 	// Insert team first
@@ -137,7 +137,7 @@ func TestTeamRepository_FindAll(t *testing.T) {
 	defer cleanup()
 	ctx := context.Background()
 
-	instanceID := "instance-1"
+	instanceID := gofakeit.UUID()
 	sampleTeams := []models.Team{
 		{
 			ID:         uuid.New().String(),
@@ -180,7 +180,7 @@ func TestTeamRepository_FindAllWithScans(t *testing.T) {
 	defer cleanup()
 	ctx := context.Background()
 
-	instanceID := "instance-1"
+	instanceID := gofakeit.UUID()
 	sampleTeams := []models.Team{
 		{
 			ID:         uuid.New().String(),
@@ -228,12 +228,12 @@ func TestTeamRepository_InsertBatch(t *testing.T) {
 		{
 			ID:         uuid.New().String(),
 			Code:       gofakeit.Password(false, true, false, false, false, 5),
-			InstanceID: "instance-1",
+			InstanceID: gofakeit.UUID(),
 		},
 		{
 			ID:         uuid.New().String(),
 			Code:       gofakeit.Password(false, true, false, false, false, 5),
-			InstanceID: "instance-1",
+			InstanceID: gofakeit.UUID(),
 		},
 	}
 	err := repo.InsertBatch(ctx, sampleTeams)
