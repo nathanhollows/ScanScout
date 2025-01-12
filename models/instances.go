@@ -6,8 +6,7 @@ import (
 	"github.com/uptrace/bun"
 )
 
-// Instance represents a single planned activity belonging to a user
-// Instance is used to match users, teams, locations, and scans
+// Instance represents an entire game state
 type Instance struct {
 	baseModel
 
