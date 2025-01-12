@@ -142,39 +142,44 @@ func newDBCommand(migrator *migrate.Migrator) *cli.Command {
 	}
 }
 
-func runApp(logger *slog.Logger, db *bun.DB) {
+func runApp(logger *slog.Logger, dbc *bun.DB) {
 	initialiseFolders(logger)
 
 	// Initialize repositories
-	blockStateRepo := repositories.NewBlockStateRepository(db)
-	blockRepo := repositories.NewBlockRepository(db, blockStateRepo)
-	checkInRepo := repositories.NewCheckInRepository(db)
-	clueRepo := repositories.NewClueRepository(db)
-	instanceRepo := repositories.NewInstanceRepository(db)
-	instanceSettingsRepo := repositories.NewInstanceSettingsRepository(db)
-	locationRepo := repositories.NewLocationRepository(db)
-	markerRepo := repositories.NewMarkerRepository(db)
-	notificationRepo := repositories.NewNotificationRepository(db)
-	teamRepo := repositories.NewTeamRepository(db)
-	userRepo := repositories.NewUserRepository(db)
+	blockStateRepo := repositories.NewBlockStateRepository(dbc)
+	blockRepo := repositories.NewBlockRepository(dbc, blockStateRepo)
+	teamRepo := repositories.NewTeamRepository(dbc)
+	checkInRepo := repositories.NewCheckInRepository(dbc)
+	clueRepo := repositories.NewClueRepository(dbc)
+	instanceSettingsRepo := repositories.NewInstanceSettingsRepository(dbc)
+	locationRepo := repositories.NewLocationRepository(dbc)
+	markerRepo := repositories.NewMarkerRepository(dbc)
+	notificationRepo := repositories.NewNotificationRepository(dbc)
+	instanceRepo := repositories.NewInstanceRepository(dbc)
+	userRepo := repositories.NewUserRepository(dbc)
+
+	// Initialize transactor for services
+	transactor := db.NewTransactor(dbc)
 
 	// Initialize services
 	assetGenerator := services.NewAssetGenerator()
 	authService := services.NewAuthService(userRepo)
-	blockService := services.NewBlockService(blockRepo, blockStateRepo)
+	blockService := services.NewBlockService(transactor, blockRepo, blockStateRepo)
 	checkInService := services.NewCheckInService(checkInRepo, locationRepo, teamRepo)
 	clueService := services.NewClueService(clueRepo, locationRepo)
 	emailService := services.NewEmailService()
-	locationService := services.NewLocationService(clueRepo, locationRepo, markerRepo, blockRepo)
+	locationService := services.NewLocationService(transactor, clueRepo, locationRepo, markerRepo, blockRepo)
 	navigationService := services.NewNavigationService()
 	notificationService := services.NewNotificationService(notificationRepo, teamRepo)
-	teamService := services.NewTeamService(teamRepo)
-	userService := services.NewUserService(userRepo)
+	teamService := services.NewTeamService(transactor, teamRepo)
+	userService := services.NewUserService(transactor, userRepo, instanceRepo)
 	gameplayService := services.NewGameplayService(
 		checkInService, locationService, teamService, blockService, navigationService, markerRepo,
 	)
 	gameManagerService := services.NewGameManagerService(
-		locationService, userService, teamService, markerRepo, clueRepo, instanceRepo, instanceSettingsRepo,
+		transactor,
+		locationService, userService, teamService,
+		markerRepo, clueRepo, instanceRepo, instanceSettingsRepo,
 	)
 
 	sessions.Start()
