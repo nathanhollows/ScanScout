@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/nathanhollows/Rapua/internal/repositories"
 	"github.com/nathanhollows/Rapua/models"
+	"github.com/nathanhollows/Rapua/repositories"
 )
 
 type ClueService interface {

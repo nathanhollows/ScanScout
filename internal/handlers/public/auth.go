@@ -17,14 +17,14 @@ import (
 
 // LoginHandler is the handler for the admin login page
 func (h *PublicHandler) Login(w http.ResponseWriter, r *http.Request) {
-	user, err := h.UserServices.AuthService.GetAuthenticatedUser(r)
+	user, err := h.AuthService.GetAuthenticatedUser(r)
 	if err == nil || user != nil {
 		// User is already authenticated, redirect to the admin page
 		http.Redirect(w, r, "/admin", http.StatusSeeOther)
 		return
 	}
 
-	c := templates.Login(h.UserServices.AuthService.AllowGoogleLogin())
+	c := templates.Login(h.AuthService.AllowGoogleLogin())
 	err = templates.AuthLayout(c, "Login").Render(r.Context(), w)
 
 	if err != nil {
@@ -39,7 +39,7 @@ func (h *PublicHandler) LoginPost(w http.ResponseWriter, r *http.Request) {
 	password := r.Form.Get("password")
 
 	// Try to authenticate the user
-	user, err := h.UserServices.AuthService.AuthenticateUser(r.Context(), email, password)
+	user, err := h.AuthService.AuthenticateUser(r.Context(), email, password)
 
 	if err != nil {
 		h.Logger.Error("authenticating user", "err", err)
@@ -78,14 +78,14 @@ func (h *PublicHandler) Logout(w http.ResponseWriter, r *http.Request) {
 
 // RegisterHandler is the handler for the admin register page
 func (h *PublicHandler) Register(w http.ResponseWriter, r *http.Request) {
-	user, err := h.UserServices.AuthService.GetAuthenticatedUser(r)
+	user, err := h.AuthService.GetAuthenticatedUser(r)
 	if err == nil || user != nil {
 		// User is already authenticated, redirect to the admin page
 		http.Redirect(w, r, "/admin", http.StatusSeeOther)
 		return
 	}
 
-	c := templates.Register(h.UserServices.AuthService.AllowGoogleLogin())
+	c := templates.Register(h.AuthService.AllowGoogleLogin())
 	err = templates.AuthLayout(c, "Register").Render(r.Context(), w)
 
 	if err != nil {
@@ -103,7 +103,8 @@ func (h *PublicHandler) RegisterPost(w http.ResponseWriter, r *http.Request) {
 
 	confirmPassword := r.Form.Get("password-confirm")
 
-	err := h.UserServices.UserService.CreateUser(r.Context(), &user, confirmPassword)
+	// Create the user
+	err := h.UserService.CreateUser(r.Context(), &user, confirmPassword)
 	if err != nil {
 		h.Logger.Error("creating user", "err", err)
 		w.WriteHeader(http.StatusUnauthorized)
@@ -117,13 +118,25 @@ func (h *PublicHandler) RegisterPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Send the email verification
+	err = h.AuthService.SendEmailVerification(r.Context(), &user)
+	if err != nil {
+		if !errors.Is(err, services.ErrUserAlreadyVerified) {
+			h.UserService.DeleteUser(r.Context(), user.ID)
+			h.Logger.Error("sending email verification", "err", err)
+			c := templates.RegisterError("Your account was created, but an error occurred while trying to send the email verification. Please try again.")
+			c.Render(r.Context(), w)
+			return
+		}
+	}
+
 	c := templates.RegisterSuccess()
 	c.Render(r.Context(), w)
 }
 
 // ForgotPasswordHandler is the handler for the forgot password page
 func (h *PublicHandler) ForgotPassword(w http.ResponseWriter, r *http.Request) {
-	user, err := h.UserServices.AuthService.GetAuthenticatedUser(r)
+	user, err := h.AuthService.GetAuthenticatedUser(r)
 	if err == nil || user != nil {
 		// User is already authenticated, redirect to the admin page
 		http.Redirect(w, r, "/admin", http.StatusSeeOther)
@@ -170,7 +183,7 @@ func (h *PublicHandler) Auth(w http.ResponseWriter, r *http.Request) {
 	provider := chi.URLParam(r, "provider")
 	r.URL.RawQuery = fmt.Sprintf("%s&provider=%s", r.URL.RawQuery, provider)
 
-	_, err := h.UserServices.AuthService.CompleteUserAuth(w, r)
+	_, err := h.AuthService.CompleteUserAuth(w, r)
 	if err == nil {
 		// User is authenticated, redirect to the admin page
 		http.Redirect(w, r, "/admin", http.StatusSeeOther)
@@ -187,7 +200,7 @@ func (h *PublicHandler) AuthCallback(w http.ResponseWriter, r *http.Request) {
 	provider := chi.URLParam(r, "provider")
 	r.URL.RawQuery = fmt.Sprintf("%s&provider=%s", r.URL.RawQuery, provider)
 
-	user, err := h.UserServices.AuthService.CompleteUserAuth(w, r)
+	user, err := h.AuthService.CompleteUserAuth(w, r)
 	if err != nil {
 		h.Logger.Error("completing auth", "error", err)
 		http.Redirect(w, r, "/login", http.StatusSeeOther)
@@ -219,16 +232,11 @@ func (h *PublicHandler) AuthCallback(w http.ResponseWriter, r *http.Request) {
 		`))
 }
 
-// VerifyEmail is the handler for verifying a user's email address
+// VerifyEmail shows the user the verify email page, the first step in the email verification process
 func (h *PublicHandler) VerifyEmail(w http.ResponseWriter, r *http.Request) {
-	user, err := h.UserServices.AuthService.GetAuthenticatedUser(r)
-	if err != nil || user == nil {
-		http.Redirect(w, r, "/login", http.StatusSeeOther)
-		return
-	}
-
-	if user.EmailVerified {
-		flash.NewInfo("Your email is already verified.").Save(w, r)
+	// If the user is authenticated without error, we will redirect them to the admin page
+	user, err := h.AuthService.GetAuthenticatedUser(r)
+	if err != nil && user != nil && user.EmailVerified {
 		http.Redirect(w, r, "/admin", http.StatusSeeOther)
 		return
 	}
@@ -241,10 +249,10 @@ func (h *PublicHandler) VerifyEmail(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// VerifyEmailWithToken is the handler for verifying a user's email address
+// VerifyEmailWithToken verifies the user's email address and redirects upon error or success
 func (h *PublicHandler) VerifyEmailWithToken(w http.ResponseWriter, r *http.Request) {
 	// If the user is authenticated without error, we will redirect them to the admin page
-	user, err := h.UserServices.AuthService.GetAuthenticatedUser(r)
+	user, err := h.AuthService.GetAuthenticatedUser(r)
 	if err == nil && user != nil && user.EmailVerified {
 		flash.NewInfo("Your email is already verified.").Save(w, r)
 		http.Redirect(w, r, "/admin", http.StatusSeeOther)
@@ -253,32 +261,29 @@ func (h *PublicHandler) VerifyEmailWithToken(w http.ResponseWriter, r *http.Requ
 
 	token := chi.URLParam(r, "token")
 
-	err = h.UserServices.AuthService.VerifyEmail(r.Context(), token)
+	err = h.AuthService.VerifyEmail(r.Context(), token)
 	if err != nil {
 		if errors.Is(err, services.ErrInvalidToken) {
-			flash.NewError("Invalid link. Please try again.").Save(w, r)
 			http.Redirect(w, r, "/verify-email", http.StatusSeeOther)
 			return
 		}
 		if errors.Is(err, services.ErrTokenExpired) {
-			flash.NewError("Link expired. We have sent you a new email with a new token.").Save(w, r)
 			http.Redirect(w, r, "/verify-email", http.StatusSeeOther)
 			return
 		}
 		h.Logger.Error("verifying email", "err", err)
 		w.WriteHeader(http.StatusInternalServerError)
-		flash.NewError("An error occurred while trying to verify your email. Please try again.").Save(w, r)
 		http.Redirect(w, r, "/verify-email", http.StatusSeeOther)
 		return
 	}
 
-	flash.NewSuccess("Email verified!").Save(w, r)
-	http.Redirect(w, r, "/admin", http.StatusSeeOther)
+	// Send a meta refresh to the verify email page
+	w.Write([]byte(`<html><head><meta http-equiv="refresh" content="2; url='/admin'"></head><body></body></html>`))
 }
 
-// Poll for email verification for HTMX
+// VerifyEmailStatus checks the status of the email verification and redirects accordingly
 func (h *PublicHandler) VerifyEmailStatus(w http.ResponseWriter, r *http.Request) {
-	user, err := h.UserServices.AuthService.GetAuthenticatedUser(r)
+	user, err := h.AuthService.GetAuthenticatedUser(r)
 	if err != nil || user == nil {
 		http.Redirect(w, r, "/login", http.StatusSeeOther)
 		return
@@ -295,13 +300,13 @@ func (h *PublicHandler) VerifyEmailStatus(w http.ResponseWriter, r *http.Request
 
 // ResendEmailVerification resends the email verification email
 func (h *PublicHandler) ResendEmailVerification(w http.ResponseWriter, r *http.Request) {
-	user, err := h.UserServices.AuthService.GetAuthenticatedUser(r)
+	user, err := h.AuthService.GetAuthenticatedUser(r)
 	if err != nil || user == nil {
 		http.Redirect(w, r, "/login", http.StatusSeeOther)
 		return
 	}
 
-	err = h.UserServices.AuthService.SendEmailVerification(r.Context(), user)
+	err = h.AuthService.SendEmailVerification(r.Context(), user)
 	if err != nil {
 		if errors.Is(err, services.ErrUserAlreadyVerified) {
 			w.WriteHeader(http.StatusUnauthorized)

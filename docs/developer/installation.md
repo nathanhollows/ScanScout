@@ -42,16 +42,20 @@ You will also need to have SQLite installed on your machine. If you don't have i
     ```sh
     vi .env
     ```
-3. Build the project
+4. Build the project
     ```sh
     make build
     ```
     Other build options are available including `make dev`, `make tailwind-build`, `make tailwind-watch`, `make templ-watch`, `make templ-generate`, and `make test`.
-4. Run the project
+5. Run [database migrations](/docs/developer/migrations)
+    ```sh
+    ./rapua db migrate
+    ```
+6. Run the project
     ```sh
     ./rapua
     ```
-5. Open your browser and navigate to `http://localhost:8090`
+7. Open your browser and navigate to `http://localhost:8090`
     
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>

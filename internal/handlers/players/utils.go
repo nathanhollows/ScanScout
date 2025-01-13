@@ -9,7 +9,6 @@ import (
 	"github.com/gorilla/sessions"
 	"github.com/nathanhollows/Rapua/internal/contextkeys"
 	"github.com/nathanhollows/Rapua/internal/flash"
-	"github.com/nathanhollows/Rapua/internal/repositories"
 	"github.com/nathanhollows/Rapua/internal/services"
 	templates "github.com/nathanhollows/Rapua/internal/templates/players"
 	"github.com/nathanhollows/Rapua/models"
@@ -17,19 +16,25 @@ import (
 
 type PlayerHandler struct {
 	Logger              *slog.Logger
+	BlockService        services.BlockService
 	GameplayService     services.GameplayService
 	NotificationService services.NotificationService
-	BlockService        services.BlockService
 	TeamService         services.TeamService
 }
 
-func NewPlayerHandler(logger *slog.Logger, gs services.GameplayService, ns services.NotificationService) *PlayerHandler {
+func NewPlayerHandler(
+	logger *slog.Logger,
+	blockService services.BlockService,
+	gameplayService services.GameplayService,
+	notificationService services.NotificationService,
+	teamService services.TeamService,
+) *PlayerHandler {
 	return &PlayerHandler{
 		Logger:              logger,
-		GameplayService:     gs,
-		NotificationService: ns,
-		BlockService:        services.NewBlockService(repositories.NewBlockRepository(), repositories.NewBlockStateRepository()),
-		TeamService:         services.NewTeamService(repositories.NewTeamRepository()),
+		BlockService:        blockService,
+		GameplayService:     gameplayService,
+		NotificationService: notificationService,
+		TeamService:         teamService,
 	}
 }
 

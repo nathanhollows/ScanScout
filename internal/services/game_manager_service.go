@@ -2,6 +2,7 @@ package services
 
 import (
 	"context"
+	"database/sql"
 	"errors"
 	"fmt"
 	"net/url"
@@ -13,12 +14,13 @@ import (
 
 	"github.com/nathanhollows/Rapua/db"
 	"github.com/nathanhollows/Rapua/internal/flash"
-	"github.com/nathanhollows/Rapua/internal/repositories"
 	"github.com/nathanhollows/Rapua/models"
+	"github.com/nathanhollows/Rapua/repositories"
 	"github.com/uptrace/bun"
 )
 
 type GameManagerService struct {
+	transactor           db.Transactor
 	locationService      LocationService
 	userService          UserService
 	teamService          TeamService
@@ -28,15 +30,25 @@ type GameManagerService struct {
 	instanceSettingsRepo repositories.InstanceSettingsRepository
 }
 
-func NewGameManagerService() GameManagerService {
+func NewGameManagerService(
+	transactor db.Transactor,
+	locationService LocationService,
+	userService UserService,
+	teamService TeamService,
+	markerRepo repositories.MarkerRepository,
+	clueRepo repositories.ClueRepository,
+	instanceRepo repositories.InstanceRepository,
+	instanceSettingsRepo repositories.InstanceSettingsRepository,
+) GameManagerService {
 	return GameManagerService{
-		locationService:      NewLocationService(repositories.NewClueRepository()),
-		userService:          NewUserService(repositories.NewUserRepository()),
-		teamService:          NewTeamService(repositories.NewTeamRepository()),
-		markerRepo:           repositories.NewMarkerRepository(),
-		clueRepo:             repositories.NewClueRepository(),
-		instanceRepo:         repositories.NewInstanceRepository(),
-		instanceSettingsRepo: repositories.NewInstanceSettingsRepository(),
+		transactor:           transactor,
+		locationService:      locationService,
+		userService:          userService,
+		teamService:          teamService,
+		markerRepo:           markerRepo,
+		clueRepo:             clueRepo,
+		instanceRepo:         instanceRepo,
+		instanceSettingsRepo: instanceSettingsRepo,
 	}
 }
 
@@ -54,7 +66,7 @@ func (s *GameManagerService) CreateInstance(ctx context.Context, name string, us
 		UserID: user.ID,
 	}
 
-	if err := s.instanceRepo.Save(ctx, instance); err != nil {
+	if err := s.instanceRepo.Create(ctx, instance); err != nil {
 		response.AddFlashMessage(*flash.NewError("Error saving instance"))
 		response.Error = fmt.Errorf("saving instance: %w", err)
 		return response
@@ -71,7 +83,7 @@ func (s *GameManagerService) CreateInstance(ctx context.Context, name string, us
 	settings := &models.InstanceSettings{
 		InstanceID: instance.ID,
 	}
-	if err := s.instanceSettingsRepo.Save(ctx, settings); err != nil {
+	if err := s.instanceSettingsRepo.Create(ctx, settings); err != nil {
 		response.AddFlashMessage(*flash.NewError("Error saving settings"))
 		response.Error = fmt.Errorf("saving settings: %w", err)
 		return response
@@ -82,7 +94,7 @@ func (s *GameManagerService) CreateInstance(ctx context.Context, name string, us
 }
 
 func (s *GameManagerService) SwitchInstance(ctx context.Context, user *models.User, instanceID string) (*models.Instance, error) {
-	instance, err := s.instanceRepo.FindByID(ctx, instanceID)
+	instance, err := s.instanceRepo.GetByID(ctx, instanceID)
 	if err != nil {
 		return nil, errors.New("instance not found")
 	}
@@ -104,7 +116,7 @@ func (s *GameManagerService) SwitchInstance(ctx context.Context, user *models.Us
 // The teams will not be duplicated
 func (s *GameManagerService) DuplicateInstance(ctx context.Context, user *models.User, id, name string) (response ServiceResponse) {
 	response = ServiceResponse{}
-	oldInstance, err := s.instanceRepo.FindByID(ctx, id)
+	oldInstance, err := s.instanceRepo.GetByID(ctx, id)
 	if err != nil {
 		response.AddFlashMessage(*flash.NewError("Instance not found"))
 		response.Error = fmt.Errorf("finding instance: %w", err)
@@ -123,7 +135,7 @@ func (s *GameManagerService) DuplicateInstance(ctx context.Context, user *models
 		UserID: user.ID,
 	}
 
-	if err := s.instanceRepo.Save(ctx, newInstance); err != nil {
+	if err := s.instanceRepo.Create(ctx, newInstance); err != nil {
 		response.AddFlashMessage(*flash.NewError("Error saving new instance"))
 		response.Error = fmt.Errorf("saving new instance: %w", err)
 		return response
@@ -142,7 +154,7 @@ func (s *GameManagerService) DuplicateInstance(ctx context.Context, user *models
 	// Copy settings
 	settings := oldInstance.Settings
 	settings.InstanceID = newInstance.ID
-	if err := s.instanceSettingsRepo.Save(ctx, &settings); err != nil {
+	if err := s.instanceSettingsRepo.Create(ctx, &settings); err != nil {
 		response.AddFlashMessage(*flash.NewError("Error saving settings"))
 		response.Error = fmt.Errorf("saving settings: %w", err)
 		return response
@@ -165,7 +177,8 @@ func (s *GameManagerService) LoadTeams(ctx context.Context, teams *[]models.Team
 
 func (s *GameManagerService) DeleteInstance(ctx context.Context, user *models.User, instanceID, confirmName string) (response ServiceResponse) {
 	response = ServiceResponse{}
-	instance, err := s.instanceRepo.FindByID(ctx, instanceID)
+	// Check if the user has permission to delete the instance
+	instance, err := s.instanceRepo.GetByID(ctx, instanceID)
 	if err != nil {
 		response.AddFlashMessage(*flash.NewError("Instance not found"))
 		response.Error = fmt.Errorf("finding instance: %w", err)
@@ -178,12 +191,14 @@ func (s *GameManagerService) DeleteInstance(ctx context.Context, user *models.Us
 		return response
 	}
 
+	// If the name does not match the confirmation, return an error
 	if confirmName != instance.Name {
 		response.AddFlashMessage(*flash.NewError("Instance name does not match confirmation"))
 		response.Error = errors.New("instance name does not match confirmation")
 		return response
 	}
 
+	// Check if the user is currently using this instance
 	if user.CurrentInstanceID == instance.ID {
 		user.CurrentInstanceID = ""
 		err := s.userService.UpdateUser(ctx, user)
@@ -194,10 +209,44 @@ func (s *GameManagerService) DeleteInstance(ctx context.Context, user *models.Us
 		}
 	}
 
-	err = s.instanceRepo.Delete(ctx, instanceID)
+	// Start transaction
+	tx, err := s.transactor.BeginTx(ctx, &sql.TxOptions{})
 	if err != nil {
+		tx.Rollback()
+		response.AddFlashMessage(*flash.NewError("Error starting transaction"))
+		response.Error = fmt.Errorf("starting transaction: %w", err)
+		return response
+	}
+
+	err = s.instanceRepo.Delete(ctx, tx, instanceID)
+	if err != nil {
+		tx.Rollback()
 		response.AddFlashMessage(*flash.NewError("Error deleting instance"))
 		response.Error = fmt.Errorf("deleting instance: %w", err)
+		return response
+	}
+
+	err = s.instanceSettingsRepo.Delete(ctx, tx, instanceID)
+	if err != nil {
+		tx.Rollback()
+		response.AddFlashMessage(*flash.NewError("Error deleting settings"))
+		response.Error = fmt.Errorf("deleting settings: %w", err)
+		return response
+	}
+
+	err = s.teamService.DeleteByInstanceID(ctx, tx, instanceID)
+	if err != nil {
+		tx.Rollback()
+		response.AddFlashMessage(*flash.NewError("Error deleting teams"))
+		response.Error = fmt.Errorf("deleting teams: %w", err)
+		return response
+	}
+
+	err = tx.Commit()
+	if err != nil {
+		tx.Rollback()
+		response.AddFlashMessage(*flash.NewError("Error committing transaction"))
+		response.Error = fmt.Errorf("committing transaction: %w", err)
 		return response
 	}
 
@@ -206,8 +255,7 @@ func (s *GameManagerService) DeleteInstance(ctx context.Context, user *models.Us
 }
 
 func (s *GameManagerService) GetTeamActivityOverview(ctx context.Context, instanceID string) ([]TeamActivity, error) {
-	locationRepository := repositories.NewLocationRepository()
-	locations, err := locationRepository.FindByInstance(ctx, instanceID)
+	locations, err := s.locationService.FindByInstance(ctx, instanceID)
 	if err != nil {
 		return nil, fmt.Errorf("finding all locations: %w", err)
 	}
@@ -242,52 +290,72 @@ func (s *GameManagerService) SaveLocation(ctx context.Context, location *models.
 	return nil
 }
 
-func (s *GameManagerService) CreateLocation(ctx context.Context, user *models.User, data map[string]string) (models.Location, error) {
-
+func (s *GameManagerService) CreateLocation(
+	ctx context.Context,
+	user *models.User,
+	data map[string]string,
+) (models.Location, error) {
+	// Extract input values
 	name := data["name"]
-	lat := data["latitude"]
-	lng := data["longitude"]
-	points := data["points"]
-	marker := data["marker"]
+	latStr := data["latitude"]
+	lngStr := data["longitude"]
+	pointsStr := data["points"]
+	markerCode := data["marker"]
 
-	var latFloat, lngFloat float64
-	var err error
-	if lat != "" && lng != "" {
-		latFloat, err = strconv.ParseFloat(lat, 64)
-		if err != nil {
-			return models.Location{}, err
-		}
-		lngFloat, err = strconv.ParseFloat(lng, 64)
-		if err != nil {
-			return models.Location{}, err
-		}
-	}
+	var (
+		lat float64
+		lng float64
+		err error
+	)
 
-	pointsInt := 10
-	if points != "" {
-		pointsInt, err = strconv.Atoi(points)
+	// Parse latitude / longitude if provided
+	if latStr != "" && lngStr != "" {
+		lat, err = strconv.ParseFloat(latStr, 64)
 		if err != nil {
-			return models.Location{}, err
+			return models.Location{}, fmt.Errorf("invalid latitude: %w", err)
+		}
+		lng, err = strconv.ParseFloat(lngStr, 64)
+		if err != nil {
+			return models.Location{}, fmt.Errorf("invalid longitude: %w", err)
 		}
 	}
 
-	if marker == "" {
-		return s.locationService.CreateLocation(ctx, user.CurrentInstanceID, name, latFloat, lngFloat, pointsInt)
+	// Parse points (default = 10)
+	points := 10
+	if pointsStr != "" {
+		points, err = strconv.Atoi(pointsStr)
+		if err != nil {
+			return models.Location{}, fmt.Errorf("invalid points value: %w", err)
+		}
 	}
 
-	instances, err := s.GetInstanceIDsForUser(ctx, user.ID)
+	// If no marker code given, create a location directly
+	if markerCode == "" {
+		return s.locationService.CreateLocation(
+			ctx,
+			user.CurrentInstanceID,
+			name,
+			lat,
+			lng,
+			points,
+		)
+	}
+
+	// Otherwise, verify that marker code exists in markers not already in the user’s current instance
+	instanceIDs, err := s.GetInstanceIDsForUser(ctx, user.ID)
 	if err != nil {
-		return models.Location{}, fmt.Errorf("getting instances for user: %w", err)
+		return models.Location{}, fmt.Errorf("getting instance IDs for user: %w", err)
 	}
 
-	markers, err := s.markerRepo.FindNotInInstance(ctx, user.CurrentInstanceID, instances)
+	markers, err := s.markerRepo.FindNotInInstance(ctx, user.CurrentInstanceID, instanceIDs)
 	if err != nil {
 		return models.Location{}, fmt.Errorf("finding markers not in instance: %w", err)
 	}
 
+	// Check if the requested marker code exists among returned markers
 	markerExists := false
 	for _, m := range markers {
-		if m.Code == marker {
+		if m.Code == markerCode {
 			markerExists = true
 			break
 		}
@@ -296,19 +364,22 @@ func (s *GameManagerService) CreateLocation(ctx context.Context, user *models.Us
 		return models.Location{}, errors.New("marker does not exist")
 	}
 
-	return s.locationService.CreateLocationFromMarker(ctx, user.CurrentInstanceID, name, latFloat, lngFloat, pointsInt, marker)
-
+	// Finally, create location from marker
+	return s.locationService.CreateLocationFromMarker(
+		ctx,
+		user.CurrentInstanceID,
+		name,
+		points,
+		markerCode,
+	)
 }
 
 func (s *GameManagerService) isMarkerShared(ctx context.Context, markerID, instanceID string) (bool, error) {
-	count, err := db.DB.NewSelect().
-		Model((*models.Location)(nil)).
-		Where("marker_id = ? AND instance_id != ?", markerID, instanceID).
-		Count(ctx)
+	shared, err := s.markerRepo.IsShared(ctx, markerID)
 	if err != nil {
-		return false, err
+		return false, fmt.Errorf("checking if marker is shared: %w", err)
 	}
-	return count > 0, nil
+	return shared, nil
 }
 
 func (s *GameManagerService) ValidateLocationMarker(user *models.User, id string) bool {

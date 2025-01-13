@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/nathanhollows/Rapua/internal/repositories"
 	"github.com/nathanhollows/Rapua/models"
+	"github.com/nathanhollows/Rapua/repositories"
 )
 
 type CheckInService interface {
@@ -19,15 +19,19 @@ type CheckInService interface {
 
 type checkInService struct {
 	checkInRepo  repositories.CheckInRepository
-	teamRepo     repositories.TeamRepository
 	locationRepo repositories.LocationRepository
+	teamRepo     repositories.TeamRepository
 }
 
-func NewCheckInService() CheckInService {
+func NewCheckInService(
+	checkInRepo repositories.CheckInRepository,
+	locationRepo repositories.LocationRepository,
+	teamRepo repositories.TeamRepository,
+) CheckInService {
 	return &checkInService{
-		checkInRepo:  repositories.NewCheckInRepository(),
-		teamRepo:     repositories.NewTeamRepository(),
-		locationRepo: repositories.NewLocationRepository(),
+		checkInRepo:  checkInRepo,
+		locationRepo: locationRepo,
+		teamRepo:     teamRepo,
 	}
 }
 
@@ -63,7 +67,7 @@ func (s *checkInService) CheckIn(ctx context.Context, team models.Team, location
 
 // CheckOut logs a check out for a team at a location
 func (s *checkInService) CheckOut(ctx context.Context, team *models.Team, location *models.Location) (models.CheckIn, error) {
-	scan, err := s.checkInRepo.CheckOut(ctx, team, location)
+	scan, err := s.checkInRepo.LogCheckOut(ctx, team, location)
 	if err != nil {
 		return models.CheckIn{}, fmt.Errorf("checking out: %w", err)
 	}

@@ -7,7 +7,7 @@ import (
 	"os"
 
 	"github.com/a-h/templ"
-	emails "github.com/nathanhollows/Rapua/internal/templates/emails"
+	templates "github.com/nathanhollows/Rapua/internal/templates/emails"
 	"github.com/nathanhollows/Rapua/models"
 	"github.com/sendgrid/rest"
 	"github.com/sendgrid/sendgrid-go"
@@ -15,14 +15,34 @@ import (
 )
 
 type EmailService interface {
-	// SendPasswordReset(ctx context.Context, user models.User) (*rest.Response, error)
+	// SendVerificationEmail sends a verification email to the user to complete their registration
 	SendVerificationEmail(ctx context.Context, user models.User) (*rest.Response, error)
+	// SendContactEmail sends an email to the site owner from the contact form
+	SendContactEmail(ctx context.Context, name, contactEmail, content string) (*rest.Response, error)
 }
 
 type emailService struct{}
 
 func NewEmailService() EmailService {
 	return &emailService{}
+}
+
+func (s emailService) SendContactEmail(ctx context.Context, name, contactEmail, content string) (*rest.Response, error) {
+	sentFrom := mail.NewEmail("Rapua Contact Form", os.Getenv("CONTACT_EMAIL"))
+	sentTo := mail.NewEmail("Rapua", os.Getenv("CONTACT_EMAIL"))
+	subject := "New message from Rapua contact form"
+
+	htmlTemplate := `
+	<p><strong>Name:</strong> %v</p>
+	<p><strong>Email:</strong> %v</p>
+	<p>%v</p>
+	`
+
+	message := mail.NewSingleEmail(sentFrom, subject, sentTo, content, fmt.Sprintf(htmlTemplate, name, contactEmail, content))
+
+	client := sendgrid.NewSendClient(os.Getenv("SENDGRID_API_KEY"))
+	response, err := client.Send(message)
+	return response, err
 }
 
 func (s emailService) SendVerificationEmail(ctx context.Context, user models.User) (*rest.Response, error) {
@@ -43,7 +63,7 @@ Nathan`
 
 	// Render the html email template
 	w := new(bytes.Buffer)
-	c := emails.VerifyEmail(url)
+	c := templates.VerifyEmail(url)
 	c.Render(ctx, w)
 
 	message := mail.NewSingleEmail(from, subject, to, plainTextContent, w.String())

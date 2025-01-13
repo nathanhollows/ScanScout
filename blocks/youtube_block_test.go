@@ -60,17 +60,3 @@ func TestYoutubeBlock_ValidatePlayerInput(t *testing.T) {
 	assert.True(t, newState.IsComplete())
 	assert.Equal(t, 0, newState.GetPointsAwarded())
 }
-
-func TestYoutubeBlock_CalculatePoints(t *testing.T) {
-	block := YoutubeBlock{
-		BaseBlock: BaseBlock{
-			Points: 5,
-		},
-		URL: "https://www.youtube.com/watch?v=12345",
-	}
-
-	input := map[string][]string{}
-	points, err := block.CalculatePoints(input)
-	require.NoError(t, err)
-	assert.Equal(t, 0, points) // YoutubeBlock has no points to calculate
-}

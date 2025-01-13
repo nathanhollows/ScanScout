@@ -95,16 +95,3 @@ func TestAnswerBlock_ValidatePlayerInput(t *testing.T) {
 	assert.True(t, newState.IsComplete())
 	assert.Equal(t, 10, newState.GetPointsAwarded())
 }
-
-func TestAnswerBlock_CalculatePoints(t *testing.T) {
-	block := AnswerBlock{
-		BaseBlock: BaseBlock{
-			Points: 10,
-		},
-	}
-
-	input := map[string][]string{"answer": {"any"}}
-	points, err := block.CalculatePoints(input)
-	require.NoError(t, err)
-	assert.Equal(t, 10, points)
-}

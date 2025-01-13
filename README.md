@@ -146,9 +146,7 @@ For examples of how to use Rapua, please refer to the [Docs](https://rapua.nz/do
 <!-- ROADMAP -->
 ## Roadmap
 
-I'm not currently operating a roadmap for this project. If you would like to see a feature added, please open an issue with the tag "enhancement". Development is currently needs-driven.
-
-See the [open issues](https://github.com/nathanhollows/Rapua/issues) for a full list of proposed features (and known issues).
+See the [roadmap/wishlist](https://rapua.nz/docs/developer/roadmap) for a list of proposed features. The list is not exhaustive and is subject to change. Please [request a feature](https://github.com/nathanhollows/Rapua/issues/new?assignees=&labels=&projects=&template=feature_request.md) if you would like to see something added.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 

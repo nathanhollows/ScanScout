@@ -92,7 +92,6 @@ That’s it! Your game is live, and participants are ready to explore and learn.
 
 ### What’s Next?
 
-- Need more customization? Check out the **[Features](/docs/user/features)**.  
-- Have questions? Visit the **[FAQs](/docs/user/faq)** or contact us at [support@rapua.nz](mailto:support@rapua.nz).  
+Check out the **[Features](/docs/user/features)** or [Content Blocks](/docs/developer/roadmap) to learn more about what Rapua can do.
 
-Let the adventure begin!
+Let the adventure begin! 🚀

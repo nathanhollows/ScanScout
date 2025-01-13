@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/nathanhollows/Rapua/internal/repositories"
 	"github.com/nathanhollows/Rapua/models"
+	"github.com/nathanhollows/Rapua/repositories"
 )
 
 type NotificationService interface {
@@ -16,14 +16,17 @@ type NotificationService interface {
 }
 
 type notificationService struct {
-	teamRepository         repositories.TeamRepository
 	notificationRepository repositories.NotificationRepository
+	teamRepository         repositories.TeamRepository
 }
 
-func NewNotificationService() NotificationService {
+func NewNotificationService(
+	notificationRepository repositories.NotificationRepository,
+	teamRepository repositories.TeamRepository,
+) NotificationService {
 	return &notificationService{
-		teamRepository:         repositories.NewTeamRepository(),
-		notificationRepository: repositories.NewNotificationRepository(),
+		notificationRepository: notificationRepository,
+		teamRepository:         teamRepository,
 	}
 }
 
@@ -34,7 +37,7 @@ func (s *notificationService) SendNotification(ctx context.Context, teamCode str
 		Content:  content,
 	}
 
-	err := s.notificationRepository.Save(ctx, &notification)
+	err := s.notificationRepository.Create(ctx, &notification)
 	return notification, err
 }
 
@@ -71,7 +74,7 @@ func (s *notificationService) GetNotifications(ctx context.Context, teamCode str
 
 // DismissNotification marks a notification as dismissed
 func (s *notificationService) DismissNotification(ctx context.Context, notificationID string) error {
-	notification, err := s.notificationRepository.FindByID(ctx, notificationID)
+	notification, err := s.notificationRepository.GetByID(ctx, notificationID)
 	if err != nil {
 		return err
 	}

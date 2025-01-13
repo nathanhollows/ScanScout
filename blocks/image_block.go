@@ -57,11 +57,7 @@ func (b *ImageBlock) UpdateBlockData(input map[string][]string) error {
 	}
 
 	if link, exists := input["link"]; exists && len(link) > 0 {
-		linkURL, err := b.parseURL(input)
-		if err != nil {
-			return fmt.Errorf("parsing link URL: %w", err)
-		}
-		b.Link = linkURL
+		b.Link = link[0]
 	}
 
 	return nil
@@ -91,9 +87,4 @@ func (b *ImageBlock) ValidatePlayerInput(state PlayerState, input map[string][]s
 	// No validation required for ImageBlock; mark as complete
 	state.SetComplete(true)
 	return state, nil
-}
-
-func (b *ImageBlock) CalculatePoints(input map[string][]string) (int, error) {
-	// ImageBlock has no points to calculate
-	return 0, nil
 }

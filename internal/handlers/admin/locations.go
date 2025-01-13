@@ -116,14 +116,14 @@ func (h *AdminHandler) LocationEdit(w http.ResponseWriter, r *http.Request) {
 	code := chi.URLParam(r, "id")
 	user := h.UserFromContext(r.Context())
 
-	location, err := h.LocationService.FindByInstanceAndCode(r.Context(), user.CurrentInstanceID, code)
+	location, err := h.LocationService.GetByInstanceAndCode(r.Context(), user.CurrentInstanceID, code)
 	if err != nil {
 		h.Logger.Error("LocationEdit: finding location", "error", err, "instance_id", user.CurrentInstanceID, "location_code", code)
 		h.redirect(w, r, "/admin/locations")
 		return
 	}
 
-	blocks, err := h.BlockService.GetByLocationID(r.Context(), location.ID)
+	blocks, err := h.BlockService.FindByLocationID(r.Context(), location.ID)
 	if err != nil {
 		h.Logger.Error("LocationEdit: getting blocks", "error", err, "instance_id", user.CurrentInstanceID, "location_id", location.ID)
 		h.redirect(w, r, "/admin/locations")
@@ -192,7 +192,7 @@ func (h *AdminHandler) LocationEditPost(w http.ResponseWriter, r *http.Request) 
 		Points:    points,
 	}
 
-	location, err := h.LocationService.FindByInstanceAndCode(r.Context(), user.CurrentInstanceID, locationCode)
+	location, err := h.LocationService.GetByInstanceAndCode(r.Context(), user.CurrentInstanceID, locationCode)
 	if err != nil {
 		h.handleError(w, r, "LocationEditPost: finding location", "Error finding location", "error", err)
 		return
@@ -235,7 +235,7 @@ func (h *AdminHandler) LocationDelete(w http.ResponseWriter, r *http.Request) {
 
 	user := h.UserFromContext(r.Context())
 
-	location, err := h.LocationService.FindByInstanceAndCode(r.Context(), user.CurrentInstanceID, locationCode)
+	location, err := h.LocationService.GetByInstanceAndCode(r.Context(), user.CurrentInstanceID, locationCode)
 	if err != nil {
 		h.handleError(w, r, "LocationDelete: finding location", "Error finding location", "error", err)
 		return
@@ -259,7 +259,7 @@ func (h *AdminHandler) LocationPreview(w http.ResponseWriter, r *http.Request) {
 	user := h.UserFromContext(r.Context())
 	locationCode := chi.URLParam(r, "id")
 
-	location, err := h.LocationService.FindByInstanceAndCode(r.Context(), user.CurrentInstanceID, locationCode)
+	location, err := h.LocationService.GetByInstanceAndCode(r.Context(), user.CurrentInstanceID, locationCode)
 	if err != nil {
 		h.handleError(w, r, "LocationEditPost: finding location", "Error finding location", "error", err)
 		return
@@ -269,7 +269,7 @@ func (h *AdminHandler) LocationPreview(w http.ResponseWriter, r *http.Request) {
 		Location: *location,
 	}
 
-	contentBlocks, err := h.BlockService.GetByLocationID(r.Context(), location.ID)
+	contentBlocks, err := h.BlockService.FindByLocationID(r.Context(), location.ID)
 
 	blockStates := make(map[string]blocks.PlayerState, len(contentBlocks))
 	for _, block := range contentBlocks {

@@ -91,7 +91,7 @@ func (h *AdminHandler) BlockNewPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	location, err := h.LocationService.FindByID(r.Context(), locationID)
+	location, err := h.LocationService.GetByID(r.Context(), locationID)
 	if err != nil {
 		h.handleError(w, r, "BlockNewPost: finding location", "Could not create block", "error", err)
 		return
@@ -103,7 +103,7 @@ func (h *AdminHandler) BlockNewPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = templates.RenderAdminBlock(user.CurrentInstance.Settings, block).Render(r.Context(), w)
+	err = templates.RenderAdminBlock(user.CurrentInstance.Settings, block, true).Render(r.Context(), w)
 	if err != nil {
 		h.Logger.Error("BlockNewPost: rendering template", "error", err)
 	}

@@ -6,53 +6,62 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/nathanhollows/Rapua/db"
+	"github.com/google/uuid"
 	"github.com/nathanhollows/Rapua/models"
 	"github.com/uptrace/bun"
 )
 
 type TeamRepository interface {
-	// Update saves or updates a team in the database
-	Update(ctx context.Context, t *models.Team) error
-	// Delete removes the team from the database
-	Delete(ctx context.Context, instanceID string, teamCode string) error
-	// DeleteByInstanceID removes all teams for an instance
-	DeleteByInstanceID(ctx context.Context, instanceID string) error
+	// InsertBatch adds multiple teams to the database
+	InsertBatch(ctx context.Context, teams []models.Team) error
+
+	// GetByCode returns a team by its code
+	GetByCode(ctx context.Context, code string) (*models.Team, error)
 	// FindAll returns all teams for an instance
 	FindAll(ctx context.Context, instanceID string) ([]models.Team, error)
 	// FindAllWithScans returns all teams for an instance with scans
 	FindAllWithScans(ctx context.Context, instanceID string) ([]models.Team, error)
-	// FindTeamByCode returns a team by code
-	FindTeamByCode(ctx context.Context, code string) (*models.Team, error)
-	// AddTeams adds teams to the database
-	InsertBatch(ctx context.Context, teams []models.Team) error
+
+	// Update saves or updates a team in the database
+	Update(ctx context.Context, t *models.Team) error
+
+	// Delete removes the team from the database
+	// Requires a transaction as related data will also need to be deleted
+	Delete(ctx context.Context, tx *bun.Tx, instanceID string, teamCode string) error
+	// DeleteByInstanceID removes all teams for a specific instance
+	// Requires a transaction as this implies a cascade delete and related data
+	// will also need to be deleted
+	DeleteByInstanceID(ctx context.Context, tx *bun.Tx, instanceID string) error
+
 	// LoadInstance loads the instance for a team
 	LoadInstance(ctx context.Context, team *models.Team) error
-	// LoadCheckIns loads the scans for a team
+	// LoadCheckIns loads the check-ins for a team
 	LoadCheckIns(ctx context.Context, team *models.Team) error
 	// LoadBlockingLocation loads the blocking location for a team
 	LoadBlockingLocation(ctx context.Context, team *models.Team) error
-	// // LoadNotifications loads the notifications for a team
-	// LoadNotifications(ctx context.Context, team *models.Team) error
 	// LoadRelations loads all relations for a team
 	LoadRelations(ctx context.Context, team *models.Team) error
 }
 
-type teamRepository struct{}
+type teamRepository struct {
+	db *bun.DB
+}
 
 // NewTeamRepository creates a new TeamRepository
-func NewTeamRepository() TeamRepository {
-	return &teamRepository{}
+func NewTeamRepository(db *bun.DB) TeamRepository {
+	return &teamRepository{
+		db: db,
+	}
 }
 
 // Update saves or updates a team in the database
 func (r *teamRepository) Update(ctx context.Context, t *models.Team) error {
-	_, err := db.DB.NewUpdate().Model(t).WherePK().Exec(ctx)
+	_, err := r.db.NewUpdate().Model(t).WherePK().Exec(ctx)
 	return err
 }
 
-func (r *teamRepository) Delete(ctx context.Context, instanceID string, teamCode string) error {
-	_, err := db.DB.
+func (r *teamRepository) Delete(ctx context.Context, tx *bun.Tx, instanceID string, teamCode string) error {
+	_, err := tx.
 		NewDelete().
 		Model(&models.Team{}).
 		Where("code = ? AND instance_id = ?", teamCode, instanceID).
@@ -60,14 +69,14 @@ func (r *teamRepository) Delete(ctx context.Context, instanceID string, teamCode
 	return err
 }
 
-func (r *teamRepository) DeleteByInstanceID(ctx context.Context, instanceID string) error {
-	_, err := db.DB.NewDelete().Model(&models.Team{}).Where("instance_id = ?", instanceID).Exec(ctx)
+func (r *teamRepository) DeleteByInstanceID(ctx context.Context, tx *bun.Tx, instanceID string) error {
+	_, err := tx.NewDelete().Model(&models.Team{}).Where("instance_id = ?", instanceID).Exec(ctx)
 	return err
 }
 
 func (r *teamRepository) FindAll(ctx context.Context, instanceID string) ([]models.Team, error) {
 	var teams []models.Team
-	err := db.DB.NewSelect().
+	err := r.db.NewSelect().
 		Model(&teams).
 		Where("team.instance_id = ?", instanceID).
 		Scan(ctx)
@@ -79,7 +88,7 @@ func (r *teamRepository) FindAll(ctx context.Context, instanceID string) ([]mode
 
 func (r *teamRepository) FindAllWithScans(ctx context.Context, instanceID string) ([]models.Team, error) {
 	var teams []models.Team
-	err := db.DB.NewSelect().
+	err := r.db.NewSelect().
 		Model(&teams).
 		Where("team.instance_id = ?", instanceID).
 		// Add the scans in the relation order by location_id
@@ -93,11 +102,11 @@ func (r *teamRepository) FindAllWithScans(ctx context.Context, instanceID string
 	return teams, nil
 }
 
-// FindTeamByCode returns a team by code
-func (r *teamRepository) FindTeamByCode(ctx context.Context, code string) (*models.Team, error) {
+// GetByCode returns a team by code
+func (r *teamRepository) GetByCode(ctx context.Context, code string) (*models.Team, error) {
 	code = strings.ToUpper(code)
 	var team models.Team
-	err := db.DB.NewSelect().Model(&team).Where("team.code = ?", code).
+	err := r.db.NewSelect().Model(&team).Where("team.code = ?", code).
 		Relation("Instance").
 		Relation("BlockingLocation").
 		Relation("CheckIns", func(q *bun.SelectQuery) *bun.SelectQuery {
@@ -112,7 +121,12 @@ func (r *teamRepository) FindTeamByCode(ctx context.Context, code string) (*mode
 
 // InsertBatch inserts a batch of teams and returns an error if there's a unique constraint conflict
 func (r *teamRepository) InsertBatch(ctx context.Context, teams []models.Team) error {
-	_, err := db.DB.NewInsert().Model(&teams).Exec(ctx)
+	for teamIndex := range teams {
+		if teams[teamIndex].ID == "" {
+			teams[teamIndex].ID = uuid.New().String()
+		}
+	}
+	_, err := r.db.NewInsert().Model(&teams).Exec(ctx)
 	if err != nil && isUniqueConstraintError(err) {
 		return errors.New("unique constraint error")
 	}
@@ -125,7 +139,7 @@ func isUniqueConstraintError(err error) bool {
 }
 
 func (r *teamRepository) LoadInstance(ctx context.Context, team *models.Team) error {
-	query := db.DB.NewSelect().
+	query := r.db.NewSelect().
 		Model(&team.Instance).
 		Where("id = ?", team.InstanceID).
 		WherePK()
@@ -143,7 +157,7 @@ func (r *teamRepository) LoadInstance(ctx context.Context, team *models.Team) er
 
 func (r *teamRepository) LoadCheckIns(ctx context.Context, team *models.Team) error {
 	// Only load the scans if they are not already loaded
-	err := db.DB.NewSelect().Model(&team.CheckIns).
+	err := r.db.NewSelect().Model(&team.CheckIns).
 		Where("team_code = ?", team.Code).
 		Relation("Location").
 		Order("time_in DESC").
@@ -158,7 +172,7 @@ func (r *teamRepository) LoadBlockingLocation(ctx context.Context, team *models.
 	if team.MustCheckOut == "" || team.BlockingLocation.ID != "" {
 		return nil
 	}
-	err := db.DB.NewSelect().Model(&team.BlockingLocation).
+	err := r.db.NewSelect().Model(&team.BlockingLocation).
 		Where("ID = ?", team.MustCheckOut).
 		Scan(ctx)
 	if err != nil {

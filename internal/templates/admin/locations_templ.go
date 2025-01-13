@@ -716,7 +716,7 @@ func EditLocation(location models.Location, settings models.InstanceSettings, co
 			return templ_7745c5c3_Err
 		}
 		for _, block := range contentBlocks {
-			templ_7745c5c3_Err = bTemplates.RenderAdminBlock(settings, block).Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = bTemplates.RenderAdminBlock(settings, block, len(contentBlocks) < 4).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

@@ -4,7 +4,6 @@ import (
 	"net/http"
 
 	"github.com/go-chi/chi"
-	"github.com/nathanhollows/Rapua/internal/services"
 	templates "github.com/nathanhollows/Rapua/internal/templates/admin"
 )
 
@@ -48,8 +47,7 @@ func (h *AdminHandler) TeamActivity(w http.ResponseWriter, r *http.Request) {
 
 	teamCode := chi.URLParam(r, "teamCode")
 
-	gameplayService := services.NewGameplayService()
-	team, err := gameplayService.GetTeamByCode(r.Context(), teamCode)
+	team, err := h.GameplayService.GetTeamByCode(r.Context(), teamCode)
 	if err != nil || team.InstanceID != user.CurrentInstanceID {
 		h.handleError(w, r, "TeamActivity: getting team", "Error getting team", "Could not load data", err)
 		return
@@ -61,7 +59,7 @@ func (h *AdminHandler) TeamActivity(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	locations, err := gameplayService.SuggestNextLocations(r.Context(), team)
+	locations, err := h.GameplayService.SuggestNextLocations(r.Context(), team)
 	if err != nil {
 		h.handleError(w, r, "TeamActivity: getting next locations", "Error getting next locations", "Could not load data", err)
 		return

@@ -9,8 +9,8 @@ import (
 
 	"github.com/nathanhollows/Rapua/blocks"
 	"github.com/nathanhollows/Rapua/internal/flash"
-	"github.com/nathanhollows/Rapua/internal/repositories"
 	"github.com/nathanhollows/Rapua/models"
+	"github.com/nathanhollows/Rapua/repositories"
 	"golang.org/x/exp/rand"
 )
 
@@ -49,17 +49,21 @@ type gameplayService struct {
 	MarkerRepository  repositories.MarkerRepository
 }
 
-func NewGameplayService() GameplayService {
+func NewGameplayService(
+	checkInService CheckInService,
+	locationService LocationService,
+	teamService TeamService,
+	blockService BlockService,
+	navigationService NavigationService,
+	markerRepository repositories.MarkerRepository,
+) GameplayService {
 	return &gameplayService{
-		CheckInService:  NewCheckInService(),
-		LocationService: NewLocationService(repositories.NewClueRepository()),
-		TeamService:     NewTeamService(repositories.NewTeamRepository()),
-		BlockService: NewBlockService(
-			repositories.NewBlockRepository(),
-			repositories.NewBlockStateRepository(),
-		),
-		NavigationService: NewNavigationService(),
-		MarkerRepository:  repositories.NewMarkerRepository(),
+		CheckInService:    checkInService,
+		LocationService:   locationService,
+		TeamService:       teamService,
+		BlockService:      blockService,
+		NavigationService: navigationService,
+		MarkerRepository:  markerRepository,
 	}
 }
 
@@ -94,7 +98,7 @@ func (s *gameplayService) GetMarkerByCode(ctx context.Context, locationCode stri
 	response.Data = make(map[string]interface{})
 
 	locationCode = strings.TrimSpace(strings.ToUpper(locationCode))
-	marker, err := s.MarkerRepository.FindByCode(ctx, locationCode)
+	marker, err := s.MarkerRepository.GetByCode(ctx, locationCode)
 	if err != nil {
 		response.Error = fmt.Errorf("GetLocationByCode finding marker: %w", err)
 		return response
@@ -171,7 +175,7 @@ func (s *gameplayService) CheckIn(ctx context.Context, team *models.Team, locati
 	}
 
 	// Find the location
-	location, err := s.LocationService.FindByInstanceAndCode(ctx, team.InstanceID, locationCode)
+	location, err := s.LocationService.GetByInstanceAndCode(ctx, team.InstanceID, locationCode)
 	if err != nil {
 		msg := flash.NewWarning("Please double check the code and try again.").SetTitle("Location code not found")
 		response.AddFlashMessage(msg)
@@ -257,7 +261,7 @@ func (s *gameplayService) CheckIn(ctx context.Context, team *models.Team, locati
 
 func (s *gameplayService) CheckOut(ctx context.Context, team *models.Team, locationCode string) error {
 
-	location, err := s.LocationService.FindByInstanceAndCode(ctx, team.InstanceID, locationCode)
+	location, err := s.LocationService.GetByInstanceAndCode(ctx, team.InstanceID, locationCode)
 	if err != nil {
 		return fmt.Errorf("%w: finding location: %w", ErrLocationNotFound, err)
 	}

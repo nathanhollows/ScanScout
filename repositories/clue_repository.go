@@ -5,26 +5,35 @@ import (
 	"fmt"
 
 	"github.com/google/uuid"
-	"github.com/nathanhollows/Rapua/db"
 	"github.com/nathanhollows/Rapua/models"
+	"github.com/uptrace/bun"
 )
 
 type ClueRepository interface {
 	// Save saves or updates a clue in the database
 	Save(ctx context.Context, c *models.Clue) error
+
+	// FindCluesByLocation returns all clues for a given location
+	FindCluesByLocation(ctx context.Context, locationID string) ([]models.Clue, error)
+
 	// Delete removes the clue from the database
 	Delete(ctx context.Context, clueID string) error
 	// DeleteByLocationID removes all clues for a location
+	// When deleting a location, please use DeleteByLocationIDWithTransaction instead
 	DeleteByLocationID(ctx context.Context, locationID string) error
-	// FindCluesByLocation returns all clues for a given location
-	FindCluesByLocation(ctx context.Context, locationID string) ([]models.Clue, error)
+	// DeleteByLocationIDWithTransaction removes all clues for a location with a transaction
+	DeleteByLocationIDWithTransaction(ctx context.Context, tx *bun.Tx, locationID string) error
 }
 
-type clueRepository struct{}
+type clueRepository struct {
+	db *bun.DB
+}
 
 // NewClueRepository creates a new ClueRepository
-func NewClueRepository() ClueRepository {
-	return &clueRepository{}
+func NewClueRepository(db *bun.DB) ClueRepository {
+	return &clueRepository{
+		db: db,
+	}
 }
 
 // Save saves or updates a clue in the database
@@ -40,13 +49,27 @@ func (r *clueRepository) Save(ctx context.Context, c *models.Clue) error {
 		}
 		c.ID = id.String()
 	}
-	_, err = db.DB.NewInsert().Model(c).Exec(ctx)
+	_, err = r.db.NewInsert().Model(c).Exec(ctx)
 	return err
+}
+
+// FindCluesByLocation returns all clues for a given location
+func (r *clueRepository) FindCluesByLocation(ctx context.Context, locationID string) ([]models.Clue, error) {
+	clues := []models.Clue{}
+	err := r.db.
+		NewSelect().
+		Model(&clues).
+		Where("location_id = ?", locationID).
+		Scan(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("finding clues by location: %w", err)
+	}
+	return clues, nil
 }
 
 // Delete removes the clue from the database
 func (r *clueRepository) Delete(ctx context.Context, clueID string) error {
-	_, err := db.DB.
+	_, err := r.db.
 		NewDelete().
 		Model(&models.Clue{ID: clueID}).
 		ForceDelete().
@@ -57,7 +80,7 @@ func (r *clueRepository) Delete(ctx context.Context, clueID string) error {
 
 // DeleteByLocationID removes all clues for a location
 func (r *clueRepository) DeleteByLocationID(ctx context.Context, locationID string) error {
-	_, err := db.DB.
+	_, err := r.db.
 		NewDelete().
 		Model(&models.Clue{}).
 		Where("location_id = ?", locationID).
@@ -66,16 +89,13 @@ func (r *clueRepository) DeleteByLocationID(ctx context.Context, locationID stri
 	return err
 }
 
-// FindCluesByLocation returns all clues for a given location
-func (r *clueRepository) FindCluesByLocation(ctx context.Context, locationID string) ([]models.Clue, error) {
-	clues := []models.Clue{}
-	err := db.DB.
-		NewSelect().
-		Model(&clues).
+// DeleteByLocationIDWithTransaction removes all clues for a location with a transaction
+func (r *clueRepository) DeleteByLocationIDWithTransaction(ctx context.Context, tx *bun.Tx, locationID string) error {
+	_, err := tx.
+		NewDelete().
+		Model(&models.Clue{}).
 		Where("location_id = ?", locationID).
-		Scan(ctx)
-	if err != nil {
-		return nil, fmt.Errorf("finding clues by location: %w", err)
-	}
-	return clues, nil
+		ForceDelete().
+		Exec(ctx)
+	return err
 }

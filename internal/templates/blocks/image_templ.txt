@@ -10,7 +10,8 @@
 <figcaption class=\"text-sm text-center\">
 </figcaption>
 </figure>
-<form hx-post=\"
+<form id=\"
+\" hx-post=\"
 \" hx-trigger=\"
 \" hx-swap=\"none\"><label for=\"
 \" class=\"form-control w-full mt-5\"><div class=\"label\"><span class=\"label-text font-bold\">Image URL</span></div><input id=\"

@@ -1,7 +1,9 @@
 package db
 
 import (
+	"context"
 	"database/sql"
+	"fmt"
 	"log"
 	"os"
 
@@ -12,11 +14,32 @@ import (
 	"github.com/uptrace/bun/extra/bundebug"
 )
 
-var DB *bun.DB
+type transactor struct {
+	db *bun.DB
+}
+
+type Transactor interface {
+	BeginTx(ctx context.Context, opts *sql.TxOptions) (*bun.Tx, error)
+}
+
+func NewTransactor(db *bun.DB) Transactor {
+	return &transactor{
+		db: db,
+	}
+}
+
+func (t *transactor) BeginTx(ctx context.Context, opts *sql.TxOptions) (*bun.Tx, error) {
+	tx, err := t.db.BeginTx(ctx, opts)
+	if err != nil {
+		return nil, fmt.Errorf("beginning transaction: %w", err)
+	}
+	return &tx, nil
+}
 
 func MustOpen() *bun.DB {
 	var sqldb *sql.DB
 	var err error
+	var db *bun.DB
 
 	dataSourceName := os.Getenv("DB_CONNECTION")
 	if dataSourceName == "" {
@@ -27,10 +50,10 @@ func MustOpen() *bun.DB {
 	switch driverName {
 	case "mysql":
 		sqldb, err = sql.Open(driverName, dataSourceName)
-		DB = bun.NewDB(sqldb, mysqldialect.New())
+		db = bun.NewDB(sqldb, mysqldialect.New())
 	case "sqlite3":
 		sqldb, err = sql.Open(sqliteshim.ShimName, dataSourceName)
-		DB = bun.NewDB(sqldb, sqlitedialect.New())
+		db = bun.NewDB(sqldb, sqlitedialect.New())
 	default:
 		panic("unsupported DB_TYPE: " + driverName + ". Supported types are mysql and sqlite3")
 	}
@@ -39,15 +62,15 @@ func MustOpen() *bun.DB {
 		panic(err)
 	}
 
-	debugEnabled := os.Getenv("BUNDEBUG") == "true"
-	DB.AddQueryHook(bundebug.NewQueryHook(
+	debugEnabled := os.Getenv("BUNDEBUG") == "1" || os.Getenv("BUNDEBUG") == "2"
+	db.AddQueryHook(bundebug.NewQueryHook(
 		// disable the hook
 		bundebug.WithEnabled(debugEnabled),
 
 		// BUNDEBUG=1 logs failed queries
 		// BUNDEBUG=2 logs all queries
-		bundebug.FromEnv(""),
+		bundebug.FromEnv("BUNDEBUG"),
 	))
 
-	return DB
+	return db
 }

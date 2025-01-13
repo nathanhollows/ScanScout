@@ -33,7 +33,7 @@ func (m Myfs) Open(name string) (result http.File, err error) {
 	}
 
 	if fi.IsDir() {
-		// Return a response that would have occured if directory didn't exist
+		// Return a response that would have occurred if directory didn't exist
 		return m.Dir.Open("does-not-exist")
 	}
 	return f, nil

@@ -3,6 +3,7 @@ package blocks
 import (
 	"testing"
 
+	"github.com/brianvoe/gofakeit/v7"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -27,17 +28,21 @@ func TestImageBlock_Getters(t *testing.T) {
 }
 
 func TestImageBlock_UpdateBlockData(t *testing.T) {
+	url := gofakeit.URL()
+	caption := gofakeit.Sentence(5)
+	link := gofakeit.URL()
+
 	block := ImageBlock{}
 	data := map[string][]string{
-		"url":     {"https://placecage.lucidinternets.com/500/400"},
-		"caption": {"A test caption"},
-		"link":    {"https://placecage.lucidinternets.com/500/400"},
+		"url":     {url},
+		"caption": {caption},
+		"link":    {link},
 	}
 	err := block.UpdateBlockData(data)
 	require.NoError(t, err)
-	assert.Equal(t, "https://placecage.lucidinternets.com/500/400", block.URL)
-	assert.Equal(t, "A test caption", block.Caption)
-	assert.Equal(t, "https://placecage.lucidinternets.com/500/400", block.Link)
+	assert.Equal(t, url, block.URL)
+	assert.Equal(t, caption, block.Caption)
+	assert.Equal(t, link, block.Link)
 
 	// Invalid URL
 	err = block.UpdateBlockData(map[string][]string{"URL": {"invalid"}})

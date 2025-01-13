@@ -78,8 +78,3 @@ func (b *YoutubeBlock) ValidatePlayerInput(state PlayerState, input map[string][
 	state.SetComplete(true)
 	return state, nil
 }
-
-func (b *YoutubeBlock) CalculatePoints(input map[string][]string) (int, error) {
-	// YoutubeBlock has no points to calculate
-	return 0, nil
-}

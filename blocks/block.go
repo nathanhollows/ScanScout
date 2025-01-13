@@ -35,7 +35,6 @@ type Block interface {
 	// Validation and Points Calculation
 	RequiresValidation() bool
 	ValidatePlayerInput(state PlayerState, input map[string][]string) (newState PlayerState, err error)
-	CalculatePoints(input map[string][]string) (int, error)
 }
 
 type Blocks []Block

@@ -102,7 +102,3 @@ func (b *PincodeBlock) ValidatePlayerInput(state PlayerState, input map[string][
 	state.SetPointsAwarded(b.Points)
 	return state, nil
 }
-
-func (b *PincodeBlock) CalculatePoints(input map[string][]string) (int, error) {
-	return b.Points, nil
-}
