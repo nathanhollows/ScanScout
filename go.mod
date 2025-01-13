@@ -65,7 +65,7 @@ require (
 	github.com/gorilla/sessions v1.3.0
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/quail-ink/goldmark-enclave v0.1.2
-	github.com/stretchr/testify v1.9.0
+	github.com/stretchr/testify v1.10.0
 	github.com/tmthrgd/go-hex v0.0.0-20190904060850-447a3041c3bc // indirect
 	github.com/uptrace/bun/dialect/mysqldialect v1.2.1
 	github.com/uptrace/bun/dialect/sqlitedialect v1.2.1
