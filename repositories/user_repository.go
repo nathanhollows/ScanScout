@@ -3,6 +3,7 @@ package repositories
 import (
 	"context"
 	"errors"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/nathanhollows/Rapua/models"
@@ -46,9 +47,19 @@ func NewUserRepository(db *bun.DB) UserRepository {
 
 // Update the user in the database
 func (r *userRepository) Update(ctx context.Context, user *models.User) error {
+	user.UpdatedAt = time.Now().UTC()
 	res, err := r.db.NewUpdate().
 		Model(user).
-		Column("name").
+		Column(
+			// ID is immutable
+			// Provider is immutable
+			"name",
+			"email_token",
+			"email_token_expiry",
+			"email_verified",
+			"password",
+			"current_instance_id",
+			"updated_at").
 		WherePK().
 		Exec(ctx)
 	rows, err := res.RowsAffected()

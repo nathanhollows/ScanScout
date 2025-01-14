@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"testing"
+	"time"
 
 	"github.com/brianvoe/gofakeit/v7"
 	"github.com/nathanhollows/Rapua/db"
@@ -77,8 +78,34 @@ func TestUserRepository_Update(t *testing.T) {
 	assert.NoError(t, err)
 
 	// Update user
+
+	// // ID is immutable
+	// // Provider is immutable
+	// "name",
+	// "email_token",
+	// "email_token_expiry",
+	// "email_verified",
+	// "password",
+	// "current_instance_id",
+	// "updated_at").
+
 	newName := gofakeit.Name()
+	newEmailToken := gofakeit.UUID()
+	newEmailTokenExpiry := sql.NullTime{
+		Time:  time.Now().Add(time.Hour * 24).UTC(),
+		Valid: true,
+	}
+	newEmailVerified := gofakeit.Bool()
+	newPassword := gofakeit.Password(true, true, true, true, true, 12)
+	newCurrentInstanceID := gofakeit.UUID()
+
 	user.Name = newName
+	user.EmailToken = newEmailToken
+	user.EmailTokenExpiry = newEmailTokenExpiry
+	user.EmailVerified = newEmailVerified
+	user.Password = newPassword
+	user.CurrentInstanceID = newCurrentInstanceID
+
 	err = repo.Update(ctx, user)
 	assert.NoError(t, err)
 
@@ -86,6 +113,12 @@ func TestUserRepository_Update(t *testing.T) {
 	fetchedUser, err := repo.GetByEmail(ctx, user.Email)
 	assert.NoError(t, err)
 	assert.Equal(t, newName, fetchedUser.Name)
+	assert.Equal(t, newEmailToken, fetchedUser.EmailToken)
+	assert.NotEqual(t, user.EmailTokenExpiry, fetchedUser.EmailTokenExpiry)
+	assert.Equal(t, newEmailVerified, fetchedUser.EmailVerified)
+	assert.Equal(t, newPassword, fetchedUser.Password)
+	assert.Equal(t, newCurrentInstanceID, fetchedUser.CurrentInstanceID)
+
 }
 
 func TestUserRepository_FindUserByID(t *testing.T) {

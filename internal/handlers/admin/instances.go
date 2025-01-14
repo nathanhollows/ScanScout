@@ -80,13 +80,13 @@ func (h *AdminHandler) InstanceDuplicate(w http.ResponseWriter, r *http.Request)
 func (h *AdminHandler) InstanceSwitch(w http.ResponseWriter, r *http.Request) {
 	user := h.UserFromContext(r.Context())
 
-	id := chi.URLParam(r, "id")
-	if id == "" {
+	instanceID := chi.URLParam(r, "id")
+	if instanceID == "" {
 		h.handleError(w, r, "InstanceSwitch: missing instance ID", "Could not switch instance", "error", "Instance ID is required", "instance_id", user.CurrentInstanceID)
 		return
 	}
 
-	_, err := h.GameManagerService.SwitchInstance(r.Context(), user, id)
+	_, err := h.GameManagerService.SwitchInstance(r.Context(), user, instanceID)
 	if err != nil {
 		h.handleError(w, r, "InstanceSwitch: switching instance", "Error switching instance", "error", err, "instance_id", user.CurrentInstanceID)
 		return
