@@ -99,6 +99,11 @@ func (s *GameManagerService) SwitchInstance(ctx context.Context, user *models.Us
 		return nil, errors.New("instance not found")
 	}
 
+	// Make sure the user has permission to switch to this instance
+	if instance.UserID != user.ID {
+		return nil, errors.New("user does not have permission to switch to this instance")
+	}
+
 	user.CurrentInstanceID = instance.ID
 	if s.userService == nil {
 		return nil, errors.New("user service is nil")
