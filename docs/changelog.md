@@ -6,6 +6,11 @@ order: 100
 
 # Changelog
 
+## 3.0.1 (2025-01-14)
+
+### Fixed
+- Fixed an issue where the user could not switch instances. `current_instance_id` was blocked from updating in the database.
+
 ## 3.0.0 (2025-01-09)
 
 ### Added
