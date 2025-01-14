@@ -422,34 +422,25 @@ func (s *GameManagerService) GetQRCodePathAndContent(action, id, name, extension
 }
 
 // UpdateSettings parses the form values and updates the instance settings
-func (s *GameManagerService) UpdateSettings(ctx context.Context, settings *models.InstanceSettings, form url.Values) (response ServiceResponse) {
-	response = ServiceResponse{}
-	response.Data = make(map[string]interface{})
-
+func (s *GameManagerService) UpdateSettings(ctx context.Context, settings *models.InstanceSettings, form url.Values) error {
 	// Navigation mode
 	navMode, err := models.ParseNavigationMode(form.Get("navigationMode"))
 	if err != nil {
-		response.AddFlashMessage(*flash.NewError("Something went wrong parsing navigation mode. Please try again."))
-		response.Error = fmt.Errorf("parsing navigation mode: %w", err)
-		return response
+		return fmt.Errorf("parsing navigation mode: %w", err)
 	}
 	settings.NavigationMode = navMode
 
 	// Completion method
 	completionMethod, err := models.ParseCompletionMethod(form.Get("completionMethod"))
 	if err != nil {
-		response.AddFlashMessage(*flash.NewError("Something went wrong parsing completion method. Please try again."))
-		response.Error = fmt.Errorf("parsing completion method: %w", err)
-		return response
+		return fmt.Errorf("parsing completion method: %w", err)
 	}
 	settings.CompletionMethod = completionMethod
 
 	// Navigation method
 	navMethod, err := models.ParseNavigationMethod(form.Get("navigationMethod"))
 	if err != nil {
-		response.AddFlashMessage(*flash.NewError("Something went wrong parsing navigation method. Please try again."))
-		response.Error = fmt.Errorf("parsing navigation method: %w", err)
-		return response
+		return fmt.Errorf("parsing navigation method: %w", err)
 	}
 	settings.NavigationMethod = navMethod
 
@@ -462,9 +453,7 @@ func (s *GameManagerService) UpdateSettings(ctx context.Context, settings *model
 	if maxLoc != "" {
 		maxLocInt, err := strconv.Atoi(form.Get("maxLocations"))
 		if err != nil {
-			response.AddFlashMessage(*flash.NewError("Something went wrong parsing max locations. Please try again."))
-			response.Error = fmt.Errorf("parsing max locations: %w", err)
-			return response
+			return fmt.Errorf("parsing max locations: %w", err)
 		}
 		settings.MaxNextLocations = maxLocInt
 	}
@@ -479,13 +468,10 @@ func (s *GameManagerService) UpdateSettings(ctx context.Context, settings *model
 
 	// Save settings
 	if err := s.instanceSettingsRepo.Update(ctx, settings); err != nil {
-		response.AddFlashMessage(*flash.NewError("Error saving settings. Please try again."))
-		response.Error = fmt.Errorf("saving settings: %w", err)
-		return response
+		return fmt.Errorf("updating settings: %w", err)
 	}
 
-	response.AddFlashMessage(*flash.NewSuccess("Settings updated!"))
-	return response
+	return nil
 }
 
 // StartGame starts the game immediately
