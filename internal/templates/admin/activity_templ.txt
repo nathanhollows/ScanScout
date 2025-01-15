@@ -41,7 +41,13 @@
 <h3 class=\"text-lg font-bold\">
  
 ∕ 
-</h3><!-- Next Locations --><div class=\"w-full\"><p class=\"py-3 font-bold\">Next Locations</p>
+ 
+<span class=\"badge badge-info badge-sm\">
+ pts</span>
+</h3><!-- Current Location -->
+<div class=\"w-full\"><p class=\"py-3 font-bold divider divider-start\">Current Location</p>
+</div>
+<!-- Next Locations --><div class=\"w-full\"><p class=\"py-3 font-bold divider divider-start\">Next Locations</p>
 <div class=\"prose\"><ul>
 <li>
  
@@ -50,20 +56,19 @@
 </li>
 </ul></div>
 <p>No activity</p>
-</div><!-- Check-ins -->
-<div class=\"collapse collapse-arrow border-base-300 bg-base-200 border\"><input type=\"checkbox\"><div class=\"collapse-title font-medium\">Check-ins <badge class=\"badge badge-secondary\">
-</badge></div><div class=\"collapse-content\">
-<div class=\"py-2\"><span>
- 
-<span class=\"badge badge-info\">Current</span>
-</span> <span class=\"convert-time badge badge-sm badge-ghost\" data-datetime=\"
-\"></span></div>
-</div></div>
-<p class=\"py-3 font-bold\">Unread Notifications</p>
-<div role=\"alert\" class=\"alert mb-3\" id=\"alert-{{ .ID }}\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"lucide lucide-megaphone\"><path d=\"m3 11 18-5v12L3 14v-3z\"></path><path d=\"M11.6 16.8a3 3 0 1 1-5.8-1.6\"></path></svg><div><div class=\"\">
-</div></div><div class=\"badge\">Sent 
-</div></div>
-<p class=\"py-3 font-bold\">Send an alert</p><!-- Send an alert --><label class=\"form-control w-full\"><form hx-post=\"/admin/notify/team/\" hx-swap=\"none\"><input type=\"hidden\" name=\"teamCode\" value=\"
+</div><!-- Previous Locations -->
+<div class=\"py-3 font-bold divider divider-start\">Previous Locations</div>
+<div class=\"prose\"><ul><li>
+ <span class=\"convert-time badge badge-sm badge-ghost\" data-datetime=\"
+\"></span> 
+<span class=\"badge badge-sm badge-info\">+
+ pts</span>
+</li></ul></div>
+<p class=\"py-3 font-bold divider divider-start\">Alerts</p>
+<div class=\"chat chat-start\"><div class=\"chat-bubble\">
+</div><div class=\"chat-footer opacity-50\"><time class=\"text-xs opacity-50\">
+</time></div></div>
+<label class=\"form-control w-full mt-3\"><form hx-post=\"/admin/notify/team/\" hx-swap=\"none\"><input type=\"hidden\" name=\"teamCode\" value=\"
 \"><div class=\"join w-full\"><input class=\"input input-bordered join-item w-full\" name=\"content\" placeholder=\"Message\" autocomplete=\"off\" autofocus=\"off\" required> <button type=\"submit\" class=\"btn btn-primary join-item rounded-r-full\" onclick=\"announcement_modal.close()\">Send <svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"lucide lucide-send-horizontal w-5 h-5\"><path d=\"m3 3 3 9-3 9 19-9Z\"></path><path d=\"M6 12h16\"></path></svg></button></div></form><div class=\"label\"><span class=\"label-text-alt\">This is a read-only message. Teams cannot reply.</span></div></label><div class=\"modal-action\"><form method=\"dialog\"><!-- if there is a button in form, it will close the modal --><button class=\"btn\">Close</button></form></div>
 <dialog id=\"schedule_modal\" class=\"modal modal-bottom sm:modal-middle\"><form hx-post=\"/admin/schedule/\" hx-swap=\"none\" class=\"modal-box\"><h3 class=\"text-lg font-bold\">Schedule a Game</h3><p class=\"py-3\">Schedule a game to start and/or end at a specific time. </p><div class=\"divider py-5\"><div class=\"form-control\"><label class=\"label cursor-pointer flex gap-3\">Scheduled Start 
 <input type=\"checkbox\" name=\"set_start\" class=\"checkbox\">
