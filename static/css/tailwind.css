@@ -6754,6 +6754,10 @@ html:has(.drawer-toggle:checked) {
   stroke: var(--fallback-p,oklch(var(--p)/1));
 }
 
+.stroke-success {
+  stroke: var(--fallback-su,oklch(var(--su)/1));
+}
+
 .p-0 {
   padding: 0px;
 }
