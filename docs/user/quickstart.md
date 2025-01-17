@@ -92,6 +92,7 @@ That’s it! Your game is live, and participants are ready to explore and learn.
 
 ### What’s Next?
 
-Check out the **[Features](/docs/user/features)** or [Content Blocks](/docs/developer/roadmap) to learn more about what Rapua can do.
+- Read more about [Getting Teams Started](/docs/user/teams) to help participants get going.
+- Check out the **[Features](/docs/user/features)** or [Content Blocks](/docs/user/blocks) to learn more about what Rapua can do.
 
 Let the adventure begin! 🚀
