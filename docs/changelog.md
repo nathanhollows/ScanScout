@@ -9,9 +9,10 @@ order: 100
 ## 3.1.0 (2025-01-17)
 
 ### Added
-- Instantly fit map bounds to neighboring markers when adding locations.
+- Instantly fit map bounds to neighboring markers when adding locations [(#44)](https://github.com/nathanhollows/Rapua/issues/44)
+
 - Introduced the official project logo.
-- Docs for [Getting Started with Teams](/docs/user/teams).
+- Docs for [Getting Started with Teams](/docs/user/teams) [(#43)](https://github.com/nathanhollows/Rapua/issues/43)
 
 ### Changed
 - Improved team activity overview for easier browsing and better visual clarity.
