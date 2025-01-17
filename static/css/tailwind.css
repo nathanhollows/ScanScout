@@ -6070,6 +6070,10 @@ html:has(.drawer-toggle:checked) {
   margin-top: 2rem;
 }
 
+.-mt-1 {
+  margin-top: -0.25rem;
+}
+
 .block {
   display: block;
 }
@@ -6742,6 +6746,10 @@ html:has(.drawer-toggle:checked) {
   fill: var(--fallback-n,oklch(var(--n)/1));
 }
 
+.fill-base-content {
+  fill: var(--fallback-bc,oklch(var(--bc)/1));
+}
+
 .stroke-current {
   stroke: currentColor;
 }
@@ -6756,6 +6764,10 @@ html:has(.drawer-toggle:checked) {
 
 .stroke-success {
   stroke: var(--fallback-su,oklch(var(--su)/1));
+}
+
+.stroke-base-content {
+  stroke: var(--fallback-bc,oklch(var(--bc)/1));
 }
 
 .p-0 {
@@ -6916,6 +6928,10 @@ html:has(.drawer-toggle:checked) {
 
 .pt-4 {
   padding-top: 1rem;
+}
+
+.pr-1 {
+  padding-right: 0.25rem;
 }
 
 .text-left {
