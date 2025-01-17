@@ -43,13 +43,13 @@ func (h *AdminHandler) LocationNew(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	markers, err := h.LocationService.FindMarkersNotInInstance(r.Context(), user.CurrentInstanceID, instances)
+	duplicatable, err := h.LocationService.FindMarkersNotInInstance(r.Context(), user.CurrentInstanceID, instances)
 	if err != nil {
 		h.handleError(w, r, "LocationNew: getting markers", "Error getting markers", "error", err, "instance_id", user.CurrentInstanceID)
 		return
 	}
 
-	c := templates.AddLocation(user.CurrentInstance.Settings, markers)
+	c := templates.AddLocation(user.CurrentInstance.Settings, user.CurrentInstance.Locations, duplicatable)
 	err = templates.Layout(c, *user, "Locations", "New Location").Render(r.Context(), w)
 	if err != nil {
 		h.Logger.Error("LocationNew: rendering template", "error", err)
