@@ -161,3 +161,11 @@ templ markdownHint() {
 		</span>
 	</span>
 }
+
+templ completionBadge(data blocks.PlayerState) {
+	if data.IsComplete() {
+		<span class="indicator-item indicator-top indicator-right badge badge-success mr-12">Complete</span>
+	} else {
+		<span class="indicator-item indicator-top indicator-right badge mr-12">Incomplete</span>
+	}
+}

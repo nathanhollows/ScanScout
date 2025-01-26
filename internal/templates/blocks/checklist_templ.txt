@@ -1,9 +1,7 @@
 <div id=\"
 \" class=\"indicator w-full\">
 <span class=\"indicator-item indicator-top indicator-center badge badge-info\">
- pts</span> 
-<span class=\"indicator-item indicator-top indicator-right badge badge-success mr-12\">Complete</span>
-<span class=\"indicator-item indicator-top indicator-right badge badge-primary mr-12\">Incomplete</span>
+ pts</span>
 <div class=\"card prose p-5 bg-base-200 shadow-lg w-full\">
 <form hx-post=\"
 \" hx-target=\"

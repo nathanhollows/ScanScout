@@ -14,11 +14,7 @@ templ answerPlayer(settings models.InstanceSettings, block blocks.AnswerBlock, d
 		if settings.EnablePoints && block.Points > 0 {
 			<span class="indicator-item indicator-top indicator-center badge badge-info">{ fmt.Sprint(block.GetPoints()) } pts</span>
 		}
-		if data.IsComplete() {
-			<span class="indicator-item indicator-top indicator-right badge badge-success mr-12">Complete</span>
-		} else {
-			<span class="indicator-item indicator-top indicator-right badge badge-primary mr-12">Incomplete</span>
-		}
+		@completionBadge(data)
 		<div class="card prose p-5 bg-base-200 shadow-lg w-full">
 			@templ.Raw(stringToMarkdown(block.Prompt))
 			<form
@@ -68,11 +64,7 @@ templ answerPlayerUpdate(settings models.InstanceSettings, block blocks.AnswerBl
 		if settings.EnablePoints && block.Points > 0 {
 			<span class="indicator-item indicator-top indicator-center badge badge-info">{ fmt.Sprint(block.GetPoints()) } pts</span>
 		}
-		if data.IsComplete() {
-			<span class="indicator-item indicator-top indicator-right badge badge-success mr-12">Complete</span>
-		} else {
-			<span class="indicator-item indicator-top indicator-right badge badge-primary mr-12">Incomplete</span>
-		}
+		@completionBadge(data)
 		<div class="card prose p-5 bg-base-200 shadow-lg w-full">
 			@templ.Raw(stringToMarkdown(block.Prompt))
 			<form
