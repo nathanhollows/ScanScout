@@ -39,6 +39,8 @@ type TeamRepository interface {
 	LoadCheckIns(ctx context.Context, team *models.Team) error
 	// LoadBlockingLocation loads the blocking location for a team
 	LoadBlockingLocation(ctx context.Context, team *models.Team) error
+	// LoadMessages loads the messages for a team
+	LoadMessages(ctx context.Context, team *models.Team) error
 	// LoadRelations loads all relations for a team
 	LoadRelations(ctx context.Context, team *models.Team) error
 }
@@ -181,6 +183,17 @@ func (r *teamRepository) LoadBlockingLocation(ctx context.Context, team *models.
 	return nil
 }
 
+func (r *teamRepository) LoadMessages(ctx context.Context, team *models.Team) error {
+	err := r.db.NewSelect().Model(&team.Messages).
+		Where("team_code = ?", team.Code).
+		Order("created_at DESC").
+		Scan(ctx)
+	if err != nil {
+		return fmt.Errorf("LoadNotifications: %v", err)
+	}
+	return nil
+}
+
 func (r *teamRepository) LoadRelations(ctx context.Context, team *models.Team) error {
 	err := r.LoadInstance(ctx, team)
 	if err != nil {
@@ -193,6 +206,11 @@ func (r *teamRepository) LoadRelations(ctx context.Context, team *models.Team) e
 	}
 
 	err = r.LoadBlockingLocation(ctx, team)
+	if err != nil {
+		return err
+	}
+
+	err = r.LoadMessages(ctx, team)
 	if err != nil {
 		return err
 	}
