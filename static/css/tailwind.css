@@ -3136,6 +3136,14 @@ input.tab:checked + .tab-content,
     var(--togglehandleborder);
 }
 
+.alert-info {
+  border-color: var(--fallback-in,oklch(var(--in)/0.2));
+  --tw-text-opacity: 1;
+  color: var(--fallback-inc,oklch(var(--inc)/var(--tw-text-opacity)));
+  --alert-bg: var(--fallback-in,oklch(var(--in)/1));
+  --alert-bg-mix: var(--fallback-b1,oklch(var(--b1)/1));
+}
+
 .alert-success {
   border-color: var(--fallback-su,oklch(var(--su)/0.2));
   --tw-text-opacity: 1;
@@ -6716,6 +6724,15 @@ html:has(.drawer-toggle:checked) {
   border-color: var(--fallback-er,oklch(var(--er)/var(--tw-border-opacity)));
 }
 
+.border-transparent {
+  border-color: transparent;
+}
+
+.border-t-primary {
+  --tw-border-opacity: 1;
+  border-top-color: var(--fallback-p,oklch(var(--p)/var(--tw-border-opacity)));
+}
+
 .bg-accent {
   --tw-bg-opacity: 1;
   background-color: var(--fallback-a,oklch(var(--a)/var(--tw-bg-opacity)));
@@ -6976,6 +6993,10 @@ html:has(.drawer-toggle:checked) {
 
 .pt-4 {
   padding-top: 1rem;
+}
+
+.pt-8 {
+  padding-top: 2rem;
 }
 
 .text-left {

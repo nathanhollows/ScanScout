@@ -23,8 +23,7 @@ func NewNavigationService() NavigationService {
 
 // CheckValidLocation checks if the location code is valid for the team to scan in to
 // This function returns an error if the location code is invalid
-func (s NavigationService) CheckValidLocation(ctx context.Context, team *models.Team, settings *models.InstanceSettings, locationCode string) (bool, error) {
-
+func (s NavigationService) CheckValidLocation(ctx context.Context, team *models.Team, settings *models.InstanceSettings, markerID string) (bool, error) {
 	// Find valid locations
 	locations, err := s.DetermineNextLocations(ctx, team)
 	if err != nil {
@@ -32,13 +31,13 @@ func (s NavigationService) CheckValidLocation(ctx context.Context, team *models.
 	}
 
 	// Check if the location code is valid
-	locationCode = strings.TrimSpace(strings.ToUpper(locationCode))
+	markerID = strings.TrimSpace(strings.ToUpper(markerID))
 	for _, loc := range locations {
-		if loc.Marker.Code == locationCode {
+		if loc.MarkerID == markerID {
 			return true, nil
 		}
 	}
-	return false, nil
+	return false, fmt.Errorf("code %s is not a valid next location", markerID)
 }
 
 func (s NavigationService) DetermineNextLocations(ctx context.Context, team *models.Team) ([]models.Location, error) {
