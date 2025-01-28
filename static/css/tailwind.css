@@ -6636,6 +6636,15 @@ html:has(.drawer-toggle:checked) {
   border-color: var(--fallback-er,oklch(var(--er)/var(--tw-border-opacity)));
 }
 
+.border-transparent {
+  border-color: transparent;
+}
+
+.border-t-primary {
+  --tw-border-opacity: 1;
+  border-top-color: var(--fallback-p,oklch(var(--p)/var(--tw-border-opacity)));
+}
+
 .bg-accent {
   --tw-bg-opacity: 1;
   background-color: var(--fallback-a,oklch(var(--a)/var(--tw-bg-opacity)));
@@ -6896,6 +6905,14 @@ html:has(.drawer-toggle:checked) {
 
 .pt-4 {
   padding-top: 1rem;
+}
+
+.pt-5 {
+  padding-top: 1.25rem;
+}
+
+.pt-2 {
+  padding-top: 0.5rem;
 }
 
 .text-left {
