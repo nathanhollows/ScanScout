@@ -6,10 +6,28 @@ order: 100
 
 # Changelog
 
+## 3.1.0 (2025-01-17)
+
+### Added
+- Instantly fit map bounds to neighboring markers when adding locations [(#44)](https://github.com/nathanhollows/Rapua/issues/44)
+
+- Introduced the official project logo.
+- Docs for [Getting Started with Teams](/docs/user/teams) [(#43)](https://github.com/nathanhollows/Rapua/issues/43)
+
+### Changed
+- Improved team activity overview for easier browsing and better visual clarity.
+- Updated a documentation icon for consistency across the interface.
+
+[Full Changelog](https://github.com/nathanhollows/Rapua/releases/tag/v3.1.0)
+
+---
+
 ## 3.0.1 (2025-01-14)
 
 ### Fixed
 - Fixed an issue where the user could not switch instances. `current_instance_id` was blocked from updating in the database.
+
+---
 
 ## 3.0.0 (2025-01-09)
 
