@@ -21,5 +21,5 @@ func (h *PlayerHandler) Next(w http.ResponseWriter, r *http.Request) {
 
 	// data["notifications"], _ = h.NotificationService.GetNotifications(r.Context(), team.Code)
 	c := templates.Next(*team, locations)
-	err = templates.Layout(c, "Next stops").Render(r.Context(), w)
+	err = templates.Layout(c, "Next stops", team.Messages).Render(r.Context(), w)
 }

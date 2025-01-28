@@ -20,6 +20,8 @@ type NotificationRepository interface {
 
 	//	Update updates a notification in the database
 	Update(context.Context, *models.Notification) error
+	// Dismiss marks a notification as dismissed
+	Dismiss(ctx context.Context, id string) error
 
 	//	Delete deletes a notification from the database
 	Delete(ctx context.Context, id string) error
@@ -56,6 +58,12 @@ func (r *notificationRepository) Create(ctx context.Context, notification *model
 		return err
 	}
 	return nil
+}
+
+// Dismiss marks a notification as dismissed
+func (r *notificationRepository) Dismiss(ctx context.Context, id string) error {
+	_, err := r.db.NewUpdate().Model(&models.Notification{}).Set("dismissed = true").Where("id = ?", id).Exec(ctx)
+	return err
 }
 
 // Update updates an existing notification in the database

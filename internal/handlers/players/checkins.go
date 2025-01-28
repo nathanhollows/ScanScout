@@ -43,7 +43,7 @@ func (h *PlayerHandler) CheckIn(w http.ResponseWriter, r *http.Request) {
 	}
 
 	c := templates.CheckIn(*marker, team.Code, team.BlockingLocation)
-	err = templates.Layout(c, "Check In: "+marker.Name).Render(r.Context(), w)
+	err = templates.Layout(c, "Check In: "+marker.Name, team.Messages).Render(r.Context(), w)
 	if err != nil {
 		h.Logger.Error("rendering checkin", "error", err.Error())
 	}
@@ -111,7 +111,7 @@ func (h *PlayerHandler) CheckOut(w http.ResponseWriter, r *http.Request) {
 	}
 
 	c := templates.CheckOut(*marker, team.Code, team.BlockingLocation)
-	err = templates.Layout(c, "Check Out: "+marker.Name).Render(r.Context(), w)
+	err = templates.Layout(c, "Check Out: "+marker.Name, team.Messages).Render(r.Context(), w)
 	if err != nil {
 		h.Logger.Error("rendering checkin", "error", err.Error())
 	}
@@ -172,7 +172,7 @@ func (h *PlayerHandler) MyCheckins(w http.ResponseWriter, r *http.Request) {
 	}
 
 	c := templates.MyCheckins(*team)
-	err = templates.Layout(c, "My Check-ins").Render(r.Context(), w)
+	err = templates.Layout(c, "My Check-ins", team.Messages).Render(r.Context(), w)
 	if err != nil {
 		h.Logger.Error("rendering checkins", "error", err.Error())
 	}
@@ -224,7 +224,7 @@ func (h *PlayerHandler) CheckInView(w http.ResponseWriter, r *http.Request) {
 	}
 
 	c := templates.CheckInView(team.Instance.Settings, team.CheckIns[index], blocks, blockStates)
-	err = templates.Layout(c, team.CheckIns[index].Location.Name).Render(r.Context(), w)
+	err = templates.Layout(c, team.CheckIns[index].Location.Name, team.Messages).Render(r.Context(), w)
 	if err != nil {
 		h.Logger.Error("rendering checkin view", "error", err.Error())
 	}

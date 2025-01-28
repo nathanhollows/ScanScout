@@ -474,7 +474,7 @@ templ TeamActivity(settings models.InstanceSettings, team models.Team, notificat
 	<h3 class="text-lg font-bold">
 		{ team.Code }
 		if team.Name != "" {
-			∕ { team.Name }
+			<span class="opacity-50">∕</span> { team.Name }
 		}
 		if settings.EnablePoints {
 			<span class="badge badge-info badge-sm">{ fmt.Sprint(team.Points) } pts</span>
@@ -537,8 +537,14 @@ templ TeamActivity(settings models.InstanceSettings, team models.Team, notificat
 		for _, notification := range notifications {
 			<div class="chat chat-start">
 				<div class="chat-bubble">{ notification.Content }</div>
-				<div class="chat-footer opacity-50">
-					<time class="text-xs opacity-50">{ fmt.Sprint("Sent ", notification.CreatedAt.Local().Format("01 Jan 03:04 PM")) }</time>
+				<div class="chat-footer text-xs opacity-50 flex items-center gap-2">
+					if notification.Dismissed {
+						Read
+					} else {
+						Unread
+					}
+					·
+					<time>{ fmt.Sprint("Sent ", notification.CreatedAt.Local().Format("02 Jan 03:04 PM")) }</time>
 				</div>
 			</div>
 		}

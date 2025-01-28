@@ -74,10 +74,10 @@ func (s *notificationService) GetNotifications(ctx context.Context, teamCode str
 
 // DismissNotification marks a notification as dismissed
 func (s *notificationService) DismissNotification(ctx context.Context, notificationID string) error {
-	notification, err := s.notificationRepository.GetByID(ctx, notificationID)
+
+	err := s.notificationRepository.Dismiss(ctx, notificationID)
 	if err != nil {
-		return err
+		return fmt.Errorf("dismiss notification: %w", err)
 	}
-	notification.Dismissed = true
-	return s.notificationRepository.Update(ctx, &notification)
+	return nil
 }

@@ -36,7 +36,7 @@ func (h *PlayerHandler) Play(w http.ResponseWriter, r *http.Request) {
 		team = &models.Team{}
 	}
 	c := templates.Home(*team)
-	err = templates.Layout(c, "Home").Render(r.Context(), w)
+	err = templates.Layout(c, "Home", nil).Render(r.Context(), w)
 	if err != nil {
 		h.Logger.Error("Home: rendering template", "error", err)
 	}

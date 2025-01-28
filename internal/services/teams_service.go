@@ -231,6 +231,8 @@ func (s *teamService) LoadRelation(ctx context.Context, team *models.Team, relat
 		return s.teamRepo.LoadCheckIns(ctx, team)
 	case "BlockingLocation":
 		return s.teamRepo.LoadBlockingLocation(ctx, team)
+	case "Messages":
+		return s.teamRepo.LoadMessages(ctx, team)
 	default:
 		return errors.New("unknown relation")
 	}
