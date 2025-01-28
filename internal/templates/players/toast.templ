@@ -6,7 +6,7 @@ import (
 )
 
 templ Toast(messages ...flash.Message) {
-	<div class="toast toast-center z-50" id="alerts" hx-swap-oob="true" hx-swap="beforeend">
+	<div class="toast toast-center z-50 w-full text-wrap" id="alerts" hx-swap-oob="true" hx-swap="beforeend">
 		for _, message := range messages {
 			<div
 				role="alert"

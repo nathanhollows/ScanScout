@@ -34,7 +34,7 @@ type GameplayService interface {
 	// CheckIn checks a team in at a location
 	// It also manages the points and mustScanOut fields
 	// As well as checking if any blocks must be completed
-	CheckIn(ctx context.Context, team *models.Team, locationCode string) ServiceResponse
+	CheckIn(ctx context.Context, team *models.Team, locationCode string) error
 	CheckOut(ctx context.Context, team *models.Team, locationCode string) error
 	CheckValidLocation(ctx context.Context, team *models.Team, locationCode string) (bool, error)
 	ValidateAndUpdateBlockState(ctx context.Context, team models.Team, data map[string][]string) (blocks.PlayerState, blocks.Block, error)
@@ -158,29 +158,22 @@ func (s *gameplayService) SuggestNextLocations(ctx context.Context, team *models
 	return locations, nil
 }
 
-func (s *gameplayService) CheckIn(ctx context.Context, team *models.Team, locationCode string) (response ServiceResponse) {
-	response = ServiceResponse{}
-
+func (s *gameplayService) CheckIn(ctx context.Context, team *models.Team, locationCode string) error {
 	// Load team relations
 	err := s.TeamService.LoadRelations(ctx, team)
 	if err != nil {
-		response.Error = fmt.Errorf("loading relations: %w", err)
-		return response
+		return fmt.Errorf("loading relations: %w", err)
 	}
 
 	// A team may not check in if they must check out at a different location
 	if team.MustCheckOut != "" && locationCode != team.MustCheckOut {
-		response.Error = ErrAlreadyCheckedIn
-		return response
+		return ErrAlreadyCheckedIn
 	}
 
 	// Find the location
 	location, err := s.LocationService.GetByInstanceAndCode(ctx, team.InstanceID, locationCode)
 	if err != nil {
-		msg := flash.NewWarning("Please double check the code and try again.").SetTitle("Location code not found")
-		response.AddFlashMessage(msg)
-		response.Error = fmt.Errorf("finding location: %w", err)
-		return response
+		return fmt.Errorf("%w: finding location: %w", ErrLocationNotFound, err)
 	}
 
 	// A team may not check in if they have previously checked in at this location
@@ -192,50 +185,33 @@ func (s *gameplayService) CheckIn(ctx context.Context, team *models.Team, locati
 		}
 	}
 	if scanned {
-		response.Error = ErrAlreadyCheckedIn
-		return response
+		return ErrAlreadyCheckedIn
 	}
 
-	// The location must be valid for the team to check in
-	valid, err := s.CheckValidLocation(ctx, team, locationCode)
+	valid, err := s.NavigationService.CheckValidLocation(ctx, team, &team.Instance.Settings, locationCode)
 	if err != nil {
-		response.Error = fmt.Errorf("check valid location: %w", err)
-		return response
+		return fmt.Errorf("checking if location is valid: %w", err)
 	}
 	if !valid {
-		msg := flash.NewWarning("Please double check the code and try again.").SetTitle("Location code not found")
-		response.AddFlashMessage(msg)
-		response.Error = fmt.Errorf("location not valid for team")
-		return response
+		return fmt.Errorf("location not valid for team")
 	}
 
 	// Check if any blocks require validation (e.g. a checklist)
 	validationRequired, err := s.BlockService.CheckValidationRequiredForLocation(ctx, location.ID)
 	if err != nil {
-		msg := flash.NewError("Something went wrong. Please try again.")
-		response.AddFlashMessage(*msg)
-		err := fmt.Errorf("checking if validation is required: %w", err)
-		response.Error = fmt.Errorf("checking if validation is required: %w", err)
-		return response
+		return fmt.Errorf("checking if validation is required: %w", err)
 	}
 
 	// Log the check in
 	mustCheckOut := team.Instance.Settings.CompletionMethod == models.CheckInAndOut
 	_, err = s.CheckInService.CheckIn(ctx, *team, *location, mustCheckOut, validationRequired)
 	if err != nil {
-		msg := flash.NewWarning("Please double check the code and try again.").SetTitle("Couldn't scan in.")
-		response.AddFlashMessage(msg)
-		err := fmt.Errorf("logging scan: %w", err)
-		response.Error = fmt.Errorf("logging scan: %w", err)
-		return response
+		return fmt.Errorf("logging scan: %w", err)
 	}
 
 	err = s.LocationService.IncrementVisitorStats(ctx, location)
 	if err != nil {
-		msg := flash.NewError("Something went wrong. Please try again.")
-		response.AddFlashMessage(*msg)
-		response.Error = fmt.Errorf("incrementing visitor stats: %w", err)
-		return response
+		return fmt.Errorf("incrementing visitor stats: %w", err)
 	}
 
 	// Points are only added if the team does not need to scan out
@@ -247,16 +223,10 @@ func (s *gameplayService) CheckIn(ctx context.Context, team *models.Team, locati
 	}
 	err = s.TeamService.Update(ctx, team)
 	if err != nil {
-		msg := flash.NewError("Something went wrong. Please try again.")
-		response.AddFlashMessage(*msg)
-		response.Error = fmt.Errorf("updating team: %w", err)
-		return response
+		return fmt.Errorf("updating team: %w", err)
 	}
 
-	response.Data = make(map[string]interface{})
-	response.Data["location"] = location
-
-	return response
+	return nil
 }
 
 func (s *gameplayService) CheckOut(ctx context.Context, team *models.Team, locationCode string) error {

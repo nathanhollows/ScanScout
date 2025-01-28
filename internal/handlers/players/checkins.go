@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"errors"
-	"fmt"
 	"net/http"
 	"strings"
 
@@ -65,26 +64,21 @@ func (h *PlayerHandler) CheckInPost(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	response := h.GameplayService.CheckIn(r.Context(), team, locationCode)
-	if response.Error != nil {
-		if response.Error == services.ErrAlreadyCheckedIn {
-			err := templates.Toast(*flash.NewInfo("You have already checked in here.")).Render(r.Context(), w)
-			if err != nil {
-				h.Logger.Error("CheckInPost: rendering toast", "error", err)
-			}
+	err = h.GameplayService.CheckIn(r.Context(), team, locationCode)
+	if err != nil {
+		if errors.Is(err, services.ErrLocationNotFound) {
+			h.handleError(w, r, "CheckInPost: checking in", "Location not found. Please try agian.", "error", err, "team", team.Code, "location", locationCode)
 			return
 		}
-		h.handleError(w, r, "CheckInPost: checking in", "Error checking in", "error", response.Error, "team", team.Code, "location", locationCode)
+		if errors.Is(err, services.ErrAlreadyCheckedIn) {
+			h.handleError(w, r, "CheckInPost: checking in", "You have already checked in here.", "error", err, "team", team.Code, "location", locationCode)
+			return
+		}
+		h.handleError(w, r, "CheckInPost: checking in", "Error checking in", "error", err, "team", team.Code, "location", locationCode)
 		return
 	}
 
-	location, ok := response.Data["location"].(*models.Location)
-	if !ok {
-		h.handleError(w, r, "CheckInPost: getting location", "Error checking in", "error", fmt.Errorf("location not found"), "team", team.Code, "location", locationCode)
-		return
-	}
-
-	h.redirect(w, r, "/checkins/"+location.MarkerID)
+	h.redirect(w, r, "/checkins/"+locationCode)
 }
 
 func (h *PlayerHandler) CheckOut(w http.ResponseWriter, r *http.Request) {

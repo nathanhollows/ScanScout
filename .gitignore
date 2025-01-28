@@ -9,6 +9,7 @@
 *.dylib
 ScanScout
 Rapua
+rapua
 main
 
 # Test binary, built with `go test -c`
