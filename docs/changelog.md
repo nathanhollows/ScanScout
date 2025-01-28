@@ -6,10 +6,17 @@ order: 100
 
 # Changelog
 
+## 3.1.1 (2025-01-28)
+
+### Fixed
+
+- Fixed an issue where users could not check in to locations. The issue was caused by locations not loading markers correctly.
+- Player alerts now display full-width with text wrapping for better readability.
+
 ## 3.1.0 (2025-01-17)
 
 ### Added
-- Instantly fit map bounds to neighboring markers when adding locations [(#44)](https://github.com/nathanhollows/Rapua/issues/44)
+- Instantly fit map bounds to neighbouring markers when adding locations [(#44)](https://github.com/nathanhollows/Rapua/issues/44)
 
 - Introduced the official project logo.
 - Docs for [Getting Started with Teams](/docs/user/teams) [(#43)](https://github.com/nathanhollows/Rapua/issues/43)
