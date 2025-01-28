@@ -36,7 +36,7 @@ func Toast(messages ...flash.Message) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		for _, message := range messages {
-			var templ_7745c5c3_Var2 = []any{fmt.Sprintf("alert alert-%s mb-5", message.Style)}
+			var templ_7745c5c3_Var2 = []any{fmt.Sprintf("alert alert-%s mb-5 grid-flow-col", message.Style)}
 			templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var2...)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
