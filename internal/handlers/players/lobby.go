@@ -24,7 +24,7 @@ func (h *PlayerHandler) Lobby(w http.ResponseWriter, r *http.Request) {
 	}
 
 	c := templates.Lobby(*team)
-	err = templates.Layout(c, "Lobby").Render(r.Context(), w)
+	err = templates.Layout(c, "Lobby", team.Messages).Render(r.Context(), w)
 	if err != nil {
 		h.Logger.Error("rendering lobby", "error", err.Error())
 	}
