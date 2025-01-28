@@ -66,7 +66,10 @@
 </li></ul></div>
 <p class=\"py-3 font-bold divider divider-start\">Alerts</p>
 <div class=\"chat chat-start\"><div class=\"chat-bubble\">
-</div><div class=\"chat-footer opacity-50\"><time class=\"text-xs opacity-50\">
+</div><div class=\"chat-footer text-xs opacity-50 flex items-center gap-2\">
+Read 
+Unread 
+· <time>
 </time></div></div>
 <label class=\"form-control w-full mt-3\"><form hx-post=\"/admin/notify/team/\" hx-swap=\"none\"><input type=\"hidden\" name=\"teamCode\" value=\"
 \"><div class=\"join w-full\"><input class=\"input input-bordered join-item w-full\" name=\"content\" placeholder=\"Message\" autocomplete=\"off\" autofocus=\"off\" required> <button type=\"submit\" class=\"btn btn-primary join-item rounded-r-full\" onclick=\"announcement_modal.close()\">Send <svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"lucide lucide-send-horizontal w-5 h-5\"><path d=\"m3 3 3 9-3 9 19-9Z\"></path><path d=\"M6 12h16\"></path></svg></button></div></form><div class=\"label\"><span class=\"label-text-alt\">This is a read-only message. Teams cannot reply.</span></div></label><div class=\"modal-action\"><form method=\"dialog\"><!-- if there is a button in form, it will close the modal --><button class=\"btn\">Close</button></form></div>
