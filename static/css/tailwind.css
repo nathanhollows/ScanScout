@@ -6274,10 +6274,6 @@ html:has(.drawer-toggle:checked) {
   max-width: 20rem;
 }
 
-.max-w-full {
-  max-width: 100%;
-}
-
 .flex-1 {
   flex: 1 1 0%;
 }
@@ -6913,18 +6909,6 @@ html:has(.drawer-toggle:checked) {
 
 .pt-4 {
   padding-top: 1rem;
-}
-
-.pt-5 {
-  padding-top: 1.25rem;
-}
-
-.pt-2 {
-  padding-top: 0.5rem;
-}
-
-.pt-12 {
-  padding-top: 3rem;
 }
 
 .pt-8 {
