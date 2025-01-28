@@ -474,7 +474,7 @@ templ TeamActivity(settings models.InstanceSettings, team models.Team, notificat
 	<h3 class="text-lg font-bold">
 		{ team.Code }
 		if team.Name != "" {
-			∕ { team.Name }
+			<span class="opacity-50">∕</span> { team.Name }
 		}
 		if settings.EnablePoints {
 			<span class="badge badge-info badge-sm">{ fmt.Sprint(team.Points) } pts</span>
