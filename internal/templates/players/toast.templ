@@ -10,7 +10,7 @@ templ Toast(messages ...flash.Message) {
 		for _, message := range messages {
 			<div
 				role="alert"
-				class={ fmt.Sprintf("alert alert-%s mb-5", message.Style) }
+				class={ fmt.Sprintf("alert alert-%s mb-5 grid-flow-col", message.Style) }
 			>
 				<svg
 					xmlns="http://www.w3.org/2000/svg"

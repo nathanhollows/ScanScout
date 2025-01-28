@@ -3,5 +3,4 @@
 \"></span><div class=\"toast toast-center z-50 w-full text-wrap\" id=\"alerts\"></div><div class=\"flex min-h-full flex-col justify-center px-6 py-12 lg:px-8\">
 </div></body></html>
 <footer class=\"text-center text-sm text-gray-500 mt-8\"><div class=\"mt-4\"><p>
-</p><p>&copy; 
- Rapua</p></div></footer>
+</p></div></footer>

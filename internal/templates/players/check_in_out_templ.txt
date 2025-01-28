@@ -23,4 +23,4 @@
 \"
  class=\"input input-bordered input-lg w-full text-2xl font-mono text-center uppercase tracking-widest\"></label></div><div><button type=\"submit\" class=\"btn btn-neutral w-full\"
  disabled
->Check Out</button></div></form></div></div>
+>Check Out</button></div><div id=\"player-nav\" class=\"flex flex-row justify-center pt-8\"><a href=\"/checkins\" class=\"btn btn-ghost btn-outline join-item\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"lucide lucide-map-pin\"><path d=\"M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z\"></path> <circle cx=\"12\" cy=\"10\" r=\"3\"></circle></svg> My Check-ins</a></div></form></div></div>

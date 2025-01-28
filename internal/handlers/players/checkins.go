@@ -144,7 +144,7 @@ func (h *PlayerHandler) CheckOutPost(w http.ResponseWriter, r *http.Request) {
 			templates.Toast(*flash.NewError("You are not checked in here.")).Render(r.Context(), w)
 			return
 		} else if errors.Is(err, services.ErrUnfinishedCheckIn) {
-			templates.Toast(*flash.NewError("You must complete all activities before checking out.")).Render(r.Context(), w)
+			templates.Toast(*flash.NewError("Whoops! You still have unfinished activities.")).Render(r.Context(), w)
 			return
 		} else {
 			h.handleError(w, r, "CheckOutPost: checking out", "Error checking out", "error", err, "team", team.Code, "location", locationCode)

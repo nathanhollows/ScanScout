@@ -1,10 +1,8 @@
 package templates
 
 import (
-	"fmt"
 	"github.com/nathanhollows/Rapua/models"
 	"os"
-	"time"
 )
 
 templ Layout(contents templ.Component, title string) {
@@ -43,9 +41,6 @@ templ footer(team models.Team) {
 		<div class="mt-4">
 			<p>
 				{ team.Instance.Name }
-			</p>
-			<p>
-				&copy; { fmt.Sprint(time.Now().Year()) } Rapua
 			</p>
 		</div>
 	</footer>
