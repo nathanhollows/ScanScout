@@ -65,9 +65,9 @@ func (h *PlayerHandler) PlayPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	session, _ := sessions.Get(r, "scanscout")
 	team := response.Data["team"].(*models.Team)
-	session.Values["team"] = team.Code
-	session.Save(r, w)
+
+	h.startSession(w, r, team.Code)
+
 	w.Header().Set("HX-Redirect", "/next")
 }

@@ -47,8 +47,11 @@ templ CheckIn(marker models.Marker, teamCode string, blocking models.Location) {
 							}
 							if teamCode != "" {
 								value={ teamCode }
+							} else {
+								autofocus
 							}
 							class="input input-bordered input-lg w-full text-2xl font-mono text-center uppercase tracking-widest"
+							required
 						/>
 					</label>
 				</div>
@@ -97,6 +100,16 @@ templ CheckOut(marker models.Marker, teamCode string, blocking models.Location) 
 					<p class="text-center text-3xl pb-3">{ marker.Name }</p>
 				</div>
 				<div>
+					if teamCode != "" && blocking.ID == "" {
+						<div role="alert" class="alert alert-info mb-5 border-2">
+							<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="stroke-current shrink-0 w-6 h-6">
+								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+							</svg>
+							<span>
+								You are not checked in anywhere.
+							</span>
+						</div>
+					}
 					if blocking.ID != "" && blocking.MarkerID != marker.Code {
 						<div role="alert" class="alert alert- mb-5 border-2">
 							<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="stroke-current shrink-0 w-6 h-6">
@@ -115,11 +128,13 @@ templ CheckOut(marker models.Marker, teamCode string, blocking models.Location) 
 							id="team"
 							name="team"
 							type="text"
-							if blocking.MarkerID != marker.Code {
+							if teamCode != "" && blocking.MarkerID != marker.Code {
 								disabled
 							}
 							if teamCode != "" {
 								value={ teamCode }
+							} else {
+								autofocus
 							}
 							class="input input-bordered input-lg w-full text-2xl font-mono text-center uppercase tracking-widest"
 						/>
@@ -129,19 +144,21 @@ templ CheckOut(marker models.Marker, teamCode string, blocking models.Location) 
 					<button
 						type="submit"
 						class="btn btn-neutral w-full"
-						if blocking.MarkerID != marker.Code {
+						if teamCode != "" && blocking.MarkerID != marker.Code {
 							disabled
 						}
 					>
 						Check Out
 					</button>
 				</div>
-				<div id="player-nav" class="flex flex-row justify-center pt-8">
-					<a href="/checkins" class="btn btn-ghost btn-outline join-item">
-						<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-map-pin"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"></path> <circle cx="12" cy="10" r="3"></circle></svg>
-						My Check-ins
-					</a>
-				</div>
+				if teamCode != "" {
+					<div id="player-nav" class="flex flex-row justify-center pt-8">
+						<a href="/checkins" class="btn btn-ghost btn-outline join-item">
+							<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-map-pin"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"></path> <circle cx="12" cy="10" r="3"></circle></svg>
+							My Check-ins
+						</a>
+					</div>
+				}
 			</form>
 		</div>
 	</div>
