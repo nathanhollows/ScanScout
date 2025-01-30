@@ -76,6 +76,14 @@ func setupPlayerRoutes(router chi.Router, playerHandler *players.PlayerHandler) 
 		r.Post("/team-name", playerHandler.SetTeamName)
 	})
 
+	// Ending the game
+	router.Route("/finish", func(r chi.Router) {
+		r.Use(func(next http.Handler) http.Handler {
+			return middlewares.TeamMiddleware(playerHandler.TeamService, next)
+		})
+		r.Get("/", playerHandler.Finish)
+	})
+
 	// Check in to a location
 	router.Route("/s", func(r chi.Router) {
 		r.Use(func(next http.Handler) http.Handler {

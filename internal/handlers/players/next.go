@@ -1,8 +1,10 @@
 package handlers
 
 import (
+	"errors"
 	"net/http"
 
+	"github.com/nathanhollows/Rapua/internal/services"
 	templates "github.com/nathanhollows/Rapua/internal/templates/players"
 )
 
@@ -15,6 +17,10 @@ func (h *PlayerHandler) Next(w http.ResponseWriter, r *http.Request) {
 
 	locations, err := h.GameplayService.SuggestNextLocations(r.Context(), team)
 	if err != nil {
+		if errors.Is(err, services.ErrAllLocationsVisited) {
+			h.redirect(w, r, "/finish")
+			return
+		}
 		h.handleError(w, r, "Next: getting next locations", "Error getting next locations", "Could not load data", err)
 		return
 	}
