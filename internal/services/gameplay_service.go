@@ -18,7 +18,7 @@ import (
 var (
 	ErrTeamNotFound             = errors.New("team not found")
 	ErrLocationNotFound         = errors.New("location not found")
-	ErrTeamNotAllowedToCheckOut = errors.New("team not allowed to check out")
+	ErrCheckOutAtWrongLocation  = errors.New("team is not at the correct location to check out")
 	ErrUnfinishedCheckIn        = errors.New("unfinished check in")
 	ErrAlreadyCheckedIn         = errors.New("player has already scanned in")
 	ErrUnecessaryCheckOut       = errors.New("player does not need to scan out")
@@ -245,7 +245,7 @@ func (s *gameplayService) CheckOut(ctx context.Context, team *models.Team, locat
 	if team.MustCheckOut == "" {
 		return ErrUnecessaryCheckOut
 	} else if team.MustCheckOut != location.ID {
-		return ErrTeamNotAllowedToCheckOut
+		return ErrCheckOutAtWrongLocation
 	}
 
 	// Check if all blocks are completed
