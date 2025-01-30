@@ -50,6 +50,7 @@ type BaseBlock struct {
 
 var registeredBlocks = Blocks{
 	&MarkdownBlock{},
+	&DividerBlock{},
 	&ImageBlock{},
 	&AnswerBlock{},
 	&PincodeBlock{},
@@ -66,6 +67,8 @@ func CreateFromBaseBlock(baseBlock BaseBlock) (Block, error) {
 	switch baseBlock.Type {
 	case "markdown":
 		return NewMarkdownBlock(baseBlock), nil
+	case "divider":
+		return NewDividerBlock(baseBlock), nil
 	case "answer":
 		return NewAnswerBlock(baseBlock), nil
 	case "pincode":
@@ -90,6 +93,11 @@ func NewMarkdownBlock(base BaseBlock) *MarkdownBlock {
 	}
 }
 
+func NewDividerBlock(base BaseBlock) *DividerBlock {
+	return &DividerBlock{
+		BaseBlock: base,
+	}
+}
 func NewAnswerBlock(base BaseBlock) *AnswerBlock {
 	return &AnswerBlock{
 		BaseBlock: base,

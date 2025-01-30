@@ -11,6 +11,9 @@ func RenderAdminEdit(settings models.InstanceSettings, block blocks.Block) templ
 	case "markdown":
 		b := block.(*blocks.MarkdownBlock)
 		return markdownAdmin(settings, *b)
+	case "divider":
+		b := block.(*blocks.DividerBlock)
+		return dividerAdmin(settings, *b)
 	case "image":
 		b := block.(*blocks.ImageBlock)
 		return imageAdmin(settings, *b)
@@ -38,6 +41,9 @@ func RenderPlayerView(settings models.InstanceSettings, block blocks.Block, stat
 	case "markdown":
 		b := block.(*blocks.MarkdownBlock)
 		return markdownPlayer(settings, *b)
+	case "divider":
+		b := block.(*blocks.DividerBlock)
+		return dividerPlayer(settings, *b)
 	case "image":
 		b := block.(*blocks.ImageBlock)
 		return imagePlayer(settings, *b)
@@ -65,6 +71,9 @@ func RenderPlayerUpdate(settings models.InstanceSettings, block blocks.Block, st
 	case "markdown":
 		b := block.(*blocks.MarkdownBlock)
 		return markdownPlayer(settings, *b)
+	case "divider":
+		b := block.(*blocks.DividerBlock)
+		return dividerPlayer(settings, *b)
 	case "image":
 		b := block.(*blocks.ImageBlock)
 		return imagePlayer(settings, *b)
