@@ -6,4 +6,5 @@
 \" hx-swap=\"none\" hx-indicator=\"
 \"><label for=\"
 \" class=\"input input-bordered flex items-center gap-2\"><input id=\"
-\" name=\"title\" type=\"text\" class=\"grow\" placeholder=\"Title\"> <span class=\"badge badge-info\">Optional</span></label></form>
+\" name=\"title\" type=\"text\" class=\"grow\" placeholder=\"Title\" value=\"
+\"> <span class=\"badge badge-info\">Optional</span></label></form>
