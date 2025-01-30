@@ -4,6 +4,8 @@ sidebar: true
 order: 20
 ---
 
+JTGC
+Testing
 # Content blocks
 
 Rapua has six content blocks that you can use to create interactive learning experiences.
@@ -15,8 +17,10 @@ Rapua has six content blocks that you can use to create interactive learning exp
 These blocks are the foundation of your game and are used to provide information, instructions, and context to participants. They are not interactive and do not award points.
 
 - [Text Block](/docs/user/blocks/text)
+- [Divider Block](/docs/user/blocks/divider)
 - [Image Block](/docs/user/blocks/image)
 - [YouTube Block](/docs/user/blocks/youtube)
+- [Alert Block](/docs/user/blocks/alert)
 
 ## Interactive blocks
 
