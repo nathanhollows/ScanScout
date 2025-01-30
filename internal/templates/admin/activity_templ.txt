@@ -55,7 +55,7 @@
 </p></blockquote>
 </li>
 </ul></div>
-<p>No activity</p>
+<p>All done!</p>
 </div><!-- Previous Locations -->
 <div class=\"py-3 font-bold divider divider-start\">Previous Locations</div>
 <div class=\"prose\"><ul><li>

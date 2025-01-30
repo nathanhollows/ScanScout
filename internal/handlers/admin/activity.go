@@ -1,9 +1,11 @@
 package handlers
 
 import (
+	"errors"
 	"net/http"
 
 	"github.com/go-chi/chi"
+	"github.com/nathanhollows/Rapua/internal/services"
 	templates "github.com/nathanhollows/Rapua/internal/templates/admin"
 )
 
@@ -61,8 +63,10 @@ func (h *AdminHandler) TeamActivity(w http.ResponseWriter, r *http.Request) {
 
 	locations, err := h.GameplayService.SuggestNextLocations(r.Context(), team)
 	if err != nil {
-		h.handleError(w, r, "TeamActivity: getting next locations", "Error getting next locations", "Could not load data", err)
-		return
+		if !errors.Is(err, services.ErrAllLocationsVisited) {
+			h.handleError(w, r, "TeamActivity: getting next locations", "Error getting next locations", "Could not load data", err)
+			return
+		}
 	}
 
 	notifications, err := h.NotificationService.GetNotifications(r.Context(), team.Code)
