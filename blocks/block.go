@@ -52,10 +52,11 @@ var registeredBlocks = Blocks{
 	&MarkdownBlock{},
 	&DividerBlock{},
 	&ImageBlock{},
+	&YoutubeBlock{},
+	&AlertBlock{},
 	&AnswerBlock{},
 	&PincodeBlock{},
 	&ChecklistBlock{},
-	&YoutubeBlock{},
 	&PhotoBlock{},
 }
 
@@ -69,6 +70,8 @@ func CreateFromBaseBlock(baseBlock BaseBlock) (Block, error) {
 		return NewMarkdownBlock(baseBlock), nil
 	case "divider":
 		return NewDividerBlock(baseBlock), nil
+	case "alert":
+		return NewAlertBlock(baseBlock), nil
 	case "answer":
 		return NewAnswerBlock(baseBlock), nil
 	case "pincode":
@@ -98,6 +101,13 @@ func NewDividerBlock(base BaseBlock) *DividerBlock {
 		BaseBlock: base,
 	}
 }
+
+func NewAlertBlock(base BaseBlock) *AlertBlock {
+	return &AlertBlock{
+		BaseBlock: base,
+	}
+}
+
 func NewAnswerBlock(base BaseBlock) *AnswerBlock {
 	return &AnswerBlock{
 		BaseBlock: base,

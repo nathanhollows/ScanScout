@@ -29,6 +29,9 @@ func RenderAdminEdit(settings models.InstanceSettings, block blocks.Block) templ
 	case "youtube":
 		b := block.(*blocks.YoutubeBlock)
 		return youtubeAdmin(settings, *b)
+	case "alert":
+		b := block.(*blocks.AlertBlock)
+		return alertAdmin(settings, *b)
 	case "photo":
 		b := block.(*blocks.PhotoBlock)
 		return photoAdmin(settings, *b)
@@ -59,6 +62,9 @@ func RenderPlayerView(settings models.InstanceSettings, block blocks.Block, stat
 	case "youtube":
 		b := block.(*blocks.YoutubeBlock)
 		return youtubePlayer(settings, *b)
+	case "alert":
+		b := block.(*blocks.AlertBlock)
+		return alertPlayer(settings, *b)
 	case "photo":
 		b := block.(*blocks.PhotoBlock)
 		return photoPlayer(settings, *b, state)
@@ -89,6 +95,9 @@ func RenderPlayerUpdate(settings models.InstanceSettings, block blocks.Block, st
 	case "youtube":
 		b := block.(*blocks.YoutubeBlock)
 		return youtubePlayer(settings, *b)
+	case "alert":
+		b := block.(*blocks.AlertBlock)
+		return alertPlayer(settings, *b)
 	case "photo":
 		b := block.(*blocks.PhotoBlock)
 		return photoPlayerUpdate(settings, *b, state)
