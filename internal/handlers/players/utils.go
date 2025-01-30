@@ -3,13 +3,14 @@ package handlers
 import (
 	"context"
 	"errors"
+	"fmt"
 	"log/slog"
 	"net/http"
 
-	"github.com/gorilla/sessions"
 	"github.com/nathanhollows/Rapua/internal/contextkeys"
 	"github.com/nathanhollows/Rapua/internal/flash"
 	"github.com/nathanhollows/Rapua/internal/services"
+	"github.com/nathanhollows/Rapua/internal/sessions"
 	templates "github.com/nathanhollows/Rapua/internal/templates/players"
 	"github.com/nathanhollows/Rapua/models"
 )
@@ -71,10 +72,33 @@ func (h PlayerHandler) redirect(w http.ResponseWriter, r *http.Request, path str
 	http.Redirect(w, r, path, http.StatusFound)
 }
 
+func (h *PlayerHandler) startSession(w http.ResponseWriter, r *http.Request, teamCode string) error {
+	session, err := sessions.Get(r, "scanscout")
+	if err != nil {
+		return fmt.Errorf("getting session: %w", err)
+	}
+	session.Values["team"] = teamCode
+	session.Options.Path = "/"
+	err = session.Save(r, w)
+	if err != nil {
+		return fmt.Errorf("saving session: %w", err)
+	}
+	return nil
+
+}
+
 // invalidateSession invalidates the current session.
-func invalidateSession(session *sessions.Session, r *http.Request, w http.ResponseWriter) {
+func invalidateSession(r *http.Request, w http.ResponseWriter) error {
+	session, err := sessions.Get(r, "scanscout")
+	if err != nil {
+		return fmt.Errorf("getting session: %w", err)
+	}
 	session.Options.MaxAge = -1
-	session.Save(r, w)
+	err = session.Save(r, w)
+	if err != nil {
+		return fmt.Errorf("saving session: %w", err)
+	}
+	return nil
 }
 
 func (h *PlayerHandler) handleError(w http.ResponseWriter, r *http.Request, logMsg string, flashMsg string, params ...interface{}) {
