@@ -8,7 +8,7 @@ import (
 	templates "github.com/nathanhollows/Rapua/internal/templates/players"
 )
 
-func (h *PlayerHandler) Next(w http.ResponseWriter, r *http.Request) {
+func (h *PlayerHandler) Finish(w http.ResponseWriter, r *http.Request) {
 	team, err := h.getTeamFromContext(r.Context())
 	if err != nil {
 		h.redirect(w, r, "/play")
@@ -17,15 +17,17 @@ func (h *PlayerHandler) Next(w http.ResponseWriter, r *http.Request) {
 
 	locations, err := h.GameplayService.SuggestNextLocations(r.Context(), team)
 	if err != nil {
-		if errors.Is(err, services.ErrAllLocationsVisited) {
-			h.redirect(w, r, "/finish")
+		if !errors.Is(err, services.ErrAllLocationsVisited) {
+			h.handleError(w, r, "Next: getting next locations", "Error getting next locations", "Could not load data", err)
 			return
 		}
-		h.handleError(w, r, "Next: getting next locations", "Error getting next locations", "Could not load data", err)
+	}
+	if len(locations) > 0 {
+		h.redirect(w, r, "/next")
 		return
 	}
 
 	// data["notifications"], _ = h.NotificationService.GetNotifications(r.Context(), team.Code)
-	c := templates.Next(*team, locations)
-	err = templates.Layout(c, "Next stops", team.Messages).Render(r.Context(), w)
+	c := templates.Finish(*team, locations)
+	err = templates.Layout(c, "The End", team.Messages).Render(r.Context(), w)
 }

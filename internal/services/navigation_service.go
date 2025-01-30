@@ -11,8 +11,8 @@ import (
 )
 
 var (
-	ErrorAllLocationsVisited = errors.New("all locations visited")
-	ErrInstanceNotFound      = errors.New("instance not found")
+	ErrAllLocationsVisited = errors.New("all locations visited")
+	ErrInstanceNotFound    = errors.New("instance not found")
 )
 
 type NavigationService struct{}
@@ -43,7 +43,7 @@ func (s NavigationService) CheckValidLocation(ctx context.Context, team *models.
 func (s NavigationService) DetermineNextLocations(ctx context.Context, team *models.Team) ([]models.Location, error) {
 	// Check if the team has visited all locations
 	if len(team.CheckIns) == len(team.Instance.Locations) {
-		return nil, ErrorAllLocationsVisited
+		return nil, ErrAllLocationsVisited
 	}
 
 	if team.Instance.ID == "" || team.Instance.Settings.InstanceID == "" {
@@ -90,7 +90,7 @@ func (s NavigationService) getUnvisitedLocations(_ context.Context, team *models
 func (s NavigationService) getOrderedLocations(ctx context.Context, team *models.Team) ([]models.Location, error) {
 	unvisited := s.getUnvisitedLocations(ctx, team)
 	if len(unvisited) == 0 {
-		return nil, ErrorAllLocationsVisited
+		return nil, ErrAllLocationsVisited
 	}
 
 	// Reorder based on .Order
@@ -119,7 +119,7 @@ func (s NavigationService) getRandomLocations(ctx context.Context, team *models.
 
 	unvisited := s.getUnvisitedLocations(ctx, team)
 	if len(unvisited) == 0 {
-		return nil, fmt.Errorf("all locations visited")
+		return []models.Location{}, ErrAllLocationsVisited
 	}
 
 	// Seed the random number generator with the team code to ensure deterministic shuffling
@@ -150,7 +150,7 @@ func (s NavigationService) getRandomLocations(ctx context.Context, team *models.
 	}
 
 	if len(selectedLocations) == 0 {
-		return nil, ErrorAllLocationsVisited
+		return nil, ErrAllLocationsVisited
 	}
 
 	return selectedLocations, nil
@@ -162,7 +162,7 @@ func (s NavigationService) getFreeRoamLocations(ctx context.Context, team *model
 	unvisited := s.getUnvisitedLocations(ctx, team)
 
 	if len(unvisited) == 0 {
-		return nil, ErrorAllLocationsVisited
+		return nil, ErrAllLocationsVisited
 	}
 
 	return unvisited, nil
