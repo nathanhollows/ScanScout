@@ -36,6 +36,13 @@ func TeamMiddleware(teamService services.TeamService, next http.Handler) http.Ha
 			return
 		}
 
+		err = teamService.LoadRelation(r.Context(), team, "Instance")
+		if err != nil {
+			slog.Error("loading relations: ", "err", err)
+			next.ServeHTTP(w, r)
+			return
+		}
+
 		// Add team to context
 		ctx := context.WithValue(r.Context(), contextkeys.TeamKey, team)
 		next.ServeHTTP(w, r.WithContext(ctx))
