@@ -12,7 +12,7 @@
 <div class=\"prose\"><div class=\"divider mt-12\">Instructions</div>
 <div class=\"divider mb-5\"></div></div><div id=\"team-id\" class=\"flex gap-3 justify-center\"><p>Team code: <span class=\"font-mono font-bold\">
 </span></p><p>Team name:  
-<a class=\"link\" onclick=\"my_modal_5.showModal()\">Add a name</a>
+<a class=\"link whitespace-nowrap\" onclick=\"my_modal_5.showModal()\">Set your team name</a>
 <a class=\"link\" onclick=\"my_modal_5.showModal()\"><span class=\"font-mono font-bold\">
 </span></a>
 </p></div><div class=\"text-center mt-12\">
