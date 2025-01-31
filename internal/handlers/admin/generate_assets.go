@@ -3,7 +3,6 @@ package handlers
 import (
 	"net/http"
 	"os"
-	"strings"
 
 	"github.com/go-chi/chi"
 	"github.com/nathanhollows/Rapua/internal/services"
