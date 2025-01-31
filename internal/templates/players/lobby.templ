@@ -11,12 +11,10 @@ templ TeamID(team models.Team) {
 		<p>
 			Team name: 
 			if team.Name == "" {
-				<a class="link" onclick="my_modal_5.showModal()">Add a name</a>
+				<a class="link font-bold whitespace-nowrap" onclick="my_modal_5.showModal()">Click to set</a>
 			} else {
-				<a class="link" onclick="my_modal_5.showModal()">
-					<span class="font-mono font-bold">
-						{ team.Name }
-					</span>
+				<a class="link font-bold whitespace-nowrap" onclick="my_modal_5.showModal()">
+					{ team.Name }
 				</a>
 			}
 		</p>
@@ -80,23 +78,10 @@ templ Lobby(team models.Team) {
 		<div class="prose">
 			<div class="divider mt-12">Instructions</div>
 			@instructions(team.Instance.Settings)
-			<div class="divider mb-5"></div>
 		</div>
-		<div id="team-id" class="flex gap-3 justify-center">
-			<p>Team code: <span class="font-mono font-bold">{ team.Code }</span></p>
-			<p>
-				Team name: 
-				if team.Name == "" {
-					<a class="link" onclick="my_modal_5.showModal()">Add a name</a>
-				} else {
-					<a class="link" onclick="my_modal_5.showModal()">
-						<span class="font-mono font-bold">
-							{ team.Name }
-						</span>
-					</a>
-				}
-			</p>
-		</div>
+		<div class="divider mb-5 prose">Team Info</div>
+		@TeamID(team)
+		<div class="divider"></div>
 		<div class="text-center mt-12">
 			switch team.Instance.GetStatus() {
 				case models.Scheduled:
