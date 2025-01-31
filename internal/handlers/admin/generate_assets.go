@@ -3,6 +3,7 @@ package handlers
 import (
 	"net/http"
 	"os"
+	"strings"
 
 	"github.com/go-chi/chi"
 	"github.com/nathanhollows/Rapua/internal/services"
@@ -181,7 +182,7 @@ func (h *AdminHandler) GeneratePosters(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.Header().Set("Content-Disposition", "attachment; filename="+user.CurrentInstance.Name+" posters.pdf")
+	w.Header().Set("Content-Disposition", "attachment; filename=\""+user.CurrentInstance.Name+" posters.pdf\"")
 	w.Header().Set("Content-Type", "application/pdf")
 	http.ServeFile(w, r, path)
 	os.Remove(path)
@@ -259,7 +260,7 @@ func (h *AdminHandler) GeneratePoster(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.Header().Set("Content-Disposition", "attachment; filename="+user.CurrentInstance.Name+" - "+location.Name+" poster.pdf")
+	w.Header().Set("Content-Disposition", "attachment; filename=\""+user.CurrentInstance.Name+" - "+location.Name+" poster.pdf\"")
 	w.Header().Set("Content-Type", "application/pdf")
 	http.ServeFile(w, r, path)
 	os.Remove(path)
