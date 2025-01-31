@@ -6,17 +6,34 @@ order: 100
 
 # Changelog
 
-## 3.1.1 (2025-01-28)
+## 3.2.0 (2025-01-31)
+
+### Added
+- Players are now redirected to a dedicated end screen upon game completion. Included an easter egg when tapping the confetti icon. [#53](https://github.com/nathanhollows/Rapua/issues/53)
+
+### Changed
+- Restyled the lobby and team name form for better clarity and user experience.
+- Improved input validation and feedback messages, especially for check-in/out forms.
+- Footer now includes team name, rules link, and team code for quick reference and is shown on more pages.
+- Differentiated check-in elements for logged-in vs. logged-out players for a smoother experience.
+- Style updates across the platform for better consistency and readability.
+- Misc code refactors on internal services and handlers for readability and consistency.
 
 ### Fixed
+- Fixed an issue where commas in filenames were preventing asset downloads. [#57](https://github.com/nathanhollows/Rapua/issues/57)
+- Fixed an issue where the team overview failed to render when a player had visited all locations.
+- Resolved issues caused by blank sessions and edge cases that led to unexpected behaviour.
+- Fixed a bug where check-in/out pages weren't rendering if the player didn't have a session.
 
-- Fixed an issue where users could not check in to locations. The issue was caused by locations not loading markers correctly.
-- Player alerts now display full-width with text wrapping for better readability.
+[Full Changelog](https://github.com/nathanhollows/Rapua/releases/tag/v3.2.0)
+
+---
 
 ## 3.1.0 (2025-01-17)
 
 ### Added
 - Instantly fit map bounds to neighbouring markers when adding locations [(#44)](https://github.com/nathanhollows/Rapua/issues/44)
+
 - Introduced the official project logo.
 - Docs for [Getting Started with Teams](/docs/user/teams) [(#43)](https://github.com/nathanhollows/Rapua/issues/43)
 
