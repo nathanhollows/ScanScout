@@ -1,7 +1,7 @@
 ---
 title: "Student Orientation with The Amazing Trace"
 sidebar: true
-order: 6
+order: 1
 ---
 
 # Student Orientation with The Amazing Trace
