@@ -3,6 +3,7 @@ package repositories_test
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"testing"
 
 	"github.com/brianvoe/gofakeit/v7"
@@ -182,6 +183,77 @@ func TestBlockStateRepository_Bulk(t *testing.T) {
 			state, err := tt.setup()
 			assert.NoError(t, err)
 			result, err := tt.action(state)
+			tt.assertion(result, err)
+			if tt.cleanupFunc != nil {
+				tt.cleanupFunc(state)
+			}
+		})
+	}
+}
+
+func TestBlockStateRepository_DeleteByTeamCodes(t *testing.T) {
+	repo, transactor, cleanup := setupBlockStateRepo(t)
+	defer cleanup()
+
+	tests := []struct {
+		name        string
+		setup       func() ([]blocks.PlayerState, []string, error)
+		action      func(state []blocks.PlayerState, teamCodes []string) (interface{}, error)
+		assertion   func(result interface{}, err error)
+		cleanupFunc func(state []blocks.PlayerState)
+	}{
+		{
+			name: "Delete player states by team codes",
+			setup: func() ([]blocks.PlayerState, []string, error) {
+				teamCodes := []string{gofakeit.UUID(), gofakeit.UUID()}
+				playerStates := make([]blocks.PlayerState, 4)
+				for i := 0; i < 4; i++ {
+					blockID := gofakeit.UUID()
+					state, _ := repo.NewBlockState(context.Background(), blockID, teamCodes[i%2])
+					ps, err := repo.Create(context.Background(), state)
+					playerStates[i] = ps
+					if err != nil {
+						return nil, nil, err
+					}
+				}
+				return playerStates, teamCodes, nil
+			},
+			action: func(state []blocks.PlayerState, teamCodes []string) (interface{}, error) {
+				tx, err := transactor.BeginTx(context.Background(), &sql.TxOptions{})
+				if err != nil {
+					return nil, err
+				}
+
+				err = repo.DeleteByTeamCodes(context.Background(), tx, teamCodes)
+				if err != nil {
+					tx.Rollback()
+					return nil, err
+				} else {
+					tx.Commit()
+				}
+
+				// Check that the states have been deleted
+				for _, s := range state {
+					_, err := repo.GetByBlockAndTeam(context.Background(), s.GetBlockID(), s.GetPlayerID())
+					if err == nil || !errors.Is(err, sql.ErrNoRows) {
+						return nil, errors.New("player state was not deleted")
+					}
+				}
+
+				return nil, nil
+			},
+			assertion: func(result interface{}, err error) {
+				assert.NoError(t, err)
+			},
+			cleanupFunc: func(state []blocks.PlayerState) {},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			state, teamCodes, err := tt.setup()
+			assert.NoError(t, err)
+			result, err := tt.action(state, teamCodes)
 			tt.assertion(result, err)
 			if tt.cleanupFunc != nil {
 				tt.cleanupFunc(state)

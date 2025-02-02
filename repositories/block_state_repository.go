@@ -28,6 +28,8 @@ type BlockStateRepository interface {
 	// DeleteByBlockID deletes all player states for a block
 	// Requires a transaction as this implies a cascade delete
 	DeleteByBlockID(ctx context.Context, tx *bun.Tx, blockID string) error
+	// DeleteByTeamCodes deletes all player states for a team
+	DeleteByTeamCodes(ctx context.Context, tx *bun.Tx, teamCodes []string) error
 }
 
 type blockStateRepository struct {
@@ -182,6 +184,15 @@ func (r *blockStateRepository) DeleteByBlockID(ctx context.Context, tx *bun.Tx, 
 	_, err := tx.NewDelete().
 		Model(&models.TeamBlockState{}).
 		Where("block_id = ?", blockID).
+		Exec(ctx)
+	return err
+}
+
+// DeleteByTeamCodes removes all team block states for a team from the database
+func (r *blockStateRepository) DeleteByTeamCodes(ctx context.Context, tx *bun.Tx, teamCodes []string) error {
+	_, err := tx.NewDelete().
+		Model(&models.TeamBlockState{}).
+		Where("team_code IN (?)", bun.In(teamCodes)).
 		Exec(ctx)
 	return err
 }
