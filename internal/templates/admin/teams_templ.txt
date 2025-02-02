@@ -16,8 +16,8 @@
 <em class=\"flex-grow opacity-50\">No name set</em> 
 <a class=\"flex-grow\">
 </a> 
-<span class=\"badge badge-ghost\">
- pts</span>
+<button class=\"btn btn-sm\" hx-get=\"
+\" hx-target=\"#team_modal .modal-box\" hx-trigger=\"click\" hx-indicator=\".loading\" hx-swap=\"innerHTML\">See activity</button>
 </div></div>
 <span class=\"hidden bg-danger text-danger-content border-error border-warning\"></span><div class=\"flex flex-col gap-3 md:flex-row justify-between items-center w-full p-5\"><h1 class=\"text-2xl font-bold\">Teams</h1><div class=\"flex gap-3\"><button class=\"btn btn-secondary\" onclick=\"add_teams_modal.showModal()\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"lucide lucide-user-plus\"><path d=\"M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2\"></path><circle cx=\"9\" cy=\"7\" r=\"4\"></circle><line x1=\"19\" x2=\"19\" y1=\"8\" y2=\"14\"></line><line x1=\"22\" x2=\"16\" y1=\"11\" y2=\"11\"></line></svg> Add teams</button></div></div><div id=\"teams-table\">
 </div><!-- Modal for adding teams --><dialog id=\"add_teams_modal\" class=\"modal\"><div class=\"modal-box\"><h3 class=\"font-bold text-lg\">Quick add teams</h3><p class=\"py-4\">How many teams would you like to add?</p><form hx-post=\"/admin/teams/add\" hx-target=\"#teams-list\" hx-swap=\"beforeend swap:0.5s\" class=\"join flex flex-row w-full\"><input name=\"count\" type=\"number\" id=\"count\" class=\"input input-bordered join-item flex-grow\" placeholder=\"1+\" min=\"1\" step=\"1\" value=\"10\"> <button class=\"btn btn-primary join-item\" onclick=\"add_teams_modal.close()\">Add Teams</button></form><div class=\"modal-action\"><form method=\"dialog\"><button class=\"btn\">Nevermind</button></form></div></div></dialog>

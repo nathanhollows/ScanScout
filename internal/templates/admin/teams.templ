@@ -349,11 +349,21 @@ templ teamItem(team models.Team, classes string) {
 					{ team.Name }
 				</a>
 			}
-			if team.Points > 0 {
-				<span class="badge badge-ghost">{ fmt.Sprint( team.Points) } pts</span>
+			if team.HasStarted {
+				<button
+					class="btn btn-sm"
+					hx-get={ fmt.Sprintf("/admin/activity/team/%s", team.Code) }
+					hx-target="#team_modal .modal-box"
+					hx-trigger="click"
+					hx-indicator=".loading"
+					hx-swap="innerHTML"
+				>
+					See activity
+				</button>
 			}
 		</div>
 	</div>
+	@teamModal()
 }
 
 templ Teams(teams []models.Team) {
@@ -409,5 +419,3 @@ templ Teams(teams []models.Team) {
 		</div>
 	</dialog>
 }
-
-var teamScriptHandle = templ.NewOnceHandle()
