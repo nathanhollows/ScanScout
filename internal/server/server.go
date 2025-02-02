@@ -35,6 +35,7 @@ func Start(logger *slog.Logger,
 	notificationService services.NotificationService,
 	teamService services.TeamService,
 	userService services.UserService,
+	facilitatorService services.FacilitatorService,
 ) {
 	// Public routes
 	publicHandler := public.NewPublicHandler(
@@ -60,6 +61,7 @@ func Start(logger *slog.Logger,
 		authService,
 		blockService,
 		clueService,
+		facilitatorService,
 		gameManagerService,
 		gameplayService,
 		locationService,

@@ -48,16 +48,23 @@ type teamService struct {
 	teamRepo       repositories.TeamRepository
 	checkInRepo    repositories.CheckInRepository
 	blockStateRepo repositories.BlockStateRepository
+	locationRepo   repositories.LocationRepository
 	batchSize      int
 }
 
 // NewTeamService creates a new TeamService
-func NewTeamService(transactor db.Transactor, tr repositories.TeamRepository, cr repositories.CheckInRepository, bsr repositories.BlockStateRepository) TeamService {
+func NewTeamService(transactor db.Transactor,
+	tr repositories.TeamRepository,
+	cr repositories.CheckInRepository,
+	bsr repositories.BlockStateRepository,
+	lr repositories.LocationRepository,
+) TeamService {
 	return &teamService{
 		transactor:     transactor,
 		teamRepo:       tr,
 		checkInRepo:    cr,
 		blockStateRepo: bsr,
+		locationRepo:   lr,
 		batchSize:      100,
 	}
 }
@@ -234,6 +241,12 @@ func (s *teamService) Reset(ctx context.Context, instanceID string, teamCodes []
 		return fmt.Errorf("deleting block states: %w", err)
 	}
 
+	err = s.locationRepo.UpdateStatistics(ctx, tx, instanceID)
+	if err != nil {
+		tx.Rollback()
+		return fmt.Errorf("updating location statistics: %w", err)
+	}
+
 	return tx.Commit()
 }
 
@@ -268,6 +281,12 @@ func (s *teamService) Delete(ctx context.Context, instanceID string, teamCode st
 	if err != nil {
 		tx.Rollback()
 		return fmt.Errorf("deleting block states: %w", err)
+	}
+
+	err = s.locationRepo.UpdateStatistics(ctx, tx, instanceID)
+	if err != nil {
+		tx.Rollback()
+		return fmt.Errorf("updating location statistics: %w", err)
 	}
 
 	return tx.Commit()

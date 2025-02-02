@@ -21,7 +21,8 @@ func setupTeamsService(t *testing.T) (services.TeamService, func()) {
 	checkinRepo := repositories.NewCheckInRepository(dbc)
 	blockStateRepo := repositories.NewBlockStateRepository(dbc)
 	teamRepo := repositories.NewTeamRepository(dbc)
-	teamService := services.NewTeamService(transactor, teamRepo, checkinRepo, blockStateRepo)
+	locationRepo := repositories.NewLocationRepository(dbc)
+	teamService := services.NewTeamService(transactor, teamRepo, checkinRepo, blockStateRepo, locationRepo)
 
 	return teamService, cleanup
 }
