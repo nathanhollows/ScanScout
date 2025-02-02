@@ -51,6 +51,7 @@ func (r *checkInRepository) LogCheckIn(ctx context.Context, team models.Team, lo
 	scan := &models.CheckIn{
 		TeamID:          team.Code,
 		LocationID:      location.ID,
+		InstanceID:      team.InstanceID,
 		TimeIn:          time.Now().UTC(),
 		MustCheckOut:    mustCheckOut,
 		Points:          location.Points,
