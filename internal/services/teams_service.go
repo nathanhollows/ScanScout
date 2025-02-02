@@ -18,6 +18,8 @@ type TeamService interface {
 	// AddTeams adds teams to the database
 	AddTeams(ctx context.Context, instanceID string, count int) ([]models.Team, error)
 
+	// FindAll returns all teams for an instance
+	FindAll(ctx context.Context, instanceID string) ([]models.Team, error)
 	// FindTeamByCode returns a team by code
 	FindTeamByCode(ctx context.Context, code string) (*models.Team, error)
 	// GetTeamActivityOverview returns a list of teams and their activity
@@ -27,6 +29,8 @@ type TeamService interface {
 	Update(ctx context.Context, team *models.Team) error
 	// AwardPoints awards points to a team
 	AwardPoints(ctx context.Context, team *models.Team, points int, reason string) error
+	// Reset wipes a team's progress for re-use
+	Reset(ctx context.Context, instanceID string, teamCodes []string) error
 
 	// Delete removes a team from the database
 	Delete(ctx context.Context, instanceID string, teamCode string) error
@@ -40,17 +44,21 @@ type TeamService interface {
 }
 
 type teamService struct {
-	transactor db.Transactor
-	teamRepo   repositories.TeamRepository
-	batchSize  int
+	transactor     db.Transactor
+	teamRepo       repositories.TeamRepository
+	checkInRepo    repositories.CheckInRepository
+	blockStateRepo repositories.BlockStateRepository
+	batchSize      int
 }
 
 // NewTeamService creates a new TeamService
-func NewTeamService(transactor db.Transactor, tr repositories.TeamRepository) TeamService {
+func NewTeamService(transactor db.Transactor, tr repositories.TeamRepository, cr repositories.CheckInRepository, bsr repositories.BlockStateRepository) TeamService {
 	return &teamService{
-		transactor: transactor,
-		teamRepo:   tr,
-		batchSize:  100,
+		transactor:     transactor,
+		teamRepo:       tr,
+		checkInRepo:    cr,
+		blockStateRepo: bsr,
+		batchSize:      100,
 	}
 }
 
@@ -116,6 +124,11 @@ func (s *teamService) AddTeams(ctx context.Context, instanceID string, count int
 	}
 
 	return newTeams, nil
+}
+
+// FindAll returns all teams for an instance
+func (s *teamService) FindAll(ctx context.Context, instanceID string) ([]models.Team, error) {
+	return s.teamRepo.FindAll(ctx, instanceID)
 }
 
 // FindTeamByCode returns a team by code
@@ -188,6 +201,42 @@ func (s *teamService) AwardPoints(ctx context.Context, team *models.Team, points
 	return s.teamRepo.Update(ctx, team)
 }
 
+// Reset wipes a team's progress for re-use
+func (s *teamService) Reset(ctx context.Context, instanceID string, teamCodes []string) error {
+	tx, err := s.transactor.BeginTx(ctx, &sql.TxOptions{})
+	if err != nil {
+		tx.Rollback()
+		return fmt.Errorf("starting transaction: %w", err)
+	}
+
+	defer func() {
+		if p := recover(); p != nil {
+			tx.Rollback()
+			panic(p)
+		}
+	}()
+
+	err = s.teamRepo.Reset(ctx, tx, instanceID, teamCodes)
+	if err != nil {
+		tx.Rollback()
+		return fmt.Errorf("resetting team: %w", err)
+	}
+
+	err = s.checkInRepo.DeleteByTeamCodes(ctx, tx, instanceID, teamCodes)
+	if err != nil {
+		tx.Rollback()
+		return fmt.Errorf("deleting check ins: %w", err)
+	}
+
+	err = s.blockStateRepo.DeleteByTeamCodes(ctx, tx, teamCodes)
+	if err != nil {
+		tx.Rollback()
+		return fmt.Errorf("deleting block states: %w", err)
+	}
+
+	return tx.Commit()
+}
+
 // Delete removes a team from the database
 func (s *teamService) Delete(ctx context.Context, instanceID string, teamCode string) error {
 	tx, err := s.transactor.BeginTx(ctx, &sql.TxOptions{})
@@ -207,6 +256,18 @@ func (s *teamService) Delete(ctx context.Context, instanceID string, teamCode st
 	if err != nil {
 		tx.Rollback()
 		return fmt.Errorf("deleting team: %w", err)
+	}
+
+	err = s.checkInRepo.DeleteByTeamCodes(ctx, tx, instanceID, []string{teamCode})
+	if err != nil {
+		tx.Rollback()
+		return fmt.Errorf("deleting check ins: %w", err)
+	}
+
+	err = s.blockStateRepo.DeleteByTeamCodes(ctx, tx, []string{teamCode})
+	if err != nil {
+		tx.Rollback()
+		return fmt.Errorf("deleting block states: %w", err)
 	}
 
 	return tx.Commit()
