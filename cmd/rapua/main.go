@@ -146,6 +146,7 @@ func runApp(logger *slog.Logger, dbc *bun.DB) {
 	initialiseFolders(logger)
 
 	// Initialize repositories
+	facilitatorRepo := repositories.NewFacilitatorTokenRepo(dbc)
 	blockStateRepo := repositories.NewBlockStateRepository(dbc)
 	blockRepo := repositories.NewBlockRepository(dbc, blockStateRepo)
 	teamRepo := repositories.NewTeamRepository(dbc)
@@ -162,6 +163,7 @@ func runApp(logger *slog.Logger, dbc *bun.DB) {
 	transactor := db.NewTransactor(dbc)
 
 	// Initialize services
+	facilitatorService := services.NewFacilitatorService(facilitatorRepo)
 	assetGenerator := services.NewAssetGenerator()
 	authService := services.NewAuthService(userRepo)
 	blockService := services.NewBlockService(transactor, blockRepo, blockStateRepo)
@@ -171,7 +173,7 @@ func runApp(logger *slog.Logger, dbc *bun.DB) {
 	locationService := services.NewLocationService(transactor, clueRepo, locationRepo, markerRepo, blockRepo)
 	navigationService := services.NewNavigationService()
 	notificationService := services.NewNotificationService(notificationRepo, teamRepo)
-	teamService := services.NewTeamService(transactor, teamRepo, checkInRepo, blockStateRepo)
+	teamService := services.NewTeamService(transactor, teamRepo, checkInRepo, blockStateRepo, locationRepo)
 	userService := services.NewUserService(transactor, userRepo, instanceRepo)
 	gameplayService := services.NewGameplayService(
 		checkInService, locationService, teamService, blockService, navigationService, markerRepo,
@@ -198,6 +200,7 @@ func runApp(logger *slog.Logger, dbc *bun.DB) {
 		notificationService,
 		teamService,
 		userService,
+		facilitatorService,
 	)
 }
 

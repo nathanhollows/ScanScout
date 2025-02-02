@@ -259,15 +259,6 @@ func (s *GameManagerService) DeleteInstance(ctx context.Context, user *models.Us
 	return response
 }
 
-func (s *GameManagerService) GetTeamActivityOverview(ctx context.Context, instanceID string) ([]TeamActivity, error) {
-	locations, err := s.locationService.FindByInstance(ctx, instanceID)
-	if err != nil {
-		return nil, fmt.Errorf("finding all locations: %w", err)
-	}
-
-	return s.teamService.GetTeamActivityOverview(ctx, instanceID, locations)
-}
-
 func (s *GameManagerService) SaveLocation(ctx context.Context, location *models.Location, lat, lng, name string) error {
 	if lat == "" || lng == "" {
 		return errors.New("latitude and longitude are required")

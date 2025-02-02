@@ -1,6 +1,13 @@
 package models
 
-import "errors"
+import (
+	"database/sql/driver"
+	"encoding/json"
+	"errors"
+	"fmt"
+)
+
+type StrArray []string
 
 type NavigationMode int
 type NavigationMethod int
@@ -38,6 +45,31 @@ const (
 	Active
 	Closed
 )
+
+// Value converts StrArray to a JSON string for database storage
+func (s StrArray) Value() (driver.Value, error) {
+	if len(s) == 0 {
+		return "[]", nil
+	}
+	bytes, err := json.Marshal(s)
+	return string(bytes), err
+}
+
+// Scan converts a database JSON string back into a StrArray
+func (s *StrArray) Scan(value interface{}) error {
+	if value == nil {
+		*s = []string{}
+		return nil
+	}
+
+	str, ok := value.(string)
+	if !ok {
+		return fmt.Errorf("failed to scan StrArray: expected string, got %T", value)
+	}
+
+	err := json.Unmarshal([]byte(str), s)
+	return err
+}
 
 // GetNavigationModes returns a list of navigation modes
 func GetNavigationModes() NavigationModes {
