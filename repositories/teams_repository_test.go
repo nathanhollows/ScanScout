@@ -132,6 +132,35 @@ func TestTeamRepository_Delete(t *testing.T) {
 	}
 }
 
+func TestTeamRepository_Reset(t *testing.T) {
+	repo, transactor, cleanup := setupTeamRepo(t)
+	defer cleanup()
+	ctx := context.Background()
+
+	sampleTeam := []models.Team{{
+		ID:         uuid.New().String(),
+		Code:       gofakeit.Password(false, true, false, false, false, 4),
+		InstanceID: gofakeit.UUID(),
+	}}
+
+	// Insert team first
+	err := repo.Update(ctx, &sampleTeam[0])
+	assert.NoError(t, err, "expected no error when saving team")
+
+	// Now delete it
+	tx, err := transactor.BeginTx(ctx, &sql.TxOptions{})
+	if err != nil {
+		tx.Rollback()
+		assert.NoError(t, err, "expected no error when starting transaction")
+	}
+	if err := repo.Reset(ctx, tx, sampleTeam[0].InstanceID, []string{sampleTeam[0].Code}); err != nil {
+		tx.Rollback()
+		assert.NoError(t, err, "expected no error when resetting team")
+	} else {
+		tx.Commit()
+	}
+}
+
 func TestTeamRepository_FindAll(t *testing.T) {
 	repo, transactor, cleanup := setupTeamRepo(t)
 	defer cleanup()

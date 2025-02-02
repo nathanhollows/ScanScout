@@ -1,10 +1,10 @@
 ---
-title: "Getting Started with Teams"
+title: "Players and Teams"
 sidebar: true
 order: 6
 ---
 
-# Getting Started with Teams
+# Players and Teams
 
 Individual and team play with the same way in Rapua. Players can either play solo or share a single device to play as a team. Here's how it works:
 
@@ -55,3 +55,11 @@ Once you've copied the team codes, you can distribute them to your players by:
 * Create "quickstart cards" with team codes and instructions for players to join.
     - Note: This is currently a feature request [(#46)](https://github.com/nathanhollows/Rapua/issues/46).
 
+## Team roles
+
+Sometimes it's useful for teams to have specific roles or responsibilities. Here are some common roles you might consider:
+
+- **App Lead**: Scans QR codes and interacts with Rapua.
+- **Navigator**: Leads the team in solving clues and deciding where to go next.
+- **Timekeeper**: Keeps track of time and ensures the team stays on schedule.
+- **Photographer**: Captures moments and memories during the game.

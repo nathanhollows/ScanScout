@@ -20,6 +20,9 @@ type CheckInRepository interface {
 
 	// Update updates an existing check-in
 	Update(ctx context.Context, checkIn *models.CheckIn) error
+
+	// DeleteByTeamCodes deletes all check-ins for the given teams
+	DeleteByTeamCodes(ctx context.Context, tx *bun.Tx, instanceID string, teamCodes []string) error
 }
 
 type checkInRepository struct {
@@ -51,6 +54,7 @@ func (r *checkInRepository) LogCheckIn(ctx context.Context, team models.Team, lo
 	scan := &models.CheckIn{
 		TeamID:          team.Code,
 		LocationID:      location.ID,
+		InstanceID:      team.InstanceID,
 		TimeIn:          time.Now().UTC(),
 		MustCheckOut:    mustCheckOut,
 		Points:          location.Points,
@@ -103,4 +107,13 @@ func (r *checkInRepository) LogCheckOut(ctx context.Context, team *models.Team, 
 	}
 
 	return *checkIn, nil
+}
+
+// DeleteByTeamCodes deletes all check-ins for the given teams
+func (r *checkInRepository) DeleteByTeamCodes(ctx context.Context, tx *bun.Tx, instanceID string, teamCodes []string) error {
+	_, err := tx.NewDelete().
+		Model(&models.CheckIn{}).
+		Where("instance_id = ? AND team_code IN (?)", instanceID, bun.In(teamCodes)).
+		Exec(ctx)
+	return err
 }
