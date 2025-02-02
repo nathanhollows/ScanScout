@@ -171,7 +171,7 @@ func runApp(logger *slog.Logger, dbc *bun.DB) {
 	locationService := services.NewLocationService(transactor, clueRepo, locationRepo, markerRepo, blockRepo)
 	navigationService := services.NewNavigationService()
 	notificationService := services.NewNotificationService(notificationRepo, teamRepo)
-	teamService := services.NewTeamService(transactor, teamRepo)
+	teamService := services.NewTeamService(transactor, teamRepo, checkInRepo, blockStateRepo)
 	userService := services.NewUserService(transactor, userRepo, instanceRepo)
 	gameplayService := services.NewGameplayService(
 		checkInService, locationService, teamService, blockService, navigationService, markerRepo,

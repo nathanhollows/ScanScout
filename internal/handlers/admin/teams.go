@@ -60,5 +60,44 @@ func (h *AdminHandler) TeamsDelete(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	h.handleSuccess(w, r, "Team(s) deleted")
+	teams, err := h.TeamService.FindAll(r.Context(), user.CurrentInstanceID)
+	if err != nil {
+		h.handleError(w, r, "TeamsReset finding teams", "Error finding teams", "error", err, "instance_id", user.CurrentInstanceID)
+		return
+	}
+
+	err = admin.TeamsTable(teams).Render(r.Context(), w)
+	if err != nil {
+		h.Logger.Error("TeamsReset rendering teams list", "error", err.Error(), "instance_id", user.CurrentInstanceID)
+	}
+	h.handleSuccess(w, r, "Deleted team(s)")
+}
+
+func (h *AdminHandler) TeamsReset(w http.ResponseWriter, r *http.Request) {
+	user := h.UserFromContext(r.Context())
+	r.ParseForm()
+
+	teamIDs := r.Form["team-checkbox"]
+	if len(teamIDs) == 0 {
+		h.handleError(w, r, "TeamsReset no team_id", "No teams selected", "error", nil, "instance_id", user.CurrentInstanceID)
+		return
+	}
+
+	err := h.TeamService.Reset(r.Context(), user.CurrentInstanceID, teamIDs)
+	if err != nil {
+		h.handleError(w, r, "TeamsReset deleting team", "Error resetting teams", "error", err, "instance_id", user.CurrentInstanceID, "team_id", teamIDs)
+		return
+	}
+
+	teams, err := h.TeamService.FindAll(r.Context(), user.CurrentInstanceID)
+	if err != nil {
+		h.handleError(w, r, "TeamsReset finding teams", "Error finding teams", "error", err, "instance_id", user.CurrentInstanceID)
+		return
+	}
+
+	err = admin.TeamsTable(teams).Render(r.Context(), w)
+	if err != nil {
+		h.Logger.Error("TeamsReset rendering teams list", "error", err.Error(), "instance_id", user.CurrentInstanceID)
+	}
+	h.handleSuccess(w, r, "Reset team(s)")
 }

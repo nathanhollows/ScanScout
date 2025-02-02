@@ -206,7 +206,8 @@ func setupAdminRoutes(router chi.Router, adminHandler *admin.AdminHandler) {
 		r.Route("/teams", func(r chi.Router) {
 			r.Get("/", adminHandler.Teams)
 			r.Post("/add", adminHandler.TeamsAdd)
-			r.Post("/delete", adminHandler.TeamsDelete)
+			r.Delete("/delete", adminHandler.TeamsDelete)
+			r.Post("/reset", adminHandler.TeamsReset)
 		})
 
 		r.Route("/experience", func(r chi.Router) {
