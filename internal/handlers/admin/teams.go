@@ -60,5 +60,16 @@ func (h *AdminHandler) TeamsDelete(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	h.handleSuccess(w, r, "Team(s) deleted")
+	teams, err := h.TeamService.FindAll(r.Context(), user.CurrentInstanceID)
+	if err != nil {
+		h.handleError(w, r, "TeamsReset finding teams", "Error finding teams", "error", err, "instance_id", user.CurrentInstanceID)
+		return
+	}
+
+	err = admin.TeamsTable(teams).Render(r.Context(), w)
+	if err != nil {
+		h.Logger.Error("TeamsReset rendering teams list", "error", err.Error(), "instance_id", user.CurrentInstanceID)
+	}
+	h.handleSuccess(w, r, "Deleted team(s)")
 }
+
