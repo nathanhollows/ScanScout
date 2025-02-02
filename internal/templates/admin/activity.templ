@@ -27,6 +27,19 @@ templ ActivityTracker(instance models.Instance) {
 					</span>
 			}
 		</h1>
+		<button
+			hx-get="/admin/facilitator/create-link"
+			hx-target="#facilitator_link_modal"
+			hx-swap="innerHTML"
+			class="btn btn-sm btn-circle tooltip md:tooltip-right md:mr-auto md:ml-0 md:mt-1"
+			data-tip="Share activity overview with Facilitators"
+			_="on click facilitator_link_modal.showModal()"
+		>
+			<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-share-2 w-4 h-4 mx-auto"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" x2="15.42" y1="13.51" y2="17.49"></line><line x1="15.41" x2="8.59" y1="6.51" y2="10.49"></line></svg>
+		</button>
+		<dialog id="facilitator_link_modal" class="modal">
+			@FacilitatorLinkModal()
+		</dialog>
 		<div class="flex gap-3">
 			@GameScheduleStatus(instance)
 			<button class="btn btn-secondary" onclick="announcement_modal.showModal()">

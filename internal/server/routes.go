@@ -32,6 +32,7 @@ func setupRouter(
 	setupPublicRoutes(router, publicHandler)
 	setupPlayerRoutes(router, playerHandler)
 	setupAdminRoutes(router, adminHandler)
+	setupFacilitatorRoutes(router, adminHandler)
 
 	// Static files
 	workDir, _ := os.Getwd()
@@ -241,6 +242,18 @@ func setupAdminRoutes(router chi.Router, adminHandler *admin.AdminHandler) {
 			r.Post("/team", adminHandler.NotifyTeamPost)
 		})
 
+		r.Route("/facilitator", func(r chi.Router) {
+			r.Get("/create-link", adminHandler.FacilitatorShowModal)
+			r.Post("/create-link", adminHandler.FacilitatorCreateTokenLink)
+		})
+
 		r.NotFound(adminHandler.NotFound)
+	})
+}
+
+func setupFacilitatorRoutes(router chi.Router, adminHandler *admin.AdminHandler) {
+	router.Route("/facilitator", func(r chi.Router) {
+		r.Get("/login/{token}", adminHandler.FacilitatorLogin)
+		r.Get("/dashboard", adminHandler.FacilitatorDashboard)
 	})
 }

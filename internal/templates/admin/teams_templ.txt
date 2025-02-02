@@ -16,7 +16,7 @@
 <em class=\"flex-grow opacity-50\">No name set</em> 
 <a class=\"flex-grow\">
 </a> 
-<button class=\"btn btn-sm\" hx-get=\"
+<button class=\"btn btn-xs\" hx-get=\"
 \" hx-target=\"#team_modal .modal-box\" hx-trigger=\"click\" hx-indicator=\".loading\" hx-swap=\"innerHTML\">See activity</button>
 </div></div>
 <span class=\"hidden bg-danger text-danger-content border-error border-warning\"></span><div class=\"flex flex-col gap-3 md:flex-row justify-between items-center w-full p-5\"><h1 class=\"text-2xl font-bold\">Teams</h1><div class=\"flex gap-3\"><button class=\"btn btn-secondary\" onclick=\"add_teams_modal.showModal()\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"lucide lucide-user-plus\"><path d=\"M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2\"></path><circle cx=\"9\" cy=\"7\" r=\"4\"></circle><line x1=\"19\" x2=\"19\" y1=\"8\" y2=\"14\"></line><line x1=\"22\" x2=\"16\" y1=\"11\" y2=\"11\"></line></svg> Add teams</button></div></div><div id=\"teams-table\">

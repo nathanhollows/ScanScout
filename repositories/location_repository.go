@@ -24,6 +24,9 @@ type LocationRepository interface {
 	// FindLocationsByMarkerID finds all locations by marker ID
 	FindLocationsByMarkerID(ctx context.Context, markerID string) ([]models.Location, error)
 
+	// UpdateStatistics updates the statistics for an instance
+	UpdateStatistics(ctx context.Context, tx *bun.Tx, instanceID string) error
+
 	// Delete deletes a location from the database
 	// Requires a transaction as related data will also need to be deleted
 	Delete(ctx context.Context, tx *bun.Tx, locationID string) error
@@ -119,6 +122,45 @@ func (r *locationRepository) FindLocationsByMarkerID(ctx context.Context, marker
 		return nil, fmt.Errorf("finding locations by marker ID: %w", err)
 	}
 	return locations, nil
+}
+
+// UpdateStatistics updates the statistics for a location
+func (r *locationRepository) UpdateStatistics(ctx context.Context, tx *bun.Tx, instanceID string) error {
+	// Subquery: Count unique teams for each location
+	totalVisitsSubquery := tx.NewSelect().
+		Model(&models.CheckIn{}).
+		ColumnExpr("COUNT(DISTINCT team_code)").
+		Where("check_in.location_id = location.id").
+		Where("check_in.instance_id = location.instance_id")
+
+	// Subquery: Count currently checked-in teams
+	currentCountSubquery := tx.NewSelect().
+		Model(&models.CheckIn{}).
+		ColumnExpr("COUNT(*)").
+		Where("check_in.location_id = location.id").
+		Where("check_in.instance_id = location.instance_id").
+		Where("check_in.time_out IS NULL")
+
+	// Subquery: Compute average duration in seconds (ignoring NULL time_out values)
+	avgDurationSubquery := tx.NewSelect().
+		Model(&models.CheckIn{}).
+		ColumnExpr("COALESCE(AVG((strftime('%s', time_out) - strftime('%s', time_in))), 0)").
+		Where("check_in.location_id = location.id").
+		Where("check_in.instance_id = location.instance_id").
+		Where("check_in.time_out IS NOT NULL") // Ignore incomplete checkouts
+
+	query := tx.NewUpdate().
+		Model(&models.Location{}).
+		Set("total_visits = (?)", totalVisitsSubquery).
+		Set("current_count = (?)", currentCountSubquery).
+		Set("avg_duration = (?)", avgDurationSubquery).
+		Where("instance_id = ?", instanceID)
+
+	fmt.Println(query.String())
+
+	_, err := query.Exec(ctx)
+
+	return err
 }
 
 // Delete deletes a location from the database
