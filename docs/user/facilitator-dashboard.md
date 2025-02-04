@@ -1,7 +1,7 @@
 ---
 title: "Facilitator Dashboard"
 sidebar: true
-order: 7
+order: 8
 ---
 
 # Facilitator Dashboard
