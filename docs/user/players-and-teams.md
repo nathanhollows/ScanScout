@@ -30,6 +30,7 @@ Individual and team play with the same way in Rapua. Players can either play sol
    - Players will automatically be directed to the lobby to set their team name and start the game.
    - The lobby is also where players will wait for the game to start if it's scheduled.
 
+<video autoplay loop muted src="/static/images/docs/user/teams-start-test.webm" frameborder="0" allowfullscreen controls></video>
 
 ## Creating Teams
 
