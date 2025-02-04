@@ -16,7 +16,7 @@ order: 100
   - API: Introduced bulk deletion of player states by team codes.
 
 - **Facilitator Features:**
-  - A new [facilitator dashboard](/docs/user/facilitator-dashboard) helps staff know the current progress of the game, reducing the need for proactice communication. [#56](https://github.com/nathanhollows/Rapua/issues/56)
+  - A new [facilitator dashboard](/docs/user/facilitator-dashboard) helps staff know the current progress of the game, reducing the need for practice communication. [#56](https://github.com/nathanhollows/Rapua/issues/56)
 
 - **UI/UX Improvements:**
   - [Reset and delete actions for teams](/docs/user/players-and-teams#deleting-and-resetting-teams) now require confirmation to prevent accidental data loss.
