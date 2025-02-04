@@ -1,7 +1,7 @@
 ---
 title: "Writing with Markdown"
 sidebar: true
-order: 4
+order: 7
 ---
 
 # Writing with Markdown
@@ -33,6 +33,10 @@ You can indicate emphasis with bold, italic, or strikethrough text.
 | Bold and italic | `***bold and italic***` | ***bold and italic*** |
 | Bold and nested italic | `**bold and *italic* nested**` | **bold and *italic* nested** |
 
+## Paragraphs
+
+To create a new paragraph, leave a blank line between lines of text.
+
 ## Quoting text
 
 You can quote text with a `>`.
@@ -62,6 +66,8 @@ Images are similar to links, but they have an exclamation mark in front:
 ```
 
 ![Screenshots of Rapua on mobile](/static/images/s2.webp)
+
+An easier way to include images is to use the [image block](/docs/user/blocks/image).
 
 ## Lists
 
@@ -97,6 +103,8 @@ To create a numbered list, use `1.`:
 3.  Item 3
 4.  Item 4
 
+For interactive checklists, use the [checklist block](/docs/user/blocks/checklist).
+
 ## Horizontal Rules
 
 Horizontal rules are easily created by putting three or more `***` or `---` on a line:
@@ -108,13 +116,9 @@ Horizontal rules are easily created by putting three or more `***` or `---` on a
 
 * * * * *
 
-## Paragraphs
-
-To create a new paragraph, leave a blank line between lines of text.
-
 ## Hiding text with comments
 
-You can hide text by enclosing it in an HTML comment. This is useful for notes or reminders that you want to keep in the source file but not display in the rendered output.
+You can hide text by enclosing it in an HTML comment. This is useful for notes or reminders that you want to keep in the admin panel but not display to players.
 
 ```
 <!-- This text will be hidden in the rendered output -->

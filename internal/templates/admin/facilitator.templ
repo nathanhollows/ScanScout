@@ -12,13 +12,13 @@ templ FacilitatorLinkModal() {
 			<button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
 		</form>
 		<h3 class="text-lg font-bold">Share activity overview with Facilitators</h3>
-		<div class="prose pt-4">
-			<p>Create a link to share the activity overview with facilitators. They will see a list of all locations and their status, and the remaining time for the game.</p>
-			<p>These links are public and can be shared with anyone. Be cautious when sharing.</p>
+		<div class="prose py-4">
+			<p>Create a link to share the activity overview with facilitators. They will see a list of all locations and how many teams are yet to visit.</p>
+			<p>These links are only valid for a limited time and can be shared with anyone. Be cautious when sharing.</p>
 		</div>
 		<div class="form-control">
 			<label class="label">
-				<span class="label-text font-bold">Expiry</span>
+				<span class="label-text font-bold">Validity</span>
 			</label>
 			<select id="link-duration" name="duration" class="select select-bordered w-full" name="duration">
 				<option value="hour">1 hour</option>
@@ -149,7 +149,7 @@ templ FacilitatorDashboard(locations []models.Location, activity []services.Team
 												<span class="badge badge-ghost whitespace-nowrap">
 													No visits yet
 												</span>
-											} else if location.TotalVisits >= len(activity) {
+											} else if location.TotalVisits >= len(activity) && location.CurrentCount == 0 {
 												<span class="badge badge-success whitespace-nowrap">
 													Complete!
 												</span>
@@ -173,14 +173,4 @@ templ FacilitatorDashboard(locations []models.Location, activity []services.Team
 			</div>
 		</div>
 	</main>
-}
-
-func percentage(num, den int) int {
-	if num == 0 || den == 0 {
-		return 0
-	}
-	if num > den {
-		return 100
-	}
-	return (num * 100) / den
 }

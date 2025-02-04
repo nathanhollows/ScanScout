@@ -52,7 +52,7 @@ Locations you add will appear on the map in the activity view.
 ## Step 3: Add Teams  
 
 Organize participants into teams for collaboration or competition.  
-1. Navigate to the [Players and Teams](/admin/players-and-teams) tab in your instance.  
+1. Navigate to the [Teams](/admin/teams) tab in your instance.  
 2. Click **Add Team** and specify the number of teams you want to create.
 3. Save your team and repeat as needed.  
 
