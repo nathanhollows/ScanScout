@@ -6,7 +6,7 @@ order: 100
 
 # Changelog
 
-## 3.3.0 (2025-02-04)
+## 3.3.0 (2025-02-05)
 
 ### Added
 - **Team Management Enhancements:**
