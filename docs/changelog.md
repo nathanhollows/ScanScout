@@ -52,7 +52,7 @@ order: 100
 - Resolved issues caused by blank sessions and edge cases that led to unexpected behaviour.
 - Fixed a bug where check-in/out pages weren't rendering if the player didn't have a session.
 
-[Full Changelog](https://github.com/nathanhollows/Rapua/releases/tag/v3.2.0)
+[Full Changelog](https://github.com/nathanhollows/Rapua/releases/tag/v3.3.0)
 
 ---
 
