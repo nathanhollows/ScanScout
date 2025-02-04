@@ -1,7 +1,7 @@
 ---
 title: "Features"
 sidebar: true
-order: 3
+order: 4
 ---
 
 # Features
@@ -22,7 +22,7 @@ This makes it easy to get started and ensures that your games are accessible to 
 
 Rapua makes it easy to design games that suit your content, audience, and space. Whether you have a few participants or hundreds, for a small space or a city-wide adventure, an hour or a month, Rapua has you covered.
 
-- **Content Types**: Add text, images, videos, checklists, and more to your game.
+- **Content Types**: Add [text](/docs/user/blocks/text), [images](/docs/user/blocks/image), [videos](/docs/user/blocks/youtube), [checklists](/docs/user/blocks/checklist), and [more](/docs/user/blocks) to your game.
 - **Navigation Modes**: Use maps, names, or clues to guide participants.
 - **Movement Styles**: Choose between free movement, random selection, or guided paths.  
 - **Competitive or Collaborative**: Design games that encourage competition or teamwork.

@@ -30,6 +30,7 @@ Individual and team play with the same way in Rapua. Players can either play sol
    - Players will automatically be directed to the lobby to set their team name and start the game.
    - The lobby is also where players will wait for the game to start if it's scheduled.
 
+<video autoplay loop muted src="/static/images/docs/user/teams-start-test.webm" frameborder="0" allowfullscreen controls></video>
 
 ## Creating Teams
 
@@ -53,7 +54,18 @@ Once you've copied the team codes, you can distribute them to your players by:
 * Email, chat apps, or any communication method your players use.
 * Display team codes and player names on a shared screen or projector.
 * Create "quickstart cards" with team codes and instructions for players to join.
-    - Note: This is currently a feature request [(#46)](https://github.com/nathanhollows/Rapua/issues/46).
+    - Note: This is a feature from [The Amazing Trace](/docs/user/history#the-amazing-trace-2022) that will eventually be ported over. [#46](https://github.com/nathanhollows/Rapua/issues/46)
+
+## Deleting and Resetting Teams
+
+Deleting and resetting teams can be done in the [Teams](/admin/teams) section of your dashboard. Here's how it works:
+
+- **Delete Teams**: Removes teams and all associated data from the system.
+- **Reset Teams**: Clears team progress and check-ins, but retains the team for future use.
+
+Delete teams when you no longer need them. Reset teams when you want to reuse them for another game, for example, after a [trial run](/docs/user/phases-of-game-setup#3-testing).
+
+<video autoplay loop muted src="/static/images/docs/user/teams-reset.webm" frameborder="0" allowfullscreen controls></video>
 
 ## Team roles
 

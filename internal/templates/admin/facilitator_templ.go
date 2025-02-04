@@ -161,7 +161,7 @@ func FacilitatorDashboard(locations []models.Location, activity []services.TeamA
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
-				} else if location.TotalVisits >= len(activity) {
+				} else if location.TotalVisits >= len(activity) && location.CurrentCount == 0 {
 					templ_7745c5c3_Err = templ.WriteWatchModeString(templ_7745c5c3_Buffer, 12)
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
@@ -220,14 +220,4 @@ func FacilitatorDashboard(locations []models.Location, activity []services.TeamA
 		}
 		return templ_7745c5c3_Err
 	})
-}
-
-func percentage(num, den int) int {
-	if num == 0 || den == 0 {
-		return 0
-	}
-	if num > den {
-		return 100
-	}
-	return (num * 100) / den
 }

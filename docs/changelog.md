@@ -6,6 +6,33 @@ order: 100
 
 # Changelog
 
+## 3.3.0 (2025-02-05)
+
+### Added
+- **Team Management Enhancements:**
+  - Added the ability to reset a team's progress back to nothing.
+  - Teams page now links to the team overview for quick access.
+  - API: Implemented bulk deletion of check-ins by team codes.
+  - API: Introduced bulk deletion of player states by team codes.
+
+- **Facilitator Features:**
+  - A new [facilitator dashboard](/docs/user/facilitator-dashboard) helps staff know the current progress of the game, reducing the need for proactice communication. [#56](https://github.com/nathanhollows/Rapua/issues/56)
+
+- **UI/UX Improvements:**
+  - [Reset and delete actions for teams](/docs/user/players-and-teams#deleting-and-resetting-teams) now require confirmation to prevent accidental data loss.
+  
+### Changed
+- Deleting teams now refreshes the entire list view instead of partial updates for better consistency.
+- Documentation improvements, including renaming files for clarity and fixing broken links.
+- Improved wording and fixed minor UI inconsistencies across the platform.
+
+### Fixed
+- Ensured `instanceID` is correctly included when saving a check-in to prevent data inconsistencies.
+
+[Full Changelog](https://github.com/nathanhollows/Rapua/releases/tag/v3.3.0)
+
+---
+
 ## 3.2.0 (2025-01-31)
 
 ### Added
