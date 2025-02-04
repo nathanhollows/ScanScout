@@ -19,7 +19,7 @@ order: 100
   - A new [facilitator dashboard](/docs/user/facilitator-dashboard) helps staff know the current progress of the game, reducing the need for proactice communication. [#56](https://github.com/nathanhollows/Rapua/issues/56)
 
 - **UI/UX Improvements:**
-  - Reset and delete actions for teams now require confirmation to prevent accidental data loss.
+  - [Reset and delete actions for teams](/docs/user/players-and-teams#deleting-and-resetting-teams) now require confirmation to prevent accidental data loss.
   
 ### Changed
 - Deleting teams now refreshes the entire list view instead of partial updates for better consistency.
