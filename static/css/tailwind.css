@@ -8775,6 +8775,25 @@ html:has(.drawer-toggle:checked) {
   color: var(--fallback-erc,oklch(var(--erc)/var(--tw-text-opacity)));
 }
 
+@container (min-width: 80rem) {
+  .\@7xl\:tooltip-top:before {
+    transform: translateX(-50%);
+    top: auto;
+    left: 50%;
+    right: auto;
+    bottom: var(--tooltip-offset);
+  }
+
+  .\@7xl\:tooltip-top:after {
+    transform: translateX(-50%);
+    border-color: var(--tooltip-color) transparent transparent transparent;
+    top: auto;
+    left: 50%;
+    right: auto;
+    bottom: var(--tooltip-tail-offset);
+  }
+}
+
 @media not all and (min-width: 640px) {
   .max-sm\:input-accent {
     --tw-border-opacity: 1;
@@ -9066,6 +9085,14 @@ html:has(.drawer-toggle:checked) {
     margin-bottom: 0;
   }
 
+  .md\:tooltip-top:before {
+    transform: translateX(-50%);
+    top: auto;
+    left: 50%;
+    right: auto;
+    bottom: var(--tooltip-offset);
+  }
+
   .md\:tooltip-right:before {
     transform: translateY(-50%);
     top: 50%;
@@ -9096,6 +9123,15 @@ html:has(.drawer-toggle:checked) {
     padding-right: 1.5rem;
     padding-top: 1rem;
     padding-bottom: 1rem;
+  }
+
+  .md\:tooltip-top:after {
+    transform: translateX(-50%);
+    border-color: var(--tooltip-color) transparent transparent transparent;
+    top: auto;
+    left: 50%;
+    right: auto;
+    bottom: var(--tooltip-tail-offset);
   }
 
   .md\:tooltip-right:after {
@@ -9134,6 +9170,14 @@ html:has(.drawer-toggle:checked) {
     width: 0.125rem;
   }
 
+  .lg\:tooltip-top:before {
+    transform: translateX(-50%);
+    top: auto;
+    left: 50%;
+    right: auto;
+    bottom: var(--tooltip-offset);
+  }
+
   .lg\:divider-horizontal {
     margin-left: 1rem;
     margin-right: 1rem;
@@ -9141,6 +9185,34 @@ html:has(.drawer-toggle:checked) {
     margin-bottom: 0px;
     height: auto;
     width: 1rem;
+  }
+
+  .lg\:tooltip-top:after {
+    transform: translateX(-50%);
+    border-color: var(--tooltip-color) transparent transparent transparent;
+    top: auto;
+    left: 50%;
+    right: auto;
+    bottom: var(--tooltip-tail-offset);
+  }
+}
+
+@media (min-width: 1280px) {
+  .xl\:tooltip-top:before {
+    transform: translateX(-50%);
+    top: auto;
+    left: 50%;
+    right: auto;
+    bottom: var(--tooltip-offset);
+  }
+
+  .xl\:tooltip-top:after {
+    transform: translateX(-50%);
+    border-color: var(--tooltip-color) transparent transparent transparent;
+    top: auto;
+    left: 50%;
+    right: auto;
+    bottom: var(--tooltip-tail-offset);
   }
 }
 

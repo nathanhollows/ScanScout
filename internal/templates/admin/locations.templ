@@ -76,15 +76,15 @@ templ LocationsIndex(settings models.InstanceSettings, locations []models.Locati
 						<!-- Marker icon -->
 						if location.Marker.Lat != 0 {
 							<span
-								class="tooltip cursor-help"
+								class="tooltip tooltip-right @7xl:tooltip-top cursor-help"
 								data-tip="Has coordinates"
 							>
 								<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-map-pin"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"></path> <circle cx="12" cy="10" r="3"></circle> </svg>
 							</span>
 						} else {
 							<span
-								class="tooltip cursor-help"
-								data-tip="No coordinates set"
+								class="tooltip tooltip-right @7xl:tooltip-top cursor-help"
+								data-tip="Unmapped location"
 							>
 								<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-map-pin-off tooltip" data-tip="Location has no coordinates set"><path d="M5.43 5.43A8.06 8.06 0 0 0 4 10c0 6 8 12 8 12a29.94 29.94 0 0 0 5-5"></path> <path d="M19.18 13.52A8.66 8.66 0 0 0 20 10a8 8 0 0 0-8-8 7.88 7.88 0 0 0-3.52.82"></path> <path d="M9.13 9.13A2.78 2.78 0 0 0 9 10a3 3 0 0 0 3 3 2.78 2.78 0 0 0 .87-.13"></path> <path d="M14.9 9.25a3 3 0 0 0-2.15-2.16"></path> <line x1="2" x2="22" y1="2" y2="22"></line> </svg>
 							</span>
@@ -228,6 +228,8 @@ templ AddLocation(settings models.InstanceSettings, neighbouring []models.Locati
 					set <input[name=marker]/>'s disabled to true
 					set <input[name=name]/>'s value to ''
 					add .hidden to #marker-badge
+					set <input[name=latitude]/>'s disabled to false
+					set <input[name=longitude]/>'s disabled to false
 			"
 				>New map marker</a>
 				<a
@@ -242,6 +244,8 @@ templ AddLocation(settings models.InstanceSettings, neighbouring []models.Locati
 					add .hidden to #new-marker
 					set <input[name=marker]/>'s disabled to false
 					trigger change on #marker-code
+					set <input[name=latitude]/>'s disabled to false
+					set <input[name=longitude]/>'s disabled to false
 			"
 				>
 					Shared map marker
@@ -265,17 +269,32 @@ templ AddLocation(settings models.InstanceSettings, neighbouring []models.Locati
 					<a
 						role="tab"
 						class="tab transition-colors tab-active group"
-						_="on click or load from body
-				if I do not match .tab-active
-					remove .tab-active from .tab-active
-					toggle .tab-active
-					add .hidden to #new-marker
-					add .hidden to #shared-marker
-					add .hidden to #marker-controls
-					set <input[name=marker]/>'s disabled to true
-					set <input[name=name]/>'s value to ''
-					add .hidden to #marker-badge
-			"
+						_="on click
+							if I do not match .tab-active
+								remove .tab-active from .tab-active
+								toggle .tab-active
+								add .hidden to #new-marker
+								add .hidden to #shared-marker
+								add .hidden to #marker-controls
+								set <input[name=marker]/>'s disabled to true
+								set <input[name=name]/>'s value to ''
+								add .hidden to #marker-badge
+								set <input[name=latitude]/>'s disabled to true
+								set <input[name=longitude]/>'s disabled to true
+							end
+						end
+						on load if I match .tab-active
+							add .hidden to #new-marker
+							add .hidden to #shared-marker
+							add .hidden to #marker-controls
+							set <input[name=marker]/>'s disabled to true
+							set <input[name=name]/>'s value to ''
+							add .hidden to #marker-badge
+							set <input[name=latitude]/>'s disabled to true
+							set <input[name=longitude]/>'s disabled to true
+						end
+						end
+						"
 					>
 						No map marker
 						<div class="dropdown dropdown-end dropdown-hover">
@@ -341,13 +360,15 @@ templ AddLocation(settings models.InstanceSettings, neighbouring []models.Locati
 					>
 						<option disabled selected>Select a location</option>
 						for _, marker := range duplicatable {
-							<option
-								value={ fmt.Sprint(marker.Code) }
-								data-code={ marker.Code }
-								data-lat={ fmt.Sprint(marker.Lat) }
-								data-lng={ fmt.Sprint(marker.Lng) }
-								data-name={ marker.Name }
-							>{ marker.Name }</option>
+							if marker.IsMapped() {
+								<option
+									value={ fmt.Sprint(marker.Code) }
+									data-code={ marker.Code }
+									data-lat={ fmt.Sprint(marker.Lat) }
+									data-lng={ fmt.Sprint(marker.Lng) }
+									data-name={ marker.Name }
+								>{ marker.Name }</option>
+							}
 						}
 					</select>
 				</div>
@@ -604,32 +625,34 @@ templ EditLocation(location models.Location, settings models.InstanceSettings, c
 					</div>
 				</section>
 				<!-- Map -->
-				<section>
-					<div class="divider mt-5 mb-10"></div>
-					<div class="label">
-						<span class="label-text font-bold">Map marker</span>
-					</div>
-					<div id="map-container" class="relative w-full aspect-square h-80 md:h-48 rounded-lg shadow-lg">
-						<div id="map" class="map w-full h-full rounded-lg"></div>
-						<!-- Overlay Button and Backdrop -->
-						<div id="map-lock-overlay" class="absolute inset-0 bg-base-300 bg-opacity-70 flex justify-center items-center opacity-0 hover:opacity-100 transition rounded-lg focus:opacity-100" tabindex="0">
-							<button id="unlock-map-btn" class="btn btn-neutral" onclick="document.getElementById('map-lock-overlay').remove()">
-								<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-lock-keyhole w-5 h-5"><circle cx="12" cy="16" r="1"></circle><rect x="3" y="10" width="18" height="12" rx="2"></rect><path d="M7 10V7a5 5 0 0 1 10 0v3"></path></svg>
-								Unlock to edit
-							</button>
+				if location.Marker.IsMapped() {
+					<section>
+						<div class="divider mt-5 mb-10"></div>
+						<div class="label">
+							<span class="label-text font-bold">Map marker</span>
 						</div>
-					</div>
-					<div class="form-control">
-						<label class="label cursor-pointer">
-							<span class="label-text">Save map location</span>
-							<input type="checkbox" name="location" form="edit-location" class="checkbox checkbox-sm" checked="checked"/>
-						</label>
-					</div>
-					<!-- Hidden inputs for form handling -->
-					<input type="hidden" name="code" form="edit-location" value={ location.Marker.Code }/>
-					<input type="hidden" name="latitude" form="edit-location" value={ floatToString(location.Marker.Lat) }/>
-					<input type="hidden" name="longitude" form="edit-location" value={ floatToString(location.Marker.Lng) }/>
-				</section>
+						<div id="map-container" class="relative w-full aspect-square h-80 md:h-48 rounded-lg shadow-lg">
+							<div id="map" class="map w-full h-full rounded-lg"></div>
+							<!-- Overlay Button and Backdrop -->
+							<div id="map-lock-overlay" class="absolute inset-0 bg-base-300 bg-opacity-70 flex justify-center items-center opacity-0 hover:opacity-100 transition rounded-lg focus:opacity-100" tabindex="0">
+								<button id="unlock-map-btn" class="btn btn-neutral" onclick="document.getElementById('map-lock-overlay').remove()">
+									<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-lock-keyhole w-5 h-5"><circle cx="12" cy="16" r="1"></circle><rect x="3" y="10" width="18" height="12" rx="2"></rect><path d="M7 10V7a5 5 0 0 1 10 0v3"></path></svg>
+									Unlock to edit
+								</button>
+							</div>
+						</div>
+						<div class="form-control">
+							<label class="label cursor-pointer">
+								<span class="label-text">Save map location</span>
+								<input type="checkbox" name="location" form="edit-location" class="checkbox checkbox-sm" checked="checked"/>
+							</label>
+						</div>
+						<!-- Hidden inputs for form handling -->
+						<input type="hidden" name="code" form="edit-location" value={ location.Marker.Code }/>
+						<input type="hidden" name="latitude" form="edit-location" value={ floatToString(location.Marker.Lat) }/>
+						<input type="hidden" name="longitude" form="edit-location" value={ floatToString(location.Marker.Lng) }/>
+					</section>
+				}
 			</div>
 			<!-- Sidebar -->
 			<!-- Preview Divider -->
