@@ -16,8 +16,6 @@ type instanceService struct {
 	locationService      LocationService
 	userService          UserService
 	teamService          TeamService
-	markerRepo           repositories.MarkerRepository
-	clueRepo             repositories.ClueRepository
 	instanceRepo         repositories.InstanceRepository
 	instanceSettingsRepo repositories.InstanceSettingsRepository
 }
@@ -43,8 +41,6 @@ func NewInstanceService(
 	locationService LocationService,
 	userService UserService,
 	teamService TeamService,
-	markerRepo repositories.MarkerRepository,
-	clueRepo repositories.ClueRepository,
 	instanceRepo repositories.InstanceRepository,
 	instanceSettingsRepo repositories.InstanceSettingsRepository,
 ) InstanceService {
@@ -53,8 +49,6 @@ func NewInstanceService(
 		locationService:      locationService,
 		userService:          userService,
 		teamService:          teamService,
-		markerRepo:           markerRepo,
-		clueRepo:             clueRepo,
 		instanceRepo:         instanceRepo,
 		instanceSettingsRepo: instanceSettingsRepo,
 	}
