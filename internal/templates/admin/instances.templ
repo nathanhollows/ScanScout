@@ -122,7 +122,7 @@ templ Instances(instances []models.Instance, currentInstance models.Instance) {
 					<div class="label">
 						<span class="label-text">New instance name</span>
 					</div>
-					<input type="text" class="input input-bordered w-full" name="name" required/>
+					<input type="text" class="input input-bordered w-full" name="name" required autocomplete="off"/>
 					<input type="hidden" name="id" value=""/>
 				</label>
 				<div class="modal-action">
@@ -165,7 +165,7 @@ templ Instances(instances []models.Instance, currentInstance models.Instance) {
 					<div class="label">
 						<span class="label-text">What is the name of the new instance?</span>
 					</div>
-					<input type="text" class="input input-bordered w-full" name="name" required/>
+					<input type="text" class="input input-bordered w-full" name="name" required autocomplete="off"/>
 				</label>
 				<div class="modal-action">
 					<button
