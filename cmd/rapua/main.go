@@ -146,17 +146,17 @@ func runApp(logger *slog.Logger, dbc *bun.DB) {
 	initialiseFolders(logger)
 
 	// Initialize repositories
-	facilitatorRepo := repositories.NewFacilitatorTokenRepo(dbc)
 	blockStateRepo := repositories.NewBlockStateRepository(dbc)
 	blockRepo := repositories.NewBlockRepository(dbc, blockStateRepo)
-	teamRepo := repositories.NewTeamRepository(dbc)
 	checkInRepo := repositories.NewCheckInRepository(dbc)
 	clueRepo := repositories.NewClueRepository(dbc)
+	facilitatorRepo := repositories.NewFacilitatorTokenRepo(dbc)
+	instanceRepo := repositories.NewInstanceRepository(dbc)
 	instanceSettingsRepo := repositories.NewInstanceSettingsRepository(dbc)
 	locationRepo := repositories.NewLocationRepository(dbc)
 	markerRepo := repositories.NewMarkerRepository(dbc)
 	notificationRepo := repositories.NewNotificationRepository(dbc)
-	instanceRepo := repositories.NewInstanceRepository(dbc)
+	teamRepo := repositories.NewTeamRepository(dbc)
 	userRepo := repositories.NewUserRepository(dbc)
 
 	// Initialize transactor for services
