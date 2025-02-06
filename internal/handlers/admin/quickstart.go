@@ -10,7 +10,7 @@ import (
 func (h *AdminHandler) Quickstart(w http.ResponseWriter, r *http.Request) {
 	user := h.UserFromContext(r.Context())
 
-	err := templates.QuickstartBar(*user).Render(r.Context(), w)
+	err := templates.QuickstartBar(user.CurrentInstance).Render(r.Context(), w)
 	if err != nil {
 		h.Logger.Error("Quickstart: rendering template", "error", err)
 	}
