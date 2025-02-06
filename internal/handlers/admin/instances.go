@@ -29,14 +29,14 @@ func (h *AdminHandler) InstancesCreate(w http.ResponseWriter, r *http.Request) {
 	}
 
 	name := r.FormValue("name")
-	response := h.GameManagerService.CreateInstance(r.Context(), name, user)
-	if response.Error != nil {
-		h.handleError(w, r, "InstancesCreate: creating instance", "Error creating instance", "error", response.Error)
+	instance, err := h.IntanceService.CreateInstance(r.Context(), name, user)
+	if err != nil {
+		h.handleError(w, r, "InstancesCreate: creating instance", "Error creating instance", "error", err, "instance_id", user.CurrentInstanceID)
 		return
 	}
 
 	// Switch to the new instance
-	_, err := h.GameManagerService.SwitchInstance(r.Context(), user, response.Data["instanceID"].(string))
+	_, err = h.IntanceService.SwitchInstance(r.Context(), user, instance.ID)
 	if err != nil {
 		h.handleError(w, r, "InstancesCreate: switching instance", "Error switching instance", "error", err)
 		return
@@ -54,24 +54,17 @@ func (h *AdminHandler) InstanceDuplicate(w http.ResponseWriter, r *http.Request)
 	id := r.Form.Get("id")
 	name := r.Form.Get("name")
 
-	response := h.GameManagerService.DuplicateInstance(r.Context(), user, id, name)
-	for _, message := range response.FlashMessages {
-		message.Save(w, r)
-	}
-	if response.Error != nil {
-		h.Logger.Error("duplicating instance", "error", response.Error.Error())
-		http.Redirect(w, r, r.Header.Get("referer"), http.StatusSeeOther)
+	instance, err := h.IntanceService.DuplicateInstance(r.Context(), user, id, name)
+	if err != nil {
+		h.handleError(w, r, "InstanceDuplicate: duplicating instance", "Error duplicating instance", "error", err, "instance_id", user.CurrentInstanceID)
 		return
 	}
 
-	newInstanceID := response.Data["instanceID"].(string)
-	_, err := h.GameManagerService.SwitchInstance(r.Context(), user, newInstanceID)
+	_, err = h.IntanceService.SwitchInstance(r.Context(), user, instance.ID)
 	if err != nil {
-		flash.NewError("Error switching instance: "+err.Error()).Save(w, r)
-		http.Redirect(w, r, "/admin/instances", http.StatusSeeOther)
+		h.handleError(w, r, "InstanceDuplicate: switching instance", "Error switching instance", "error", err, "instance_id", user.CurrentInstanceID)
 		return
 	}
-	flash.NewSuccess("Now using "+name+" as your current instance").Save(w, r)
 
 	http.Redirect(w, r, "/admin/navigation", http.StatusSeeOther)
 }
@@ -86,7 +79,7 @@ func (h *AdminHandler) InstanceSwitch(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_, err := h.GameManagerService.SwitchInstance(r.Context(), user, instanceID)
+	_, err := h.IntanceService.SwitchInstance(r.Context(), user, instanceID)
 	if err != nil {
 		h.handleError(w, r, "InstanceSwitch: switching instance", "Error switching instance", "error", err, "instance_id", user.CurrentInstanceID)
 		return
@@ -120,11 +113,11 @@ func (h *AdminHandler) InstanceDelete(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	response := h.GameManagerService.DeleteInstance(r.Context(), user, id, confirmName)
-	if response.Error != nil {
-		h.handleError(w, r, "InstanceDelete: deleting instance", "Error deleting instance", "error", response.Error, "instance_id", user.CurrentInstanceID)
+	_, err := h.IntanceService.DeleteInstance(r.Context(), user, id, confirmName)
+	if err != nil {
+		h.handleError(w, r, "InstanceDelete: deleting instance", "Error deleting instance", "error", err, "instance_id", user.CurrentInstanceID)
 		return
 	}
 
-	h.redirect(w, r, "/admin/instances")
+	h.handleSuccess(w, r, "Instance deleted")
 }

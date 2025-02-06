@@ -39,7 +39,7 @@ func main() {
 		Name:        "Rapua",
 		Usage:       "rapua [global options] command [command options] [arguments...]",
 		Description: `An open-source platform for location-based games.`,
-		Version:     "3.3.0",
+		Version:     "3.4.0",
 		Commands: []*cli.Command{
 			newDBCommand(migrator),
 		},
@@ -175,6 +175,11 @@ func runApp(logger *slog.Logger, dbc *bun.DB) {
 	notificationService := services.NewNotificationService(notificationRepo, teamRepo)
 	teamService := services.NewTeamService(transactor, teamRepo, checkInRepo, blockStateRepo, locationRepo)
 	userService := services.NewUserService(transactor, userRepo, instanceRepo)
+	instanceService := services.NewInstanceService(
+		transactor,
+		locationService, userService, teamService,
+		markerRepo, clueRepo, instanceRepo, instanceSettingsRepo,
+	)
 	gameplayService := services.NewGameplayService(
 		checkInService, locationService, teamService, blockService, navigationService, markerRepo,
 	)
@@ -182,6 +187,7 @@ func runApp(logger *slog.Logger, dbc *bun.DB) {
 		transactor,
 		locationService, userService, teamService,
 		markerRepo, clueRepo, instanceRepo, instanceSettingsRepo,
+		instanceService,
 	)
 
 	sessions.Start()
@@ -193,14 +199,15 @@ func runApp(logger *slog.Logger, dbc *bun.DB) {
 		checkInService,
 		clueService,
 		emailService,
+		facilitatorService,
 		gameManagerService,
 		gameplayService,
+		instanceService,
 		locationService,
 		navigationService,
 		notificationService,
 		teamService,
 		userService,
-		facilitatorService,
 	)
 }
 
