@@ -319,12 +319,14 @@ templ AddLocation(settings models.InstanceSettings, neighbouring []models.Locati
 		}
 		if len(neighbouring) > 0 {
 			for _, location := range neighbouring {
-				<span
-					class="neighbour-marker hidden"
-					data-location={ fmt.Sprint(location.Name) }
-					data-lat={ fmt.Sprint(location.Marker.Lat) }
-					data-lng={ fmt.Sprint(location.Marker.Lng) }
-				></span>
+				if location.Marker.IsMapped() {
+					<span
+						class="neighbour-marker hidden"
+						data-location={ fmt.Sprint(location.Name) }
+						data-lat={ fmt.Sprint(location.Marker.Lat) }
+						data-lng={ fmt.Sprint(location.Marker.Lng) }
+					></span>
+				}
 			}
 		}
 		<div id="marker-controls">
