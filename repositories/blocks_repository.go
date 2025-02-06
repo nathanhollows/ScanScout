@@ -80,7 +80,7 @@ func (r *blockRepository) GetByID(ctx context.Context, blockID string) (blocks.B
 func (r *blockRepository) Create(ctx context.Context, block blocks.Block, locationID string) (blocks.Block, error) {
 	modelBlock := models.Block{
 		ID:                 uuid.New().String(),
-		LocationID:         block.GetLocationID(),
+		LocationID:         locationID,
 		Type:               block.GetType(),
 		Data:               block.GetData(),
 		Ordering:           1e4,

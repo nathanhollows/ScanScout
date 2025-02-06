@@ -280,3 +280,36 @@ func TestBlockRepository_Bulk(t *testing.T) {
 		})
 	}
 }
+
+// Test that creating a new block with a new location ID replaces the old location ID
+func TestBlockRepository_Create_NewLocationID(t *testing.T) {
+	repo, _, cleanup := setupBlockRepo(t)
+	defer cleanup()
+
+	block, err := repo.Create(
+		context.Background(),
+		blocks.NewImageBlock(
+			blocks.BaseBlock{
+				LocationID: gofakeit.UUID(),
+				Type:       "image",
+				Points:     10,
+			},
+		),
+		gofakeit.UUID(),
+	)
+
+	assert.NoError(t, err)
+	assert.NotNil(t, block)
+
+	// Create a new block with a new location ID
+	newBlock, err := repo.Create(
+		context.Background(),
+		block,
+		gofakeit.UUID(),
+	)
+
+	assert.NoError(t, err)
+	assert.NotNil(t, newBlock)
+	assert.NotEqual(t, block.GetLocationID(), newBlock.GetLocationID())
+
+}
