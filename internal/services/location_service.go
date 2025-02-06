@@ -18,7 +18,7 @@ type LocationService interface {
 	// CreateMarker creates a new marker
 	CreateMarker(ctx context.Context, name string, lat, lng float64) (models.Marker, error)
 	// DuplicateLocation creates a new location given an existing location and the instance ID of the new location
-	DuplicateLocation(ctx context.Context, location *models.Location, newInstanceID string) (models.Location, error)
+	DuplicateLocation(ctx context.Context, location models.Location, newInstanceID string) (models.Location, error)
 
 	// GetByID finds a location by its ID
 	GetByID(ctx context.Context, locationID string) (*models.Location, error)
@@ -134,14 +134,47 @@ func (s locationService) CreateMarker(ctx context.Context, name string, lat, lng
 }
 
 // DuplicateLocation duplicates a location
-func (s locationService) DuplicateLocation(ctx context.Context, location *models.Location, newInstanceID string) (models.Location, error) {
-	newLocation := *location
+func (s locationService) DuplicateLocation(ctx context.Context, location models.Location, newInstanceID string) (models.Location, error) {
+	// Load relations
+	err := s.locationRepo.LoadRelations(ctx, &location)
+	if err != nil {
+		return models.Location{}, fmt.Errorf("loading relations: %v", err)
+	}
+
+	// Copy the location
+	newLocation := location
 	newLocation.ID = ""
 	newLocation.InstanceID = newInstanceID
-	err := s.locationRepo.Create(ctx, &newLocation)
+	err = s.locationRepo.Create(ctx, &newLocation)
 	if err != nil {
 		return models.Location{}, fmt.Errorf("saving location: %v", err)
 	}
+
+	// Copy the clues
+	for _, clue := range location.Clues {
+		newClue := clue
+		newClue.ID = ""
+		newClue.InstanceID = newInstanceID
+		newClue.LocationID = newLocation.ID
+		err = s.clueRepo.Save(ctx, &newClue)
+		if err != nil {
+			return models.Location{}, fmt.Errorf("saving clue: %v", err)
+		}
+	}
+
+	// Copy the blocks
+	fmt.Println("Copying blocks: ", len(location.Blocks))
+	for _, block := range location.Blocks {
+		block, err := s.blockRepo.GetByID(ctx, block.ID)
+		if err != nil {
+			return models.Location{}, fmt.Errorf("finding block: %v", err)
+		}
+		block, err = s.blockRepo.Create(ctx, block, newLocation.ID)
+		if err != nil {
+			return models.Location{}, fmt.Errorf("saving block: %v", err)
+		}
+	}
+
 	return newLocation, nil
 }
 

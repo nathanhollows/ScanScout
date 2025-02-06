@@ -123,7 +123,7 @@ func (s *instanceService) DuplicateInstance(ctx context.Context, user *models.Us
 
 	// Copy locations
 	for _, location := range locations {
-		_, err := s.locationService.DuplicateLocation(ctx, &location, newInstance.ID)
+		_, err := s.locationService.DuplicateLocation(ctx, location, newInstance.ID)
 		if err != nil {
 			return nil, fmt.Errorf("duplicating location: %w", err)
 		}
