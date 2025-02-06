@@ -5,10 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"net/url"
-	"os"
-	"regexp"
 	"strconv"
-	"strings"
 	"time"
 
 	"github.com/nathanhollows/Rapua/db"
@@ -45,13 +42,11 @@ type GameManagerService interface {
 	SaveLocation(ctx context.Context, location *models.Location, lat, lng, name string) error
 
 	// Marker & Validation
-	isMarkerShared(ctx context.Context, markerID, instanceID string) (bool, error)
 	ValidateLocationMarker(user *models.User, id string) bool
 	ValidateLocationID(user *models.User, id string) bool
 
 	// Settings & Utilities
 	UpdateSettings(ctx context.Context, settings *models.InstanceSettings, form url.Values) error
-	GetQRCodePathAndContent(action, id, name, extension string) (string, string)
 	DismissQuickstart(ctx context.Context, instanceID string) error
 }
 
@@ -224,22 +219,6 @@ func (s *gameManagerService) ValidateLocationID(user *models.User, id string) bo
 		}
 	}
 	return false
-}
-
-func (s *gameManagerService) GetQRCodePathAndContent(action, id, name, extension string) (string, string) {
-	content := os.Getenv("SITE_URL")
-	path := "assets/codes/"
-	name = strings.Trim(name, " ")
-	re := regexp.MustCompile(`[^\d\p{Latin} -]`)
-	name = re.ReplaceAllString(name, "")
-	if action == "in" {
-		content = content + "/s/" + id
-		path = path + extension + "/" + id + " " + name + "." + extension
-	} else {
-		content = content + "/o/" + id
-		path = path + extension + "/" + id + " " + name + " Check Out." + extension
-	}
-	return path, content
 }
 
 // UpdateSettings parses the form values and updates the instance settings

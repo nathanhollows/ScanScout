@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"regexp"
 	"strings"
 	"time"
 
@@ -81,6 +82,8 @@ type AssetGenerator interface {
 	// CreatePDF creates a PDF document from the given data
 	// Returns the path to the PDF
 	CreatePDF(ctx context.Context, data PDFData) (string, error)
+	// GetQRCodePathAndContent returns the path and content for a QR code
+	GetQRCodePathAndContent(action, id, name, extension string) (string, string)
 }
 
 type assetGenerator struct{}
@@ -230,4 +233,20 @@ func (s *assetGenerator) addPage(pdf *fpdf.Fpdf, page PDFPage, instanceName stri
 	pdf.Cell(40, 70, scanText)
 
 	return nil
+}
+
+func (s *assetGenerator) GetQRCodePathAndContent(action, id, name, extension string) (string, string) {
+	content := os.Getenv("SITE_URL")
+	path := "assets/codes/"
+	name = strings.Trim(name, " ")
+	re := regexp.MustCompile(`[^\d\p{Latin} -]`)
+	name = re.ReplaceAllString(name, "")
+	if action == "in" {
+		content = content + "/s/" + id
+		path = path + extension + "/" + id + " " + name + "." + extension
+	} else {
+		content = content + "/o/" + id
+		path = path + extension + "/" + id + " " + name + " Check Out." + extension
+	}
+	return path, content
 }
