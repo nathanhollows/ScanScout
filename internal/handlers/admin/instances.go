@@ -15,7 +15,7 @@ func (h *AdminHandler) Instances(w http.ResponseWriter, r *http.Request) {
 	c := templates.Instances(user.Instances, user.CurrentInstance)
 	err := templates.Layout(c, *user, "Instances", "Instances").Render(r.Context(), w)
 	if err != nil {
-		h.Logger.Error("Instances: rendering template", "error", err)
+		h.handleError(w, r, "Instances: rendering template", "Error rendering template", "error", err, "instance_id", user.CurrentInstanceID)
 	}
 }
 
@@ -66,7 +66,7 @@ func (h *AdminHandler) InstanceDuplicate(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	http.Redirect(w, r, "/admin/navigation", http.StatusSeeOther)
+	h.redirect(w, r, "/admin/instances")
 }
 
 // InstanceSwitch switches the current instance
@@ -119,5 +119,5 @@ func (h *AdminHandler) InstanceDelete(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	h.handleSuccess(w, r, "Instance deleted")
+	h.redirect(w, r, "/admin/instances")
 }
