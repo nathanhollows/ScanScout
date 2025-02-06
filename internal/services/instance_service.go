@@ -60,6 +60,10 @@ func (s *instanceService) CreateInstance(ctx context.Context, name string, user 
 		return nil, NewValidationError("name")
 	}
 
+	if user == nil {
+		return nil, ErrUserNotAuthenticated
+	}
+
 	instance := &models.Instance{
 		Name:   name,
 		UserID: user.ID,
@@ -87,6 +91,10 @@ func (s *instanceService) CreateInstance(ctx context.Context, name string, user 
 
 // DuplicateInstance implements InstanceService.
 func (s *instanceService) DuplicateInstance(ctx context.Context, user *models.User, id string, name string) (*models.Instance, error) {
+	if user == nil {
+		return nil, ErrUserNotAuthenticated
+	}
+
 	oldInstance, err := s.instanceRepo.GetByID(ctx, id)
 	if err != nil {
 		return nil, fmt.Errorf("finding instance: %w", err)
@@ -98,7 +106,7 @@ func (s *instanceService) DuplicateInstance(ctx context.Context, user *models.Us
 	}
 
 	if name == "" {
-		name = oldInstance.Name + " (copy)"
+		return nil, NewValidationError("name")
 	}
 	if id == "" {
 		return nil, NewValidationError("id")
@@ -149,6 +157,10 @@ func (s *instanceService) FindInstanceIDsForUser(ctx context.Context, userID str
 
 // DeleteInstance implements InstanceService.
 func (s *instanceService) DeleteInstance(ctx context.Context, user *models.User, instanceID string, confirmName string) (bool, error) {
+	if user == nil {
+		return false, ErrUserNotAuthenticated
+	}
+
 	// Check if the user has permission to delete the instance
 	instance, err := s.instanceRepo.GetByID(ctx, instanceID)
 	if err != nil {
@@ -205,6 +217,10 @@ func (s *instanceService) DeleteInstance(ctx context.Context, user *models.User,
 
 // SwitchInstance implements InstanceService.
 func (s *instanceService) SwitchInstance(ctx context.Context, user *models.User, instanceID string) (*models.Instance, error) {
+	if user == nil {
+		return nil, ErrUserNotAuthenticated
+	}
+
 	instance, err := s.instanceRepo.GetByID(ctx, instanceID)
 	if err != nil {
 		return nil, errors.New("instance not found")
