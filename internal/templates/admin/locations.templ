@@ -671,7 +671,7 @@ templ EditLocation(location models.Location, settings models.InstanceSettings, c
 							<div
 								class="sm:mx-auto sm:w-full sm:max-w-sm block overflow-y-scroll p-5 py-12"
 								hx-get={ fmt.Sprint("/admin/locations/", location.MarkerID, "/preview") }
-								hx-trigger="load, htmx:afterRequest from:#blocks, htmx:afterRequest from:#edit-location-btn"
+								hx-trigger="load, htmx:afterRequest from:#blocks, htmx:afterRequest from:#edit-location-btn, htmx:afterRequest from:#delete-block-btn"
 								hx-swap="innerHTML"
 								hx-indicator=".htmx-indicator"
 							></div>
@@ -693,6 +693,7 @@ templ EditLocation(location models.Location, settings models.InstanceSettings, c
 					onclick="confirm_delete_block.close()"
 				>Nevermind</button>
 				<button
+					id="delete-block-btn"
 					type="button"
 					class="btn btn-error"
 					onclick="confirm_delete_block.close()"
