@@ -2,6 +2,7 @@ package repositories
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"time"
 
@@ -76,15 +77,15 @@ func (r *checkInRepository) LogCheckIn(ctx context.Context, team models.Team, lo
 // LogCheckOut logs a check out for a team at a location.
 func (r *checkInRepository) LogCheckOut(ctx context.Context, team *models.Team, location *models.Location) (models.CheckIn, error) {
 	if team == nil {
-		return models.CheckIn{}, fmt.Errorf("team is required")
+		return models.CheckIn{}, errors.New("team is required")
 	}
 
 	if location == nil {
-		return models.CheckIn{}, fmt.Errorf("location is required")
+		return models.CheckIn{}, errors.New("location is required")
 	}
 
 	if len(team.CheckIns) == 0 {
-		return models.CheckIn{}, fmt.Errorf("no check ins found for team")
+		return models.CheckIn{}, errors.New("no check ins found for team")
 	}
 
 	var checkIn *models.CheckIn
@@ -96,7 +97,7 @@ func (r *checkInRepository) LogCheckOut(ctx context.Context, team *models.Team, 
 	}
 
 	if checkIn == nil {
-		return models.CheckIn{}, fmt.Errorf("check in not found")
+		return models.CheckIn{}, errors.New("check in not found")
 	}
 
 	checkIn.TimeOut = time.Now().UTC()

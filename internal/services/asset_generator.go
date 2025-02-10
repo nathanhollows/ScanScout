@@ -9,6 +9,7 @@ import (
 	"regexp"
 	"strings"
 	"time"
+	"strconv"
 
 	"github.com/go-pdf/fpdf"
 	"github.com/nathanhollows/Rapua/helpers"
@@ -113,7 +114,6 @@ func (s *assetGenerator) CreateQRCodeImage(ctx context.Context, path string, con
 	if err != nil {
 		return fmt.Errorf("encoding text: %w", err)
 	}
-	go_qr.MakeSegmentsOptimally(content, go_qr.Medium, 10, 27)
 	config := go_qr.NewQrCodeImgConfig(20, 2)
 
 	if defaultOptions.format == "png" {
@@ -133,7 +133,7 @@ func (s *assetGenerator) CreateQRCodeImage(ctx context.Context, path string, con
 
 func (s *assetGenerator) CreateArchive(ctx context.Context, paths []string) (path string, err error) {
 	// Create the file
-	path = "assets/codes/" + helpers.NewCode(10) + "-" + fmt.Sprint(time.Now().UnixNano()) + ".zip"
+	path = "assets/codes/" + helpers.NewCode(10) + "-" + strconv.FormatInt(time.Now().UnixNano(), 10) + ".zip"
 	archive, err := os.Create(path)
 	if err != nil {
 		return "", fmt.Errorf("could not create archive: %w", err)
@@ -190,7 +190,7 @@ func (s *assetGenerator) CreatePDF(ctx context.Context, data PDFData) (path stri
 		}
 	}
 
-	path = "assets/codes/" + helpers.NewCode(10) + "-" + fmt.Sprint(time.Now().UnixNano()) + ".pdf"
+	path = "assets/codes/" + helpers.NewCode(10) + "-" + strconv.FormatInt(time.Now().UnixNano(), 10) + ".pdf"
 	err = pdf.OutputFileAndClose(path)
 	if err != nil {
 		return "", err

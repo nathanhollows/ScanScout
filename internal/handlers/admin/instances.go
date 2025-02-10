@@ -49,7 +49,11 @@ func (h *AdminHandler) InstancesCreate(w http.ResponseWriter, r *http.Request) {
 func (h *AdminHandler) InstanceDuplicate(w http.ResponseWriter, r *http.Request) {
 	user := h.UserFromContext(r.Context())
 
-	r.ParseForm()
+	err := r.ParseForm()
+	if err != nil {
+		h.handleError(w, r, "parsing form", "Error parsing form", "error", err)
+		return
+	}
 
 	id := r.Form.Get("id")
 	name := r.Form.Get("name")

@@ -2,6 +2,7 @@ package blocks
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/url"
 	"strconv"
@@ -49,13 +50,13 @@ func (b *PhotoBlock) UpdateBlockData(input map[string][]string) error {
 	if input["points"] != nil {
 		points, err := strconv.Atoi(input["points"][0])
 		if err != nil {
-			return fmt.Errorf("points must be an integer")
+			return errors.New("points must be an integer")
 		}
 		b.Points = points
 	}
 	// Prompt and Photo
 	if input["prompt"] == nil {
-		return fmt.Errorf("prompt is a required field")
+		return errors.New("prompt is a required field")
 	}
 	b.Prompt = input["prompt"][0]
 	return nil
@@ -67,7 +68,7 @@ func (b *PhotoBlock) RequiresValidation() bool { return true }
 
 func (b *PhotoBlock) ValidatePlayerInput(state PlayerState, input map[string][]string) (PlayerState, error) {
 	if input["url"] == nil || len(input["url"]) == 0 {
-		return state, fmt.Errorf("photo is a required field")
+		return state, errors.New("photo is a required field")
 	}
 
 	newPlayerData := photoBlockData{}
@@ -80,11 +81,11 @@ func (b *PhotoBlock) ValidatePlayerInput(state PlayerState, input map[string][]s
 
 	for _, image := range input["url"] {
 		if image == "" {
-			return state, fmt.Errorf("photo is a required field")
+			return state, errors.New("photo is a required field")
 		}
 		// Check valid image URL
 		if _, err := url.ParseRequestURI(image); err != nil {
-			return state, fmt.Errorf("invalid URL")
+			return state, errors.New("invalid URL")
 		}
 		newPlayerData.URLs = append(newPlayerData.URLs, image)
 	}
@@ -92,7 +93,7 @@ func (b *PhotoBlock) ValidatePlayerInput(state PlayerState, input map[string][]s
 	// Correct photo, update state to complete
 	playerData, err := json.Marshal(newPlayerData)
 	if err != nil {
-		return state, fmt.Errorf("Error saving player data")
+		return state, errors.New("Error saving player data")
 	}
 	state.SetPlayerData(playerData)
 	state.SetComplete(true)

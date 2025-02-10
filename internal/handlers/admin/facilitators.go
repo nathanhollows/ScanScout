@@ -24,7 +24,11 @@ func (h *AdminHandler) FacilitatorShowModal(w http.ResponseWriter, r *http.Reque
 func (h *AdminHandler) FacilitatorCreateTokenLink(w http.ResponseWriter, r *http.Request) {
 	user := h.UserFromContext(r.Context())
 
-	r.ParseForm()
+	err := r.ParseForm()
+	if err != nil {
+		h.handleError(w, r, "parsing form", "Error parsing form", "error", err)
+		return
+	}
 
 	var duration time.Duration
 	switch r.Form.Get("duration") {

@@ -2,6 +2,7 @@ package repositories
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"github.com/google/uuid"
@@ -46,7 +47,7 @@ func (r *instanceRepository) Create(ctx context.Context, instance *models.Instan
 		instance.ID = uuid.New().String()
 	}
 	if instance.UserID == "" {
-		return fmt.Errorf("UserID is required")
+		return errors.New("UserID is required")
 	}
 	_, err := r.db.NewInsert().Model(instance).Exec(ctx)
 	if err != nil {
@@ -57,7 +58,7 @@ func (r *instanceRepository) Create(ctx context.Context, instance *models.Instan
 
 func (r *instanceRepository) Update(ctx context.Context, instance *models.Instance) error {
 	if instance.ID == "" {
-		return fmt.Errorf("ID is required")
+		return errors.New("ID is required")
 	}
 	res, err := r.db.NewUpdate().Model(instance).WherePK().Exec(ctx)
 	if err != nil {
@@ -65,7 +66,7 @@ func (r *instanceRepository) Update(ctx context.Context, instance *models.Instan
 	}
 	affected, err := res.RowsAffected()
 	if err != nil || affected == 0 {
-		return fmt.Errorf("instance not found")
+		return errors.New("instance not found")
 	}
 	return nil
 }

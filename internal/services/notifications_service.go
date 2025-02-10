@@ -3,6 +3,7 @@ package services
 import (
 	"context"
 	"fmt"
+	"errors"
 
 	"github.com/nathanhollows/Rapua/models"
 	"github.com/nathanhollows/Rapua/repositories"
@@ -49,11 +50,11 @@ func (s *notificationService) SendNotificationToAllTeams(ctx context.Context, in
 	}
 
 	if len(teams) == 0 {
-		return fmt.Errorf("no teams to send notification to")
+		return errors.New("no teams to send notification to")
 	}
 
 	if content == "" {
-		return fmt.Errorf("content cannot be empty")
+		return errors.New("content cannot be empty")
 	}
 
 	for _, team := range teams {

@@ -2,6 +2,7 @@ package repositories
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"github.com/google/uuid"
@@ -39,7 +40,7 @@ func NewClueRepository(db *bun.DB) ClueRepository {
 // Save saves or updates a clue in the database.
 func (r *clueRepository) Save(ctx context.Context, c *models.Clue) error {
 	if c.InstanceID == "" || c.LocationID == "" {
-		return fmt.Errorf("instance ID and location ID must be set")
+		return errors.New("instance ID and location ID must be set")
 	}
 	var err error
 	if c.ID == "" {

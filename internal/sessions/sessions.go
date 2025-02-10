@@ -1,7 +1,6 @@
 package sessions
 
 import (
-	"fmt"
 	"net/http"
 	"os"
 
@@ -32,7 +31,7 @@ func Start() {
 		google.New(
 			os.Getenv("GOOGLE_CLIENT_ID"),
 			os.Getenv("GOOGLE_SECRET_ID"),
-			fmt.Sprintf("%s/auth/google/callback", os.Getenv("SITE_URL")),
+			os.Getenv("SITE_URL")+"/auth/google/callback",
 			"email",
 			"profile",
 		),

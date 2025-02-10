@@ -67,7 +67,11 @@ func (h *PublicHandler) LoginPost(w http.ResponseWriter, r *http.Request) {
 		}
 		return
 	}
-	session.Save(r, w)
+	err = session.Save(r, w)
+	if err != nil {
+		h.handleError(w, r, "LoginPost: saving session", "Error logging in", "error", err)
+		return
+	}
 	w.Header().Add("hx-redirect", "/admin")
 }
 
@@ -82,7 +86,11 @@ func (h *PublicHandler) Logout(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	session.Options.MaxAge = -1
-	session.Save(r, w)
+	err = session.Save(r, w)
+	if err != nil {
+		h.handleError(w, r, "Logout: saving session", "Error logging out", "error", err)
+		return
+	}
 	http.Redirect(w, r, helpers.URL("/login"), http.StatusSeeOther)
 }
 
@@ -105,7 +113,11 @@ func (h *PublicHandler) Register(w http.ResponseWriter, r *http.Request) {
 
 // RegisterPostHandler handles the form submission for creating a new user.
 func (h *PublicHandler) RegisterPost(w http.ResponseWriter, r *http.Request) {
-	r.ParseForm()
+	err := r.ParseForm()
+	if err != nil {
+		h.handleError(w, r, "parsing form", "Error parsing form", "error", err)
+		return
+	}
 	var user models.User
 	user.Name = r.Form.Get("name")
 	user.Email = r.Form.Get("email")
@@ -114,7 +126,7 @@ func (h *PublicHandler) RegisterPost(w http.ResponseWriter, r *http.Request) {
 	confirmPassword := r.Form.Get("password-confirm")
 
 	// Create the user
-	err := h.UserService.CreateUser(r.Context(), &user, confirmPassword)
+	err = h.UserService.CreateUser(r.Context(), &user, confirmPassword)
 	if err != nil {
 		h.Logger.Error("creating user", "err", err)
 		w.WriteHeader(http.StatusUnauthorized)

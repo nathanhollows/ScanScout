@@ -3,6 +3,7 @@ package services
 import (
 	"context"
 	"fmt"
+	"errors"
 
 	"github.com/nathanhollows/Rapua/models"
 	"github.com/nathanhollows/Rapua/repositories"
@@ -35,7 +36,7 @@ func (s *clueService) UpdateClues(ctx context.Context, location *models.Location
 
 	// There may be more clue IDs than clues, but not the other way around
 	if len(clueIDs) > len(clues) {
-		return fmt.Errorf("there are more clue IDs than clues")
+		return errors.New("there are more clue IDs than clues")
 	}
 
 	// Delete all clues

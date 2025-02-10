@@ -2,7 +2,7 @@ package repositories
 
 import (
 	"context"
-	"fmt"
+	"errors"
 	"time"
 
 	"github.com/nathanhollows/Rapua/models"
@@ -32,7 +32,7 @@ func NewInstanceSettingsRepository(db *bun.DB) InstanceSettingsRepository {
 
 func (r *instanceSettingsRepository) Create(ctx context.Context, settings *models.InstanceSettings) error {
 	if settings.InstanceID == "" {
-		return fmt.Errorf("instance ID is required")
+		return errors.New("instance ID is required")
 	}
 	settings.CreatedAt = time.Now().UTC()
 	settings.UpdatedAt = time.Now().UTC()
@@ -45,7 +45,7 @@ func (r *instanceSettingsRepository) Create(ctx context.Context, settings *model
 
 func (r *instanceSettingsRepository) Update(ctx context.Context, settings *models.InstanceSettings) error {
 	if settings.InstanceID == "" {
-		return fmt.Errorf("instance ID is required")
+		return errors.New("instance ID is required")
 	}
 	settings.UpdatedAt = time.Now().UTC()
 	_, err := r.db.NewUpdate().Model(settings).WherePK().Exec(ctx)

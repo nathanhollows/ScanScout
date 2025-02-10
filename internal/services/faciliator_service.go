@@ -6,6 +6,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"errors"
 	"time"
 
 	"github.com/nathanhollows/Rapua/models"
@@ -59,7 +60,7 @@ func (s *FacilitatorService) ValidateToken(ctx context.Context, token string) (*
 
 	// Check expiration
 	if time.Now().After(facToken.ExpiresAt) {
-		return nil, fmt.Errorf("token has expired")
+		return nil, errors.New("token has expired")
 	}
 
 	return facToken, nil

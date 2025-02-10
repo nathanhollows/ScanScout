@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"errors"
 
 	"github.com/nathanhollows/Rapua/db"
 	"github.com/nathanhollows/Rapua/models"
@@ -318,7 +319,7 @@ func (s locationService) ReorderLocations(ctx context.Context, instanceID string
 		}
 	}
 	if len(locationMap) != len(locationIDs) {
-		return fmt.Errorf("list length does not match number of locations")
+		return errors.New("list length does not match number of locations")
 	}
 
 	// Reorder the locations

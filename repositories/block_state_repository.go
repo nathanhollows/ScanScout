@@ -3,7 +3,7 @@ package repositories
 import (
 	"context"
 	"encoding/json"
-	"fmt"
+	"errors"
 	"time"
 
 	"github.com/nathanhollows/Rapua/blocks"
@@ -138,7 +138,7 @@ func (r *blockStateRepository) Create(ctx context.Context, state blocks.PlayerSt
 func (r *blockStateRepository) Update(ctx context.Context, state blocks.PlayerState) (blocks.PlayerState, error) {
 	modelState := convertPlayerStateToModelData(state)
 	if state.GetBlockID() == "" || state.GetPlayerID() == "" {
-		return nil, fmt.Errorf("block_id and team_code must be set")
+		return nil, errors.New("block_id and team_code must be set")
 	}
 
 	_, err := r.db.NewUpdate().

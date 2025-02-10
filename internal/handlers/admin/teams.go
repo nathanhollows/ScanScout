@@ -48,7 +48,11 @@ func (h *AdminHandler) TeamsAdd(w http.ResponseWriter, r *http.Request) {
 
 func (h *AdminHandler) TeamsDelete(w http.ResponseWriter, r *http.Request) {
 	user := h.UserFromContext(r.Context())
-	r.ParseForm()
+	err := r.ParseForm()
+	if err != nil {
+		h.handleError(w, r, "parsing form", "Error parsing form", "error", err)
+		return
+	}
 
 	teamID := r.Form["team-checkbox"]
 	if len(teamID) == 0 {
@@ -79,7 +83,11 @@ func (h *AdminHandler) TeamsDelete(w http.ResponseWriter, r *http.Request) {
 
 func (h *AdminHandler) TeamsReset(w http.ResponseWriter, r *http.Request) {
 	user := h.UserFromContext(r.Context())
-	r.ParseForm()
+	err := r.ParseForm()
+	if err != nil {
+		h.handleError(w, r, "parsing form", "Error parsing form", "error", err)
+		return
+	}
 
 	teamIDs := r.Form["team-checkbox"]
 	if len(teamIDs) == 0 {
@@ -87,7 +95,7 @@ func (h *AdminHandler) TeamsReset(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err := h.TeamService.Reset(r.Context(), user.CurrentInstanceID, teamIDs)
+	err = h.TeamService.Reset(r.Context(), user.CurrentInstanceID, teamIDs)
 	if err != nil {
 		h.handleError(w, r, "TeamsReset deleting team", "Error resetting teams", "error", err, "instance_id", user.CurrentInstanceID, "team_id", teamIDs)
 		return

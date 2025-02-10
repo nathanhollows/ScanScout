@@ -110,7 +110,11 @@ func (h *AdminHandler) ReorderLocations(w http.ResponseWriter, r *http.Request) 
 
 // LocationEdit shows the form to edit a location.
 func (h *AdminHandler) LocationEdit(w http.ResponseWriter, r *http.Request) {
-	r.ParseForm()
+	err := r.ParseForm()
+	if err != nil {
+		h.handleError(w, r, "parsing form", "Error parsing form", "error", err)
+		return
+	}
 
 	// Get the location from the chi context
 	code := chi.URLParam(r, "id")

@@ -6,7 +6,6 @@ import (
 	"regexp"
 
 	"github.com/nathanhollows/Rapua/internal/contextkeys"
-	"github.com/nathanhollows/Rapua/internal/flash"
 	"github.com/nathanhollows/Rapua/internal/services"
 	"github.com/nathanhollows/Rapua/models"
 )
@@ -17,7 +16,7 @@ func AdminAuthMiddleware(authService services.AuthService, next http.Handler) ht
 		// Make sure the user is authenticated
 		user, err := authService.GetAuthenticatedUser(r)
 		if err != nil {
-			flash.NewError("You must be logged in to access this page").Save(w, r)
+			// flash.NewError("You must be logged in to access this page").Save(w, r)
 			http.Redirect(w, r, "/login", http.StatusSeeOther)
 			return
 		}
@@ -48,11 +47,11 @@ func AdminCheckInstanceMiddleware(next http.Handler) http.Handler {
 		}
 
 		if user.CurrentInstanceID == "" {
-			flash.Message{
-				Title:   "Error",
-				Message: "Please select an instance to continue",
-				Style:   flash.Error,
-			}.Save(w, r)
+			// flash.Message{
+			// 	Title:   "Error",
+			// 	Message: "Please select an instance to continue",
+			// 	Style:   flash.Error,
+			// }.Save(w, r)
 			http.Redirect(w, r, "/admin/instances", http.StatusSeeOther)
 			return
 		}

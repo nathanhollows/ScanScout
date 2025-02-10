@@ -2,6 +2,7 @@ package repositories
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"github.com/google/uuid"
@@ -41,10 +42,10 @@ func NewNotificationRepository(db *bun.DB) NotificationRepository {
 func (r *notificationRepository) Create(ctx context.Context, notification *models.Notification) error {
 	// Validate the notification
 	if notification.Content == "" {
-		return fmt.Errorf("message is required")
+		return errors.New("message is required")
 	}
 	if notification.TeamCode == "" {
-		return fmt.Errorf("team_code is required")
+		return errors.New("team_code is required")
 	}
 
 	// Generate a new ID if one doesn't exist
@@ -69,7 +70,7 @@ func (r *notificationRepository) Dismiss(ctx context.Context, id string) error {
 // Update updates an existing notification in the database.
 func (r *notificationRepository) Update(ctx context.Context, notification *models.Notification) error {
 	if notification.ID == "" {
-		return fmt.Errorf("ID is required")
+		return errors.New("ID is required")
 	}
 
 	_, err := r.db.NewUpdate().Model(notification).WherePK().Exec(ctx)

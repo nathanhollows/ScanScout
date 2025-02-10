@@ -191,7 +191,7 @@ func (s *gameplayService) CheckIn(ctx context.Context, team *models.Team, locati
 		return fmt.Errorf("checking if location is valid: %w", err)
 	}
 	if !valid {
-		return fmt.Errorf("location not valid for team")
+		return errors.New("location not valid for team")
 	}
 
 	// Check if any blocks require validation (e.g. a checklist)
@@ -290,7 +290,7 @@ func (s *gameplayService) CheckValidLocation(ctx context.Context, team *models.T
 func (s *gameplayService) ValidateAndUpdateBlockState(ctx context.Context, team models.Team, data map[string][]string) (blocks.PlayerState, blocks.Block, error) {
 	blockID := data["block"][0]
 	if blockID == "" {
-		return nil, nil, fmt.Errorf("blockID must be set")
+		return nil, nil, errors.New("blockID must be set")
 	}
 
 	block, state, err := s.BlockService.GetBlockWithStateByBlockIDAndTeamCode(ctx, blockID, team.Code)
@@ -299,7 +299,7 @@ func (s *gameplayService) ValidateAndUpdateBlockState(ctx context.Context, team 
 	}
 
 	if state == nil {
-		return nil, nil, fmt.Errorf("block state not found")
+		return nil, nil, errors.New("block state not found")
 	}
 
 	// Returning early here prevents the block from being updated

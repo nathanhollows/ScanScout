@@ -2,6 +2,7 @@ package blocks
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"strconv"
 
@@ -79,7 +80,7 @@ func (b *ChecklistBlock) UpdateBlockData(input map[string][]string) error {
 	if ok && len(pointsInput[0]) > 0 {
 		points, err := strconv.Atoi(pointsInput[0])
 		if err != nil {
-			return fmt.Errorf("points must be an integer")
+			return errors.New("points must be an integer")
 		}
 		b.Points = points
 	} else {

@@ -47,10 +47,13 @@ func (h *AdminHandler) StopGame(w http.ResponseWriter, r *http.Request) {
 func (h *AdminHandler) ScheduleGame(w http.ResponseWriter, r *http.Request) {
 	user := h.UserFromContext(r.Context())
 
-	r.ParseForm()
+	err := r.ParseForm()
+	if err != nil {
+		h.handleError(w, r, "parsing form", "Error parsing form", "error", err)
+		return
+	}
 
 	var sTime, eTime time.Time
-	var err error
 	if r.Form.Get("set_start") != "" {
 		startDate := r.Form.Get("utc_start_date")
 		startTime := r.Form.Get("utc_start_time")
@@ -85,7 +88,11 @@ func (h *AdminHandler) ScheduleGame(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	if response.Error != nil {
-		templates.Toast(*flash.NewError("Error scheduling game")).Render(r.Context(), w)
+		err := templates.Toast(*flash.NewError("Error scheduling game")).Render(r.Context(), w)
+		if err != nil {
+			h.handleError(w, r, "ScheduleGame: rendering template", "Error rendering template", "error", err)
+			return
+		}
 		h.Logger.Error("scheduling game", "err", response.Error)
 		return
 	}

@@ -52,7 +52,11 @@ func (h *PlayerHandler) CheckIn(w http.ResponseWriter, r *http.Request) {
 
 // CheckInPost handles the POST request for scanning in.
 func (h *PlayerHandler) CheckInPost(w http.ResponseWriter, r *http.Request) {
-	r.ParseForm()
+	err := r.ParseForm()
+	if err != nil {
+		h.handleError(w, r, "parsing form", "Error parsing form", "error", err)
+		return
+	}
 	locationCode := chi.URLParam(r, "code")
 	locationCode = strings.ToUpper(locationCode)
 
@@ -129,7 +133,11 @@ func (h *PlayerHandler) CheckOut(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *PlayerHandler) CheckOutPost(w http.ResponseWriter, r *http.Request) {
-	r.ParseForm()
+	err := r.ParseForm()
+	if err != nil {
+		h.handleError(w, r, "parsing form", "Error parsing form", "error", err)
+		return
+	}
 	locationCode := chi.URLParam(r, "code")
 	locationCode = strings.ToUpper(locationCode)
 

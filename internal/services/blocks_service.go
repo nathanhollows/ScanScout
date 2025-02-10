@@ -3,7 +3,9 @@ package services
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
+	"log"
 
 	"github.com/nathanhollows/Rapua/blocks"
 	"github.com/nathanhollows/Rapua/db"
@@ -67,17 +69,17 @@ func (s *blockService) GetByBlockID(ctx context.Context, blockID string) (blocks
 // FindByLocationID fetches all content blocks for a location.
 func (s *blockService) FindByLocationID(ctx context.Context, locationID string) (blocks.Blocks, error) {
 	if locationID == "" {
-		return nil, fmt.Errorf("location must be set")
+		return nil, errors.New("location must be set")
 	}
 	return s.blockRepo.FindByLocationID(ctx, locationID)
 }
 
 func (s *blockService) NewBlock(ctx context.Context, locationID string, blockType string) (blocks.Block, error) {
 	if locationID == "" {
-		return nil, fmt.Errorf("location must be set")
+		return nil, errors.New("location must be set")
 	}
 	if blockType == "" {
-		return nil, fmt.Errorf("block type must be set")
+		return nil, errors.New("block type must be set")
 	}
 	// Use the blocks package to create the appropriate block based on the type.
 	baseBlock := blocks.BaseBlock{
@@ -103,10 +105,10 @@ func (s *blockService) NewBlock(ctx context.Context, locationID string, blockTyp
 // NewBlockState creates a new block state.
 func (s *blockService) NewBlockState(ctx context.Context, blockID, teamCode string) (blocks.PlayerState, error) {
 	if blockID == "" {
-		return nil, fmt.Errorf("blockID must be set")
+		return nil, errors.New("blockID must be set")
 	}
 	if teamCode == "" {
-		return nil, fmt.Errorf("teamCode must be set")
+		return nil, errors.New("teamCode must be set")
 	}
 	state, err := s.blockStateRepo.NewBlockState(ctx, blockID, teamCode)
 	if err != nil {
@@ -122,7 +124,7 @@ func (s *blockService) NewBlockState(ctx context.Context, blockID, teamCode stri
 // NewMockBlockState creates a new mock block state.
 func (s *blockService) NewMockBlockState(ctx context.Context, blockID, teamCode string) (blocks.PlayerState, error) {
 	if blockID == "" {
-		return nil, fmt.Errorf("blockID must be set")
+		return nil, errors.New("blockID must be set")
 	}
 	// teamCode may be blank
 	state, err := s.blockStateRepo.NewBlockState(ctx, blockID, teamCode)
@@ -151,7 +153,8 @@ func (s *blockService) DeleteBlock(ctx context.Context, blockID string) error {
 	// Ensure rollback on failure
 	defer func() {
 		if p := recover(); p != nil {
-			tx.Rollback()
+			err := tx.Rollback()
+			log.Printf("recovered from panic, rolling back transaction: %v", err)
 			panic(p)
 		}
 	}()
@@ -176,7 +179,7 @@ func (s *blockService) ReorderBlocks(ctx context.Context, locationID string, blo
 
 func (s *blockService) FindByLocationIDAndTeamCodeWithState(ctx context.Context, locationID, teamCode string) ([]blocks.Block, map[string]blocks.PlayerState, error) {
 	if locationID == "" {
-		return nil, nil, fmt.Errorf("locationID must be set")
+		return nil, nil, errors.New("locationID must be set")
 	}
 	foundBlocks, states, err := s.blockRepo.FindBlocksAndStatesByLocationIDAndTeamCode(ctx, locationID, teamCode)
 	if err != nil {
