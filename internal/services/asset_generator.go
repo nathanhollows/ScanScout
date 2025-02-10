@@ -3,7 +3,6 @@ package services
 import (
 	"archive/zip"
 	"context"
-	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -107,10 +106,13 @@ func (s *assetGenerator) CreateQRCodeImage(ctx context.Context, path string, con
 
 	// Validate the options
 	if defaultOptions.format != "png" && defaultOptions.format != "svg" {
-		return errors.New(fmt.Sprintf("unsupported format: %s", defaultOptions.format))
+		return fmt.Errorf("unsupported format: %s", defaultOptions.format)
 	}
 
 	qr, err := go_qr.EncodeText(content, go_qr.Medium)
+	if err != nil {
+		return fmt.Errorf("encoding text: %w", err)
+	}
 	go_qr.MakeSegmentsOptimally(content, go_qr.Medium, 10, 27)
 	config := go_qr.NewQrCodeImgConfig(20, 2)
 

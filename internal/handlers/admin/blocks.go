@@ -115,18 +115,26 @@ func (h *AdminHandler) BlockDelete(w http.ResponseWriter, r *http.Request) {
 	user := h.UserFromContext(r.Context())
 
 	location := chi.URLParam(r, "location")
+	blockID := chi.URLParam(r, "blockID")
+
+	if location == "" || blockID == "" {
+		h.handleError(w, r, "BlockDelete: missing parameters", "Could not delete block. Missing parameters")
+		return
+	}
+
+	// Check if the user has access to the location
 	if !h.GameManagerService.ValidateLocationID(user, location) {
 		h.handleError(w, r, "BlockDelete: invalid location", "Could not delete block. Invalid location", "location", location)
 		return
 	}
 
-	blockID := chi.URLParam(r, "blockID")
 	block, err := h.BlockService.GetByBlockID(r.Context(), blockID)
 	if err != nil {
 		h.handleError(w, r, "BlockDelete: getting block", "Could not delete block", "error", err)
 		return
 	}
 
+	// Sanity check, but should never happen
 	if block.GetLocationID() != location {
 		h.handleError(w, r, "BlockDelete: block does not belong to location", "Could not delete block", "blockID", blockID, "location", location)
 		return

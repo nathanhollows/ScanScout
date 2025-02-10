@@ -18,7 +18,10 @@ func (h *PlayerHandler) ValidateBlock(w http.ResponseWriter, r *http.Request) {
 	if err != nil || team == nil {
 		// If the team is not found, return an error
 		h.handleError(w, r, fmt.Errorf("validateBlock: getTeamifExists: %v", err).Error(), "Team not found")
-		invalidateSession(r, w)
+		err := invalidateSession(r, w)
+		if err != nil {
+			h.handleError(w, r, fmt.Errorf("validateBlock: invalidateSession: %v", err).Error(), "Something went wrong!")
+		}
 		return
 	}
 

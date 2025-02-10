@@ -62,6 +62,9 @@ func (r *userRepository) Update(ctx context.Context, user *models.User) error {
 			"updated_at").
 		WherePK().
 		Exec(ctx)
+	if err != nil {
+		return err
+	}
 	rows, err := res.RowsAffected()
 	if rows == 0 {
 		return ErrUserNotFound
@@ -144,6 +147,9 @@ func (r *userRepository) Delete(ctx context.Context, tx *bun.Tx, userID string) 
 		Model(user).
 		Where("id = ?", userID).
 		Exec(ctx)
+	if err != nil {
+		return err
+	}
 	rows, err := res.RowsAffected()
 	if rows == 0 {
 		return ErrUserNotFound

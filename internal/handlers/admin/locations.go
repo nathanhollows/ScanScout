@@ -138,6 +138,9 @@ func (h *AdminHandler) LocationEdit(w http.ResponseWriter, r *http.Request) {
 
 	c := templates.EditLocation(*location, user.CurrentInstance.Settings, blocks)
 	err = templates.Layout(c, *user, "Locations", "Edit Location").Render(r.Context(), w)
+	if err != nil {
+		h.handleError(w, r, "LocationEdit: rendering template", "Error rendering template", "error", err)
+	}
 }
 
 // LocationEditPost handles updating a location
@@ -270,10 +273,18 @@ func (h *AdminHandler) LocationPreview(w http.ResponseWriter, r *http.Request) {
 	}
 
 	contentBlocks, err := h.BlockService.FindByLocationID(r.Context(), location.ID)
+	if err != nil {
+		h.handleError(w, r, "LocationPreview: getting blocks", "Error getting blocks", "error", err)
+		return
+	}
 
 	blockStates := make(map[string]blocks.PlayerState, len(contentBlocks))
 	for _, block := range contentBlocks {
 		blockStates[block.GetID()], err = h.BlockService.NewMockBlockState(r.Context(), block.GetID(), "")
+		if err != nil {
+			h.handleError(w, r, "LocationPreview: creating block state", "Error creating block state", "error", err)
+			return
+		}
 	}
 
 	err = playerTemplates.CheckInView(user.CurrentInstance.Settings, scan, contentBlocks, blockStates).Render(r.Context(), w)

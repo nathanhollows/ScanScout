@@ -81,8 +81,8 @@ func (h *AdminHandler) ScheduleGame(w http.ResponseWriter, r *http.Request) {
 		err := templates.GameScheduleStatus(user.CurrentInstance, msg).Render(r.Context(), w)
 		if err != nil {
 			h.Logger.Error("ScheduleGame: rendering template", "error", err)
+			return
 		}
-		return
 	}
 	if response.Error != nil {
 		templates.Toast(*flash.NewError("Error scheduling game")).Render(r.Context(), w)

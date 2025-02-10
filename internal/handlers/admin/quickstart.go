@@ -29,6 +29,4 @@ func (h *AdminHandler) DismissQuickstart(w http.ResponseWriter, r *http.Request)
 	if r.URL.Query().Has("redirect") {
 		h.redirect(w, r, "/admin/activity")
 	}
-
-	return
 }

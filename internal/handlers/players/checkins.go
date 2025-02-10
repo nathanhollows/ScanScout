@@ -133,9 +133,6 @@ func (h *PlayerHandler) CheckOutPost(w http.ResponseWriter, r *http.Request) {
 	locationCode := chi.URLParam(r, "code")
 	locationCode = strings.ToUpper(locationCode)
 
-	teamCode := r.FormValue("team")
-	teamCode = strings.ToUpper(teamCode)
-
 	// Get the team from the context
 	// Or start a new session if the provided team code is valid
 	team, err := h.getTeamFromContext(r.Context())
@@ -155,16 +152,28 @@ func (h *PlayerHandler) CheckOutPost(w http.ResponseWriter, r *http.Request) {
 	err = h.GameplayService.CheckOut(r.Context(), team, locationCode)
 	if err != nil {
 		if errors.Is(err, services.ErrLocationNotFound) {
-			templates.Toast(*flash.NewError("Location not found. Please double check the code and try again.")).Render(r.Context(), w)
+			err := templates.Toast(*flash.NewError("Location not found. Please double check the code and try again.")).Render(r.Context(), w)
+			if err != nil {
+				h.handleError(w, r, "CheckOutPost: checking out", "Error checking out", "error", err, "team", team.Code, "location", locationCode)
+			}
 			return
 		} else if errors.Is(err, services.ErrUnecessaryCheckOut) {
-			templates.Toast(*flash.NewInfo("You are not checked in anywhere.")).Render(r.Context(), w)
+			err := templates.Toast(*flash.NewInfo("You are not checked in anywhere.")).Render(r.Context(), w)
+			if err != nil {
+				h.handleError(w, r, "CheckOutPost: checking out", "Error checking out", "error", err, "team", team.Code, "location", locationCode)
+			}
 			return
 		} else if errors.Is(err, services.ErrCheckOutAtWrongLocation) {
-			templates.Toast(*flash.NewInfo("You are not checked in here.")).Render(r.Context(), w)
+			err := templates.Toast(*flash.NewInfo("You are not checked in here.")).Render(r.Context(), w)
+			if err != nil {
+				h.handleError(w, r, "CheckOutPost: checking out", "Error checking out", "error", err, "team", team.Code, "location", locationCode)
+			}
 			return
 		} else if errors.Is(err, services.ErrUnfinishedCheckIn) {
-			templates.Toast(*flash.NewInfo("Whoops! You still have unfinished activities.")).Render(r.Context(), w)
+			err := templates.Toast(*flash.NewInfo("Whoops! You still have unfinished activities.")).Render(r.Context(), w)
+			if err != nil {
+				h.handleError(w, r, "CheckOutPost: checking out", "Error checking out", "error", err, "team", team.Code, "location", locationCode)
+			}
 			return
 		} else {
 			h.handleError(w, r, "CheckOutPost: checking out", "Error checking out", "error", err, "team", team.Code, "location", locationCode)

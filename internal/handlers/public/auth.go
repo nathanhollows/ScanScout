@@ -54,7 +54,10 @@ func (h *PublicHandler) LoginPost(w http.ResponseWriter, r *http.Request) {
 		h.Logger.Error("creating session", "err", err)
 		w.WriteHeader(http.StatusInternalServerError)
 		c := templates.LoginError("An error occurred while trying to log in. Please try again.")
-		c.Render(r.Context(), w)
+		err := c.Render(r.Context(), w)
+		if err != nil {
+			h.handleError(w, r, "LoginPost: rendering template", "Error logging in", "error", err)
+		}
 		return
 	}
 	session.Save(r, w)
@@ -110,28 +113,44 @@ func (h *PublicHandler) RegisterPost(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusUnauthorized)
 		if errors.Is(err, services.ErrPasswordsDoNotMatch) {
 			c := templates.RegisterError("Passwords do not match.")
-			c.Render(r.Context(), w)
-			return
+			err := c.Render(r.Context(), w)
+			if err != nil {
+				h.handleError(w, r, "RegisterPost: rendering template", "Error registering user", "error", err)
+
+				return
+			}
 		}
 		c := templates.RegisterError("Something went wrong! Please try again.")
-		c.Render(r.Context(), w)
-		return
+		err := c.Render(r.Context(), w)
+		if err != nil {
+			h.handleError(w, r, "RegisterPost: rendering template", "Error registering user", "error", err)
+		}
 	}
 
 	// Send the email verification
 	err = h.AuthService.SendEmailVerification(r.Context(), &user)
 	if err != nil {
 		if !errors.Is(err, services.ErrUserAlreadyVerified) {
-			h.UserService.DeleteUser(r.Context(), user.ID)
+			err := h.UserService.DeleteUser(r.Context(), user.ID)
+			if err != nil {
+				h.handleError(w, r, "RegisterPost: deleting user", "Error deleting user", "error", err)
+				return
+			}
 			h.Logger.Error("sending email verification", "err", err)
 			c := templates.RegisterError("Your account was created, but an error occurred while trying to send the email verification. Please try again.")
-			c.Render(r.Context(), w)
-			return
+			err = c.Render(r.Context(), w)
+			if err != nil {
+				h.handleError(w, r, "RegisterPost: rendering template", "Error registering user", "error", err)
+				return
+			}
 		}
 	}
 
 	c := templates.RegisterSuccess()
-	c.Render(r.Context(), w)
+	err = c.Render(r.Context(), w)
+	if err != nil {
+		h.handleError(w, r, "RegisterPost: rendering template", "Error registering user", "error", err)
+	}
 }
 
 // ForgotPasswordHandler is the handler for the forgot password page
@@ -158,23 +177,11 @@ func (h *PublicHandler) ForgotPasswordPost(w http.ResponseWriter, r *http.Reques
 	c := templates.ForgotMessage(
 		*flash.NewInfo("If an account with that email exists, an email will be sent with instructions on how to reset your password."),
 	)
-	c.Render(r.Context(), w)
+	err := c.Render(r.Context(), w)
+	if err != nil {
+		h.handleError(w, r, "ForgotPasswordPost: rendering template", "Error sending forgot password email", "error", err)
+	}
 }
-
-var userTemplate = `
-<p><a href="/logout/{{.Provider}}">logout</a></p>
-<p>Name: {{.Name}} [{{.LastName}}, {{.FirstName}}]</p>
-<p>Email: {{.Email}}</p>
-<p>NickName: {{.NickName}}</p>
-<p>Location: {{.Location}}</p>
-<p>AvatarURL: {{.AvatarURL}} <img src="{{.AvatarURL}}"></p>
-<p>Description: {{.Description}}</p>
-<p>UserID: {{.UserID}}</p>
-<p>AccessToken: {{.AccessToken}}</p>
-<p>ExpiresAt: {{.ExpiresAt}}</p>
-<p>RefreshToken: {{.RefreshToken}}</p>
-<p>Provider: {{.Provider}}</p>
-`
 
 // Auth redirects the user to the Google OAuth page
 func (h *PublicHandler) Auth(w http.ResponseWriter, r *http.Request) {
@@ -218,18 +225,29 @@ func (h *PublicHandler) AuthCallback(w http.ResponseWriter, r *http.Request) {
 		h.Logger.Error("creating session", "err", err)
 		w.WriteHeader(http.StatusInternalServerError)
 		c := templates.LoginError("An error occurred while trying to log in. Please try again.")
-		c.Render(r.Context(), w)
+		err := c.Render(r.Context(), w)
+		if err != nil {
+			h.handleError(w, r, "AuthCallback: rendering template", "Error authenticating user", "error", err)
+			return
+		}
+	}
+
+	err = session.Save(r, w)
+	if err != nil {
+		h.handleError(w, r, "AuthCallback: saving session", "Error authenticating user", "error")
 		return
 	}
-	session.Save(r, w)
 
-	w.Write([]byte(`
+	_, err = w.Write([]byte(`
 <!DOCTYPE html>
 <html>
 <head><meta http-equiv="refresh" content="0; url='/admin'"></head>
 <body></body>
 </html>
 		`))
+	if err != nil {
+		h.handleError(w, r, "AuthCallback: writing response", "Error authenticating user", "error", err)
+	}
 }
 
 // VerifyEmail shows the user the verify email page, the first step in the email verification process
@@ -278,7 +296,10 @@ func (h *PublicHandler) VerifyEmailWithToken(w http.ResponseWriter, r *http.Requ
 	}
 
 	// Send a meta refresh to the verify email page
-	w.Write([]byte(`<html><head><meta http-equiv="refresh" content="2; url='/admin'"></head><body></body></html>`))
+	_, err = w.Write([]byte(`<html><head><meta http-equiv="refresh" content="2; url='/admin'"></head><body></body></html>`))
+	if err != nil {
+		h.handleError(w, r, "VerifyEmailWithToken: writing response", "Error verifying email", "error", err)
+	}
 }
 
 // VerifyEmailStatus checks the status of the email verification and redirects accordingly

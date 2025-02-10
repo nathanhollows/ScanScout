@@ -45,8 +45,6 @@ func (h *PlayerHandler) Play(w http.ResponseWriter, r *http.Request) {
 	session.Options.MaxAge = -1
 	session.Save(r, w)
 
-	return
-
 }
 
 // PlayPost is the handler for the play form submission
@@ -67,7 +65,11 @@ func (h *PlayerHandler) PlayPost(w http.ResponseWriter, r *http.Request) {
 
 	team := response.Data["team"].(*models.Team)
 
-	h.startSession(w, r, team.Code)
+	err := h.startSession(w, r, team.Code)
+	if err != nil {
+		h.handleError(w, r, "HomePost: starting session", "Error starting session. Please try again.", "error", err, "team", team.Code)
+		return
+	}
 
 	w.Header().Set("HX-Redirect", "/next")
 }

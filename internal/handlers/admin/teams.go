@@ -35,6 +35,10 @@ func (h *AdminHandler) TeamsAdd(w http.ResponseWriter, r *http.Request) {
 
 	// Add the teams
 	teams, err := h.TeamService.AddTeams(r.Context(), user.CurrentInstanceID, count)
+	if err != nil {
+		h.handleError(w, r, "TeamsAdd adding teams", "Error adding teams", "error", err, "instance_id", user.CurrentInstanceID)
+		return
+	}
 
 	err = admin.TeamsList(teams).Render(r.Context(), w)
 	if err != nil {

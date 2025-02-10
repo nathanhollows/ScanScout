@@ -169,7 +169,7 @@ func (s locationService) DuplicateLocation(ctx context.Context, location models.
 		if err != nil {
 			return models.Location{}, fmt.Errorf("finding block: %v", err)
 		}
-		block, err = s.blockRepo.Create(ctx, block, newLocation.ID)
+		_, err = s.blockRepo.Create(ctx, block, newLocation.ID)
 		if err != nil {
 			return models.Location{}, fmt.Errorf("saving block: %v", err)
 		}
