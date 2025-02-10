@@ -6,11 +6,25 @@ order: 100
 
 # Changelog
 
+## 3.4.0 (2025-02-12)
+
+### Added
+
+- Added the option to create locations with no coordinates for non-physical or roaming locations, or for locations where maps don't make sense. [#45](https://github.com/nathanhollows/Rapua/issues/45)
+- `IsMapped` method on markers to check if a location is mapped or not.
+- **Content Blocks:**
+  - [Divider Blocks](/docs/user/blocks/divider) to separate content blocks for better readability.
+  - [Alert Blocks](/docs/user/blocks/alert) for important messages. 
+
+### Fixed
+
+- Minor typos and inconsistencies in documentation.
+
 ## 3.3.0 (2025-02-05)
 
 ### Added
 - **Team Management Enhancements:**
-  - Added the ability to reset a team's progress back to nothing.
+  - Added the ability to reset a team's progress back to nothing. [#54](https://github.com/nathanhollows/Rapua/issues/54)
   - Teams page now links to the team overview for quick access.
   - API: Implemented bulk deletion of check-ins by team codes.
   - API: Introduced bulk deletion of player states by team codes.
