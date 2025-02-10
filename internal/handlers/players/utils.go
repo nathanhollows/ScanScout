@@ -47,9 +47,9 @@ func (h *PlayerHandler) getTeamIfExists(ctx context.Context, teamCode interface{
 	return h.GameplayService.GetTeamByCode(ctx, teamCode.(string))
 }
 
-// GetTeamFromContext retrieves the team from the context
-// Team will always be in the context because the middleware
-// However the Team could be nil if the team was not found
+// GetTeamFromContext retrieves the team from the context.
+// Team will always be in the context because the middleware.
+// However the Team could be nil if the team was not found.
 func (h PlayerHandler) getTeamFromContext(ctx context.Context) (*models.Team, error) {
 	val := ctx.Value(contextkeys.TeamKey)
 	if val == nil {
@@ -62,8 +62,8 @@ func (h PlayerHandler) getTeamFromContext(ctx context.Context) (*models.Team, er
 	return team, nil
 }
 
-// redirect is a helper function to redirect the user to a new page
-// It accounts for htmx requests
+// redirect is a helper function to redirect the user to a new page.
+// It accounts for htmx requests.
 func (h PlayerHandler) redirect(w http.ResponseWriter, r *http.Request, path string) {
 	if r.Header.Get("HX-Request") == "true" {
 		w.Header().Set("HX-Redirect", path)

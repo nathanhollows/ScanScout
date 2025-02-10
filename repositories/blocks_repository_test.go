@@ -281,7 +281,7 @@ func TestBlockRepository_Bulk(t *testing.T) {
 	}
 }
 
-// Test that creating a new block with a new location ID replaces the old location ID
+// Test that creating a new block with a new location ID replaces the old location ID.
 func TestBlockRepository_Create_NewLocationID(t *testing.T) {
 	repo, _, cleanup := setupBlockRepo(t)
 	defer cleanup()

@@ -12,7 +12,7 @@ import (
 	"github.com/nathanhollows/Rapua/repositories"
 )
 
-// Define errors
+// Define errors.
 var (
 	ErrTeamNotFound             = errors.New("team not found")
 	ErrLocationNotFound         = errors.New("location not found")
@@ -65,7 +65,7 @@ func NewGameplayService(
 	}
 }
 
-// GetGameStatus returns the current status of the game
+// GetGameStatus returns the current status of the game.
 func (s *gameplayService) CheckGameStatus(ctx context.Context, team *models.Team) (response *ServiceResponse) {
 	response = &ServiceResponse{}
 	response.Data = make(map[string]interface{})
@@ -265,7 +265,7 @@ func (s *gameplayService) CheckOut(ctx context.Context, team *models.Team, locat
 	return nil
 }
 
-// CheckLocation checks if the location is valid for the team to check in
+// CheckLocation checks if the location is valid for the team to check in.
 func (s *gameplayService) CheckValidLocation(ctx context.Context, team *models.Team, locationCode string) (bool, error) {
 	if team.Instance.ID == "" {
 		return false, ErrInstanceNotFound

@@ -6,7 +6,7 @@ import (
 	"github.com/uptrace/bun"
 )
 
-// Instance represents an entire game state
+// Instance represents an entire game state.
 type Instance struct {
 	baseModel
 
@@ -23,7 +23,7 @@ type Instance struct {
 	Settings  InstanceSettings `bun:"rel:has-one,join:id=instance_id"`
 }
 
-// GetStatus returns the status of the instance
+// GetStatus returns the status of the instance.
 func (i *Instance) GetStatus() GameStatus {
 	// If the start time is null, the game is closed
 	if i.StartTime.Time.IsZero() {

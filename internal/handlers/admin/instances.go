@@ -8,7 +8,7 @@ import (
 	templates "github.com/nathanhollows/Rapua/internal/templates/admin"
 )
 
-// Instances shows admin the instances
+// Instances shows admin the instances.
 func (h *AdminHandler) Instances(w http.ResponseWriter, r *http.Request) {
 	user := h.UserFromContext(r.Context())
 
@@ -19,7 +19,7 @@ func (h *AdminHandler) Instances(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// InstancesCreate creates a new instance
+// InstancesCreate creates a new instance.
 func (h *AdminHandler) InstancesCreate(w http.ResponseWriter, r *http.Request) {
 	user := h.UserFromContext(r.Context())
 
@@ -45,7 +45,7 @@ func (h *AdminHandler) InstancesCreate(w http.ResponseWriter, r *http.Request) {
 	h.redirect(w, r, "/admin/instances")
 }
 
-// InstanceDuplicate duplicates an instance
+// InstanceDuplicate duplicates an instance.
 func (h *AdminHandler) InstanceDuplicate(w http.ResponseWriter, r *http.Request) {
 	user := h.UserFromContext(r.Context())
 
@@ -69,7 +69,7 @@ func (h *AdminHandler) InstanceDuplicate(w http.ResponseWriter, r *http.Request)
 	h.redirect(w, r, "/admin/instances")
 }
 
-// InstanceSwitch switches the current instance
+// InstanceSwitch switches the current instance.
 func (h *AdminHandler) InstanceSwitch(w http.ResponseWriter, r *http.Request) {
 	user := h.UserFromContext(r.Context())
 
@@ -93,7 +93,7 @@ func (h *AdminHandler) InstanceSwitch(w http.ResponseWriter, r *http.Request) {
 	h.redirect(w, r, r.Header.Get("Referer"))
 }
 
-// InstanceDelete deletes an instance
+// InstanceDelete deletes an instance.
 func (h *AdminHandler) InstanceDelete(w http.ResponseWriter, r *http.Request) {
 	user := h.UserFromContext(r.Context())
 

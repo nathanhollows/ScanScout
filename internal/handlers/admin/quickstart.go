@@ -6,7 +6,7 @@ import (
 	templates "github.com/nathanhollows/Rapua/internal/templates/admin"
 )
 
-// Quickstart shows the quickstart bar
+// Quickstart shows the quickstart bar.
 func (h *AdminHandler) Quickstart(w http.ResponseWriter, r *http.Request) {
 	user := h.UserFromContext(r.Context())
 
@@ -16,7 +16,7 @@ func (h *AdminHandler) Quickstart(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// DismissQuickstart dismisses the quickstart
+// DismissQuickstart dismisses the quickstart.
 func (h *AdminHandler) DismissQuickstart(w http.ResponseWriter, r *http.Request) {
 	user := h.UserFromContext(r.Context())
 

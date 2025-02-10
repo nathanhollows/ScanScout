@@ -37,7 +37,7 @@ func NewNotificationRepository(db *bun.DB) NotificationRepository {
 	}
 }
 
-// Create inserts a new notification into the database
+// Create inserts a new notification into the database.
 func (r *notificationRepository) Create(ctx context.Context, notification *models.Notification) error {
 	// Validate the notification
 	if notification.Content == "" {
@@ -60,13 +60,13 @@ func (r *notificationRepository) Create(ctx context.Context, notification *model
 	return nil
 }
 
-// Dismiss marks a notification as dismissed
+// Dismiss marks a notification as dismissed.
 func (r *notificationRepository) Dismiss(ctx context.Context, id string) error {
 	_, err := r.db.NewUpdate().Model(&models.Notification{}).Set("dismissed = true").Where("id = ?", id).Exec(ctx)
 	return err
 }
 
-// Update updates an existing notification in the database
+// Update updates an existing notification in the database.
 func (r *notificationRepository) Update(ctx context.Context, notification *models.Notification) error {
 	if notification.ID == "" {
 		return fmt.Errorf("ID is required")
@@ -79,7 +79,7 @@ func (r *notificationRepository) Update(ctx context.Context, notification *model
 	return nil
 }
 
-// Delete removes a notification from the database
+// Delete removes a notification from the database.
 func (r *notificationRepository) Delete(ctx context.Context, id string) error {
 	_, err := r.db.NewDelete().Model(&models.Notification{}).Where("id = ?", id).Exec(ctx)
 	if err != nil {
@@ -88,7 +88,7 @@ func (r *notificationRepository) Delete(ctx context.Context, id string) error {
 	return nil
 }
 
-// GetByID finds a notification by its ID
+// GetByID finds a notification by its ID.
 func (r *notificationRepository) GetByID(ctx context.Context, id string) (models.Notification, error) {
 	notification := models.Notification{}
 	err := r.db.NewSelect().Model(&notification).Where("id = ?", id).Scan(ctx)
@@ -98,7 +98,7 @@ func (r *notificationRepository) GetByID(ctx context.Context, id string) (models
 	return notification, nil
 }
 
-// FindByTeamCode finds all notifications for a specific team code
+// FindByTeamCode finds all notifications for a specific team code.
 func (r *notificationRepository) FindByTeamCode(ctx context.Context, teamCode string) ([]models.Notification, error) {
 	var notifications []models.Notification
 	err := r.db.NewSelect().Model(&notifications).Where("team_code = ? AND NOT dismissed", teamCode).Scan(ctx)

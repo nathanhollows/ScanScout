@@ -51,20 +51,20 @@ type teamRepository struct {
 	db *bun.DB
 }
 
-// NewTeamRepository creates a new TeamRepository
+// NewTeamRepository creates a new TeamRepository.
 func NewTeamRepository(db *bun.DB) TeamRepository {
 	return &teamRepository{
 		db: db,
 	}
 }
 
-// Update saves or updates a team in the database
+// Update saves or updates a team in the database.
 func (r *teamRepository) Update(ctx context.Context, t *models.Team) error {
 	_, err := r.db.NewUpdate().Model(t).WherePK().Exec(ctx)
 	return err
 }
 
-// Reset wipes a team's progress for re-use
+// Reset wipes a team's progress for re-use.
 func (r *teamRepository) Reset(ctx context.Context, tx *bun.Tx, instanceID string, teamCodes []string) error {
 	res, err := tx.NewUpdate().Model(&models.Team{}).
 		Set("name = ''").
@@ -121,7 +121,7 @@ func (r *teamRepository) FindAllWithScans(ctx context.Context, instanceID string
 	return teams, nil
 }
 
-// GetByCode returns a team by code
+// GetByCode returns a team by code.
 func (r *teamRepository) GetByCode(ctx context.Context, code string) (*models.Team, error) {
 	code = strings.ToUpper(code)
 	var team models.Team
@@ -138,7 +138,7 @@ func (r *teamRepository) GetByCode(ctx context.Context, code string) (*models.Te
 	return &team, nil
 }
 
-// InsertBatch inserts a batch of teams and returns an error if there's a unique constraint conflict
+// InsertBatch inserts a batch of teams and returns an error if there's a unique constraint conflict.
 func (r *teamRepository) InsertBatch(ctx context.Context, teams []models.Team) error {
 	for teamIndex := range teams {
 		if teams[teamIndex].ID == "" {
@@ -152,7 +152,7 @@ func (r *teamRepository) InsertBatch(ctx context.Context, teams []models.Team) e
 	return err
 }
 
-// isUniqueConstraintError checks if an error is due to a unique constraint violation
+// isUniqueConstraintError checks if an error is due to a unique constraint violation.
 func isUniqueConstraintError(err error) bool {
 	return err != nil && strings.Contains(err.Error(), "unique constraint")
 }

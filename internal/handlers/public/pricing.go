@@ -6,7 +6,7 @@ import (
 	templates "github.com/nathanhollows/Rapua/internal/templates/public"
 )
 
-// NotFound shows the not found page
+// Pricing shows the pricing page.
 func (h *PublicHandler) Pricing(w http.ResponseWriter, r *http.Request) {
 	c := templates.Pricing()
 	err := templates.PublicLayout(c, "Pricing").Render(r.Context(), w)

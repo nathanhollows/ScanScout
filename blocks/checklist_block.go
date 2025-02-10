@@ -35,14 +35,14 @@ func (c ChecklistItem) IsChecked(playerData json.RawMessage) bool {
 	return false
 }
 
-// Unexported struct for storing player progress data in a block
+// Unexported struct for storing player progress data in a block.
 type checklistPlayerData struct {
 	CheckedItems []string `json:"checked_items"`
 }
 
 // Ensure ChecklistBlock implements the Block interface
 
-// Basic Attributes Getters
+// Basic Attributes Getters.
 func (b *ChecklistBlock) GetName() string { return "Checklist" }
 
 func (b *ChecklistBlock) GetDescription() string {
@@ -68,7 +68,7 @@ func (b *ChecklistBlock) GetData() json.RawMessage {
 	return data
 }
 
-// Data Operations
+// Data Operations.
 func (b *ChecklistBlock) ParseData() error {
 	return json.Unmarshal(b.Data, b)
 }
@@ -119,7 +119,7 @@ func (b *ChecklistBlock) UpdateBlockData(input map[string][]string) error {
 	return nil
 }
 
-// Validation and Points Calculation
+// Validation and Points Calculation.
 func (b *ChecklistBlock) RequiresValidation() bool { return true }
 
 func (b *ChecklistBlock) ValidatePlayerInput(state PlayerState, input map[string][]string) (PlayerState, error) {

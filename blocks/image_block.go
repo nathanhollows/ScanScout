@@ -78,7 +78,7 @@ func (b *ImageBlock) parseURL(input map[string][]string) (string, error) {
 	return parsedURL.String(), nil
 }
 
-// Validation and Points Calculation
+// Validation and Points Calculation.
 func (b *ImageBlock) RequiresValidation() bool {
 	return false
 }

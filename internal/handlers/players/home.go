@@ -8,7 +8,7 @@ import (
 	"github.com/nathanhollows/Rapua/models"
 )
 
-// Play shows the player the first page of the game
+// Play shows the player the first page of the game.
 func (h *PlayerHandler) Play(w http.ResponseWriter, r *http.Request) {
 	session, _ := sessions.Get(r, "scanscout")
 	teamCode := session.Values["team"]
@@ -47,7 +47,7 @@ func (h *PlayerHandler) Play(w http.ResponseWriter, r *http.Request) {
 
 }
 
-// PlayPost is the handler for the play form submission
+// PlayPost is the handler for the play form submission.
 func (h *PlayerHandler) PlayPost(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
 	teamCode := r.FormValue("team")

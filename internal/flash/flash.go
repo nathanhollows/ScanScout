@@ -11,7 +11,7 @@ func init() {
 	gob.Register(Message{})
 }
 
-// Message is a struct containing each flashed message
+// Message is a struct containing each flashed message.
 type Message struct {
 	Title   string
 	Message string

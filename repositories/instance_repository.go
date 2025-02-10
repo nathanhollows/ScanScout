@@ -124,7 +124,7 @@ func (r *instanceRepository) Delete(ctx context.Context, tx *bun.Tx, id string) 
 	return nil
 }
 
-// DeleteByUserID removes all instances associated with a user ID
+// DeleteByUserID removes all instances associated with a user ID.
 func (r *instanceRepository) DeleteByUser(ctx context.Context, tx *bun.Tx, userID string) error {
 	instances, err := r.FindByUserID(ctx, userID)
 	if err != nil {
@@ -138,7 +138,7 @@ func (r *instanceRepository) DeleteByUser(ctx context.Context, tx *bun.Tx, userI
 	return nil
 }
 
-// DismissQuickstart marks the user as having dismissed the quickstart
+// DismissQuickstart marks the user as having dismissed the quickstart.
 func (r *instanceRepository) DismissQuickstart(ctx context.Context, instanceID string) error {
 	_, err := r.db.NewUpdate().
 		Model(&models.Instance{}).

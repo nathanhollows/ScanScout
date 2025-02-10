@@ -20,7 +20,7 @@ func NewFacilitatorService(repo repositories.FacilitatorTokenRepo) FacilitatorSe
 	return FacilitatorService{repo: repo}
 }
 
-// Generate a secure random token
+// Generate a secure random token.
 func (s *FacilitatorService) generateToken() string {
 	size := 32
 	b := make([]byte, size)
@@ -31,7 +31,7 @@ func (s *FacilitatorService) generateToken() string {
 	return base64.URLEncoding.WithPadding(base64.NoPadding).EncodeToString(b)
 }
 
-// CreateFacilitatorToken generates and stores a facilitator access token
+// CreateFacilitatorToken generates and stores a facilitator access token.
 func (s *FacilitatorService) CreateFacilitatorToken(ctx context.Context, instanceID string, locations []string, duration time.Duration) (string, error) {
 	token := s.generateToken()
 	expiry := time.Now().Add(duration)
@@ -50,7 +50,7 @@ func (s *FacilitatorService) CreateFacilitatorToken(ctx context.Context, instanc
 	return token, nil
 }
 
-// ValidateToken checks if a token is valid and not expired
+// ValidateToken checks if a token is valid and not expired.
 func (s *FacilitatorService) ValidateToken(ctx context.Context, token string) (*models.FacilitatorToken, error) {
 	facToken, err := s.repo.GetToken(ctx, token)
 	if err != nil {
@@ -65,12 +65,12 @@ func (s *FacilitatorService) ValidateToken(ctx context.Context, token string) (*
 	return facToken, nil
 }
 
-// CleanupExpiredTokens removes all expired facilitator tokens
+// CleanupExpiredTokens removes all expired facilitator tokens.
 func (s *FacilitatorService) CleanupExpiredTokens(ctx context.Context) error {
 	return s.repo.CleanUpExpiredTokens(ctx)
 }
 
-// FormatTokenResponse converts a FacilitatorToken to JSON output format
+// FormatTokenResponse converts a FacilitatorToken to JSON output format.
 func (s *FacilitatorService) FormatTokenResponse(token *models.FacilitatorToken) (string, error) {
 	output, err := json.Marshal(token)
 	if err != nil {

@@ -13,7 +13,7 @@ import (
 	"github.com/yuin/goldmark/text"
 )
 
-// Markdown to AST
+// Markdown to AST.
 func testDocs_MarkdownToAST(t *testing.T, markdown string) ast.Node {
 	t.Helper()
 

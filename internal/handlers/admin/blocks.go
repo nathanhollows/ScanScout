@@ -7,7 +7,7 @@ import (
 	templates "github.com/nathanhollows/Rapua/internal/templates/blocks"
 )
 
-// BlockEdit shows the form to edit a block
+// BlockEdit shows the form to edit a block.
 func (h *AdminHandler) BlockEdit(w http.ResponseWriter, r *http.Request) {
 	user := h.UserFromContext(r.Context())
 	location := chi.URLParam(r, "location")
@@ -36,7 +36,7 @@ func (h *AdminHandler) BlockEdit(w http.ResponseWriter, r *http.Request) {
 
 }
 
-// BlockEditPost updates the block
+// BlockEditPost updates the block.
 func (h *AdminHandler) BlockEditPost(w http.ResponseWriter, r *http.Request) {
 	user := h.UserFromContext(r.Context())
 
@@ -110,7 +110,7 @@ func (h *AdminHandler) BlockNewPost(w http.ResponseWriter, r *http.Request) {
 
 }
 
-// BlockDelete deletes a block
+// BlockDelete deletes a block.
 func (h *AdminHandler) BlockDelete(w http.ResponseWriter, r *http.Request) {
 	user := h.UserFromContext(r.Context())
 
@@ -149,7 +149,7 @@ func (h *AdminHandler) BlockDelete(w http.ResponseWriter, r *http.Request) {
 	h.handleSuccess(w, r, "Block deleted")
 }
 
-// ReorderBlocks reorders the blocks
+// ReorderBlocks reorders the blocks.
 func (h *AdminHandler) ReorderBlocks(w http.ResponseWriter, r *http.Request) {
 	user := h.UserFromContext(r.Context())
 

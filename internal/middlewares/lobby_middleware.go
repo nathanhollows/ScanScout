@@ -11,7 +11,7 @@ import (
 	"github.com/nathanhollows/Rapua/models"
 )
 
-// LobbyMiddleware redirects to the lobby if the game is scheduled to start
+// LobbyMiddleware redirects to the lobby if the game is scheduled to start.
 func LobbyMiddleware(teamService services.TeamService, next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// Extract the session

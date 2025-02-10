@@ -7,7 +7,7 @@ import (
 	templates "github.com/nathanhollows/Rapua/internal/templates/players"
 )
 
-// Lobby is where teams wait for the game to begin
+// Lobby is where teams wait for the game to begin.
 func (h *PlayerHandler) Lobby(w http.ResponseWriter, r *http.Request) {
 	team, err := h.getTeamFromContext(r.Context())
 	if err != nil {
@@ -30,7 +30,7 @@ func (h *PlayerHandler) Lobby(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// SetTeamName sets the team name
+// SetTeamName sets the team name.
 func (h *PlayerHandler) SetTeamName(w http.ResponseWriter, r *http.Request) {
 	team, err := h.getTeamFromContext(r.Context())
 	if err != nil {

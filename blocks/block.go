@@ -89,7 +89,7 @@ func CreateFromBaseBlock(baseBlock BaseBlock) (Block, error) {
 	}
 }
 
-// Example constructor functions
+// Example constructor functions.
 func NewMarkdownBlock(base BaseBlock) *MarkdownBlock {
 	return &MarkdownBlock{
 		BaseBlock: base,

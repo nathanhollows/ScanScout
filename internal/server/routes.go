@@ -42,7 +42,7 @@ func setupRouter(
 	return router
 }
 
-// Setup the player routes
+// Setup the player routes.
 func setupPlayerRoutes(router chi.Router, playerHandler *players.PlayerHandler) {
 	// Home route
 	// Takes a GET request to show the home page

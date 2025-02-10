@@ -60,8 +60,8 @@ func NewAdminHandler(
 	}
 }
 
-// GetUserFromContext retrieves the user from the context
-// User will always be in the context because the middleware
+// GetUserFromContext retrieves the user from the context.
+// User will always be in the context because the middleware.
 func (h AdminHandler) UserFromContext(ctx context.Context) *models.User {
 	return ctx.Value(contextkeys.UserKey).(*models.User)
 }
@@ -81,8 +81,8 @@ func (h *AdminHandler) handleSuccess(w http.ResponseWriter, r *http.Request, fla
 	}
 }
 
-// redirect is a helper function to redirect the user to a new page
-// It accounts for htmx requests and redirects the user to the referer
+// redirect is a helper function to redirect the user to a new page.
+// It accounts for htmx requests and redirects the user to the referer.
 func (h AdminHandler) redirect(w http.ResponseWriter, r *http.Request, path string) {
 	if r.Header.Get("HX-Request") == "true" {
 		w.Header().Set("HX-Redirect", path)

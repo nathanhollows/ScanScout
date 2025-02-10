@@ -49,7 +49,7 @@ func (r *checkInRepository) Update(ctx context.Context, checkIn *models.CheckIn)
 	return err
 }
 
-// LogCheckIn logs a check in for a team at a location
+// LogCheckIn logs a check in for a team at a location.
 func (r *checkInRepository) LogCheckIn(ctx context.Context, team models.Team, location models.Location, mustCheckOut bool, validationRequired bool) (models.CheckIn, error) {
 	scan := &models.CheckIn{
 		TeamID:          team.Code,
@@ -73,7 +73,7 @@ func (r *checkInRepository) LogCheckIn(ctx context.Context, team models.Team, lo
 	return *scan, nil
 }
 
-// LogCheckOut logs a check out for a team at a location
+// LogCheckOut logs a check out for a team at a location.
 func (r *checkInRepository) LogCheckOut(ctx context.Context, team *models.Team, location *models.Location) (models.CheckIn, error) {
 	if team == nil {
 		return models.CheckIn{}, fmt.Errorf("team is required")
@@ -109,7 +109,7 @@ func (r *checkInRepository) LogCheckOut(ctx context.Context, team *models.Team, 
 	return *checkIn, nil
 }
 
-// DeleteByTeamCodes deletes all check-ins for the given teams
+// DeleteByTeamCodes deletes all check-ins for the given teams.
 func (r *checkInRepository) DeleteByTeamCodes(ctx context.Context, tx *bun.Tx, instanceID string, teamCodes []string) error {
 	_, err := tx.NewDelete().
 		Model(&models.CheckIn{}).

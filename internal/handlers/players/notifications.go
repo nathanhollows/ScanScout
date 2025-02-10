@@ -7,7 +7,7 @@ import (
 	"github.com/nathanhollows/Rapua/internal/flash"
 )
 
-// DismissNotificationPost dismisses a message
+// DismissNotificationPost dismisses a message.
 func (h *PlayerHandler) DismissNotificationPost(w http.ResponseWriter, r *http.Request) {
 	notificationID := chi.URLParam(r, "ID")
 	err := h.NotificationService.DismissNotification(r.Context(), notificationID)

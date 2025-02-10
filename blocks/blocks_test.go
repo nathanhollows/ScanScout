@@ -8,7 +8,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-// Test that each registered block can be created from a base block
+// Test that each registered block can be created from a base block.
 func TestCreateFromBaseBlock(t *testing.T) {
 	for _, block := range blocks.GetRegisteredBlocks() {
 		t.Run("creates "+block.GetName()+" from base block", func(t *testing.T) {
@@ -31,7 +31,7 @@ func TestCreateFromBaseBlock(t *testing.T) {
 	}
 }
 
-// Test that an error is returned when trying to create a block with an unknown type
+// Test that an error is returned when trying to create a block with an unknown type.
 func TestCreateFromBaseBlockUnknownType(t *testing.T) {
 	baseBlock := blocks.BaseBlock{
 		ID:         "1",
@@ -47,7 +47,7 @@ func TestCreateFromBaseBlockUnknownType(t *testing.T) {
 	assert.Nil(t, newBlock)
 }
 
-// Ensure that blocks have unique types, names, icons, and descriptions
+// Ensure that blocks have unique types, names, icons, and descriptions.
 func TestBlockUniqueness(t *testing.T) {
 	types := make(map[string]bool)
 	names := make(map[string]bool)

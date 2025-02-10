@@ -12,7 +12,7 @@ import (
 	"github.com/nathanhollows/Rapua/models"
 )
 
-// FacilitatorShowModal renders the modal for creating a facilitator token
+// FacilitatorShowModal renders the modal for creating a facilitator token.
 func (h *AdminHandler) FacilitatorShowModal(w http.ResponseWriter, r *http.Request) {
 	err := templates.FacilitatorLinkModal().Render(r.Context(), w)
 	if err != nil {
@@ -20,7 +20,7 @@ func (h *AdminHandler) FacilitatorShowModal(w http.ResponseWriter, r *http.Reque
 	}
 }
 
-// FacilitatorCreateTokenLink creates a new one-click login link for a facilitators
+// FacilitatorCreateTokenLink creates a new one-click login link for a facilitators.
 func (h *AdminHandler) FacilitatorCreateTokenLink(w http.ResponseWriter, r *http.Request) {
 	user := h.UserFromContext(r.Context())
 
@@ -62,7 +62,7 @@ func (h *AdminHandler) FacilitatorCreateTokenLink(w http.ResponseWriter, r *http
 
 const facilitatorSessionCookie = "rapua_facilitator"
 
-// FacilitatorLogin accepts a token and creates a session cookie
+// FacilitatorLogin accepts a token and creates a session cookie.
 func (h *AdminHandler) FacilitatorLogin(w http.ResponseWriter, r *http.Request) {
 	token := chi.URLParam(r, "token")
 	if token == "" {
@@ -91,7 +91,7 @@ func (h *AdminHandler) FacilitatorLogin(w http.ResponseWriter, r *http.Request) 
 	http.Redirect(w, r, "/facilitator/dashboard", http.StatusSeeOther)
 }
 
-// FacilitatorDashboard renders the facilitator dashboard
+// FacilitatorDashboard renders the facilitator dashboard.
 func (h *AdminHandler) FacilitatorDashboard(w http.ResponseWriter, r *http.Request) {
 	token, err := r.Cookie(facilitatorSessionCookie)
 	if err != nil {

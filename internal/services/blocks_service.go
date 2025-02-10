@@ -59,12 +59,12 @@ func NewBlockService(transactor db.Transactor, blockRepo repositories.BlockRepos
 	}
 }
 
-// GetByBlockID fetches a content block by its ID
+// GetByBlockID fetches a content block by its ID.
 func (s *blockService) GetByBlockID(ctx context.Context, blockID string) (blocks.Block, error) {
 	return s.blockRepo.GetByID(ctx, blockID)
 }
 
-// FindByLocationID fetches all content blocks for a location
+// FindByLocationID fetches all content blocks for a location.
 func (s *blockService) FindByLocationID(ctx context.Context, locationID string) (blocks.Blocks, error) {
 	if locationID == "" {
 		return nil, fmt.Errorf("location must be set")
@@ -100,7 +100,7 @@ func (s *blockService) NewBlock(ctx context.Context, locationID string, blockTyp
 	return newBlock, nil
 }
 
-// NewBlockState creates a new block state
+// NewBlockState creates a new block state.
 func (s *blockService) NewBlockState(ctx context.Context, blockID, teamCode string) (blocks.PlayerState, error) {
 	if blockID == "" {
 		return nil, fmt.Errorf("blockID must be set")
@@ -119,7 +119,7 @@ func (s *blockService) NewBlockState(ctx context.Context, blockID, teamCode stri
 	return state, nil
 }
 
-// NewMockBlockState creates a new mock block state
+// NewMockBlockState creates a new mock block state.
 func (s *blockService) NewMockBlockState(ctx context.Context, blockID, teamCode string) (blocks.PlayerState, error) {
 	if blockID == "" {
 		return nil, fmt.Errorf("blockID must be set")
@@ -132,7 +132,7 @@ func (s *blockService) NewMockBlockState(ctx context.Context, blockID, teamCode 
 	return state, nil
 }
 
-// UpdateBlock updates a block
+// UpdateBlock updates a block.
 func (s *blockService) UpdateBlock(ctx context.Context, block blocks.Block, data map[string][]string) (blocks.Block, error) {
 	err := block.UpdateBlockData(data)
 	if err != nil {
@@ -141,7 +141,7 @@ func (s *blockService) UpdateBlock(ctx context.Context, block blocks.Block, data
 	return s.blockRepo.Update(ctx, block)
 }
 
-// DeleteBlock deletes a block
+// DeleteBlock deletes a block.
 func (s *blockService) DeleteBlock(ctx context.Context, blockID string) error {
 	tx, err := s.transactor.BeginTx(ctx, &sql.TxOptions{})
 	if err != nil {
@@ -169,7 +169,7 @@ func (s *blockService) DeleteBlock(ctx context.Context, blockID string) error {
 	return tx.Commit()
 }
 
-// ReorderBlocks reorders the blocks in a location
+// ReorderBlocks reorders the blocks in a location.
 func (s *blockService) ReorderBlocks(ctx context.Context, locationID string, blockIDs []string) error {
 	return s.blockRepo.Reorder(ctx, locationID, blockIDs)
 }
@@ -200,7 +200,7 @@ func (s *blockService) GetBlockWithStateByBlockIDAndTeamCode(ctx context.Context
 	return s.blockRepo.GetBlockAndStateByBlockIDAndTeamCode(ctx, blockID, teamCode)
 }
 
-// Convert block to model
+// Convert block to model.
 func (s *blockService) ConvertBlockToModel(block blocks.Block) models.Block {
 	return models.Block{
 		ID:                 block.GetID(),
@@ -213,7 +213,7 @@ func (s *blockService) ConvertBlockToModel(block blocks.Block) models.Block {
 	}
 }
 
-// CheckValidationRequiredForLocation checks if any blocks in a location require validation
+// CheckValidationRequiredForLocation checks if any blocks in a location require validation.
 func (s *blockService) CheckValidationRequiredForLocation(ctx context.Context, locationID string) (bool, error) {
 	blocks, err := s.FindByLocationID(ctx, locationID)
 	if err != nil {
@@ -229,7 +229,7 @@ func (s *blockService) CheckValidationRequiredForLocation(ctx context.Context, l
 	return false, nil
 }
 
-// CheckValidationRequiredForCheckIn checks if any blocks still require validation for a check in
+// CheckValidationRequiredForCheckIn checks if any blocks still require validation for a check in.
 func (s *blockService) CheckValidationRequiredForCheckIn(ctx context.Context, locationID, teamCode string) (bool, error) {
 	blocks, state, err := s.FindByLocationIDAndTeamCodeWithState(ctx, locationID, teamCode)
 	if err != nil {
@@ -251,7 +251,7 @@ func (s *blockService) CheckValidationRequiredForCheckIn(ctx context.Context, lo
 	return false, nil
 }
 
-// UpdateState updates the player state for a block
+// UpdateState updates the player state for a block.
 func (s *blockService) UpdateState(ctx context.Context, state blocks.PlayerState) (blocks.PlayerState, error) {
 	return s.blockStateRepo.Update(ctx, state)
 }

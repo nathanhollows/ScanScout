@@ -9,7 +9,7 @@ import (
 	templates "github.com/nathanhollows/Rapua/internal/templates/admin"
 )
 
-// StartGame starts the game immediately
+// StartGame starts the game immediately.
 func (h *AdminHandler) StartGame(w http.ResponseWriter, r *http.Request) {
 	user := h.UserFromContext(r.Context())
 
@@ -26,7 +26,7 @@ func (h *AdminHandler) StartGame(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// StopGame stops the game immediately
+// StopGame stops the game immediately.
 func (h *AdminHandler) StopGame(w http.ResponseWriter, r *http.Request) {
 	user := h.UserFromContext(r.Context())
 
@@ -43,7 +43,7 @@ func (h *AdminHandler) StopGame(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// ScheduleGame schedules the game to start and/or end at a specific time
+// ScheduleGame schedules the game to start and/or end at a specific time.
 func (h *AdminHandler) ScheduleGame(w http.ResponseWriter, r *http.Request) {
 	user := h.UserFromContext(r.Context())
 

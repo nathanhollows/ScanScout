@@ -6,7 +6,7 @@ import (
 	templates "github.com/nathanhollows/Rapua/internal/templates/public"
 )
 
-// NotFound shows the not found page
+// NotFound shows the not found page.
 func (h *PublicHandler) NotFound(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/html")
 

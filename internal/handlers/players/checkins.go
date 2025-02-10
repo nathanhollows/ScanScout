@@ -12,7 +12,7 @@ import (
 	"github.com/nathanhollows/Rapua/models"
 )
 
-// CheckIn handles the GET request for scanning a location
+// CheckIn handles the GET request for scanning a location.
 func (h *PlayerHandler) CheckIn(w http.ResponseWriter, r *http.Request) {
 	code := chi.URLParam(r, "code")
 	code = strings.ToUpper(code)
@@ -50,7 +50,7 @@ func (h *PlayerHandler) CheckIn(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// CheckInPost handles the POST request for scanning in
+// CheckInPost handles the POST request for scanning in.
 func (h *PlayerHandler) CheckInPost(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
 	locationCode := chi.URLParam(r, "code")
@@ -184,7 +184,7 @@ func (h *PlayerHandler) CheckOutPost(w http.ResponseWriter, r *http.Request) {
 	h.redirect(w, r, "/next")
 }
 
-// MyCheckins shows the found locations page
+// MyCheckins shows the found locations page.
 func (h *PlayerHandler) MyCheckins(w http.ResponseWriter, r *http.Request) {
 	team, err := h.getTeamFromContext(r.Context())
 	if err != nil || team == nil {
@@ -207,7 +207,7 @@ func (h *PlayerHandler) MyCheckins(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// CheckInView shows the page for a specific location
+// CheckInView shows the page for a specific location.
 func (h *PlayerHandler) CheckInView(w http.ResponseWriter, r *http.Request) {
 	locationCode := chi.URLParam(r, "id")
 

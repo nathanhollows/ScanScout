@@ -29,14 +29,14 @@ type clueRepository struct {
 	db *bun.DB
 }
 
-// NewClueRepository creates a new ClueRepository
+// NewClueRepository creates a new ClueRepository.
 func NewClueRepository(db *bun.DB) ClueRepository {
 	return &clueRepository{
 		db: db,
 	}
 }
 
-// Save saves or updates a clue in the database
+// Save saves or updates a clue in the database.
 func (r *clueRepository) Save(ctx context.Context, c *models.Clue) error {
 	if c.InstanceID == "" || c.LocationID == "" {
 		return fmt.Errorf("instance ID and location ID must be set")
@@ -53,7 +53,7 @@ func (r *clueRepository) Save(ctx context.Context, c *models.Clue) error {
 	return err
 }
 
-// FindCluesByLocation returns all clues for a given location
+// FindCluesByLocation returns all clues for a given location.
 func (r *clueRepository) FindCluesByLocation(ctx context.Context, locationID string) ([]models.Clue, error) {
 	clues := []models.Clue{}
 	err := r.db.
@@ -67,7 +67,7 @@ func (r *clueRepository) FindCluesByLocation(ctx context.Context, locationID str
 	return clues, nil
 }
 
-// Delete removes the clue from the database
+// Delete removes the clue from the database.
 func (r *clueRepository) Delete(ctx context.Context, clueID string) error {
 	_, err := r.db.
 		NewDelete().
@@ -78,7 +78,7 @@ func (r *clueRepository) Delete(ctx context.Context, clueID string) error {
 	return err
 }
 
-// DeleteByLocationID removes all clues for a location
+// DeleteByLocationID removes all clues for a location.
 func (r *clueRepository) DeleteByLocationID(ctx context.Context, locationID string) error {
 	_, err := r.db.
 		NewDelete().
@@ -89,7 +89,7 @@ func (r *clueRepository) DeleteByLocationID(ctx context.Context, locationID stri
 	return err
 }
 
-// DeleteByLocationIDWithTransaction removes all clues for a location with a transaction
+// DeleteByLocationIDWithTransaction removes all clues for a location with a transaction.
 func (r *clueRepository) DeleteByLocationIDWithTransaction(ctx context.Context, tx *bun.Tx, locationID string) error {
 	_, err := tx.
 		NewDelete().

@@ -45,7 +45,7 @@ func (h *AdminHandler) ExperiencePost(w http.ResponseWriter, r *http.Request) {
 	h.handleSuccess(w, r, "Settings updated")
 }
 
-// Show a player preview for navigation
+// Show a player preview for navigation.
 func (h *AdminHandler) ExperiencePreview(w http.ResponseWriter, r *http.Request) {
 	user := h.UserFromContext(r.Context())
 

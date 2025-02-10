@@ -8,7 +8,7 @@ import (
 	templates "github.com/nathanhollows/Rapua/internal/templates/blocks"
 )
 
-// ValidateBlock runs input validation on the block
+// ValidateBlock runs input validation on the block.
 func (h *PlayerHandler) ValidateBlock(w http.ResponseWriter, r *http.Request) {
 	session, _ := sessions.Get(r, "scanscout")
 	teamCode := session.Values["team"]

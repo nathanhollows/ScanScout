@@ -27,7 +27,7 @@ type gameManagerService struct {
 	instanceService      InstanceService
 }
 
-// TODO: Split this service into smaller services
+// TODO: Split this service into smaller services.
 type GameManagerService interface {
 	// Game Control
 	StartGame(ctx context.Context, user *models.User) (response ServiceResponse)
@@ -213,7 +213,7 @@ func (s *gameManagerService) ValidateLocationID(user *models.User, id string) bo
 	return false
 }
 
-// UpdateSettings parses the form values and updates the instance settings
+// UpdateSettings parses the form values and updates the instance settings.
 func (s *gameManagerService) UpdateSettings(ctx context.Context, settings *models.InstanceSettings, form url.Values) error {
 	// Navigation mode
 	navMode, err := models.ParseNavigationMode(form.Get("navigationMode"))
@@ -266,17 +266,17 @@ func (s *gameManagerService) UpdateSettings(ctx context.Context, settings *model
 	return nil
 }
 
-// StartGame starts the game immediately
+// StartGame starts the game immediately.
 func (s *gameManagerService) StartGame(ctx context.Context, user *models.User) (response ServiceResponse) {
 	return s.SetStartTime(ctx, user, time.Now())
 }
 
-// StopGame stops the game immediately
+// StopGame stops the game immediately.
 func (s *gameManagerService) StopGame(ctx context.Context, user *models.User) (response ServiceResponse) {
 	return s.SetEndTime(ctx, user, time.Now())
 }
 
-// SetStartTime sets the game start time to the given time
+// SetStartTime sets the game start time to the given time.
 func (s *gameManagerService) SetStartTime(ctx context.Context, user *models.User, time time.Time) (response ServiceResponse) {
 	response = ServiceResponse{}
 
@@ -304,7 +304,7 @@ func (s *gameManagerService) SetStartTime(ctx context.Context, user *models.User
 	return response
 }
 
-// SetEndTime sets the game end time to the given time
+// SetEndTime sets the game end time to the given time.
 func (s *gameManagerService) SetEndTime(ctx context.Context, user *models.User, time time.Time) (response ServiceResponse) {
 	response = ServiceResponse{}
 
@@ -335,8 +335,7 @@ func (s *gameManagerService) SetEndTime(ctx context.Context, user *models.User, 
 	return response
 }
 
-// ScheduleGame schedules the game to start and/or end at a specific time
-// Expects a form with set_start, utc_start_date, utc_start_time, set_end, utc_end_date, and utc_end_time
+// Expects a form with set_start, utc_start_date, utc_start_time, set_end, utc_end_date, and utc_end_time.
 func (s *gameManagerService) ScheduleGame(ctx context.Context, user *models.User, start time.Time, end time.Time) (response ServiceResponse) {
 	response = ServiceResponse{}
 
@@ -363,7 +362,7 @@ func (s *gameManagerService) ScheduleGame(ctx context.Context, user *models.User
 	return response
 }
 
-// DismissQuickstart marks the user as having dismissed the quickstart
+// DismissQuickstart marks the user as having dismissed the quickstart.
 func (s *gameManagerService) DismissQuickstart(ctx context.Context, instanceID string) error {
 	return s.instanceRepo.DismissQuickstart(ctx, instanceID)
 }

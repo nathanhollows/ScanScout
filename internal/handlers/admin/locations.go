@@ -12,7 +12,7 @@ import (
 	"github.com/nathanhollows/Rapua/models"
 )
 
-// Locations shows admin the locations
+// Locations shows admin the locations.
 func (h *AdminHandler) Locations(w http.ResponseWriter, r *http.Request) {
 	user := h.UserFromContext(r.Context())
 
@@ -33,7 +33,7 @@ func (h *AdminHandler) Locations(w http.ResponseWriter, r *http.Request) {
 
 }
 
-// LocationNew shows the form to create a new location
+// LocationNew shows the form to create a new location.
 func (h *AdminHandler) LocationNew(w http.ResponseWriter, r *http.Request) {
 	user := h.UserFromContext(r.Context())
 
@@ -56,7 +56,7 @@ func (h *AdminHandler) LocationNew(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// LocationNewPost handles creating a new location
+// LocationNewPost handles creating a new location.
 func (h *AdminHandler) LocationNewPost(w http.ResponseWriter, r *http.Request) {
 	user := h.UserFromContext(r.Context())
 
@@ -80,9 +80,9 @@ func (h *AdminHandler) LocationNewPost(w http.ResponseWriter, r *http.Request) {
 	h.redirect(w, r, "/admin/locations/"+location.MarkerID)
 }
 
-// ReorderLocations handles reordering locations
-// Returns a 200 status code if successful
-// Otherwise, returns a 500 status code
+// ReorderLocations handles reordering locations.
+// Returns a 200 status code if successful,
+// Otherwise, returns a 500 status code.
 func (h *AdminHandler) ReorderLocations(w http.ResponseWriter, r *http.Request) {
 	// Check HTMX headers
 	if r.Header.Get("HX-Request") != "true" {
@@ -108,7 +108,7 @@ func (h *AdminHandler) ReorderLocations(w http.ResponseWriter, r *http.Request) 
 	h.handleSuccess(w, r, "Order updated")
 }
 
-// LocationEdit shows the form to edit a location
+// LocationEdit shows the form to edit a location.
 func (h *AdminHandler) LocationEdit(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
 
@@ -143,7 +143,7 @@ func (h *AdminHandler) LocationEdit(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// LocationEditPost handles updating a location
+// LocationEditPost handles updating a location.
 func (h *AdminHandler) LocationEditPost(w http.ResponseWriter, r *http.Request) {
 	if err := r.ParseForm(); err != nil {
 		h.handleError(w, r, "LocationEditPost: parsing form", "Error parsing form", "error", err)
@@ -232,7 +232,7 @@ func (h *AdminHandler) LocationEditPost(w http.ResponseWriter, r *http.Request) 
 	h.handleSuccess(w, r, "Location updated")
 }
 
-// LocationDelete handles deleting a location
+// LocationDelete handles deleting a location.
 func (h *AdminHandler) LocationDelete(w http.ResponseWriter, r *http.Request) {
 	locationCode := chi.URLParam(r, "id")
 
@@ -257,7 +257,7 @@ func (h *AdminHandler) LocationDelete(w http.ResponseWriter, r *http.Request) {
 	h.redirect(w, r, "/admin/locations")
 }
 
-// LocationPreview shows a player preview of the given location
+// LocationPreview shows a player preview of the given location.
 func (h *AdminHandler) LocationPreview(w http.ResponseWriter, r *http.Request) {
 	user := h.UserFromContext(r.Context())
 	locationCode := chi.URLParam(r, "id")

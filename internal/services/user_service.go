@@ -12,7 +12,7 @@ import (
 	"github.com/nathanhollows/Rapua/security"
 )
 
-// ErrPasswordsDoNotMatch is returned when the passwords do not match
+// ErrPasswordsDoNotMatch is returned when the passwords do not match.
 var (
 	ErrPasswordsDoNotMatch = errors.New("passwords do not match")
 )
@@ -45,7 +45,7 @@ func NewUserService(transactor db.Transactor, userRepository repositories.UserRe
 	}
 }
 
-// CreateUser creates a new user in the database
+// CreateUser creates a new user in the database.
 func (s *userService) CreateUser(ctx context.Context, user *models.User, passwordConfirm string) error {
 	// Confirm passwords match
 	if user.Password != passwordConfirm {
@@ -65,17 +65,17 @@ func (s *userService) CreateUser(ctx context.Context, user *models.User, passwor
 	return s.userRepository.Create(ctx, user)
 }
 
-// UpdateUser updates a user in the database
+// UpdateUser updates a user in the database.
 func (s *userService) UpdateUser(ctx context.Context, user *models.User) error {
 	return s.userRepository.Update(ctx, user)
 }
 
-// GetUserByEmail retrieves a user by their email address
+// GetUserByEmail retrieves a user by their email address.
 func (s *userService) GetUserByEmail(ctx context.Context, email string) (*models.User, error) {
 	return s.userRepository.GetByEmail(ctx, email)
 }
 
-// DeleteUser deletes a user from the database
+// DeleteUser deletes a user from the database.
 func (s *userService) DeleteUser(ctx context.Context, userID string) error {
 	tx, err := s.transactor.BeginTx(ctx, &sql.TxOptions{})
 	if err != nil {

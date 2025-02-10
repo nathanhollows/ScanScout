@@ -32,8 +32,8 @@ func NewNavigationService() NavigationService {
 	return &navigationService{}
 }
 
-// CheckValidLocation checks if the location code is valid for the team to check in to
-// This function returns an error if the location code is invalid
+// CheckValidLocation checks if the location code is valid for the team to
+// check in to. This function returns an error if the location code is invalid.
 func (s *navigationService) CheckValidLocation(ctx context.Context, team *models.Team, settings *models.InstanceSettings, markerID string) (bool, error) {
 	// Find valid locations
 	locations, err := s.DetermineNextLocations(ctx, team)
@@ -51,6 +51,7 @@ func (s *navigationService) CheckValidLocation(ctx context.Context, team *models
 	return false, fmt.Errorf("code %s is not a valid next location", markerID)
 }
 
+// DetermineNextLocations returns the next locations for the team to visit.
 func (s *navigationService) DetermineNextLocations(ctx context.Context, team *models.Team) ([]models.Location, error) {
 	// Check if the team has visited all locations
 	if len(team.CheckIns) == len(team.Instance.Locations) {
@@ -74,7 +75,7 @@ func (s *navigationService) DetermineNextLocations(ctx context.Context, team *mo
 	return nil, errors.New("invalid navigation mode")
 }
 
-// getUnvisitedLocations returns a list of locations that the team has not visited
+// getUnvisitedLocations returns a list of locations that the team has not visited.
 func (s *navigationService) getUnvisitedLocations(_ context.Context, team *models.Team) []models.Location {
 	unvisited := []models.Location{}
 
@@ -96,8 +97,8 @@ func (s *navigationService) getUnvisitedLocations(_ context.Context, team *model
 	return unvisited
 }
 
-// getOrderedLocations returns locations in the order defined by the admin
-// This function returns the next location for the team to visit
+// getOrderedLocations returns locations in the order defined by the admin. This
+// function returns the next location for the team to visit.
 func (s *navigationService) getOrderedLocations(ctx context.Context, team *models.Team) ([]models.Location, error) {
 	unvisited := s.getUnvisitedLocations(ctx, team)
 	if len(unvisited) == 0 {
@@ -116,12 +117,13 @@ func (s *navigationService) getOrderedLocations(ctx context.Context, team *model
 	return unvisited[:1], nil
 }
 
-// getRandomLocations returns random locations for the team to visit
-// This function uses the team code as a seed for the random number generator
+// getRandomLocations returns random locations for the team to visit.
+// This function uses the team code as a seed for the random number generator.
 // Process:
-// 1. Shuffle the list of all locations deterministically based on team code
-// 2. Select the first n unvisited locations from the shuffled list
-// 3. Return these locations ensuring the order is consistent across refreshes
+// 1. Shuffle the list of all locations deterministically based on team code,
+// 2. Select the first n unvisited locations from the shuffled list,
+// 3. Return these locations ensuring the order is consistent across refreshes,
+// 3. Return these locations ensuring the order is consistent across refreshes.
 func (s *navigationService) getRandomLocations(ctx context.Context, team *models.Team) ([]models.Location, error) {
 	allLocations := team.Instance.Locations
 	if len(allLocations) == 0 {
@@ -167,8 +169,8 @@ func (s *navigationService) getRandomLocations(ctx context.Context, team *models
 	return selectedLocations, nil
 }
 
-// getFreeRoamLocations returns a list of locations for free roam mode
-// This function returns all locations in the instance for the team to visit
+// getFreeRoamLocations returns a list of locations for free roam mode. This
+// function returns all locations in the instance for the team to visit.
 func (s *navigationService) getFreeRoamLocations(ctx context.Context, team *models.Team) ([]models.Location, error) {
 	unvisited := s.getUnvisitedLocations(ctx, team)
 
@@ -179,7 +181,7 @@ func (s *navigationService) getFreeRoamLocations(ctx context.Context, team *mode
 	return unvisited, nil
 }
 
-// HasVisited returns true if the team has visited the location
+// HasVisited returns true if the team has visited the location.
 func (s *navigationService) HasVisited(checkins []models.CheckIn, locationID string) bool {
 	for _, checkin := range checkins {
 		if checkin.LocationID == locationID {

@@ -88,13 +88,13 @@ func (s *authService) GetAuthenticatedUser(r *http.Request) (*models.User, error
 	return user, nil
 }
 
-// Check if the system allows google login (env var set)
+// Check if the system allows google login (env var set).
 func (s *authService) AllowGoogleLogin() bool {
 	provider, err := goth.GetProvider("google")
 	return err == nil && provider != nil
 }
 
-// OAuthLogin handles User Login via OAuth
+// OAuthLogin handles User Login via OAuth.
 func (s *authService) OAuthLogin(ctx context.Context, provider string, oauthUser goth.User) (*models.User, error) {
 	existingUser, err := s.userRepository.GetByEmail(ctx, oauthUser.Email)
 	if err != nil {
@@ -109,7 +109,7 @@ func (s *authService) OAuthLogin(ctx context.Context, provider string, oauthUser
 	return existingUser, nil
 }
 
-// CheckUserRegisteredWithOAuth looks for user already registered with OAuth
+// CheckUserRegisteredWithOAuth looks for user already registered with OAuth.
 func (s *authService) CheckUserRegisteredWithOAuth(ctx context.Context, provider, email string) (*models.User, error) {
 	user, err := s.userRepository.GetByEmailAndProvider(ctx, email, provider)
 	if err != nil {
@@ -119,7 +119,7 @@ func (s *authService) CheckUserRegisteredWithOAuth(ctx context.Context, provider
 	return user, nil
 }
 
-// CreateUserWithOAuth creates a new user if logging in with OAuth for the first time
+// CreateUserWithOAuth creates a new user if logging in with OAuth for the first time.
 func (s *authService) CreateUserWithOAuth(ctx context.Context, user goth.User) (*models.User, error) {
 	uuid := uuid.New()
 	newUser := models.User{
@@ -138,7 +138,7 @@ func (s *authService) CreateUserWithOAuth(ctx context.Context, user goth.User) (
 	return &newUser, nil
 }
 
-// CompleteUserAuth completes the user authentication process
+// CompleteUserAuth completes the user authentication process.
 func (s *authService) CompleteUserAuth(w http.ResponseWriter, r *http.Request) (*models.User, error) {
 	gothUser, err := gothic.CompleteUserAuth(w, r)
 	if err != nil {
@@ -153,7 +153,7 @@ func (s *authService) CompleteUserAuth(w http.ResponseWriter, r *http.Request) (
 	return user, nil
 }
 
-// VerifyEmail verifies the user's email address
+// VerifyEmail verifies the user's email address.
 func (s *authService) VerifyEmail(ctx context.Context, token string) error {
 	user, err := s.userRepository.GetByEmailToken(ctx, token)
 	if err != nil {
@@ -180,7 +180,7 @@ func (s *authService) VerifyEmail(ctx context.Context, token string) error {
 	return nil
 }
 
-// SendVerificationEmail sends a verification email to the user
+// SendVerificationEmail sends a verification email to the user.
 func (s *authService) SendEmailVerification(ctx context.Context, user *models.User) error {
 	// If the user is already verified, return an error
 	if user.EmailVerified {

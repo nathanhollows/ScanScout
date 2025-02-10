@@ -15,7 +15,7 @@ import (
 	"github.com/nathanhollows/Rapua/models"
 )
 
-// LoginHandler is the handler for the admin login page
+// LoginHandler is the handler for the admin login page.
 func (h *PublicHandler) Login(w http.ResponseWriter, r *http.Request) {
 	user, err := h.AuthService.GetAuthenticatedUser(r)
 	if err == nil || user != nil {
@@ -32,7 +32,7 @@ func (h *PublicHandler) Login(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// LoginPost handles the login form submission
+// LoginPost handles the login form submission.
 func (h *PublicHandler) LoginPost(w http.ResponseWriter, r *http.Request) {
 	err := r.ParseForm()
 	if err != nil {
@@ -71,7 +71,7 @@ func (h *PublicHandler) LoginPost(w http.ResponseWriter, r *http.Request) {
 	w.Header().Add("hx-redirect", "/admin")
 }
 
-// Logout destroys the user session
+// Logout destroys the user session.
 func (h *PublicHandler) Logout(w http.ResponseWriter, r *http.Request) {
 	session, err := sessions.Get(r, "admin")
 	if err != nil {
@@ -86,7 +86,7 @@ func (h *PublicHandler) Logout(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, helpers.URL("/login"), http.StatusSeeOther)
 }
 
-// RegisterHandler is the handler for the admin register page
+// RegisterHandler is the handler for the admin register page.
 func (h *PublicHandler) Register(w http.ResponseWriter, r *http.Request) {
 	user, err := h.AuthService.GetAuthenticatedUser(r)
 	if err == nil || user != nil {
@@ -103,7 +103,7 @@ func (h *PublicHandler) Register(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// RegisterPostHandler handles the form submission for creating a new user
+// RegisterPostHandler handles the form submission for creating a new user.
 func (h *PublicHandler) RegisterPost(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
 	var user models.User
@@ -160,7 +160,7 @@ func (h *PublicHandler) RegisterPost(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// ForgotPasswordHandler is the handler for the forgot password page
+// ForgotPasswordHandler is the handler for the forgot password page.
 func (h *PublicHandler) ForgotPassword(w http.ResponseWriter, r *http.Request) {
 	user, err := h.AuthService.GetAuthenticatedUser(r)
 	if err == nil || user != nil {
@@ -177,7 +177,7 @@ func (h *PublicHandler) ForgotPassword(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// ForgotPasswordPostHandler handles the form submission for the forgot password page
+// ForgotPasswordPostHandler handles the form submission for the forgot password page.
 func (h *PublicHandler) ForgotPasswordPost(w http.ResponseWriter, r *http.Request) {
 	// TODO: Implement
 
@@ -190,7 +190,7 @@ func (h *PublicHandler) ForgotPasswordPost(w http.ResponseWriter, r *http.Reques
 	}
 }
 
-// Auth redirects the user to the Google OAuth page
+// Auth redirects the user to the Google OAuth page.
 func (h *PublicHandler) Auth(w http.ResponseWriter, r *http.Request) {
 	// Include the provider to the query string
 	// since Chi doesn't do this automatically
@@ -207,7 +207,7 @@ func (h *PublicHandler) Auth(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// AuthCallback handles the callback from Google OAuth
+// AuthCallback handles the callback from Google OAuth.
 func (h *PublicHandler) AuthCallback(w http.ResponseWriter, r *http.Request) {
 	// Include the provider to the query string
 	// since Chi doesn't do this automatically
@@ -257,7 +257,7 @@ func (h *PublicHandler) AuthCallback(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// VerifyEmail shows the user the verify email page, the first step in the email verification process
+// VerifyEmail shows the user the verify email page, the first step in the email verification process.
 func (h *PublicHandler) VerifyEmail(w http.ResponseWriter, r *http.Request) {
 	// If the user is authenticated without error, we will redirect them to the admin page
 	user, err := h.AuthService.GetAuthenticatedUser(r)
@@ -274,7 +274,7 @@ func (h *PublicHandler) VerifyEmail(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// VerifyEmailWithToken verifies the user's email address and redirects upon error or success
+// VerifyEmailWithToken verifies the user's email address and redirects upon error or success.
 func (h *PublicHandler) VerifyEmailWithToken(w http.ResponseWriter, r *http.Request) {
 	// If the user is authenticated without error, we will redirect them to the admin page
 	user, err := h.AuthService.GetAuthenticatedUser(r)
@@ -309,7 +309,7 @@ func (h *PublicHandler) VerifyEmailWithToken(w http.ResponseWriter, r *http.Requ
 	}
 }
 
-// VerifyEmailStatus checks the status of the email verification and redirects accordingly
+// VerifyEmailStatus checks the status of the email verification and redirects accordingly.
 func (h *PublicHandler) VerifyEmailStatus(w http.ResponseWriter, r *http.Request) {
 	user, err := h.AuthService.GetAuthenticatedUser(r)
 	if err != nil || user == nil {
@@ -326,7 +326,7 @@ func (h *PublicHandler) VerifyEmailStatus(w http.ResponseWriter, r *http.Request
 	w.WriteHeader(http.StatusUnauthorized)
 }
 
-// ResendEmailVerification resends the email verification email
+// ResendEmailVerification resends the email verification email.
 func (h *PublicHandler) ResendEmailVerification(w http.ResponseWriter, r *http.Request) {
 	user, err := h.AuthService.GetAuthenticatedUser(r)
 	if err != nil || user == nil {
