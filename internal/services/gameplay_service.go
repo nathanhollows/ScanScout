@@ -4,14 +4,12 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"hash/fnv"
 	"strings"
 
 	"github.com/nathanhollows/Rapua/blocks"
 	"github.com/nathanhollows/Rapua/internal/flash"
 	"github.com/nathanhollows/Rapua/models"
 	"github.com/nathanhollows/Rapua/repositories"
-	"golang.org/x/exp/rand"
 )
 
 // Define errors
@@ -287,45 +285,6 @@ func (s *gameplayService) CheckValidLocation(ctx context.Context, team *models.T
 	}
 
 	return valid, nil
-}
-
-// loadClues loads the clues for the current location
-// By default, it will only show one clue per location
-func (s *gameplayService) loadClues(ctx context.Context, team *models.Team, locations []models.Location) (response ServiceResponse) {
-	response = ServiceResponse{}
-	response.Data = make(map[string]interface{})
-
-	err := s.LocationService.LoadCluesForLocations(ctx, &locations)
-	if err != nil {
-		response.Error = fmt.Errorf("loading clues for locations: %w", err)
-		return response
-	}
-
-	// Create a seed for the random clue
-	seed := team.Code
-	h := fnv.New64a()
-	_, err = h.Write([]byte(seed))
-	if err != nil {
-		response.Error = fmt.Errorf("creating seed for random clue: %w", err)
-		return response
-	}
-	r := rand.New(rand.NewSource(uint64(h.Sum64())))
-
-	// Randomly select a clue for each location
-	// If the location has no clues, it will be skipped
-	for i, location := range locations {
-		if len(location.Clues) == 0 {
-			continue
-		} else if len(location.Clues) == 1 {
-			continue
-		}
-
-		n := r.Intn(len(location.Clues))
-		(locations)[i].Clues = location.Clues[n : n+1]
-	}
-
-	response.Data["nextLocations"] = locations
-	return response
 }
 
 func (s *gameplayService) ValidateAndUpdateBlockState(ctx context.Context, team models.Team, data map[string][]string) (blocks.PlayerState, blocks.Block, error) {

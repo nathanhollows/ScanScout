@@ -24,14 +24,6 @@ func setupUserService(t *testing.T) (services.UserService, func()) {
 	return userService, cleanup
 }
 
-func setupNotificationRepo(t *testing.T) (repositories.NotificationRepository, func()) {
-	t.Helper()
-	db, cleanup := setupDB(t)
-
-	notificationRepo := repositories.NewNotificationRepository(db)
-	return notificationRepo, cleanup
-}
-
 func TestCreateUser(t *testing.T) {
 	service, cleanup := setupUserService(t)
 	defer cleanup()

@@ -213,38 +213,6 @@ func (s *blockService) ConvertBlockToModel(block blocks.Block) models.Block {
 	}
 }
 
-func (s *blockService) convertModelsToBlocks(cbs []models.Block) (blocks.Blocks, error) {
-	b := make(blocks.Blocks, len(cbs))
-	for i, cb := range cbs {
-		block, err := s.convertModelToBlock(&cb)
-		if err != nil {
-			return nil, err
-		}
-		b[i] = block
-	}
-	return b, nil
-}
-
-func (s *blockService) convertModelToBlock(m *models.Block) (blocks.Block, error) {
-	// Convert model to block
-	newBlock, err := blocks.CreateFromBaseBlock(blocks.BaseBlock{
-		ID:         m.ID,
-		LocationID: m.LocationID,
-		Type:       m.Type,
-		Data:       m.Data,
-		Order:      m.Ordering,
-		Points:     m.Points,
-	})
-	if err != nil {
-		return nil, err
-	}
-	err = newBlock.ParseData()
-	if err != nil {
-		return nil, err
-	}
-	return newBlock, nil
-}
-
 // CheckValidationRequiredForLocation checks if any blocks in a location require validation
 func (s *blockService) CheckValidationRequiredForLocation(ctx context.Context, locationID string) (bool, error) {
 	blocks, err := s.FindByLocationID(ctx, locationID)

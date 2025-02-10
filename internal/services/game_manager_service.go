@@ -195,14 +195,6 @@ func (s *gameManagerService) CreateLocation(
 	)
 }
 
-func (s *gameManagerService) isMarkerShared(ctx context.Context, markerID, instanceID string) (bool, error) {
-	shared, err := s.markerRepo.IsShared(ctx, markerID)
-	if err != nil {
-		return false, fmt.Errorf("checking if marker is shared: %w", err)
-	}
-	return shared, nil
-}
-
 func (s *gameManagerService) ValidateLocationMarker(user *models.User, id string) bool {
 	for _, loc := range user.CurrentInstance.Locations {
 		if loc.MarkerID == id {

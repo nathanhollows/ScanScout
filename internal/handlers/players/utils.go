@@ -108,10 +108,3 @@ func (h *PlayerHandler) handleError(w http.ResponseWriter, r *http.Request, logM
 		h.Logger.Error(logMsg+" - rendering template", "error", err)
 	}
 }
-
-func (h *PlayerHandler) handleSuccess(w http.ResponseWriter, r *http.Request, flashMsg string) {
-	err := templates.Toast(*flash.NewSuccess(flashMsg)).Render(r.Context(), w)
-	if err != nil {
-		h.Logger.Error("rendering success template", "error", err)
-	}
-}
