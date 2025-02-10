@@ -29,7 +29,13 @@ func TestFullMigration(t *testing.T) {
 	if err := migrator.Lock(ctx); err != nil {
 		assert.NoError(t, err)
 	}
-	defer migrator.Unlock(ctx)
+
+	defer func() {
+		if err := migrator.Unlock(ctx); err != nil {
+			assert.NoError(t, err)
+		}
+		db.Close()
+	}()
 
 	// Migrate up
 	_, err := migrator.Migrate(ctx)
@@ -43,5 +49,4 @@ func TestFullMigration(t *testing.T) {
 		assert.NoError(t, err)
 	}
 
-	db.Close()
 }

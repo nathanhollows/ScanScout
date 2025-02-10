@@ -26,7 +26,12 @@ func setupDB(t *testing.T) (*bun.DB, func()) {
 	if err := migrator.Lock(ctx); err != nil {
 		t.Fatal(err)
 	}
-	defer migrator.Unlock(ctx)
+
+	defer func() {
+		if err := migrator.Unlock(ctx); err != nil {
+			t.Fatal(err)
+		}
+	}()
 
 	_, err := migrator.Migrate(ctx)
 	if err != nil {

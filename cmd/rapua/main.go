@@ -4,6 +4,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"log/slog"
 	"os"
 	"strings"
@@ -76,7 +77,12 @@ func newDBCommand(migrator *migrate.Migrator) *cli.Command {
 					if err := migrator.Lock(c.Context); err != nil {
 						return err
 					}
-					defer migrator.Unlock(c.Context)
+
+					defer func() {
+						if err := migrator.Unlock(c.Context); err != nil {
+							log.Printf("could not unlock: %v", err)
+						}
+					}()
 
 					group, err := migrator.Migrate(c.Context)
 					if err != nil {
@@ -97,7 +103,12 @@ func newDBCommand(migrator *migrate.Migrator) *cli.Command {
 					if err := migrator.Lock(c.Context); err != nil {
 						return err
 					}
-					defer migrator.Unlock(c.Context)
+
+					defer func() {
+						if err := migrator.Unlock(c.Context); err != nil {
+							log.Printf("could not unlock: %v", err)
+						}
+					}()
 
 					group, err := migrator.Rollback(c.Context)
 					if err != nil {
