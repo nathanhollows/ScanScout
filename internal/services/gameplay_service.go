@@ -146,7 +146,7 @@ func (s *gameplayService) SuggestNextLocations(ctx context.Context, team *models
 		return nil, fmt.Errorf("determining next locations: %w", err)
 	}
 
-	for i, _ := range locations {
+	for i := range locations {
 		err := s.LocationService.LoadRelations(ctx, &locations[i])
 		if err != nil {
 			return nil, fmt.Errorf("loading relations for location: %w", err)

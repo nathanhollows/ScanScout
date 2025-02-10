@@ -86,7 +86,7 @@ func TestBlockRepository(t *testing.T) {
 					return nil, err
 				}
 				createdBlock, _ := repo.Create(context.Background(), block, gofakeit.UUID())
-				return createdBlock.(blocks.Block), nil
+				return createdBlock, nil
 			},
 			action: func(block blocks.Block) (interface{}, error) {
 				return repo.GetByID(context.Background(), block.GetID())
@@ -125,7 +125,7 @@ func TestBlockRepository(t *testing.T) {
 					return nil, err
 				}
 				createdBlock, _ := repo.Create(context.Background(), block, gofakeit.UUID())
-				return createdBlock.(blocks.Block), nil
+				return createdBlock, nil
 			},
 			action: func(block blocks.Block) (interface{}, error) {
 				// This relies on the Image Block
@@ -170,7 +170,7 @@ func TestBlockRepository(t *testing.T) {
 					return nil, err
 				}
 				createdBlock, _ := repo.Create(context.Background(), block, gofakeit.UUID())
-				return createdBlock.(blocks.Block), nil
+				return createdBlock, nil
 			},
 			action: func(block blocks.Block) (interface{}, error) {
 				tx, err := transactor.BeginTx(context.Background(), &sql.TxOptions{})

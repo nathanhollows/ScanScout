@@ -57,10 +57,8 @@ func (b *YoutubeBlock) UpdateBlockData(input map[string][]string) error {
 			return fmt.Errorf("URL is not valid")
 		}
 
-		// if video contains "/shorts/" in the URL, replace it with "/watch?v="
-		if strings.Contains(u[0], "/shorts/") {
-			u[0] = strings.Replace(u[0], "/shorts/", "/watch?v=", 1)
-		}
+		// Convert shorts URL to watch URL
+		u[0] = strings.Replace(u[0], "/shorts/", "/watch?v=", 1)
 
 		b.URL = u[0]
 	}
