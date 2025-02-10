@@ -25,7 +25,11 @@ func (h *PlayerHandler) ValidateBlock(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	r.ParseForm()
+	err = r.ParseForm()
+	if err != nil {
+		h.handleError(w, r, fmt.Errorf("validateBlock: parsing form: %v", err).Error(), "Something went wrong!")
+		return
+	}
 	data := make(map[string][]string)
 	for key, value := range r.Form {
 		data[key] = value

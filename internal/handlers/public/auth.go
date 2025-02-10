@@ -34,7 +34,11 @@ func (h *PublicHandler) Login(w http.ResponseWriter, r *http.Request) {
 
 // LoginPost handles the login form submission
 func (h *PublicHandler) LoginPost(w http.ResponseWriter, r *http.Request) {
-	r.ParseForm()
+	err := r.ParseForm()
+	if err != nil {
+		h.handleError(w, r, "LoginPost: parsing form", "Error logging in", "error", err)
+		return
+	}
 	email := r.Form.Get("email")
 	password := r.Form.Get("password")
 
@@ -45,7 +49,10 @@ func (h *PublicHandler) LoginPost(w http.ResponseWriter, r *http.Request) {
 		h.Logger.Error("authenticating user", "err", err)
 		w.WriteHeader(http.StatusUnauthorized)
 		c := templates.LoginError("Invalid email or password.")
-		c.Render(r.Context(), w)
+		err = c.Render(r.Context(), w)
+		if err != nil {
+			h.handleError(w, r, "LoginPost: rendering template", "Error logging in", "error", err)
+		}
 		return
 	}
 
@@ -334,8 +341,11 @@ func (h *PublicHandler) ResendEmailVerification(w http.ResponseWriter, r *http.R
 			c := templates.Toast(
 				*flash.NewError("Your email is already verified."),
 			)
-			c.Render(r.Context(), w)
-			return
+			err := c.Render(r.Context(), w)
+			if err != nil {
+				h.handleError(w, r, "ResendEmailVerification: rendering template", "Error sending email verification", "error", err)
+				return
+			}
 		}
 
 		h.Logger.Error("sending email verification", "err", err)
@@ -343,13 +353,19 @@ func (h *PublicHandler) ResendEmailVerification(w http.ResponseWriter, r *http.R
 		c := templates.Toast(
 			*flash.NewError("An error occurred while trying to send the email. Please try again."),
 		)
-		c.Render(r.Context(), w)
-		return
+		err := c.Render(r.Context(), w)
+		if err != nil {
+			h.handleError(w, r, "ResendEmailVerification: rendering template", "Error sending email verification", "error", err)
+			return
+		}
 	}
 
 	w.WriteHeader(http.StatusOK)
 	c := templates.Toast(
 		*flash.NewSuccess("Email sent! Please check your inbox."),
 	)
-	c.Render(r.Context(), w)
+	err = c.Render(r.Context(), w)
+	if err != nil {
+		h.handleError(w, r, "ResendEmailVerification: rendering template", "Error sending email verification", "error", err)
+	}
 }

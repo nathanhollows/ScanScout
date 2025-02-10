@@ -79,7 +79,10 @@ func (b *AnswerBlock) ValidatePlayerInput(state PlayerState, input map[string][]
 	var err error
 	newPlayerData := answerBlockData{}
 	if state.GetPlayerData() != nil {
-		json.Unmarshal(state.GetPlayerData(), &newPlayerData)
+		err := json.Unmarshal(state.GetPlayerData(), &newPlayerData)
+		if err != nil {
+			return state, fmt.Errorf("parse player data: %w", err)
+		}
 	}
 
 	// Increment the number of attempts and save guesses

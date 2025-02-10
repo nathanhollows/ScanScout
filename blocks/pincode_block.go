@@ -75,7 +75,10 @@ func (b *PincodeBlock) ValidatePlayerInput(state PlayerState, input map[string][
 	var err error
 	newPlayerData := pincodeBlockData{}
 	if state.GetPlayerData() != nil {
-		json.Unmarshal(state.GetPlayerData(), &newPlayerData)
+		err := json.Unmarshal(state.GetPlayerData(), &newPlayerData)
+		if err != nil {
+			return state, fmt.Errorf("unmarshalling player data %w", err)
+		}
 	}
 
 	// Increment the number of attempts and save guesses

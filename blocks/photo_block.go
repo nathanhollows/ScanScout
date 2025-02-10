@@ -72,7 +72,10 @@ func (b *PhotoBlock) ValidatePlayerInput(state PlayerState, input map[string][]s
 
 	newPlayerData := photoBlockData{}
 	if state.GetPlayerData() != nil {
-		json.Unmarshal(state.GetPlayerData(), &newPlayerData)
+		err := json.Unmarshal(state.GetPlayerData(), &newPlayerData)
+		if err != nil {
+			return state, fmt.Errorf("unmarshalling player data %v", err)
+		}
 	}
 
 	for _, image := range input["url"] {
