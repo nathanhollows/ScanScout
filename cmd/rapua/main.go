@@ -15,6 +15,7 @@ import (
 	"github.com/nathanhollows/Rapua/internal/server"
 	"github.com/nathanhollows/Rapua/internal/services"
 	"github.com/nathanhollows/Rapua/internal/sessions"
+	"github.com/nathanhollows/Rapua/internal/storage"
 	"github.com/nathanhollows/Rapua/repositories"
 	"github.com/uptrace/bun"
 	"github.com/uptrace/bun/migrate"
@@ -169,11 +170,16 @@ func runApp(logger *slog.Logger, dbc *bun.DB) {
 	notificationRepo := repositories.NewNotificationRepository(dbc)
 	teamRepo := repositories.NewTeamRepository(dbc)
 	userRepo := repositories.NewUserRepository(dbc)
+	uploadRepo := repositories.NewUploadRepository(dbc)
 
 	// Initialize transactor for services
 	transactor := db.NewTransactor(dbc)
 
+	// Storage for the upload service
+	localStorage := storage.NewLocalStorage("static/uploads/")
+
 	// Initialize services
+	uploadService := services.NewUploadService(uploadRepo, localStorage)
 	facilitatorService := services.NewFacilitatorService(facilitatorRepo)
 	assetGenerator := services.NewAssetGenerator()
 	authService := services.NewAuthService(userRepo)
@@ -217,6 +223,7 @@ func runApp(logger *slog.Logger, dbc *bun.DB) {
 		navigationService,
 		notificationService,
 		teamService,
+		uploadService,
 		userService,
 	)
 }

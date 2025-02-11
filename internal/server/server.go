@@ -36,6 +36,7 @@ func Start(logger *slog.Logger,
 	navigationService services.NavigationService,
 	notificationService services.NotificationService,
 	teamService services.TeamService,
+	uploadService services.UploadService,
 	userService services.UserService,
 ) {
 	// Public routes
@@ -69,6 +70,7 @@ func Start(logger *slog.Logger,
 		locationService,
 		notificationService,
 		teamService,
+		uploadService,
 		userService,
 	)
 	router = setupRouter(logger, publicHandler, playerHandler, adminHandler)
