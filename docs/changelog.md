@@ -6,19 +6,45 @@ order: 100
 
 # Changelog
 
-## 3.4.0 (2025-02-12)
+## 3.4.0 (2025-02-11)
 
 ### Added
-
-- Added the option to create locations with no coordinates for non-physical or roaming locations, or for locations where maps don't make sense. [#45](https://github.com/nathanhollows/Rapua/issues/45)
-- `IsMapped` method on markers to check if a location is mapped or not.
 - **Content Blocks:**
   - [Divider Blocks](/docs/user/blocks/divider) to separate content blocks for better readability.
   - [Alert Blocks](/docs/user/blocks/alert) for important messages. 
 
+- **Uploads and Image Management:**
+  - Admins can now upload images to [Image Blocks](/docs/user/blocks/image). Images by URL are no longer supported. [#21](https://github.com/nathanhollows/Rapua/issues/21). This lays a lot of groundwork for player image and video uploads in the future ([#49](https://github.com/nathanhollows/Rapua/issues/49))
+
+- **Game Enhancements:**
+  - Introduced support and interface updates for unmapped locations. [#45](https://github.com/nathanhollows/Rapua/issues/45)
+  - Added an `IsMapped` method on markers to check if a location is mapped.
+  
+### Changed
+
+- Refactored URL generation, moving it out of the game manager and into the asset generator for better separation of concerns.
+- Split `game_manager_service` into `instance_service` to improve maintainability.
+- Refactored dependencies in services to reduce unnecessary coupling.
+- Modified the quickbar to accept only an instance instead of the whole user object.
+
 ### Fixed
 
-- Minor typos and inconsistencies in documentation.
+- Resolved an issue where duplicating locations did not copy clues and blocks. [#52](https://github.com/nathanhollows/Rapua/issues/52)
+- Fixed an issue where newly created blocks did not correctly replace the location ID.
+- Ensured non-marker locations are disabled from rendering on maps. [#45](https://github.com/nathanhollows/Rapua/issues/45)
+- Fixed preview refresh issues after deleting a block.
+- Addressed static analysis warnings for unused variables, comments, and ignored errors.
+- Various minor typo fixes and documentation updates.
+
+### Removed
+
+- Cleaned up dead code and removed unused functions flagged by static analysis.
+- Removed redundant code in templates and players.
+- Removed unnecessary dependencies in services.
+
+[Full Changelog](https://github.com/nathanhollows/Rapua/releases/tag/v3.4.0)
+
+---
 
 ## 3.3.0 (2025-02-05)
 
