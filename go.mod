@@ -34,6 +34,7 @@ require (
 	github.com/gorilla/mux v1.6.2 // indirect
 	github.com/gorilla/securecookie v1.1.2 // indirect
 	github.com/hashicorp/golang-lru/v2 v2.0.7 // indirect
+	github.com/jmespath/go-jmespath v0.4.0 // indirect
 	github.com/kr/text v0.2.0 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
@@ -61,6 +62,7 @@ require (
 )
 
 require (
+	github.com/aws/aws-sdk-go v1.55.6
 	github.com/go-chi/chi v1.5.5
 	github.com/gorilla/sessions v1.3.0
 	github.com/jinzhu/inflection v1.0.0 // indirect
