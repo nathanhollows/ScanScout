@@ -247,6 +247,10 @@ func setupAdminRoutes(router chi.Router, adminHandler *admin.AdminHandler) {
 			r.Post("/create-link", adminHandler.FacilitatorCreateTokenLink)
 		})
 
+		r.Route("/media", func(r chi.Router) {
+			r.Post("/upload", adminHandler.UploadMedia)
+		})
+
 		r.NotFound(adminHandler.NotFound)
 	})
 }
