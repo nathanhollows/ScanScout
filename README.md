@@ -77,7 +77,7 @@ Rapua exists to make it easy to create games for education in the real world. It
 
 ### Built With
 
-Rapua is built with the GOTH stack: Go, (SQLite), HTMX, and TailwindCSS.
+Rapua is built with the [GOTTH stack](https://github.com/TomDoesTech/GOTTH): Go, (SQLite), TailwindCSS, Templ, and HTMX.
 
 [![Go][go]][go-url] [![HTMX][htmx]][htmx-url]
 
