@@ -2,6 +2,7 @@ package blocks
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"strconv"
 )
@@ -50,13 +51,13 @@ func (b *PincodeBlock) UpdateBlockData(input map[string][]string) error {
 	if input["points"] != nil {
 		points, err := strconv.Atoi(input["points"][0])
 		if err != nil {
-			return fmt.Errorf("points must be an integer")
+			return errors.New("points must be an integer")
 		}
 		b.Points = points
 	}
 	// Prompt and Pincode
 	if input["prompt"] == nil || input["pincode"] == nil {
-		return fmt.Errorf("prompt and pincode are required fields")
+		return errors.New("prompt and pincode are required fields")
 	}
 	b.Prompt = input["prompt"][0]
 	b.Pincode = input["pincode"][0]
@@ -69,13 +70,16 @@ func (b *PincodeBlock) RequiresValidation() bool { return true }
 
 func (b *PincodeBlock) ValidatePlayerInput(state PlayerState, input map[string][]string) (PlayerState, error) {
 	if input["pincode"] == nil {
-		return state, fmt.Errorf("pincode is a required field")
+		return state, errors.New("pincode is a required field")
 	}
 
 	var err error
 	newPlayerData := pincodeBlockData{}
 	if state.GetPlayerData() != nil {
-		json.Unmarshal(state.GetPlayerData(), &newPlayerData)
+		err := json.Unmarshal(state.GetPlayerData(), &newPlayerData)
+		if err != nil {
+			return state, fmt.Errorf("unmarshalling player data %w", err)
+		}
 	}
 
 	// Increment the number of attempts and save guesses
@@ -86,7 +90,7 @@ func (b *PincodeBlock) ValidatePlayerInput(state PlayerState, input map[string][
 		// Incorrect pincode, save player data and return an error
 		playerData, err := json.Marshal(newPlayerData)
 		if err != nil {
-			return state, fmt.Errorf("Error saving player data")
+			return state, errors.New("Error saving player data")
 		}
 		state.SetPlayerData(playerData)
 		return state, nil
@@ -95,7 +99,7 @@ func (b *PincodeBlock) ValidatePlayerInput(state PlayerState, input map[string][
 	// Correct pincode, update state to complete
 	playerData, err := json.Marshal(newPlayerData)
 	if err != nil {
-		return state, fmt.Errorf("Error saving player data")
+		return state, errors.New("Error saving player data")
 	}
 	state.SetPlayerData(playerData)
 	state.SetComplete(true)

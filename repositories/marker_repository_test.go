@@ -3,7 +3,7 @@ package repositories_test
 import (
 	"testing"
 
-	"github.com/nathanhollows/Rapua/repositories"
+	"github.com/nathanhollows/Rapua/v3/repositories"
 )
 
 func setupMarkerRepo(t *testing.T) (repositories.MarkerRepository, func()) {

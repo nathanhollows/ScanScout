@@ -4,17 +4,19 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"log/slog"
 	"os"
 	"strings"
 
 	"github.com/joho/godotenv"
-	"github.com/nathanhollows/Rapua/db"
-	"github.com/nathanhollows/Rapua/internal/migrations"
-	"github.com/nathanhollows/Rapua/internal/server"
-	"github.com/nathanhollows/Rapua/internal/services"
-	"github.com/nathanhollows/Rapua/internal/sessions"
-	"github.com/nathanhollows/Rapua/repositories"
+	"github.com/nathanhollows/Rapua/v3/db"
+	"github.com/nathanhollows/Rapua/v3/internal/migrations"
+	"github.com/nathanhollows/Rapua/v3/internal/server"
+	"github.com/nathanhollows/Rapua/v3/internal/services"
+	"github.com/nathanhollows/Rapua/v3/internal/sessions"
+	"github.com/nathanhollows/Rapua/v3/internal/storage"
+	"github.com/nathanhollows/Rapua/v3/repositories"
 	"github.com/uptrace/bun"
 	"github.com/uptrace/bun/migrate"
 	"github.com/urfave/cli/v2"
@@ -39,7 +41,7 @@ func main() {
 		Name:        "Rapua",
 		Usage:       "rapua [global options] command [command options] [arguments...]",
 		Description: `An open-source platform for location-based games.`,
-		Version:     "3.3.0",
+		Version:     "3.4.0",
 		Commands: []*cli.Command{
 			newDBCommand(migrator),
 		},
@@ -76,7 +78,12 @@ func newDBCommand(migrator *migrate.Migrator) *cli.Command {
 					if err := migrator.Lock(c.Context); err != nil {
 						return err
 					}
-					defer migrator.Unlock(c.Context)
+
+					defer func() {
+						if err := migrator.Unlock(c.Context); err != nil {
+							log.Printf("could not unlock: %v", err)
+						}
+					}()
 
 					group, err := migrator.Migrate(c.Context)
 					if err != nil {
@@ -97,7 +104,12 @@ func newDBCommand(migrator *migrate.Migrator) *cli.Command {
 					if err := migrator.Lock(c.Context); err != nil {
 						return err
 					}
-					defer migrator.Unlock(c.Context)
+
+					defer func() {
+						if err := migrator.Unlock(c.Context); err != nil {
+							log.Printf("could not unlock: %v", err)
+						}
+					}()
 
 					group, err := migrator.Rollback(c.Context)
 					if err != nil {
@@ -146,23 +158,28 @@ func runApp(logger *slog.Logger, dbc *bun.DB) {
 	initialiseFolders(logger)
 
 	// Initialize repositories
-	facilitatorRepo := repositories.NewFacilitatorTokenRepo(dbc)
 	blockStateRepo := repositories.NewBlockStateRepository(dbc)
 	blockRepo := repositories.NewBlockRepository(dbc, blockStateRepo)
-	teamRepo := repositories.NewTeamRepository(dbc)
 	checkInRepo := repositories.NewCheckInRepository(dbc)
 	clueRepo := repositories.NewClueRepository(dbc)
+	facilitatorRepo := repositories.NewFacilitatorTokenRepo(dbc)
+	instanceRepo := repositories.NewInstanceRepository(dbc)
 	instanceSettingsRepo := repositories.NewInstanceSettingsRepository(dbc)
 	locationRepo := repositories.NewLocationRepository(dbc)
 	markerRepo := repositories.NewMarkerRepository(dbc)
 	notificationRepo := repositories.NewNotificationRepository(dbc)
-	instanceRepo := repositories.NewInstanceRepository(dbc)
+	teamRepo := repositories.NewTeamRepository(dbc)
 	userRepo := repositories.NewUserRepository(dbc)
+	uploadRepo := repositories.NewUploadRepository(dbc)
 
 	// Initialize transactor for services
 	transactor := db.NewTransactor(dbc)
 
+	// Storage for the upload service
+	localStorage := storage.NewLocalStorage("static/uploads/")
+
 	// Initialize services
+	uploadService := services.NewUploadService(uploadRepo, localStorage)
 	facilitatorService := services.NewFacilitatorService(facilitatorRepo)
 	assetGenerator := services.NewAssetGenerator()
 	authService := services.NewAuthService(userRepo)
@@ -175,6 +192,10 @@ func runApp(logger *slog.Logger, dbc *bun.DB) {
 	notificationService := services.NewNotificationService(notificationRepo, teamRepo)
 	teamService := services.NewTeamService(transactor, teamRepo, checkInRepo, blockStateRepo, locationRepo)
 	userService := services.NewUserService(transactor, userRepo, instanceRepo)
+	instanceService := services.NewInstanceService(
+		transactor,
+		locationService, userService, teamService, instanceRepo, instanceSettingsRepo,
+	)
 	gameplayService := services.NewGameplayService(
 		checkInService, locationService, teamService, blockService, navigationService, markerRepo,
 	)
@@ -182,6 +203,7 @@ func runApp(logger *slog.Logger, dbc *bun.DB) {
 		transactor,
 		locationService, userService, teamService,
 		markerRepo, clueRepo, instanceRepo, instanceSettingsRepo,
+		instanceService,
 	)
 
 	sessions.Start()
@@ -193,14 +215,16 @@ func runApp(logger *slog.Logger, dbc *bun.DB) {
 		checkInService,
 		clueService,
 		emailService,
+		facilitatorService,
 		gameManagerService,
 		gameplayService,
+		instanceService,
 		locationService,
 		navigationService,
 		notificationService,
 		teamService,
+		uploadService,
 		userService,
-		facilitatorService,
 	)
 }
 

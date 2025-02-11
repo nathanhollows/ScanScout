@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/nathanhollows/Rapua/services"
+	"github.com/nathanhollows/Rapua/v3/services"
 )
 
 // Helper function to create temporary markdown files for testing.

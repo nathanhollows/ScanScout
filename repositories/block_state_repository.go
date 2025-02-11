@@ -3,11 +3,11 @@ package repositories
 import (
 	"context"
 	"encoding/json"
-	"fmt"
+	"errors"
 	"time"
 
-	"github.com/nathanhollows/Rapua/blocks"
-	"github.com/nathanhollows/Rapua/models"
+	"github.com/nathanhollows/Rapua/v3/blocks"
+	"github.com/nathanhollows/Rapua/v3/models"
 	"github.com/uptrace/bun"
 )
 
@@ -42,7 +42,7 @@ func NewBlockStateRepository(db *bun.DB) BlockStateRepository {
 	}
 }
 
-// PlayerStateData struct implements the PlayerState interface
+// PlayerStateData struct implements the PlayerState interface.
 type PlayerStateData struct {
 	blockID       string
 	playerID      string
@@ -83,7 +83,7 @@ func (p *PlayerStateData) SetPointsAwarded(points int) {
 	p.pointsAwarded = points
 }
 
-// Convert model state to PlayerState
+// Convert model state to PlayerState.
 func convertModelToPlayerStateData(state models.TeamBlockState) blocks.PlayerState {
 	return &PlayerStateData{
 		blockID:       state.BlockID,
@@ -94,7 +94,7 @@ func convertModelToPlayerStateData(state models.TeamBlockState) blocks.PlayerSta
 	}
 }
 
-// Convert PlayerState to model state
+// Convert PlayerState to model state.
 func convertPlayerStateToModelData(state blocks.PlayerState) models.TeamBlockState {
 	return models.TeamBlockState{
 		TeamCode:      state.GetPlayerID(),
@@ -105,7 +105,7 @@ func convertPlayerStateToModelData(state blocks.PlayerState) models.TeamBlockSta
 	}
 }
 
-// GetByBlockAndTeam fetches a specific team block state for a block and team
+// GetByBlockAndTeam fetches a specific team block state for a block and team.
 func (r *blockStateRepository) GetByBlockAndTeam(ctx context.Context, blockID string, teamCode string) (blocks.PlayerState, error) {
 	var modelState models.TeamBlockState
 	err := r.db.NewSelect().
@@ -120,7 +120,7 @@ func (r *blockStateRepository) GetByBlockAndTeam(ctx context.Context, blockID st
 	return convertModelToPlayerStateData(modelState), nil
 }
 
-// Create inserts a new team block state into the database
+// Create inserts a new team block state into the database.
 func (r *blockStateRepository) Create(ctx context.Context, state blocks.PlayerState) (blocks.PlayerState, error) {
 	modelState := convertPlayerStateToModelData(state)
 
@@ -134,11 +134,11 @@ func (r *blockStateRepository) Create(ctx context.Context, state blocks.PlayerSt
 	return convertModelToPlayerStateData(modelState), nil
 }
 
-// Update modifies an existing team block state in the database
+// Update modifies an existing team block state in the database.
 func (r *blockStateRepository) Update(ctx context.Context, state blocks.PlayerState) (blocks.PlayerState, error) {
 	modelState := convertPlayerStateToModelData(state)
 	if state.GetBlockID() == "" || state.GetPlayerID() == "" {
-		return nil, fmt.Errorf("block_id and team_code must be set")
+		return nil, errors.New("block_id and team_code must be set")
 	}
 
 	_, err := r.db.NewUpdate().
@@ -154,7 +154,7 @@ func (r *blockStateRepository) Update(ctx context.Context, state blocks.PlayerSt
 	return state, err
 }
 
-// NewBlockState creates a new block state
+// NewBlockState creates a new block state.
 func (r *blockStateRepository) NewBlockState(ctx context.Context, blockID, teamCode string) (blocks.PlayerState, error) {
 	state := &PlayerStateData{
 		blockID:       blockID,
@@ -166,7 +166,7 @@ func (r *blockStateRepository) NewBlockState(ctx context.Context, blockID, teamC
 	return state, nil
 }
 
-// Delete removes a team block state from the database by its ID
+// Delete removes a team block state from the database by its ID.
 func (r *blockStateRepository) Delete(ctx context.Context, block_id string, team_code string) error {
 	_, err := r.db.NewDelete().
 		Model(&models.TeamBlockState{}).
@@ -179,7 +179,7 @@ func (r *blockStateRepository) Delete(ctx context.Context, block_id string, team
 	return nil
 }
 
-// DeleteByBlockID removes all team block states for a block from the database
+// DeleteByBlockID removes all team block states for a block from the database.
 func (r *blockStateRepository) DeleteByBlockID(ctx context.Context, tx *bun.Tx, blockID string) error {
 	_, err := tx.NewDelete().
 		Model(&models.TeamBlockState{}).
@@ -188,7 +188,7 @@ func (r *blockStateRepository) DeleteByBlockID(ctx context.Context, tx *bun.Tx, 
 	return err
 }
 
-// DeleteByTeamCodes removes all team block states for a team from the database
+// DeleteByTeamCodes removes all team block states for a team from the database.
 func (r *blockStateRepository) DeleteByTeamCodes(ctx context.Context, tx *bun.Tx, teamCodes []string) error {
 	_, err := tx.NewDelete().
 		Model(&models.TeamBlockState{}).

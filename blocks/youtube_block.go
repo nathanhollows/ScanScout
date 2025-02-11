@@ -2,7 +2,7 @@ package blocks
 
 import (
 	"encoding/json"
-	"fmt"
+	"errors"
 	"net/http"
 	"regexp"
 	"strings"
@@ -44,23 +44,21 @@ func (b *YoutubeBlock) UpdateBlockData(input map[string][]string) error {
 		// Regex: https://stackoverflow.com/a/6904504
 		_, err := regexp.MatchString(`(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})`, u[0])
 		if err != nil {
-			return fmt.Errorf("URL is not valid")
+			return errors.New("URL is not valid")
 		}
 
 		// Confirm URL is valid
-		checkURL := fmt.Sprintf("https://www.youtube.com/oembed?format=json&url=%s", u[0])
+		checkURL := "https://www.youtube.com/oembed?format=json&url=" + u[0]
 		resp, err := http.Get(checkURL)
 		if err != nil {
-			return fmt.Errorf("URL is not valid")
+			return errors.New("URL is not valid")
 		}
 		if resp.StatusCode != 200 {
-			return fmt.Errorf("URL is not valid")
+			return errors.New("URL is not valid")
 		}
 
-		// if video contains "/shorts/" in the URL, replace it with "/watch?v="
-		if strings.Contains(u[0], "/shorts/") {
-			u[0] = strings.Replace(u[0], "/shorts/", "/watch?v=", 1)
-		}
+		// Convert shorts URL to watch URL
+		u[0] = strings.Replace(u[0], "/shorts/", "/watch?v=", 1)
 
 		b.URL = u[0]
 	}

@@ -4,11 +4,11 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/nathanhollows/Rapua/helpers"
-	templates "github.com/nathanhollows/Rapua/internal/templates/admin"
+	"github.com/nathanhollows/Rapua/v3/helpers"
+	templates "github.com/nathanhollows/Rapua/v3/internal/templates/admin"
 )
 
-// PreviewMarkdown takes markdown from a form and renders it for htmx
+// PreviewMarkdown takes markdown from a form and renders it for htmx.
 func (h *AdminHandler) PreviewMarkdown(w http.ResponseWriter, r *http.Request) {
 	decoder := json.NewDecoder(r.Body)
 	var m map[string]string

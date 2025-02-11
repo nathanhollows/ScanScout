@@ -2,6 +2,7 @@ package blocks
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/url"
 	"strings"
@@ -66,7 +67,7 @@ func (b *ImageBlock) UpdateBlockData(input map[string][]string) error {
 func (b *ImageBlock) parseURL(input map[string][]string) (string, error) {
 	var inputURL string
 	if u, exists := input["url"]; !exists || len(u) == 0 {
-		return "", fmt.Errorf("url is a required field")
+		return "", errors.New("url is a required field")
 	}
 	inputURL = strings.TrimSpace(input["url"][0])
 
@@ -78,7 +79,7 @@ func (b *ImageBlock) parseURL(input map[string][]string) (string, error) {
 	return parsedURL.String(), nil
 }
 
-// Validation and Points Calculation
+// Validation and Points Calculation.
 func (b *ImageBlock) RequiresValidation() bool {
 	return false
 }

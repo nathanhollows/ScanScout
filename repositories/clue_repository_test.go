@@ -6,8 +6,8 @@ import (
 
 	"github.com/brianvoe/gofakeit/v7"
 	"github.com/google/uuid"
-	"github.com/nathanhollows/Rapua/models"
-	"github.com/nathanhollows/Rapua/repositories"
+	"github.com/nathanhollows/Rapua/v3/models"
+	"github.com/nathanhollows/Rapua/v3/repositories"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -70,7 +70,6 @@ func TestClueRepository_DeleteByLocationID(t *testing.T) {
 
 	locationID := gofakeit.UUID()
 	instanceID := gofakeit.UUID()
-	clues := []models.Clue{}
 	for i := 0; i < 3; i++ {
 		clue := &models.Clue{
 			InstanceID: instanceID,
@@ -79,13 +78,12 @@ func TestClueRepository_DeleteByLocationID(t *testing.T) {
 		}
 		err := repo.Save(ctx, clue)
 		assert.NoError(t, err, "expected no error when saving clue")
-		clues = append(clues, *clue)
 	}
 
 	err := repo.DeleteByLocationID(ctx, locationID)
 	assert.NoError(t, err, "expected no error when deleting clues by location ID")
 
-	clues, err = repo.FindCluesByLocation(ctx, locationID)
+	clues, err := repo.FindCluesByLocation(ctx, locationID)
 	assert.NoError(t, err, "expected no error when finding clues by location")
 	assert.Len(t, clues, 0, "expected no clues to be found")
 }

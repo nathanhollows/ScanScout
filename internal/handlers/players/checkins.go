@@ -6,13 +6,13 @@ import (
 	"strings"
 
 	"github.com/go-chi/chi"
-	"github.com/nathanhollows/Rapua/internal/flash"
-	"github.com/nathanhollows/Rapua/internal/services"
-	templates "github.com/nathanhollows/Rapua/internal/templates/players"
-	"github.com/nathanhollows/Rapua/models"
+	"github.com/nathanhollows/Rapua/v3/internal/flash"
+	"github.com/nathanhollows/Rapua/v3/internal/services"
+	templates "github.com/nathanhollows/Rapua/v3/internal/templates/players"
+	"github.com/nathanhollows/Rapua/v3/models"
 )
 
-// CheckIn handles the GET request for scanning a location
+// CheckIn handles the GET request for scanning a location.
 func (h *PlayerHandler) CheckIn(w http.ResponseWriter, r *http.Request) {
 	code := chi.URLParam(r, "code")
 	code = strings.ToUpper(code)
@@ -50,9 +50,13 @@ func (h *PlayerHandler) CheckIn(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// CheckInPost handles the POST request for scanning in
+// CheckInPost handles the POST request for scanning in.
 func (h *PlayerHandler) CheckInPost(w http.ResponseWriter, r *http.Request) {
-	r.ParseForm()
+	err := r.ParseForm()
+	if err != nil {
+		h.handleError(w, r, "parsing form", "Error parsing form", "error", err)
+		return
+	}
 	locationCode := chi.URLParam(r, "code")
 	locationCode = strings.ToUpper(locationCode)
 
@@ -129,12 +133,13 @@ func (h *PlayerHandler) CheckOut(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *PlayerHandler) CheckOutPost(w http.ResponseWriter, r *http.Request) {
-	r.ParseForm()
+	err := r.ParseForm()
+	if err != nil {
+		h.handleError(w, r, "parsing form", "Error parsing form", "error", err)
+		return
+	}
 	locationCode := chi.URLParam(r, "code")
 	locationCode = strings.ToUpper(locationCode)
-
-	teamCode := r.FormValue("team")
-	teamCode = strings.ToUpper(teamCode)
 
 	// Get the team from the context
 	// Or start a new session if the provided team code is valid
@@ -155,16 +160,28 @@ func (h *PlayerHandler) CheckOutPost(w http.ResponseWriter, r *http.Request) {
 	err = h.GameplayService.CheckOut(r.Context(), team, locationCode)
 	if err != nil {
 		if errors.Is(err, services.ErrLocationNotFound) {
-			templates.Toast(*flash.NewError("Location not found. Please double check the code and try again.")).Render(r.Context(), w)
+			err := templates.Toast(*flash.NewError("Location not found. Please double check the code and try again.")).Render(r.Context(), w)
+			if err != nil {
+				h.handleError(w, r, "CheckOutPost: checking out", "Error checking out", "error", err, "team", team.Code, "location", locationCode)
+			}
 			return
 		} else if errors.Is(err, services.ErrUnecessaryCheckOut) {
-			templates.Toast(*flash.NewInfo("You are not checked in anywhere.")).Render(r.Context(), w)
+			err := templates.Toast(*flash.NewInfo("You are not checked in anywhere.")).Render(r.Context(), w)
+			if err != nil {
+				h.handleError(w, r, "CheckOutPost: checking out", "Error checking out", "error", err, "team", team.Code, "location", locationCode)
+			}
 			return
 		} else if errors.Is(err, services.ErrCheckOutAtWrongLocation) {
-			templates.Toast(*flash.NewInfo("You are not checked in here.")).Render(r.Context(), w)
+			err := templates.Toast(*flash.NewInfo("You are not checked in here.")).Render(r.Context(), w)
+			if err != nil {
+				h.handleError(w, r, "CheckOutPost: checking out", "Error checking out", "error", err, "team", team.Code, "location", locationCode)
+			}
 			return
 		} else if errors.Is(err, services.ErrUnfinishedCheckIn) {
-			templates.Toast(*flash.NewInfo("Whoops! You still have unfinished activities.")).Render(r.Context(), w)
+			err := templates.Toast(*flash.NewInfo("Whoops! You still have unfinished activities.")).Render(r.Context(), w)
+			if err != nil {
+				h.handleError(w, r, "CheckOutPost: checking out", "Error checking out", "error", err, "team", team.Code, "location", locationCode)
+			}
 			return
 		} else {
 			h.handleError(w, r, "CheckOutPost: checking out", "Error checking out", "error", err, "team", team.Code, "location", locationCode)
@@ -175,7 +192,7 @@ func (h *PlayerHandler) CheckOutPost(w http.ResponseWriter, r *http.Request) {
 	h.redirect(w, r, "/next")
 }
 
-// MyCheckins shows the found locations page
+// MyCheckins shows the found locations page.
 func (h *PlayerHandler) MyCheckins(w http.ResponseWriter, r *http.Request) {
 	team, err := h.getTeamFromContext(r.Context())
 	if err != nil || team == nil {
@@ -198,7 +215,7 @@ func (h *PlayerHandler) MyCheckins(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// CheckInView shows the page for a specific location
+// CheckInView shows the page for a specific location.
 func (h *PlayerHandler) CheckInView(w http.ResponseWriter, r *http.Request) {
 	locationCode := chi.URLParam(r, "id")
 

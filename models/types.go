@@ -46,7 +46,7 @@ const (
 	Closed
 )
 
-// Value converts StrArray to a JSON string for database storage
+// Value converts StrArray to a JSON string for database storage.
 func (s StrArray) Value() (driver.Value, error) {
 	if len(s) == 0 {
 		return "[]", nil
@@ -55,7 +55,7 @@ func (s StrArray) Value() (driver.Value, error) {
 	return string(bytes), err
 }
 
-// Scan converts a database JSON string back into a StrArray
+// Scan converts a database JSON string back into a StrArray.
 func (s *StrArray) Scan(value interface{}) error {
 	if value == nil {
 		*s = []string{}
@@ -71,47 +71,47 @@ func (s *StrArray) Scan(value interface{}) error {
 	return err
 }
 
-// GetNavigationModes returns a list of navigation modes
+// GetNavigationModes returns a list of navigation modes.
 func GetNavigationModes() NavigationModes {
 	return []NavigationMode{RandomNav, FreeRoamNav, OrderedNav}
 }
 
-// GetNavigationMethods returns a list of navigation methods
+// GetNavigationMethods returns a list of navigation methods.
 func GetNavigationMethods() NavigationMethods {
 	return []NavigationMethod{ShowMap, ShowMapAndNames, ShowNames, ShowClues}
 }
 
-// GetCompletionMethods returns a list of completion methods
+// GetCompletionMethods returns a list of completion methods.
 func GetCompletionMethods() CompletionMethods {
 	return []CompletionMethod{CheckInOnly, CheckInAndOut}
 }
 
-// GetGameStatuses returns a list of game statuses
+// GetGameStatuses returns a list of game statuses.
 func GetGameStatuses() GameStatuses {
 	return []GameStatus{Scheduled, Active, Closed}
 }
 
-// String returns the string representation of the NavigationMode
+// String returns the string representation of the NavigationMode.
 func (n NavigationMode) String() string {
 	return [...]string{"Random", "Free Roam", "Ordered"}[n]
 }
 
-// String returns the string representation of the NavigationMethod
+// String returns the string representation of the NavigationMethod.
 func (n NavigationMethod) String() string {
 	return [...]string{"Show Map", "Show Map and Names", "Show Location Names", "Show Clues"}[n]
 }
 
-// String returns the string representation of the CompletionMethod
+// String returns the string representation of the CompletionMethod.
 func (c CompletionMethod) String() string {
 	return [...]string{"Check In Only", "Check In and Out", "Submit Content", "Password", "Click Button"}[c]
 }
 
-// String returns the string representation of the GameStatus
+// String returns the string representation of the GameStatus.
 func (g GameStatus) String() string {
 	return [...]string{"Scheduled", "Active", "Closed"}[g]
 }
 
-// Description returns the description of the NavigationMode
+// Description returns the description of the NavigationMode.
 func (n NavigationMode) Description() string {
 	return [...]string{
 		"The game will randomly select locations for players to visit. Good for large groups as it disperses players.",
@@ -120,7 +120,7 @@ func (n NavigationMode) Description() string {
 	}[n]
 }
 
-// Description returns the description of the NavigationMethod
+// Description returns the description of the NavigationMethod.
 func (n NavigationMethod) Description() string {
 	return [...]string{
 		"Players are shown a map.",
@@ -130,7 +130,7 @@ func (n NavigationMethod) Description() string {
 	}[n]
 }
 
-// Description returns the description of the CompletionMethod
+// Description returns the description of the CompletionMethod.
 func (c CompletionMethod) Description() string {
 	return [...]string{
 		"Players must check in to a location but do not need to check out.",
@@ -141,7 +141,7 @@ func (c CompletionMethod) Description() string {
 	}[c]
 }
 
-// Description returns the description of the GameStatus
+// Description returns the description of the GameStatus.
 func (g GameStatus) Description() string {
 	return [...]string{
 		"The game is scheduled but not yet active.",
@@ -150,7 +150,7 @@ func (g GameStatus) Description() string {
 	}[g]
 }
 
-// Parse NavigationMode
+// Parse NavigationMode.
 func ParseNavigationMode(s string) (NavigationMode, error) {
 	switch s {
 	case "Random":
@@ -164,7 +164,7 @@ func ParseNavigationMode(s string) (NavigationMode, error) {
 	}
 }
 
-// Parse NavigationMethod
+// Parse NavigationMethod.
 func ParseNavigationMethod(s string) (NavigationMethod, error) {
 	switch s {
 	case "Show Map":
@@ -180,7 +180,7 @@ func ParseNavigationMethod(s string) (NavigationMethod, error) {
 	}
 }
 
-// Parse CompletionMethod
+// Parse CompletionMethod.
 func ParseCompletionMethod(s string) (CompletionMethod, error) {
 	switch s {
 	case "Check In Only":
@@ -198,7 +198,7 @@ func ParseCompletionMethod(s string) (CompletionMethod, error) {
 	}
 }
 
-// Parse GameStatus
+// Parse GameStatus.
 func ParseGameStatus(s string) (GameStatus, error) {
 	switch s {
 	case "Scheduled":

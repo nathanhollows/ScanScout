@@ -5,10 +5,10 @@ import (
 	"testing"
 
 	"github.com/brianvoe/gofakeit/v7"
-	"github.com/nathanhollows/Rapua/db"
-	"github.com/nathanhollows/Rapua/internal/services"
-	"github.com/nathanhollows/Rapua/models"
-	"github.com/nathanhollows/Rapua/repositories"
+	"github.com/nathanhollows/Rapua/v3/db"
+	"github.com/nathanhollows/Rapua/v3/internal/services"
+	"github.com/nathanhollows/Rapua/v3/models"
+	"github.com/nathanhollows/Rapua/v3/repositories"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -22,14 +22,6 @@ func setupUserService(t *testing.T) (services.UserService, func()) {
 	userRepo := repositories.NewUserRepository(dbc)
 	userService := services.NewUserService(transactor, userRepo, instanceRepo)
 	return userService, cleanup
-}
-
-func setupNotificationRepo(t *testing.T) (repositories.NotificationRepository, func()) {
-	t.Helper()
-	db, cleanup := setupDB(t)
-
-	notificationRepo := repositories.NewNotificationRepository(db)
-	return notificationRepo, cleanup
 }
 
 func TestCreateUser(t *testing.T) {

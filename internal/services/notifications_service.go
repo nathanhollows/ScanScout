@@ -2,10 +2,11 @@ package services
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
-	"github.com/nathanhollows/Rapua/models"
-	"github.com/nathanhollows/Rapua/repositories"
+	"github.com/nathanhollows/Rapua/v3/models"
+	"github.com/nathanhollows/Rapua/v3/repositories"
 )
 
 type NotificationService interface {
@@ -30,7 +31,7 @@ func NewNotificationService(
 	}
 }
 
-// SendNotification sends a notification to a team
+// SendNotification sends a notification to a team.
 func (s *notificationService) SendNotification(ctx context.Context, teamCode string, content string) (models.Notification, error) {
 	notification := models.Notification{
 		TeamCode: teamCode,
@@ -41,7 +42,7 @@ func (s *notificationService) SendNotification(ctx context.Context, teamCode str
 	return notification, err
 }
 
-// SendNotificationToAllTeams sends a notification to all teams
+// SendNotificationToAllTeams sends a notification to all teams.
 func (s *notificationService) SendNotificationToAllTeams(ctx context.Context, instanceID string, content string) error {
 	teams, err := s.teamRepository.FindAll(ctx, instanceID)
 	if err != nil {
@@ -49,11 +50,11 @@ func (s *notificationService) SendNotificationToAllTeams(ctx context.Context, in
 	}
 
 	if len(teams) == 0 {
-		return fmt.Errorf("no teams to send notification to")
+		return errors.New("no teams to send notification to")
 	}
 
 	if content == "" {
-		return fmt.Errorf("content cannot be empty")
+		return errors.New("content cannot be empty")
 	}
 
 	for _, team := range teams {
@@ -67,12 +68,12 @@ func (s *notificationService) SendNotificationToAllTeams(ctx context.Context, in
 	return nil
 }
 
-// GetNotifications retrieves all notifications for a team
+// GetNotifications retrieves all notifications for a team.
 func (s *notificationService) GetNotifications(ctx context.Context, teamCode string) ([]models.Notification, error) {
 	return s.notificationRepository.FindByTeamCode(ctx, teamCode)
 }
 
-// DismissNotification marks a notification as dismissed
+// DismissNotification marks a notification as dismissed.
 func (s *notificationService) DismissNotification(ctx context.Context, notificationID string) error {
 
 	err := s.notificationRepository.Dismiss(ctx, notificationID)

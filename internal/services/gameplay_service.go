@@ -4,17 +4,15 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"hash/fnv"
 	"strings"
 
-	"github.com/nathanhollows/Rapua/blocks"
-	"github.com/nathanhollows/Rapua/internal/flash"
-	"github.com/nathanhollows/Rapua/models"
-	"github.com/nathanhollows/Rapua/repositories"
-	"golang.org/x/exp/rand"
+	"github.com/nathanhollows/Rapua/v3/blocks"
+	"github.com/nathanhollows/Rapua/v3/internal/flash"
+	"github.com/nathanhollows/Rapua/v3/models"
+	"github.com/nathanhollows/Rapua/v3/repositories"
 )
 
-// Define errors
+// Define errors.
 var (
 	ErrTeamNotFound             = errors.New("team not found")
 	ErrLocationNotFound         = errors.New("location not found")
@@ -67,7 +65,7 @@ func NewGameplayService(
 	}
 }
 
-// GetGameStatus returns the current status of the game
+// GetGameStatus returns the current status of the game.
 func (s *gameplayService) CheckGameStatus(ctx context.Context, team *models.Team) (response *ServiceResponse) {
 	response = &ServiceResponse{}
 	response.Data = make(map[string]interface{})
@@ -148,7 +146,7 @@ func (s *gameplayService) SuggestNextLocations(ctx context.Context, team *models
 		return nil, fmt.Errorf("determining next locations: %w", err)
 	}
 
-	for i, _ := range locations {
+	for i := range locations {
 		err := s.LocationService.LoadRelations(ctx, &locations[i])
 		if err != nil {
 			return nil, fmt.Errorf("loading relations for location: %w", err)
@@ -193,7 +191,7 @@ func (s *gameplayService) CheckIn(ctx context.Context, team *models.Team, locati
 		return fmt.Errorf("checking if location is valid: %w", err)
 	}
 	if !valid {
-		return fmt.Errorf("location not valid for team")
+		return errors.New("location not valid for team")
 	}
 
 	// Check if any blocks require validation (e.g. a checklist)
@@ -267,7 +265,7 @@ func (s *gameplayService) CheckOut(ctx context.Context, team *models.Team, locat
 	return nil
 }
 
-// CheckLocation checks if the location is valid for the team to check in
+// CheckLocation checks if the location is valid for the team to check in.
 func (s *gameplayService) CheckValidLocation(ctx context.Context, team *models.Team, locationCode string) (bool, error) {
 	if team.Instance.ID == "" {
 		return false, ErrInstanceNotFound
@@ -289,49 +287,10 @@ func (s *gameplayService) CheckValidLocation(ctx context.Context, team *models.T
 	return valid, nil
 }
 
-// loadClues loads the clues for the current location
-// By default, it will only show one clue per location
-func (s *gameplayService) loadClues(ctx context.Context, team *models.Team, locations []models.Location) (response ServiceResponse) {
-	response = ServiceResponse{}
-	response.Data = make(map[string]interface{})
-
-	err := s.LocationService.LoadCluesForLocations(ctx, &locations)
-	if err != nil {
-		response.Error = fmt.Errorf("loading clues for locations: %w", err)
-		return response
-	}
-
-	// Create a seed for the random clue
-	seed := team.Code
-	h := fnv.New64a()
-	_, err = h.Write([]byte(seed))
-	if err != nil {
-		response.Error = fmt.Errorf("creating seed for random clue: %w", err)
-		return response
-	}
-	r := rand.New(rand.NewSource(uint64(h.Sum64())))
-
-	// Randomly select a clue for each location
-	// If the location has no clues, it will be skipped
-	for i, location := range locations {
-		if len(location.Clues) == 0 {
-			continue
-		} else if len(location.Clues) == 1 {
-			continue
-		}
-
-		n := r.Intn(len(location.Clues))
-		(locations)[i].Clues = location.Clues[n : n+1]
-	}
-
-	response.Data["nextLocations"] = locations
-	return response
-}
-
 func (s *gameplayService) ValidateAndUpdateBlockState(ctx context.Context, team models.Team, data map[string][]string) (blocks.PlayerState, blocks.Block, error) {
 	blockID := data["block"][0]
 	if blockID == "" {
-		return nil, nil, fmt.Errorf("blockID must be set")
+		return nil, nil, errors.New("blockID must be set")
 	}
 
 	block, state, err := s.BlockService.GetBlockWithStateByBlockIDAndTeamCode(ctx, blockID, team.Code)
@@ -340,7 +299,7 @@ func (s *gameplayService) ValidateAndUpdateBlockState(ctx context.Context, team 
 	}
 
 	if state == nil {
-		return nil, nil, fmt.Errorf("block state not found")
+		return nil, nil, errors.New("block state not found")
 	}
 
 	// Returning early here prevents the block from being updated

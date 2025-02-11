@@ -3,12 +3,12 @@ package handlers
 import (
 	"net/http"
 
-	"github.com/nathanhollows/Rapua/internal/sessions"
-	templates "github.com/nathanhollows/Rapua/internal/templates/players"
-	"github.com/nathanhollows/Rapua/models"
+	"github.com/nathanhollows/Rapua/v3/internal/sessions"
+	templates "github.com/nathanhollows/Rapua/v3/internal/templates/players"
+	"github.com/nathanhollows/Rapua/v3/models"
 )
 
-// Play shows the player the first page of the game
+// Play shows the player the first page of the game.
 func (h *PlayerHandler) Play(w http.ResponseWriter, r *http.Request) {
 	session, _ := sessions.Get(r, "scanscout")
 	teamCode := session.Values["team"]
@@ -28,7 +28,12 @@ func (h *PlayerHandler) Play(w http.ResponseWriter, r *http.Request) {
 		} else {
 			h.Logger.Error("Home get team from session code", "err", err, "team", teamCode)
 			session.Options.MaxAge = -1
-			session.Save(r, w)
+			err := session.Save(r, w)
+			if err != nil {
+				h.handleError(w, r,
+					"Home: saving session", "Error saving session. Please try again.", "error", err)
+				return
+			}
 		}
 	}
 
@@ -43,15 +48,21 @@ func (h *PlayerHandler) Play(w http.ResponseWriter, r *http.Request) {
 
 	// Destroy the session now
 	session.Options.MaxAge = -1
-	session.Save(r, w)
-
-	return
+	err = session.Save(r, w)
+	if err != nil {
+		h.handleError(w, r, "Home: saving session", "Error saving session. Please try again.", "error", err)
+		return
+	}
 
 }
 
-// PlayPost is the handler for the play form submission
+// PlayPost is the handler for the play form submission.
 func (h *PlayerHandler) PlayPost(w http.ResponseWriter, r *http.Request) {
-	r.ParseForm()
+	err := r.ParseForm()
+	if err != nil {
+		h.handleError(w, r, "parsing form", "Error parsing form", "error", err)
+		return
+	}
 	teamCode := r.FormValue("team")
 	teamName := r.FormValue("customTeamName")
 
@@ -67,7 +78,11 @@ func (h *PlayerHandler) PlayPost(w http.ResponseWriter, r *http.Request) {
 
 	team := response.Data["team"].(*models.Team)
 
-	h.startSession(w, r, team.Code)
+	err = h.startSession(w, r, team.Code)
+	if err != nil {
+		h.handleError(w, r, "HomePost: starting session", "Error starting session. Please try again.", "error", err, "team", team.Code)
+		return
+	}
 
 	w.Header().Set("HX-Redirect", "/next")
 }

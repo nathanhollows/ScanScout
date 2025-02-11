@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/nathanhollows/Rapua/models"
+	"github.com/nathanhollows/Rapua/v3/models"
 	"github.com/uptrace/bun"
 )
 
@@ -45,7 +45,7 @@ func NewUserRepository(db *bun.DB) UserRepository {
 	}
 }
 
-// Update the user in the database
+// Update the user in the database.
 func (r *userRepository) Update(ctx context.Context, user *models.User) error {
 	user.UpdatedAt = time.Now().UTC()
 	res, err := r.db.NewUpdate().
@@ -62,6 +62,9 @@ func (r *userRepository) Update(ctx context.Context, user *models.User) error {
 			"updated_at").
 		WherePK().
 		Exec(ctx)
+	if err != nil {
+		return err
+	}
 	rows, err := res.RowsAffected()
 	if rows == 0 {
 		return ErrUserNotFound
@@ -69,7 +72,7 @@ func (r *userRepository) Update(ctx context.Context, user *models.User) error {
 	return err
 }
 
-// Create creates a new user in the database
+// Create creates a new user in the database.
 func (r *userRepository) Create(ctx context.Context, user *models.User) error {
 	if user.ID == "" {
 		uuid := uuid.New()
@@ -80,7 +83,7 @@ func (r *userRepository) Create(ctx context.Context, user *models.User) error {
 	return err
 }
 
-// GetByEmail retrieves a user by their email address
+// GetByEmail retrieves a user by their email address.
 func (r *userRepository) GetByEmail(ctx context.Context, email string) (*models.User, error) {
 	user := &models.User{}
 	err := r.db.NewSelect().
@@ -92,7 +95,7 @@ func (r *userRepository) GetByEmail(ctx context.Context, email string) (*models.
 	return user, err
 }
 
-// GetByEmailToken retrieves a user by their email token
+// GetByEmailToken retrieves a user by their email token.
 func (r *userRepository) GetByEmailToken(ctx context.Context, token string) (*models.User, error) {
 	user := &models.User{}
 	err := r.db.NewSelect().
@@ -124,7 +127,7 @@ func (r *userRepository) GetByID(ctx context.Context, userID string) (*models.Us
 	return &user, nil
 }
 
-// GetByEmailAndProvider retrieves a user by their email address and provider
+// GetByEmailAndProvider retrieves a user by their email address and provider.
 func (r *userRepository) GetByEmailAndProvider(ctx context.Context, email, provider string) (*models.User, error) {
 	user := &models.User{}
 	err := r.db.NewSelect().
@@ -137,13 +140,16 @@ func (r *userRepository) GetByEmailAndProvider(ctx context.Context, email, provi
 	return user, err
 }
 
-// Delete deletes a user from the database
+// Delete deletes a user from the database.
 func (r *userRepository) Delete(ctx context.Context, tx *bun.Tx, userID string) error {
 	user := &models.User{ID: userID}
 	res, err := tx.NewDelete().
 		Model(user).
 		Where("id = ?", userID).
 		Exec(ctx)
+	if err != nil {
+		return err
+	}
 	rows, err := res.RowsAffected()
 	if rows == 0 {
 		return ErrUserNotFound

@@ -5,11 +5,11 @@ import (
 	"net/http"
 
 	"github.com/go-chi/chi"
-	"github.com/nathanhollows/Rapua/internal/services"
-	templates "github.com/nathanhollows/Rapua/internal/templates/admin"
+	"github.com/nathanhollows/Rapua/v3/internal/services"
+	templates "github.com/nathanhollows/Rapua/v3/internal/templates/admin"
 )
 
-// Activity displays the activity tracker page
+// Activity displays the activity tracker page.
 func (h *AdminHandler) Activity(w http.ResponseWriter, r *http.Request) {
 	user := h.UserFromContext(r.Context())
 
@@ -26,7 +26,7 @@ func (h *AdminHandler) Activity(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// ActivityTeamsOverview displays the activity tracker page
+// ActivityTeamsOverview displays the activity tracker page.
 func (h *AdminHandler) ActivityTeamsOverview(w http.ResponseWriter, r *http.Request) {
 	user := h.UserFromContext(r.Context())
 
@@ -42,8 +42,8 @@ func (h *AdminHandler) ActivityTeamsOverview(w http.ResponseWriter, r *http.Requ
 	}
 }
 
-// TeamActivity displays the activity tracker page
-// It accepts HTMX requests to update the team activity
+// TeamActivity displays the activity tracker page.
+// It accepts HTMX requests to update the team activity.
 func (h *AdminHandler) TeamActivity(w http.ResponseWriter, r *http.Request) {
 	user := h.UserFromContext(r.Context())
 

@@ -7,10 +7,10 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/nathanhollows/Rapua/db"
-	"github.com/nathanhollows/Rapua/helpers"
-	"github.com/nathanhollows/Rapua/models"
-	"github.com/nathanhollows/Rapua/repositories"
+	"github.com/nathanhollows/Rapua/v3/db"
+	"github.com/nathanhollows/Rapua/v3/helpers"
+	"github.com/nathanhollows/Rapua/v3/models"
+	"github.com/nathanhollows/Rapua/v3/repositories"
 	"github.com/uptrace/bun"
 )
 
@@ -52,7 +52,7 @@ type teamService struct {
 	batchSize      int
 }
 
-// NewTeamService creates a new TeamService
+// NewTeamService creates a new TeamService.
 func NewTeamService(transactor db.Transactor,
 	tr repositories.TeamRepository,
 	cr repositories.CheckInRepository,
@@ -83,7 +83,7 @@ type LocationActivity struct {
 	TimeOut  time.Time
 }
 
-// Helper function to check for code uniqueness within a batch
+// Helper function to check for code uniqueness within a batch.
 func (s *teamService) containsCode(teams []models.Team, code string) bool {
 	for _, team := range teams {
 		if team.Code == code {
@@ -93,7 +93,7 @@ func (s *teamService) containsCode(teams []models.Team, code string) bool {
 	return false
 }
 
-// AddTeams generates and inserts teams in batches, retrying if unique constraint errors occur
+// AddTeams generates and inserts teams in batches, retrying if unique constraint errors occur.
 func (s *teamService) AddTeams(ctx context.Context, instanceID string, count int) ([]models.Team, error) {
 	var newTeams []models.Team
 	for i := 0; i < count; i += s.batchSize {
@@ -133,17 +133,17 @@ func (s *teamService) AddTeams(ctx context.Context, instanceID string, count int
 	return newTeams, nil
 }
 
-// FindAll returns all teams for an instance
+// FindAll returns all teams for an instance.
 func (s *teamService) FindAll(ctx context.Context, instanceID string) ([]models.Team, error) {
 	return s.teamRepo.FindAll(ctx, instanceID)
 }
 
-// FindTeamByCode returns a team by code
+// FindTeamByCode returns a team by code.
 func (s *teamService) FindTeamByCode(ctx context.Context, code string) (*models.Team, error) {
 	return s.teamRepo.GetByCode(ctx, code)
 }
 
-// GetTeamActivityOverview returns a list of teams and their activity
+// GetTeamActivityOverview returns a list of teams and their activity.
 func (s *teamService) GetTeamActivityOverview(ctx context.Context, instanceID string, locations []models.Location) ([]TeamActivity, error) {
 	teams, err := s.teamRepo.FindAll(ctx, instanceID)
 	if err != nil {
@@ -197,18 +197,18 @@ func (s *teamService) GetTeamActivityOverview(ctx context.Context, instanceID st
 	return activity, nil
 }
 
-// Update updates a team in the database
+// Update updates a team in the database.
 func (s *teamService) Update(ctx context.Context, team *models.Team) error {
 	return s.teamRepo.Update(ctx, team)
 }
 
-// AwardPoints awards points to a team
+// AwardPoints awards points to a team.
 func (s *teamService) AwardPoints(ctx context.Context, team *models.Team, points int, _ string) error {
 	team.Points += points
 	return s.teamRepo.Update(ctx, team)
 }
 
-// Reset wipes a team's progress for re-use
+// Reset wipes a team's progress for re-use.
 func (s *teamService) Reset(ctx context.Context, instanceID string, teamCodes []string) error {
 	tx, err := s.transactor.BeginTx(ctx, &sql.TxOptions{})
 	if err != nil {
@@ -250,7 +250,7 @@ func (s *teamService) Reset(ctx context.Context, instanceID string, teamCodes []
 	return tx.Commit()
 }
 
-// Delete removes a team from the database
+// Delete removes a team from the database.
 func (s *teamService) Delete(ctx context.Context, instanceID string, teamCode string) error {
 	tx, err := s.transactor.BeginTx(ctx, &sql.TxOptions{})
 	if err != nil {
@@ -292,7 +292,7 @@ func (s *teamService) Delete(ctx context.Context, instanceID string, teamCode st
 	return tx.Commit()
 }
 
-// DeleteByInstanceID removes all teams for a specific instance
+// DeleteByInstanceID removes all teams for a specific instance.
 func (s *teamService) DeleteByInstanceID(ctx context.Context, tx *bun.Tx, instanceID string) error {
 	err := s.teamRepo.DeleteByInstanceID(ctx, tx, instanceID)
 	if err != nil {
@@ -302,7 +302,7 @@ func (s *teamService) DeleteByInstanceID(ctx context.Context, tx *bun.Tx, instan
 	return nil
 }
 
-// LoadRelation loads the specified relation for a team
+// LoadRelation loads the specified relation for a team.
 func (s *teamService) LoadRelation(ctx context.Context, team *models.Team, relation string) error {
 	switch relation {
 	case "Instance":
@@ -318,7 +318,7 @@ func (s *teamService) LoadRelation(ctx context.Context, team *models.Team, relat
 	}
 }
 
-// LoadRelations loads all relations for a team
+// LoadRelations loads all relations for a team.
 func (s *teamService) LoadRelations(ctx context.Context, team *models.Team) error {
 	err := s.teamRepo.LoadRelations(ctx, team)
 	if err != nil {

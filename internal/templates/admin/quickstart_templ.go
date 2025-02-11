@@ -10,10 +10,10 @@ import templruntime "github.com/a-h/templ/runtime"
 
 import (
 	"fmt"
-	"github.com/nathanhollows/Rapua/models"
+	"github.com/nathanhollows/Rapua/v3/models"
 )
 
-func QuickstartBar(user models.User) templ.Component {
+func QuickstartBar(instance models.Instance) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
@@ -31,12 +31,12 @@ func QuickstartBar(user models.User) templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		if user.CurrentInstanceID == "" || !user.CurrentInstance.IsQuickStartDismissed {
+		if instance.ID == "" || !instance.IsQuickStartDismissed {
 			templ_7745c5c3_Err = templ.WriteWatchModeString(templ_7745c5c3_Buffer, 1)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			if len(user.Instances) > 0 {
+			if instance.ID != "" {
 				templ_7745c5c3_Err = completedStep("Create an Instance").Render(ctx, templ_7745c5c3_Buffer)
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
@@ -47,35 +47,35 @@ func QuickstartBar(user models.User) templ.Component {
 					return templ_7745c5c3_Err
 				}
 			}
-			if len(user.CurrentInstance.Locations) > 0 {
+			if len(instance.Locations) > 0 {
 				templ_7745c5c3_Err = completedStep("Add a Location").Render(ctx, templ_7745c5c3_Buffer)
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 			} else {
-				templ_7745c5c3_Err = nextStep(2, "Add a Location", "/admin/locations/new", user.CurrentInstanceID == "").Render(ctx, templ_7745c5c3_Buffer)
+				templ_7745c5c3_Err = nextStep(2, "Add a Location", "/admin/locations/new", instance.ID == "").Render(ctx, templ_7745c5c3_Buffer)
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 			}
-			if len(user.CurrentInstance.Teams) > 0 {
+			if len(instance.Teams) > 0 {
 				templ_7745c5c3_Err = completedStep("Add a Team").Render(ctx, templ_7745c5c3_Buffer)
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 			} else {
-				templ_7745c5c3_Err = nextStep(3, "Add a Team", "/admin/teams", user.CurrentInstanceID == "").Render(ctx, templ_7745c5c3_Buffer)
+				templ_7745c5c3_Err = nextStep(3, "Add a Team", "/admin/teams", instance.ID == "").Render(ctx, templ_7745c5c3_Buffer)
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 			}
-			if !user.CurrentInstance.Settings.CreatedAt.Equal(user.CurrentInstance.Settings.UpdatedAt) {
+			if !instance.Settings.CreatedAt.Equal(instance.Settings.UpdatedAt) {
 				templ_7745c5c3_Err = completedStep("Update Settings").Render(ctx, templ_7745c5c3_Buffer)
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 			} else {
-				templ_7745c5c3_Err = nextStep(4, "Update Settings", "/admin/experience", user.CurrentInstanceID == "").Render(ctx, templ_7745c5c3_Buffer)
+				templ_7745c5c3_Err = nextStep(4, "Update Settings", "/admin/experience", instance.ID == "").Render(ctx, templ_7745c5c3_Buffer)
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -84,7 +84,7 @@ func QuickstartBar(user models.User) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			if len(user.Instances) > 0 && len(user.CurrentInstance.Locations) > 0 && len(user.CurrentInstance.Teams) > 0 && !user.CurrentInstance.Settings.CreatedAt.Equal(user.CurrentInstance.Settings.UpdatedAt) {
+			if instance.ID == "" && len(instance.Locations) > 0 && len(instance.Teams) > 0 && !instance.Settings.CreatedAt.Equal(instance.Settings.UpdatedAt) {
 				templ_7745c5c3_Err = templ.WriteWatchModeString(templ_7745c5c3_Buffer, 3)
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
@@ -99,7 +99,7 @@ func QuickstartBar(user models.User) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			if len(user.Instances) > 0 && len(user.CurrentInstance.Locations) > 0 && len(user.CurrentInstance.Teams) > 0 && !user.CurrentInstance.Settings.CreatedAt.Equal(user.CurrentInstance.Settings.UpdatedAt) {
+			if instance.ID == "" && len(instance.Locations) > 0 && len(instance.Teams) > 0 && !instance.Settings.CreatedAt.Equal(instance.Settings.UpdatedAt) {
 				templ_7745c5c3_Err = templ.WriteWatchModeString(templ_7745c5c3_Buffer, 6)
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err

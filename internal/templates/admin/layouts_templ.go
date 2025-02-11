@@ -10,7 +10,7 @@ import templruntime "github.com/a-h/templ/runtime"
 
 import (
 	"fmt"
-	"github.com/nathanhollows/Rapua/models"
+	"github.com/nathanhollows/Rapua/v3/models"
 	"os"
 )
 
@@ -65,7 +65,7 @@ func Layout(contents templ.Component, user models.User, section string, title st
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = QuickstartBar(user).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = QuickstartBar(user.CurrentInstance).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

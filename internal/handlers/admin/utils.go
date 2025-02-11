@@ -5,11 +5,11 @@ import (
 	"log/slog"
 	"net/http"
 
-	"github.com/nathanhollows/Rapua/internal/contextkeys"
-	"github.com/nathanhollows/Rapua/internal/flash"
-	"github.com/nathanhollows/Rapua/internal/services"
-	templates "github.com/nathanhollows/Rapua/internal/templates/admin"
-	"github.com/nathanhollows/Rapua/models"
+	"github.com/nathanhollows/Rapua/v3/internal/contextkeys"
+	"github.com/nathanhollows/Rapua/v3/internal/flash"
+	"github.com/nathanhollows/Rapua/v3/internal/services"
+	templates "github.com/nathanhollows/Rapua/v3/internal/templates/admin"
+	"github.com/nathanhollows/Rapua/v3/models"
 )
 
 type AdminHandler struct {
@@ -21,9 +21,11 @@ type AdminHandler struct {
 	FacilitatorService  services.FacilitatorService
 	GameManagerService  services.GameManagerService
 	GameplayService     services.GameplayService
+	IntanceService      services.InstanceService
 	LocationService     services.LocationService
 	NotificationService services.NotificationService
 	TeamService         services.TeamService
+	UploadService       services.UploadService
 	UserService         services.UserService
 }
 
@@ -36,9 +38,11 @@ func NewAdminHandler(
 	facilitatorService services.FacilitatorService,
 	gameManagerService services.GameManagerService,
 	gameplayService services.GameplayService,
+	instanceService services.InstanceService,
 	locationService services.LocationService,
 	notificationService services.NotificationService,
 	teamService services.TeamService,
+	uploadService services.UploadService,
 	userService services.UserService,
 ) *AdminHandler {
 	return &AdminHandler{
@@ -50,15 +54,17 @@ func NewAdminHandler(
 		FacilitatorService:  facilitatorService,
 		GameManagerService:  gameManagerService,
 		GameplayService:     gameplayService,
+		IntanceService:      instanceService,
 		LocationService:     locationService,
 		NotificationService: notificationService,
 		TeamService:         teamService,
+		UploadService:       uploadService,
 		UserService:         userService,
 	}
 }
 
-// GetUserFromContext retrieves the user from the context
-// User will always be in the context because the middleware
+// GetUserFromContext retrieves the user from the context.
+// User will always be in the context because the middleware.
 func (h AdminHandler) UserFromContext(ctx context.Context) *models.User {
 	return ctx.Value(contextkeys.UserKey).(*models.User)
 }
@@ -78,8 +84,8 @@ func (h *AdminHandler) handleSuccess(w http.ResponseWriter, r *http.Request, fla
 	}
 }
 
-// redirect is a helper function to redirect the user to a new page
-// It accounts for htmx requests and redirects the user to the referer
+// redirect is a helper function to redirect the user to a new page.
+// It accounts for htmx requests and redirects the user to the referer.
 func (h AdminHandler) redirect(w http.ResponseWriter, r *http.Request, path string) {
 	if r.Header.Get("HX-Request") == "true" {
 		w.Header().Set("HX-Redirect", path)

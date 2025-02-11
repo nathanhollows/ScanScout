@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"strconv"
 
-	admin "github.com/nathanhollows/Rapua/internal/templates/admin"
+	admin "github.com/nathanhollows/Rapua/v3/internal/templates/admin"
 )
 
 func (h *AdminHandler) Teams(w http.ResponseWriter, r *http.Request) {
@@ -35,6 +35,10 @@ func (h *AdminHandler) TeamsAdd(w http.ResponseWriter, r *http.Request) {
 
 	// Add the teams
 	teams, err := h.TeamService.AddTeams(r.Context(), user.CurrentInstanceID, count)
+	if err != nil {
+		h.handleError(w, r, "TeamsAdd adding teams", "Error adding teams", "error", err, "instance_id", user.CurrentInstanceID)
+		return
+	}
 
 	err = admin.TeamsList(teams).Render(r.Context(), w)
 	if err != nil {
@@ -44,7 +48,11 @@ func (h *AdminHandler) TeamsAdd(w http.ResponseWriter, r *http.Request) {
 
 func (h *AdminHandler) TeamsDelete(w http.ResponseWriter, r *http.Request) {
 	user := h.UserFromContext(r.Context())
-	r.ParseForm()
+	err := r.ParseForm()
+	if err != nil {
+		h.handleError(w, r, "parsing form", "Error parsing form", "error", err)
+		return
+	}
 
 	teamID := r.Form["team-checkbox"]
 	if len(teamID) == 0 {
@@ -75,7 +83,11 @@ func (h *AdminHandler) TeamsDelete(w http.ResponseWriter, r *http.Request) {
 
 func (h *AdminHandler) TeamsReset(w http.ResponseWriter, r *http.Request) {
 	user := h.UserFromContext(r.Context())
-	r.ParseForm()
+	err := r.ParseForm()
+	if err != nil {
+		h.handleError(w, r, "parsing form", "Error parsing form", "error", err)
+		return
+	}
 
 	teamIDs := r.Form["team-checkbox"]
 	if len(teamIDs) == 0 {
@@ -83,7 +95,7 @@ func (h *AdminHandler) TeamsReset(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err := h.TeamService.Reset(r.Context(), user.CurrentInstanceID, teamIDs)
+	err = h.TeamService.Reset(r.Context(), user.CurrentInstanceID, teamIDs)
 	if err != nil {
 		h.handleError(w, r, "TeamsReset deleting team", "Error resetting teams", "error", err, "instance_id", user.CurrentInstanceID, "team_id", teamIDs)
 		return

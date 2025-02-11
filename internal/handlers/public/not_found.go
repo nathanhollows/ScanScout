@@ -3,10 +3,10 @@ package handlers
 import (
 	"net/http"
 
-	templates "github.com/nathanhollows/Rapua/internal/templates/public"
+	templates "github.com/nathanhollows/Rapua/v3/internal/templates/public"
 )
 
-// NotFound shows the not found page
+// NotFound shows the not found page.
 func (h *PublicHandler) NotFound(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/html")
 

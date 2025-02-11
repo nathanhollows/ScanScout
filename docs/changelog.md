@@ -6,17 +6,57 @@ order: 100
 
 # Changelog
 
+## 3.4.0 (2025-02-11)
+
+### Added
+- **Content Blocks:**
+  - [Divider Blocks](/docs/user/blocks/divider) to separate content blocks for better readability.
+  - [Alert Blocks](/docs/user/blocks/alert) for important messages. 
+
+- **Uploads and Image Management:**
+  - Admins can now upload images to [Image Blocks](/docs/user/blocks/image). Images by URL are no longer supported. [#21](https://github.com/nathanhollows/Rapua/issues/21). This lays a lot of groundwork for player image and video uploads in the future ([#49](https://github.com/nathanhollows/Rapua/issues/49))
+
+- **Game Enhancements:**
+  - Introduced support and interface updates for unmapped locations. [#45](https://github.com/nathanhollows/Rapua/issues/45)
+  - Added an `IsMapped` method on markers to check if a location is mapped.
+  
+### Changed
+
+- Refactored URL generation, moving it out of the game manager and into the asset generator for better separation of concerns.
+- Split `game_manager_service` into `instance_service` to improve maintainability.
+- Refactored dependencies in services to reduce unnecessary coupling.
+- Modified the quickbar to accept only an instance instead of the whole user object.
+
+### Fixed
+
+- Resolved an issue where duplicating locations did not copy clues and blocks. [#52](https://github.com/nathanhollows/Rapua/issues/52)
+- Fixed an issue where newly created blocks did not correctly replace the location ID.
+- Ensured non-marker locations are disabled from rendering on maps. [#45](https://github.com/nathanhollows/Rapua/issues/45)
+- Fixed preview refresh issues after deleting a block.
+- Addressed static analysis warnings for unused variables, comments, and ignored errors.
+- Various minor typo fixes and documentation updates.
+
+### Removed
+
+- Cleaned up dead code and removed unused functions flagged by static analysis.
+- Removed redundant code in templates and players.
+- Removed unnecessary dependencies in services.
+
+[Full Changelog](https://github.com/nathanhollows/Rapua/releases/tag/v3.4.0)
+
+---
+
 ## 3.3.0 (2025-02-05)
 
 ### Added
 - **Team Management Enhancements:**
-  - Added the ability to reset a team's progress back to nothing.
+  - Added the ability to reset a team's progress back to nothing. [#54](https://github.com/nathanhollows/Rapua/issues/54)
   - Teams page now links to the team overview for quick access.
   - API: Implemented bulk deletion of check-ins by team codes.
   - API: Introduced bulk deletion of player states by team codes.
 
 - **Facilitator Features:**
-  - A new [facilitator dashboard](/docs/user/facilitator-dashboard) helps staff know the current progress of the game, reducing the need for proactice communication. [#56](https://github.com/nathanhollows/Rapua/issues/56)
+  - A new [facilitator dashboard](/docs/user/facilitator-dashboard) helps staff know the current progress of the game, reducing the need for practice communication. [#56](https://github.com/nathanhollows/Rapua/issues/56)
 
 - **UI/UX Improvements:**
   - [Reset and delete actions for teams](/docs/user/players-and-teams#deleting-and-resetting-teams) now require confirmation to prevent accidental data loss.

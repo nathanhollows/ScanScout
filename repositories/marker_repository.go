@@ -4,8 +4,8 @@ import (
 	"context"
 	"strings"
 
-	"github.com/nathanhollows/Rapua/helpers"
-	"github.com/nathanhollows/Rapua/models"
+	"github.com/nathanhollows/Rapua/v3/helpers"
+	"github.com/nathanhollows/Rapua/v3/models"
 	"github.com/uptrace/bun"
 )
 
@@ -42,7 +42,7 @@ func NewMarkerRepository(db *bun.DB) MarkerRepository {
 	}
 }
 
-// Create saves or updates a marker in the database
+// Create saves or updates a marker in the database.
 func (r *markerRepository) Create(ctx context.Context, marker *models.Marker) error {
 	if marker.Code == "" {
 		// TODO: Remove magic number
@@ -54,7 +54,7 @@ func (r *markerRepository) Create(ctx context.Context, marker *models.Marker) er
 	return err
 }
 
-// Update updates a marker in the database
+// Update updates a marker in the database.
 func (r *markerRepository) Update(ctx context.Context, marker *models.Marker) error {
 	_, err := r.db.
 		NewUpdate().
@@ -66,13 +66,13 @@ func (r *markerRepository) Update(ctx context.Context, marker *models.Marker) er
 	return err
 }
 
-// Delete deletes a marker from the database
+// Delete deletes a marker from the database.
 func (r *markerRepository) Delete(ctx context.Context, markerCode string) error {
 	_, err := r.db.NewDelete().Model(&models.Marker{Code: markerCode}).WherePK().Exec(ctx)
 	return err
 }
 
-// GetByCode finds a marker by its code
+// GetByCode finds a marker by its code.
 func (r *markerRepository) GetByCode(ctx context.Context, code string) (*models.Marker, error) {
 	code = strings.ToUpper(strings.TrimSpace(code))
 	var marker models.Marker
@@ -94,7 +94,7 @@ func (r *markerRepository) FindNotInInstance(ctx context.Context, instanceID str
 	return markers, err
 }
 
-// UpdateCoords updates the latitude and longitude of a marker in the database
+// UpdateCoords updates the latitude and longitude of a marker in the database.
 func (r *markerRepository) UpdateCoords(ctx context.Context, marker *models.Marker, lat, lng float64) error {
 	marker.Lat = lat
 	marker.Lng = lng
@@ -102,7 +102,7 @@ func (r *markerRepository) UpdateCoords(ctx context.Context, marker *models.Mark
 	return err
 }
 
-// IsShared checks if a marker is shared
+// IsShared checks if a marker is shared.
 func (r *markerRepository) IsShared(ctx context.Context, code string) (bool, error) {
 	var count int
 	count, err := r.db.NewSelect().Model(&models.Location{}).Where("marker_id = ?", code).Count(ctx)
@@ -112,7 +112,7 @@ func (r *markerRepository) IsShared(ctx context.Context, code string) (bool, err
 	return count > 1, nil
 }
 
-// UserOwnsMarker checks if a user owns a marker
+// UserOwnsMarker checks if a user owns a marker.
 func (r *markerRepository) UserOwnsMarker(ctx context.Context, userID, markerCode string) (bool, error) {
 	var count int
 	count, err := r.db.

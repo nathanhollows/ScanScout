@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/nathanhollows/Rapua/services"
+	"github.com/nathanhollows/Rapua/v3/services"
 	"github.com/yuin/goldmark"
 	"github.com/yuin/goldmark/ast"
 	"github.com/yuin/goldmark/extension"
@@ -13,7 +13,7 @@ import (
 	"github.com/yuin/goldmark/text"
 )
 
-// Markdown to AST
+// Markdown to AST.
 func testDocs_MarkdownToAST(t *testing.T, markdown string) ast.Node {
 	t.Helper()
 
@@ -53,7 +53,7 @@ func TestDocs_LinksResolve(t *testing.T) {
 				walkPages(page.Children)
 			}
 			nodes := testDocs_MarkdownToAST(t, page.Content)
-			ast.Walk(nodes, func(n ast.Node, entering bool) (ast.WalkStatus, error) {
+			err := ast.Walk(nodes, func(n ast.Node, entering bool) (ast.WalkStatus, error) {
 				if n.Kind() == ast.KindLink {
 					link := n.(*ast.Link)
 					dest := (string)(link.Destination)
@@ -80,6 +80,9 @@ func TestDocs_LinksResolve(t *testing.T) {
 				}
 				return ast.WalkContinue, nil
 			})
+			if err != nil {
+				t.Fatalf("failed to walk AST: %v", err)
+			}
 		}
 	}
 	walkPages(docsService.Pages)

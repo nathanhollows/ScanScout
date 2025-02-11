@@ -6,9 +6,9 @@ import (
 	"testing"
 
 	"github.com/brianvoe/gofakeit/v7"
-	"github.com/nathanhollows/Rapua/blocks"
-	"github.com/nathanhollows/Rapua/db"
-	"github.com/nathanhollows/Rapua/repositories"
+	"github.com/nathanhollows/Rapua/v3/blocks"
+	"github.com/nathanhollows/Rapua/v3/db"
+	"github.com/nathanhollows/Rapua/v3/repositories"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -86,7 +86,7 @@ func TestBlockRepository(t *testing.T) {
 					return nil, err
 				}
 				createdBlock, _ := repo.Create(context.Background(), block, gofakeit.UUID())
-				return createdBlock.(blocks.Block), nil
+				return createdBlock, nil
 			},
 			action: func(block blocks.Block) (interface{}, error) {
 				return repo.GetByID(context.Background(), block.GetID())
@@ -125,7 +125,7 @@ func TestBlockRepository(t *testing.T) {
 					return nil, err
 				}
 				createdBlock, _ := repo.Create(context.Background(), block, gofakeit.UUID())
-				return createdBlock.(blocks.Block), nil
+				return createdBlock, nil
 			},
 			action: func(block blocks.Block) (interface{}, error) {
 				// This relies on the Image Block
@@ -170,7 +170,7 @@ func TestBlockRepository(t *testing.T) {
 					return nil, err
 				}
 				createdBlock, _ := repo.Create(context.Background(), block, gofakeit.UUID())
-				return createdBlock.(blocks.Block), nil
+				return createdBlock, nil
 			},
 			action: func(block blocks.Block) (interface{}, error) {
 				tx, err := transactor.BeginTx(context.Background(), &sql.TxOptions{})
@@ -279,4 +279,37 @@ func TestBlockRepository_Bulk(t *testing.T) {
 			}
 		})
 	}
+}
+
+// Test that creating a new block with a new location ID replaces the old location ID.
+func TestBlockRepository_Create_NewLocationID(t *testing.T) {
+	repo, _, cleanup := setupBlockRepo(t)
+	defer cleanup()
+
+	block, err := repo.Create(
+		context.Background(),
+		blocks.NewImageBlock(
+			blocks.BaseBlock{
+				LocationID: gofakeit.UUID(),
+				Type:       "image",
+				Points:     10,
+			},
+		),
+		gofakeit.UUID(),
+	)
+
+	assert.NoError(t, err)
+	assert.NotNil(t, block)
+
+	// Create a new block with a new location ID
+	newBlock, err := repo.Create(
+		context.Background(),
+		block,
+		gofakeit.UUID(),
+	)
+
+	assert.NoError(t, err)
+	assert.NotNil(t, newBlock)
+	assert.NotEqual(t, block.GetLocationID(), newBlock.GetLocationID())
+
 }

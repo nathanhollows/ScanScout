@@ -4,10 +4,10 @@ import (
 	"net/http"
 
 	"github.com/go-chi/chi"
-	templates "github.com/nathanhollows/Rapua/internal/templates/blocks"
+	templates "github.com/nathanhollows/Rapua/v3/internal/templates/blocks"
 )
 
-// BlockEdit shows the form to edit a block
+// BlockEdit shows the form to edit a block.
 func (h *AdminHandler) BlockEdit(w http.ResponseWriter, r *http.Request) {
 	user := h.UserFromContext(r.Context())
 	location := chi.URLParam(r, "location")
@@ -36,7 +36,7 @@ func (h *AdminHandler) BlockEdit(w http.ResponseWriter, r *http.Request) {
 
 }
 
-// BlockEditPost updates the block
+// BlockEditPost updates the block.
 func (h *AdminHandler) BlockEditPost(w http.ResponseWriter, r *http.Request) {
 	user := h.UserFromContext(r.Context())
 
@@ -110,23 +110,31 @@ func (h *AdminHandler) BlockNewPost(w http.ResponseWriter, r *http.Request) {
 
 }
 
-// BlockDelete deletes a block
+// BlockDelete deletes a block.
 func (h *AdminHandler) BlockDelete(w http.ResponseWriter, r *http.Request) {
 	user := h.UserFromContext(r.Context())
 
 	location := chi.URLParam(r, "location")
+	blockID := chi.URLParam(r, "blockID")
+
+	if location == "" || blockID == "" {
+		h.handleError(w, r, "BlockDelete: missing parameters", "Could not delete block. Missing parameters")
+		return
+	}
+
+	// Check if the user has access to the location
 	if !h.GameManagerService.ValidateLocationID(user, location) {
 		h.handleError(w, r, "BlockDelete: invalid location", "Could not delete block. Invalid location", "location", location)
 		return
 	}
 
-	blockID := chi.URLParam(r, "blockID")
 	block, err := h.BlockService.GetByBlockID(r.Context(), blockID)
 	if err != nil {
 		h.handleError(w, r, "BlockDelete: getting block", "Could not delete block", "error", err)
 		return
 	}
 
+	// Sanity check, but should never happen
 	if block.GetLocationID() != location {
 		h.handleError(w, r, "BlockDelete: block does not belong to location", "Could not delete block", "blockID", blockID, "location", location)
 		return
@@ -141,7 +149,7 @@ func (h *AdminHandler) BlockDelete(w http.ResponseWriter, r *http.Request) {
 	h.handleSuccess(w, r, "Block deleted")
 }
 
-// ReorderBlocks reorders the blocks
+// ReorderBlocks reorders the blocks.
 func (h *AdminHandler) ReorderBlocks(w http.ResponseWriter, r *http.Request) {
 	user := h.UserFromContext(r.Context())
 

@@ -8,11 +8,11 @@ import (
 
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
-	"github.com/nathanhollows/Rapua/filesystem"
-	admin "github.com/nathanhollows/Rapua/internal/handlers/admin"
-	players "github.com/nathanhollows/Rapua/internal/handlers/players"
-	public "github.com/nathanhollows/Rapua/internal/handlers/public"
-	"github.com/nathanhollows/Rapua/internal/middlewares"
+	"github.com/nathanhollows/Rapua/v3/filesystem"
+	admin "github.com/nathanhollows/Rapua/v3/internal/handlers/admin"
+	players "github.com/nathanhollows/Rapua/v3/internal/handlers/players"
+	public "github.com/nathanhollows/Rapua/v3/internal/handlers/public"
+	"github.com/nathanhollows/Rapua/v3/internal/middlewares"
 )
 
 func setupRouter(
@@ -42,7 +42,7 @@ func setupRouter(
 	return router
 }
 
-// Setup the player routes
+// Setup the player routes.
 func setupPlayerRoutes(router chi.Router, playerHandler *players.PlayerHandler) {
 	// Home route
 	// Takes a GET request to show the home page
@@ -245,6 +245,10 @@ func setupAdminRoutes(router chi.Router, adminHandler *admin.AdminHandler) {
 		r.Route("/facilitator", func(r chi.Router) {
 			r.Get("/create-link", adminHandler.FacilitatorShowModal)
 			r.Post("/create-link", adminHandler.FacilitatorCreateTokenLink)
+		})
+
+		r.Route("/media", func(r chi.Router) {
+			r.Post("/upload", adminHandler.UploadMedia)
 		})
 
 		r.NotFound(adminHandler.NotFound)

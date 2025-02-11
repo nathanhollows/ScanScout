@@ -7,9 +7,9 @@ import (
 	"testing"
 
 	"github.com/brianvoe/gofakeit/v7"
-	"github.com/nathanhollows/Rapua/blocks"
-	"github.com/nathanhollows/Rapua/db"
-	"github.com/nathanhollows/Rapua/repositories"
+	"github.com/nathanhollows/Rapua/v3/blocks"
+	"github.com/nathanhollows/Rapua/v3/db"
+	"github.com/nathanhollows/Rapua/v3/repositories"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -47,7 +47,8 @@ func TestBlockStateRepository(t *testing.T) {
 				assert.NotNil(t, result)
 			},
 			cleanupFunc: func(state blocks.PlayerState) {
-				repo.Delete(context.Background(), state.GetBlockID(), state.GetPlayerID())
+				err := repo.Delete(context.Background(), state.GetBlockID(), state.GetPlayerID())
+				assert.NoError(t, err)
 			},
 		},
 		{
@@ -64,7 +65,8 @@ func TestBlockStateRepository(t *testing.T) {
 				assert.NotNil(t, result)
 			},
 			cleanupFunc: func(state blocks.PlayerState) {
-				repo.Delete(context.Background(), state.GetBlockID(), state.GetPlayerID())
+				err := repo.Delete(context.Background(), state.GetBlockID(), state.GetPlayerID())
+				assert.NoError(t, err)
 			},
 		},
 		{
@@ -87,7 +89,8 @@ func TestBlockStateRepository(t *testing.T) {
 				assert.Equal(t, 100, updatedState.GetPointsAwarded())
 			},
 			cleanupFunc: func(state blocks.PlayerState) {
-				repo.Delete(context.Background(), state.GetBlockID(), state.GetPlayerID())
+				err := repo.Delete(context.Background(), state.GetBlockID(), state.GetPlayerID())
+				assert.NoError(t, err)
 			},
 		},
 		{
@@ -152,11 +155,11 @@ func TestBlockStateRepository_Bulk(t *testing.T) {
 				}
 
 				err = repo.DeleteByBlockID(context.Background(), tx, state[0].GetBlockID())
-				if err != nil {
+				if err == nil {
+					tx.Commit()
+				} else {
 					tx.Rollback()
 					return nil, err
-				} else {
-					tx.Commit()
 				}
 
 				// Check that the states have been deleted

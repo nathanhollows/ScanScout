@@ -2,8 +2,8 @@ package blocks
 
 import (
 	"fmt"
-	"github.com/nathanhollows/Rapua/blocks"
-	"github.com/nathanhollows/Rapua/models"
+	"github.com/nathanhollows/Rapua/v3/blocks"
+	"github.com/nathanhollows/Rapua/v3/models"
 )
 
 func RenderAdminEdit(settings models.InstanceSettings, block blocks.Block) templ.Component {
@@ -11,6 +11,9 @@ func RenderAdminEdit(settings models.InstanceSettings, block blocks.Block) templ
 	case "markdown":
 		b := block.(*blocks.MarkdownBlock)
 		return markdownAdmin(settings, *b)
+	case "divider":
+		b := block.(*blocks.DividerBlock)
+		return dividerAdmin(settings, *b)
 	case "image":
 		b := block.(*blocks.ImageBlock)
 		return imageAdmin(settings, *b)
@@ -26,6 +29,12 @@ func RenderAdminEdit(settings models.InstanceSettings, block blocks.Block) templ
 	case "youtube":
 		b := block.(*blocks.YoutubeBlock)
 		return youtubeAdmin(settings, *b)
+	case "alert":
+		b := block.(*blocks.AlertBlock)
+		return alertAdmin(settings, *b)
+	case "photo":
+		b := block.(*blocks.PhotoBlock)
+		return photoAdmin(settings, *b)
 	}
 	return nil
 }
@@ -35,6 +44,9 @@ func RenderPlayerView(settings models.InstanceSettings, block blocks.Block, stat
 	case "markdown":
 		b := block.(*blocks.MarkdownBlock)
 		return markdownPlayer(settings, *b)
+	case "divider":
+		b := block.(*blocks.DividerBlock)
+		return dividerPlayer(settings, *b)
 	case "image":
 		b := block.(*blocks.ImageBlock)
 		return imagePlayer(settings, *b)
@@ -50,6 +62,12 @@ func RenderPlayerView(settings models.InstanceSettings, block blocks.Block, stat
 	case "youtube":
 		b := block.(*blocks.YoutubeBlock)
 		return youtubePlayer(settings, *b)
+	case "alert":
+		b := block.(*blocks.AlertBlock)
+		return alertPlayer(settings, *b)
+	case "photo":
+		b := block.(*blocks.PhotoBlock)
+		return photoPlayer(settings, *b, state)
 	}
 	return nil
 }
@@ -59,6 +77,9 @@ func RenderPlayerUpdate(settings models.InstanceSettings, block blocks.Block, st
 	case "markdown":
 		b := block.(*blocks.MarkdownBlock)
 		return markdownPlayer(settings, *b)
+	case "divider":
+		b := block.(*blocks.DividerBlock)
+		return dividerPlayer(settings, *b)
 	case "image":
 		b := block.(*blocks.ImageBlock)
 		return imagePlayer(settings, *b)
@@ -74,6 +95,12 @@ func RenderPlayerUpdate(settings models.InstanceSettings, block blocks.Block, st
 	case "youtube":
 		b := block.(*blocks.YoutubeBlock)
 		return youtubePlayer(settings, *b)
+	case "alert":
+		b := block.(*blocks.AlertBlock)
+		return alertPlayer(settings, *b)
+	case "photo":
+		b := block.(*blocks.PhotoBlock)
+		return photoPlayerUpdate(settings, *b, state)
 	}
 	return nil
 }
@@ -160,4 +187,12 @@ templ markdownHint() {
 			This block uses Markdown for formatting content. <a class="link" href="/docs/user/markdown-guide" target="blank">Here's a quick guide</a>.
 		</span>
 	</span>
+}
+
+templ completionBadge(data blocks.PlayerState) {
+	if data.IsComplete() {
+		<span class="indicator-item indicator-top indicator-right badge badge-success mr-12">Complete</span>
+	} else {
+		<span class="indicator-item indicator-top indicator-right badge mr-12">Incomplete</span>
+	}
 }

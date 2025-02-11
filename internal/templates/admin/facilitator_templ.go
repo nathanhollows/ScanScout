@@ -10,8 +10,8 @@ import templruntime "github.com/a-h/templ/runtime"
 
 import (
 	"fmt"
-	"github.com/nathanhollows/Rapua/internal/services"
-	"github.com/nathanhollows/Rapua/models"
+	"github.com/nathanhollows/Rapua/v3/internal/services"
+	"github.com/nathanhollows/Rapua/v3/models"
 )
 
 func FacilitatorLinkModal() templ.Component {

@@ -4,8 +4,8 @@ import (
 	"errors"
 	"net/http"
 
-	"github.com/nathanhollows/Rapua/internal/services"
-	templates "github.com/nathanhollows/Rapua/internal/templates/players"
+	"github.com/nathanhollows/Rapua/v3/internal/services"
+	templates "github.com/nathanhollows/Rapua/v3/internal/templates/players"
 )
 
 func (h *PlayerHandler) Finish(w http.ResponseWriter, r *http.Request) {
@@ -30,4 +30,7 @@ func (h *PlayerHandler) Finish(w http.ResponseWriter, r *http.Request) {
 	// data["notifications"], _ = h.NotificationService.GetNotifications(r.Context(), team.Code)
 	c := templates.Finish(*team, locations)
 	err = templates.Layout(c, "The End", team.Messages).Render(r.Context(), w)
+	if err != nil {
+		h.handleError(w, r, "Next: rendering template", "Error rendering template", "Could not render template", err)
+	}
 }

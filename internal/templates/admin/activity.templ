@@ -2,8 +2,8 @@ package templates
 
 import (
 	"fmt"
-	"github.com/nathanhollows/Rapua/internal/flash"
-	"github.com/nathanhollows/Rapua/models"
+	"github.com/nathanhollows/Rapua/v3/internal/flash"
+	"github.com/nathanhollows/Rapua/v3/models"
 	"github.com/uptrace/bun/schema"
 	"sort"
 )
@@ -86,8 +86,10 @@ templ ActivityTracker(instance models.Instance) {
 									href={ templ.URL(fmt.Sprintf("/admin/locations/%s", location.Marker.Code)) }
 									hx-boost="true"
 									class="link flex-grow location-name"
-									data-lat={ fmt.Sprint(location.Marker.Lat) }
-									data-lng={ fmt.Sprint(location.Marker.Lng) }
+									if location.Marker.IsMapped() {
+										data-lat={ fmt.Sprint(location.Marker.Lat) }
+										data-lng={ fmt.Sprint(location.Marker.Lng) }
+									}
 								>{ location.Marker.Name }</a>
 							</div>
 						</div>
@@ -154,6 +156,9 @@ templ ActivityTracker(instance models.Instance) {
 
     // Find and loop through .location-name elements to create markers with original numbers
     locations.forEach(function (location, index) {
+	  if (!location.dataset.lat || !location.dataset.lng) {
+		return;
+		}
       // Create a HTML element for each marker
       const el = document.createElement('div');
       el.className = 'marker';

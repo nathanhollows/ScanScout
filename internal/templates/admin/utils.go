@@ -19,13 +19,3 @@ func filter[T any](items []T, fn func(T) bool) []T {
 	}
 	return filtered
 }
-
-func percentage(num, den int) int {
-	if num == 0 || den == 0 {
-		return 0
-	}
-	if num > den {
-		return 100
-	}
-	return (num * 100) / den
-}

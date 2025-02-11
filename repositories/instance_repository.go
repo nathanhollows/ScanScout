@@ -2,10 +2,11 @@ package repositories
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"github.com/google/uuid"
-	"github.com/nathanhollows/Rapua/models"
+	"github.com/nathanhollows/Rapua/v3/models"
 	"github.com/uptrace/bun"
 )
 
@@ -46,7 +47,7 @@ func (r *instanceRepository) Create(ctx context.Context, instance *models.Instan
 		instance.ID = uuid.New().String()
 	}
 	if instance.UserID == "" {
-		return fmt.Errorf("UserID is required")
+		return errors.New("UserID is required")
 	}
 	_, err := r.db.NewInsert().Model(instance).Exec(ctx)
 	if err != nil {
@@ -57,7 +58,7 @@ func (r *instanceRepository) Create(ctx context.Context, instance *models.Instan
 
 func (r *instanceRepository) Update(ctx context.Context, instance *models.Instance) error {
 	if instance.ID == "" {
-		return fmt.Errorf("ID is required")
+		return errors.New("ID is required")
 	}
 	res, err := r.db.NewUpdate().Model(instance).WherePK().Exec(ctx)
 	if err != nil {
@@ -65,7 +66,7 @@ func (r *instanceRepository) Update(ctx context.Context, instance *models.Instan
 	}
 	affected, err := res.RowsAffected()
 	if err != nil || affected == 0 {
-		return fmt.Errorf("instance not found")
+		return errors.New("instance not found")
 	}
 	return nil
 }
@@ -124,7 +125,7 @@ func (r *instanceRepository) Delete(ctx context.Context, tx *bun.Tx, id string) 
 	return nil
 }
 
-// DeleteByUserID removes all instances associated with a user ID
+// DeleteByUserID removes all instances associated with a user ID.
 func (r *instanceRepository) DeleteByUser(ctx context.Context, tx *bun.Tx, userID string) error {
 	instances, err := r.FindByUserID(ctx, userID)
 	if err != nil {
@@ -138,7 +139,7 @@ func (r *instanceRepository) DeleteByUser(ctx context.Context, tx *bun.Tx, userI
 	return nil
 }
 
-// DismissQuickstart marks the user as having dismissed the quickstart
+// DismissQuickstart marks the user as having dismissed the quickstart.
 func (r *instanceRepository) DismissQuickstart(ctx context.Context, instanceID string) error {
 	_, err := r.db.NewUpdate().
 		Model(&models.Instance{}).

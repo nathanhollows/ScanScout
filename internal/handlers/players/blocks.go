@@ -4,11 +4,11 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/nathanhollows/Rapua/internal/sessions"
-	templates "github.com/nathanhollows/Rapua/internal/templates/blocks"
+	"github.com/nathanhollows/Rapua/v3/internal/sessions"
+	templates "github.com/nathanhollows/Rapua/v3/internal/templates/blocks"
 )
 
-// ValidateBlock runs input validation on the block
+// ValidateBlock runs input validation on the block.
 func (h *PlayerHandler) ValidateBlock(w http.ResponseWriter, r *http.Request) {
 	session, _ := sessions.Get(r, "scanscout")
 	teamCode := session.Values["team"]
@@ -18,11 +18,18 @@ func (h *PlayerHandler) ValidateBlock(w http.ResponseWriter, r *http.Request) {
 	if err != nil || team == nil {
 		// If the team is not found, return an error
 		h.handleError(w, r, fmt.Errorf("validateBlock: getTeamifExists: %v", err).Error(), "Team not found")
-		invalidateSession(r, w)
+		err := invalidateSession(r, w)
+		if err != nil {
+			h.handleError(w, r, fmt.Errorf("validateBlock: invalidateSession: %v", err).Error(), "Something went wrong!")
+		}
 		return
 	}
 
-	r.ParseForm()
+	err = r.ParseForm()
+	if err != nil {
+		h.handleError(w, r, fmt.Errorf("validateBlock: parsing form: %v", err).Error(), "Something went wrong!")
+		return
+	}
 	data := make(map[string][]string)
 	for key, value := range r.Form {
 		data[key] = value

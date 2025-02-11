@@ -2,8 +2,8 @@ package blocks
 
 import (
 	"fmt"
-	"github.com/nathanhollows/Rapua/blocks"
-	"github.com/nathanhollows/Rapua/models"
+	"github.com/nathanhollows/Rapua/v3/blocks"
+	"github.com/nathanhollows/Rapua/v3/models"
 )
 
 templ pincodePlayer(settings models.InstanceSettings, block blocks.PincodeBlock, data blocks.PlayerState) {
@@ -14,11 +14,7 @@ templ pincodePlayer(settings models.InstanceSettings, block blocks.PincodeBlock,
 		if settings.EnablePoints && block.Points > 0 {
 			<span class="indicator-item indicator-top indicator-center badge badge-info">{ fmt.Sprint(block.GetPoints()) } pts</span>
 		}
-		if data.IsComplete() {
-			<span class="indicator-item indicator-top indicator-right badge badge-success mr-12">Complete</span>
-		} else {
-			<span class="indicator-item indicator-top indicator-right badge badge-primary mr-12">Incomplete</span>
-		}
+		@completionBadge(data)
 		<div class="card prose p-5 bg-base-200 shadow-lg w-full">
 			@templ.Raw(stringToMarkdown(block.Prompt))
 			<form

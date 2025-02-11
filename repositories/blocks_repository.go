@@ -5,8 +5,8 @@ import (
 	"errors"
 
 	"github.com/google/uuid"
-	"github.com/nathanhollows/Rapua/blocks"
-	"github.com/nathanhollows/Rapua/models"
+	"github.com/nathanhollows/Rapua/v3/blocks"
+	"github.com/nathanhollows/Rapua/v3/models"
 	"github.com/uptrace/bun"
 )
 
@@ -49,7 +49,7 @@ func NewBlockRepository(db *bun.DB, stateRepo BlockStateRepository) BlockReposit
 	}
 }
 
-// FindByLocationID fetches all blocks for a location
+// FindByLocationID fetches all blocks for a location.
 func (r *blockRepository) FindByLocationID(ctx context.Context, locationID string) (blocks.Blocks, error) {
 	modelBlocks := []models.Block{}
 	err := r.db.NewSelect().
@@ -63,7 +63,7 @@ func (r *blockRepository) FindByLocationID(ctx context.Context, locationID strin
 	return convertModelsToBlocks(modelBlocks)
 }
 
-// GetByID fetches a block by its ID
+// GetByID fetches a block by its ID.
 func (r *blockRepository) GetByID(ctx context.Context, blockID string) (blocks.Block, error) {
 	modelBlock := &models.Block{}
 	err := r.db.NewSelect().
@@ -76,11 +76,11 @@ func (r *blockRepository) GetByID(ctx context.Context, blockID string) (blocks.B
 	return convertModelToBlock(modelBlock)
 }
 
-// Create saves a new block to the database
+// Create saves a new block to the database.
 func (r *blockRepository) Create(ctx context.Context, block blocks.Block, locationID string) (blocks.Block, error) {
 	modelBlock := models.Block{
 		ID:                 uuid.New().String(),
-		LocationID:         block.GetLocationID(),
+		LocationID:         locationID,
 		Type:               block.GetType(),
 		Data:               block.GetData(),
 		Ordering:           1e4,
@@ -99,7 +99,7 @@ func (r *blockRepository) Create(ctx context.Context, block blocks.Block, locati
 	return createdBlock, nil
 }
 
-// Update saves an existing block to the database
+// Update saves an existing block to the database.
 func (r *blockRepository) Update(ctx context.Context, block blocks.Block) (blocks.Block, error) {
 	modelBlock := convertBlockToModel(block)
 	_, err := r.db.NewUpdate().Model(&modelBlock).WherePK().Exec(ctx)
@@ -114,7 +114,7 @@ func (r *blockRepository) Update(ctx context.Context, block blocks.Block) (block
 	return updatedBlock, nil
 }
 
-// Convert block to model
+// Convert block to model.
 func convertBlockToModel(block blocks.Block) models.Block {
 	return models.Block{
 		ID:                 block.GetID(),
@@ -159,19 +159,19 @@ func convertModelToBlock(model *models.Block) (blocks.Block, error) {
 	return newBlock, nil
 }
 
-// Delete deletes a block from the database
+// Delete deletes a block from the database.
 func (r *blockRepository) Delete(ctx context.Context, tx *bun.Tx, blockID string) error {
 	_, err := tx.NewDelete().Model(&models.Block{}).Where("id = ?", blockID).Exec(ctx)
 	return err
 }
 
-// DeleteByLocationID deletes all blocks for a location
+// DeleteByLocationID deletes all blocks for a location.
 func (r *blockRepository) DeleteByLocationID(ctx context.Context, tx *bun.Tx, locationID string) error {
 	_, err := tx.NewDelete().Model(&models.Block{}).Where("location_id = ?", locationID).Exec(ctx)
 	return err
 }
 
-// Reorder reorders the blocks
+// Reorder reorders the blocks.
 func (r *blockRepository) Reorder(ctx context.Context, locationID string, blockIDs []string) error {
 	for i, blockID := range blockIDs {
 		_, err := r.db.NewUpdate().
@@ -186,7 +186,7 @@ func (r *blockRepository) Reorder(ctx context.Context, locationID string, blockI
 	return nil
 }
 
-// FindBlocksAndStatesByLocationIDAndTeamCode fetches all blocks for a location with their player states
+// FindBlocksAndStatesByLocationIDAndTeamCode fetches all blocks for a location with their player states.
 func (r *blockRepository) FindBlocksAndStatesByLocationIDAndTeamCode(ctx context.Context, locationID string, teamCode string) ([]blocks.Block, []blocks.PlayerState, error) {
 	if teamCode == "" {
 		return nil, nil, errors.New("team code must be set")
@@ -256,7 +256,7 @@ func (r *blockRepository) FindBlocksAndStatesByLocationIDAndTeamCode(ctx context
 	return foundBlocks, playerStates, nil
 }
 
-// GetBlockAndStateByBlockIDAndTeamCode fetches a block by its ID with the player state for a given team
+// GetBlockAndStateByBlockIDAndTeamCode fetches a block by its ID with the player state for a given team.
 func (r *blockRepository) GetBlockAndStateByBlockIDAndTeamCode(ctx context.Context, blockID string, teamCode string) (blocks.Block, blocks.PlayerState, error) {
 	modelBlock := models.Block{}
 	err := r.db.NewSelect().

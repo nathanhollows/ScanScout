@@ -9,18 +9,18 @@ import (
 	"github.com/go-chi/chi"
 )
 
-// FileSystem interface to allow access to local files
+// FileSystem interface to allow access to local files.
 type FileSystem interface {
 	Open(name string) (http.File, error)
 }
 
-// Myfs is the accessible directory
+// Myfs is the accessible directory.
 type Myfs struct {
 	Dir http.Dir
 }
 
 // Open returns the file if available.
-// It will not return directory listings
+// It will not return directory listings.
 func (m Myfs) Open(name string) (result http.File, err error) {
 	f, err := m.Dir.Open(name)
 	if err != nil {
@@ -39,7 +39,7 @@ func (m Myfs) Open(name string) (result http.File, err error) {
 	return f, nil
 }
 
-// FileServer serves the requested file
+// FileServer serves the requested file.
 func FileServer(r chi.Router, path string, root http.FileSystem) {
 	if strings.ContainsAny(path, "{}*") {
 		panic("FileServer does not permit URL parameters")

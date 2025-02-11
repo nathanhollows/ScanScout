@@ -3,8 +3,8 @@ package handlers
 import (
 	"net/http"
 
-	templates "github.com/nathanhollows/Rapua/internal/templates/public"
-	"github.com/nathanhollows/Rapua/services"
+	templates "github.com/nathanhollows/Rapua/v3/internal/templates/public"
+	"github.com/nathanhollows/Rapua/v3/services"
 )
 
 func (h *PublicHandler) Docs(w http.ResponseWriter, r *http.Request) {

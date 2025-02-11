@@ -2,6 +2,7 @@ package blocks
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"strconv"
 )
@@ -51,13 +52,13 @@ func (b *AnswerBlock) UpdateBlockData(input map[string][]string) error {
 	if input["points"] != nil {
 		points, err := strconv.Atoi(input["points"][0])
 		if err != nil {
-			return fmt.Errorf("points must be an integer")
+			return errors.New("points must be an integer")
 		}
 		b.Points = points
 	}
 	// Prompt and Answer
 	if input["prompt"] == nil || input["answer"] == nil {
-		return fmt.Errorf("prompt and answer are required fields")
+		return errors.New("prompt and answer are required fields")
 	}
 	b.Prompt = input["prompt"][0]
 	b.Answer = input["answer"][0]
@@ -73,13 +74,16 @@ func (b *AnswerBlock) RequiresValidation() bool { return true }
 
 func (b *AnswerBlock) ValidatePlayerInput(state PlayerState, input map[string][]string) (PlayerState, error) {
 	if input["answer"] == nil {
-		return state, fmt.Errorf("answer is a required field")
+		return state, errors.New("answer is a required field")
 	}
 
 	var err error
 	newPlayerData := answerBlockData{}
 	if state.GetPlayerData() != nil {
-		json.Unmarshal(state.GetPlayerData(), &newPlayerData)
+		err := json.Unmarshal(state.GetPlayerData(), &newPlayerData)
+		if err != nil {
+			return state, fmt.Errorf("parse player data: %w", err)
+		}
 	}
 
 	// Increment the number of attempts and save guesses
@@ -90,7 +94,7 @@ func (b *AnswerBlock) ValidatePlayerInput(state PlayerState, input map[string][]
 		// Incorrect answer, save player data and return an error
 		playerData, err := json.Marshal(newPlayerData)
 		if err != nil {
-			return state, fmt.Errorf("Error saving player data")
+			return state, errors.New("Error saving player data")
 		}
 		state.SetPlayerData(playerData)
 		return state, nil
@@ -99,7 +103,7 @@ func (b *AnswerBlock) ValidatePlayerInput(state PlayerState, input map[string][]
 	// Correct answer, update state to complete
 	playerData, err := json.Marshal(newPlayerData)
 	if err != nil {
-		return state, fmt.Errorf("Error saving player data")
+		return state, errors.New("Error saving player data")
 	}
 	state.SetPlayerData(playerData)
 	state.SetComplete(true)
