@@ -57,7 +57,7 @@ var registeredBlocks = Blocks{
 	&AnswerBlock{},
 	&PincodeBlock{},
 	&ChecklistBlock{},
-	&PhotoBlock{},
+	// &PhotoBlock{},
 }
 
 func GetRegisteredBlocks() Blocks {
@@ -82,8 +82,8 @@ func CreateFromBaseBlock(baseBlock BaseBlock) (Block, error) {
 		return NewYoutubeBlock(baseBlock), nil
 	case "image":
 		return NewImageBlock(baseBlock), nil
-	case "photo":
-		return NewPhotoBlock(baseBlock), nil
+	// case "photo":
+	// 	return NewPhotoBlock(baseBlock), nil
 	default:
 		return nil, fmt.Errorf("block type %s not found", baseBlock.Type)
 	}
@@ -138,8 +138,9 @@ func NewImageBlock(base BaseBlock) *ImageBlock {
 	}
 }
 
-func NewPhotoBlock(base BaseBlock) *PhotoBlock {
-	return &PhotoBlock{
-		BaseBlock: base,
-	}
-}
+//
+// func NewPhotoBlock(base BaseBlock) *PhotoBlock {
+// 	return &PhotoBlock{
+// 		BaseBlock: base,
+// 	}
+// }
