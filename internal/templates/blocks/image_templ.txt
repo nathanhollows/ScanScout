@@ -38,7 +38,7 @@
 \" name=\"caption\" type=\"text\" class=\"input input-bordered w-full\" placeholder=\"Caption below image\" value=\"
 \"></label> <label for=\"
 \" class=\"form-control w-full mt-5\"><div class=\"label\"><span class=\"w-full label-text font-bold flex justify-between\">Link <badge class=\"badge badge-info badge-sm opacity-80\">Optional</badge></span></div><input id=\"
-\" name=\"link\" type=\"url\" class=\"input input-bordered w-full\" placeholder=\"Link when clicked\" value=\"
+\" name=\"link\" type=\"url\" class=\"input input-bordered w-full invalid:border-error\" placeholder=\"Link when clicked\" value=\"
 \"></label></div></form>
 <label id=\"
 \" class=\"input input-bordered input-disabled border-opacity-100 flex items-center gap-2\" hx-swap-oob=\"true\"><input id=\"

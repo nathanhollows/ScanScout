@@ -9078,6 +9078,16 @@ html:has(.drawer-toggle:checked) {
   content: var(--tw-content);
 }
 
+.invalid\:border-warning:invalid {
+  --tw-border-opacity: 1;
+  border-color: var(--fallback-wa,oklch(var(--wa)/var(--tw-border-opacity)));
+}
+
+.invalid\:border-error:invalid {
+  --tw-border-opacity: 1;
+  border-color: var(--fallback-er,oklch(var(--er)/var(--tw-border-opacity)));
+}
+
 .hover\:border-0:hover {
   border-width: 0px;
 }

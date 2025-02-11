@@ -148,7 +148,7 @@ templ imageAdmin(_ models.InstanceSettings, block blocks.ImageBlock) {
 					id={ fmt.Sprintf("link-%s", block.ID) }
 					name="link"
 					type="url"
-					class="input input-bordered w-full"
+					class="input input-bordered w-full invalid:border-error"
 					placeholder="Link when clicked"
 					value={ block.Link }
 				/>
