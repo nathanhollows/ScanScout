@@ -14,14 +14,17 @@ import (
 	"github.com/nathanhollows/Rapua/internal/services"
 )
 
+// LocalStorage is a storage implementation that saves files to the local filesystem.
 type LocalStorage struct {
 	basePath string
 }
 
+// NewLocalStorage creates a new local storage instance.
 func NewLocalStorage(basePath string) services.UploadStorage {
 	return &LocalStorage{basePath: basePath}
 }
 
+// Upload saves the file to the local storage.
 func (s *LocalStorage) Upload(ctx context.Context, file multipart.File, filename string) (map[string]string, string, error) {
 	select {
 	case <-ctx.Done():
@@ -69,6 +72,7 @@ func (s *LocalStorage) Upload(ctx context.Context, file multipart.File, filename
 	return map[string]string{"original": filePath}, "", nil
 }
 
+// Type returns the storage type.
 func (s *LocalStorage) Type() string {
 	return "local"
 }
