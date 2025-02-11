@@ -7,12 +7,12 @@ import (
 	"io"
 	"os"
 	"regexp"
+	"strconv"
 	"strings"
 	"time"
-	"strconv"
 
 	"github.com/go-pdf/fpdf"
-	"github.com/nathanhollows/Rapua/helpers"
+	"github.com/nathanhollows/Rapua/v3/helpers"
 	go_qr "github.com/piglig/go-qr"
 )
 

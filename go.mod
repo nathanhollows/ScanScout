@@ -1,4 +1,4 @@
-module github.com/nathanhollows/Rapua
+module github.com/nathanhollows/Rapua/v3
 
 go 1.22.7
 

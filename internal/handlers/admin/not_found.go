@@ -4,7 +4,7 @@ import (
 	"log/slog"
 	"net/http"
 
-	templates "github.com/nathanhollows/Rapua/internal/templates/admin"
+	templates "github.com/nathanhollows/Rapua/v3/internal/templates/admin"
 )
 
 // NotFound shows the not found page.

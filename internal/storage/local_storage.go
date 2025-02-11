@@ -10,8 +10,8 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/nathanhollows/Rapua/helpers"
-	"github.com/nathanhollows/Rapua/internal/services"
+	"github.com/nathanhollows/Rapua/v3/helpers"
+	"github.com/nathanhollows/Rapua/v3/internal/services"
 )
 
 // LocalStorage is a storage implementation that saves files to the local filesystem.

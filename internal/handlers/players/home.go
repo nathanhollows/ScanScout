@@ -3,9 +3,9 @@ package handlers
 import (
 	"net/http"
 
-	"github.com/nathanhollows/Rapua/internal/sessions"
-	templates "github.com/nathanhollows/Rapua/internal/templates/players"
-	"github.com/nathanhollows/Rapua/models"
+	"github.com/nathanhollows/Rapua/v3/internal/sessions"
+	templates "github.com/nathanhollows/Rapua/v3/internal/templates/players"
+	"github.com/nathanhollows/Rapua/v3/models"
 )
 
 // Play shows the player the first page of the game.

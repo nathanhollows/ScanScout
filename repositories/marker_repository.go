@@ -4,8 +4,8 @@ import (
 	"context"
 	"strings"
 
-	"github.com/nathanhollows/Rapua/helpers"
-	"github.com/nathanhollows/Rapua/models"
+	"github.com/nathanhollows/Rapua/v3/helpers"
+	"github.com/nathanhollows/Rapua/v3/models"
 	"github.com/uptrace/bun"
 )
 

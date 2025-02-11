@@ -3,8 +3,8 @@ package handlers
 import (
 	"net/http"
 
-	"github.com/nathanhollows/Rapua/internal/flash"
-	templates "github.com/nathanhollows/Rapua/internal/templates/players"
+	"github.com/nathanhollows/Rapua/v3/internal/flash"
+	templates "github.com/nathanhollows/Rapua/v3/internal/templates/players"
 )
 
 // Lobby is where teams wait for the game to begin.

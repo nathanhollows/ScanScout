@@ -5,9 +5,9 @@ import (
 	"net/http"
 	"regexp"
 
-	"github.com/nathanhollows/Rapua/internal/contextkeys"
-	"github.com/nathanhollows/Rapua/internal/services"
-	"github.com/nathanhollows/Rapua/models"
+	"github.com/nathanhollows/Rapua/v3/internal/contextkeys"
+	"github.com/nathanhollows/Rapua/v3/internal/services"
+	"github.com/nathanhollows/Rapua/v3/models"
 )
 
 // AdminAuthMiddleware ensures the user is authenticated and has verified their email.

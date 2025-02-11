@@ -10,9 +10,9 @@ import templruntime "github.com/a-h/templ/runtime"
 
 import (
 	"fmt"
-	"github.com/nathanhollows/Rapua/blocks"
-	bTemplates "github.com/nathanhollows/Rapua/internal/templates/blocks"
-	"github.com/nathanhollows/Rapua/models"
+	"github.com/nathanhollows/Rapua/v3/blocks"
+	bTemplates "github.com/nathanhollows/Rapua/v3/internal/templates/blocks"
+	"github.com/nathanhollows/Rapua/v3/models"
 )
 
 func LocationsIndex(settings models.InstanceSettings, locations []models.Location) templ.Component {

@@ -7,12 +7,12 @@ import (
 
 	"github.com/go-chi/chi"
 	"github.com/markbates/goth/gothic"
-	"github.com/nathanhollows/Rapua/helpers"
-	"github.com/nathanhollows/Rapua/internal/flash"
-	"github.com/nathanhollows/Rapua/internal/services"
-	"github.com/nathanhollows/Rapua/internal/sessions"
-	templates "github.com/nathanhollows/Rapua/internal/templates/public"
-	"github.com/nathanhollows/Rapua/models"
+	"github.com/nathanhollows/Rapua/v3/helpers"
+	"github.com/nathanhollows/Rapua/v3/internal/flash"
+	"github.com/nathanhollows/Rapua/v3/internal/services"
+	"github.com/nathanhollows/Rapua/v3/internal/sessions"
+	templates "github.com/nathanhollows/Rapua/v3/internal/templates/public"
+	"github.com/nathanhollows/Rapua/v3/models"
 )
 
 // LoginHandler is the handler for the admin login page.

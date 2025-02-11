@@ -4,8 +4,8 @@ import (
 	"net/http"
 
 	"github.com/go-chi/chi"
-	"github.com/nathanhollows/Rapua/internal/flash"
-	templates "github.com/nathanhollows/Rapua/internal/templates/admin"
+	"github.com/nathanhollows/Rapua/v3/internal/flash"
+	templates "github.com/nathanhollows/Rapua/v3/internal/templates/admin"
 )
 
 // Instances shows admin the instances.

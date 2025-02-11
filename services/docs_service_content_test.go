@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/nathanhollows/Rapua/services"
+	"github.com/nathanhollows/Rapua/v3/services"
 	"github.com/yuin/goldmark"
 	"github.com/yuin/goldmark/ast"
 	"github.com/yuin/goldmark/extension"

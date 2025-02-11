@@ -6,10 +6,10 @@ import (
 	"time"
 
 	"github.com/go-chi/chi"
-	"github.com/nathanhollows/Rapua/helpers"
-	templates "github.com/nathanhollows/Rapua/internal/templates/admin"
-	public "github.com/nathanhollows/Rapua/internal/templates/public"
-	"github.com/nathanhollows/Rapua/models"
+	"github.com/nathanhollows/Rapua/v3/helpers"
+	templates "github.com/nathanhollows/Rapua/v3/internal/templates/admin"
+	public "github.com/nathanhollows/Rapua/v3/internal/templates/public"
+	"github.com/nathanhollows/Rapua/v3/models"
 )
 
 // FacilitatorShowModal renders the modal for creating a facilitator token.

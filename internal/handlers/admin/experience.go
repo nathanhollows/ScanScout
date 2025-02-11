@@ -4,9 +4,9 @@ import (
 	"net/http"
 	"strconv"
 
-	admin "github.com/nathanhollows/Rapua/internal/templates/admin"
-	players "github.com/nathanhollows/Rapua/internal/templates/players"
-	"github.com/nathanhollows/Rapua/models"
+	admin "github.com/nathanhollows/Rapua/v3/internal/templates/admin"
+	players "github.com/nathanhollows/Rapua/v3/internal/templates/players"
+	"github.com/nathanhollows/Rapua/v3/models"
 )
 
 // Show the form to edit the navigation settings.

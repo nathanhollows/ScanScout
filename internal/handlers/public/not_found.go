@@ -3,7 +3,7 @@ package handlers
 import (
 	"net/http"
 
-	templates "github.com/nathanhollows/Rapua/internal/templates/public"
+	templates "github.com/nathanhollows/Rapua/v3/internal/templates/public"
 )
 
 // NotFound shows the not found page.

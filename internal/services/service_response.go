@@ -1,7 +1,7 @@
 package services
 
 import (
-	"github.com/nathanhollows/Rapua/internal/flash"
+	"github.com/nathanhollows/Rapua/v3/internal/flash"
 )
 
 type ServiceResponse struct {

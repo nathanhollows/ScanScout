@@ -3,7 +3,7 @@ package repositories_test
 import (
 	"testing"
 
-	"github.com/nathanhollows/Rapua/repositories"
+	"github.com/nathanhollows/Rapua/v3/repositories"
 )
 
 func setupLocationRepo(t *testing.T) (repositories.LocationRepository, func()) {

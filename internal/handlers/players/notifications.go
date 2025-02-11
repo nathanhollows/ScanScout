@@ -4,7 +4,7 @@ import (
 	"net/http"
 
 	"github.com/go-chi/chi"
-	"github.com/nathanhollows/Rapua/internal/flash"
+	"github.com/nathanhollows/Rapua/v3/internal/flash"
 )
 
 // DismissNotificationPost dismisses a message.
