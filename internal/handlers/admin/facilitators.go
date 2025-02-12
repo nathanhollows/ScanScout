@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"fmt"
 	"net/http"
 	"time"
 
@@ -174,9 +173,6 @@ func (h *AdminHandler) FacilitatorDashboard(w http.ResponseWriter, r *http.Reque
 			}
 		}
 	}
-
-	// Pretty print the locs for debugging
-	fmt.Printf("%+v\n", locs)
 
 	c := templates.FacilitatorDashboard(locations, overview)
 	err = public.AuthLayout(c, "Facilitator Dashboard").Render(r.Context(), w)
