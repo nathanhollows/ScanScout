@@ -1655,6 +1655,14 @@ html {
     color: var(--fallback-nc,oklch(var(--nc)/var(--tw-text-opacity)));
   }
 
+  
+.menu li > *:not(ul, .menu-title, details, .btn).\!active {
+    --tw-bg-opacity: 1 !important;
+    background-color: var(--fallback-n,oklch(var(--n)/var(--tw-bg-opacity))) !important;
+    --tw-text-opacity: 1 !important;
+    color: var(--fallback-nc,oklch(var(--nc)/var(--tw-text-opacity))) !important;
+  }
+
   .radio-primary:hover {
     --tw-border-opacity: 1;
     border-color: var(--fallback-p,oklch(var(--p)/var(--tw-border-opacity)));
@@ -3396,6 +3404,12 @@ input.tab:checked + .tab-content,
   color: var(--fallback-er,oklch(var(--er)/var(--tw-text-opacity)));
 }
 
+.btm-nav > *:where(.\!active) {
+  border-top-width: 2px !important;
+  --tw-bg-opacity: 1 !important;
+  background-color: var(--fallback-b1,oklch(var(--b1)/var(--tw-bg-opacity))) !important;
+}
+
 .btm-nav > *:where(.active) {
   border-top-width: 2px;
   --tw-bg-opacity: 1;
@@ -4301,6 +4315,14 @@ details.collapse summary::-webkit-details-marker {
   color: var(--fallback-nc,oklch(var(--nc)/var(--tw-text-opacity)));
 }
 
+
+.menu li > *:not(ul, .menu-title, details, .btn).\!active {
+  --tw-bg-opacity: 1 !important;
+  background-color: var(--fallback-n,oklch(var(--n)/var(--tw-bg-opacity))) !important;
+  --tw-text-opacity: 1 !important;
+  color: var(--fallback-nc,oklch(var(--nc)/var(--tw-text-opacity))) !important;
+}
+
 .menu :where(li > details > summary)::-webkit-details-marker {
   display: none;
 }
@@ -5035,11 +5057,29 @@ details.collapse summary::-webkit-details-marker {
   background-color: var(--fallback-b2,oklch(var(--b2)/var(--tw-bg-opacity)));
 }
 
+.table tr.\!active,
+  .table tr.\!active:nth-child(even) {
+  --tw-bg-opacity: 1 !important;
+  background-color: var(--fallback-b2,oklch(var(--b2)/var(--tw-bg-opacity))) !important;
+}
+
+.table-zebra tr.\!active,
+    .table-zebra tr.\!active:nth-child(even) {
+  --tw-bg-opacity: 1 !important;
+  background-color: var(--fallback-b3,oklch(var(--b3)/var(--tw-bg-opacity))) !important;
+}
+
 .table-zebra tr.active,
     .table-zebra tr.active:nth-child(even),
     .table-zebra-zebra tbody tr:nth-child(even) {
   --tw-bg-opacity: 1;
   background-color: var(--fallback-b3,oklch(var(--b3)/var(--tw-bg-opacity)));
+}
+
+.table-zebra tr.\!active,
+    .table-zebra tr.\!active:nth-child(even) {
+  --tw-bg-opacity: 1 !important;
+  background-color: var(--fallback-b3,oklch(var(--b3)/var(--tw-bg-opacity))) !important;
 }
 
 .table :where(thead tr, tbody tr:not(:last-child), tbody tr:first-child:last-child) {
@@ -5347,16 +5387,32 @@ details.collapse summary::-webkit-details-marker {
   padding-right: 0.438rem;
 }
 
+.btm-nav-xs > *:where(.\!active) {
+  border-top-width: 1px !important;
+}
+
 .btm-nav-xs > *:where(.active) {
   border-top-width: 1px;
+}
+
+.btm-nav-sm > *:where(.\!active) {
+  border-top-width: 2px !important;
 }
 
 .btm-nav-sm > *:where(.active) {
   border-top-width: 2px;
 }
 
+.btm-nav-md > *:where(.\!active) {
+  border-top-width: 2px !important;
+}
+
 .btm-nav-md > *:where(.active) {
   border-top-width: 2px;
+}
+
+.btm-nav-lg > *:where(.\!active) {
+  border-top-width: 4px !important;
 }
 
 .btm-nav-lg > *:where(.active) {
@@ -6193,6 +6249,10 @@ html:has(.drawer-toggle:checked) {
   margin: auto;
 }
 
+.m-0 {
+  margin: 0px;
+}
+
 .mx-auto {
   margin-left: auto;
   margin-right: auto;
@@ -6226,6 +6286,11 @@ html:has(.drawer-toggle:checked) {
 .my-8 {
   margin-top: 2rem;
   margin-bottom: 2rem;
+}
+
+.mx-5 {
+  margin-left: 1.25rem;
+  margin-right: 1.25rem;
 }
 
 .-ml-24 {
@@ -6340,6 +6405,10 @@ html:has(.drawer-toggle:checked) {
   margin-top: 2rem;
 }
 
+.mt-6 {
+  margin-top: 1.5rem;
+}
+
 .block {
   display: block;
 }
@@ -6354,6 +6423,10 @@ html:has(.drawer-toggle:checked) {
 
 .flex {
   display: flex;
+}
+
+.inline-flex {
+  display: inline-flex;
 }
 
 .table {
@@ -6649,6 +6722,10 @@ html:has(.drawer-toggle:checked) {
   cursor: pointer;
 }
 
+.cursor-default {
+  cursor: default;
+}
+
 .select-all {
   -webkit-user-select: all;
      -moz-user-select: all;
@@ -6941,8 +7018,17 @@ html:has(.drawer-toggle:checked) {
   border-width: 2px;
 }
 
+.border-y {
+  border-top-width: 1px;
+  border-bottom-width: 1px;
+}
+
 .border-b-0 {
   border-bottom-width: 0px;
+}
+
+.border-t {
+  border-top-width: 1px;
 }
 
 .border-base-300 {
@@ -7075,6 +7161,10 @@ html:has(.drawer-toggle:checked) {
 
 .stroke-current {
   stroke: currentColor;
+}
+
+.stroke-error {
+  stroke: var(--fallback-er,oklch(var(--er)/1));
 }
 
 .stroke-info {
