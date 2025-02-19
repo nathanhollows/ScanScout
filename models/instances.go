@@ -13,6 +13,8 @@ type Instance struct {
 	ID                    string       `bun:"id,pk,type:varchar(36)"`
 	Name                  string       `bun:"name,type:varchar(255)"`
 	UserID                string       `bun:"user_id,type:varchar(36)"`
+	IsTemplate            bool         `bun:"is_template,type:bool"`
+	TemplateID            string       `bun:"template_id,type:varchar(36),nullzero"`
 	StartTime             bun.NullTime `bun:"start_time,nullzero"`
 	EndTime               bun.NullTime `bun:"end_time,nullzero"`
 	Status                GameStatus   `bun:"-"`
