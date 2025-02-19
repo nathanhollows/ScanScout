@@ -100,6 +100,10 @@ func (s *instanceService) DuplicateInstance(ctx context.Context, user *models.Us
 		return nil, fmt.Errorf("finding instance: %w", err)
 	}
 
+	if oldInstance.IsTemplate {
+		return nil, errors.New("cannot duplicate a template")
+	}
+
 	locations, err := s.locationService.FindByInstance(ctx, oldInstance.ID)
 	if err != nil {
 		return nil, fmt.Errorf("finding locations: %w", err)
@@ -224,6 +228,10 @@ func (s *instanceService) SwitchInstance(ctx context.Context, user *models.User,
 	instance, err := s.instanceRepo.GetByID(ctx, instanceID)
 	if err != nil {
 		return nil, errors.New("instance not found")
+	}
+
+	if instance.IsTemplate {
+		return nil, errors.New("cannot switch to a template")
 	}
 
 	// Make sure the user has permission to switch to this instance
