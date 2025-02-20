@@ -65,8 +65,9 @@ func (s *instanceService) CreateInstance(ctx context.Context, name string, user 
 	}
 
 	instance := &models.Instance{
-		Name:   name,
-		UserID: user.ID,
+		Name:       name,
+		UserID:     user.ID,
+		IsTemplate: false,
 	}
 
 	if err := s.instanceRepo.Create(ctx, instance); err != nil {
@@ -139,8 +140,6 @@ func (s *instanceService) DuplicateInstance(ctx context.Context, user *models.Us
 	if err := s.instanceSettingsRepo.Create(ctx, &settings); err != nil {
 		return nil, fmt.Errorf("creating settings: %w", err)
 	}
-
-	// TODO: Copy blocks and clues
 
 	return newInstance, nil
 }
