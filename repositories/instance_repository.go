@@ -18,6 +18,8 @@ type InstanceRepository interface {
 	GetByID(ctx context.Context, id string) (*models.Instance, error)
 	// FindByUserID finds all instances associated with a user ID
 	FindByUserID(ctx context.Context, userID string) ([]models.Instance, error)
+	// FindTemplates finds all instances that are templates
+	FindTemplates(ctx context.Context, userID string) ([]models.Instance, error)
 
 	// Update updates an instance in the database
 	Update(ctx context.Context, instance *models.Instance) error
@@ -90,6 +92,19 @@ func (r *instanceRepository) FindByUserID(ctx context.Context, userID string) ([
 	err := r.db.NewSelect().
 		Model(&instances).
 		Where("user_id = ?", userID).
+		Scan(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return instances, nil
+}
+
+func (r *instanceRepository) FindTemplates(ctx context.Context, userID string) ([]models.Instance, error) {
+	instances := []models.Instance{}
+	err := r.db.NewSelect().
+		Model(&instances).
+		Where("user_id = ? AND is_template = ?", userID, true).
+		Order("created_at DESC").
 		Scan(ctx)
 	if err != nil {
 		return nil, err
