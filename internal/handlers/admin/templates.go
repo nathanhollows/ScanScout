@@ -45,3 +45,41 @@ func (h *AdminHandler) TemplatesCreate(w http.ResponseWriter, r *http.Request) {
 		h.handleError(w, r, "Instances: rendering template", "Error rendering template", "error", err, "instance_id", user.CurrentInstanceID)
 	}
 }
+
+// TemplatesDelete deletes a template.
+func (h *AdminHandler) TemplatesDelete(w http.ResponseWriter, r *http.Request) {
+	user := h.UserFromContext(r.Context())
+
+	if err := r.ParseForm(); err != nil {
+		h.handleError(w, r, "TemplateDelete: parsing form", "Error parsing form", "error", err)
+		return
+	}
+
+	id := r.Form.Get("id")
+	if id == "" {
+		h.handleError(w, r, "TemplateDelete: missing id", "Could not find the instance ID")
+		return
+	}
+
+	template, err := h.TemplateService.GetByID(r.Context(), id)
+	if err != nil {
+		h.handleError(w, r, "TemplateDelete: getting template", "Error getting template", "error", err, "instance_id", user.CurrentInstanceID)
+		return
+	}
+
+	_, err = h.InstanceService.DeleteInstance(r.Context(), user, template.ID, template.Name)
+	if err != nil {
+		h.handleError(w, r, "InstanceDelete: deleting instance", "Error deleting instance", "error", err, "instance_id", user.CurrentInstanceID)
+	} else {
+		err = templates.Toast(*flash.NewSuccess("Template deleted")).Render(r.Context(), w)
+		if err != nil {
+			h.Logger.Error("InstanceDelete: rendering template", "Error", err)
+		}
+	}
+
+	gameTemplates, err := h.TemplateService.Find(r.Context(), user.ID)
+	err = templates.Templates(gameTemplates).Render(r.Context(), w)
+	if err != nil {
+		h.handleError(w, r, "Instances: rendering template", "Error rendering template", "error", err, "instance_id", user.CurrentInstanceID)
+	}
+}

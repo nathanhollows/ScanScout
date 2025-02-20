@@ -96,6 +96,18 @@ func (s *TemplateService) CreateFromInstance(ctx context.Context, userID, instan
 	return newInstance, nil
 }
 
+// GetByID retrieves a template by ID.
+func (s *TemplateService) GetByID(ctx context.Context, id string) (*models.Instance, error) {
+	instance, err := s.instanceRepo.GetByID(ctx, id)
+	if err != nil {
+		return nil, fmt.Errorf("finding instance: %w", err)
+	}
+	if !instance.IsTemplate {
+		return nil, errors.New("instance is not a template")
+	}
+	return instance, nil
+}
+
 // Find retrieves all templates.
 func (s *TemplateService) Find(ctx context.Context, userID string) ([]models.Instance, error) {
 	instances, err := s.instanceRepo.FindTemplates(ctx, userID)

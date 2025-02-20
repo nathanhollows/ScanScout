@@ -89,7 +89,7 @@ templ Templates(templates []models.Instance) {
 			>
 				<div class="flex flex-row items-center gap-3 grow">
 					<p class="flex-grow text-center">
-						No teams to show yet. Do you want to <a href="#" class="link" onclick="add_teams_modal.showModal()">add some teams</a>?
+						No templates found. You can create new templates from existing games.
 					</p>
 				</div>
 			</div>
@@ -226,11 +226,15 @@ templ templateModals() {
 			<h3 class="text-lg font-bold">Delete a template</h3>
 			<p class="pt-4">You are about to delete your <code id="delete-template-name"></code> template and any share links you may have generated. Games that were created from this template will not be impacted.</p>
 			<p>This action cannot be undone. Are you sure?</p>
-			<form hx-delete="/admin/templates" hx-swap="none">
+			<form
+				hx-delete="/admin/templates"
+				hx-swap="outerHTML"
+				hx-target="#templates"
+			>
 				<div class="modal-action">
+					<input type="hidden" name="id" value=""/>
 					<button type="button" class="btn" onclick="confirm_delete_template_modal.close()">Nevermind</button>
 					<button type="submit" class="btn btn-error" onclick="confirm_delete_template_modal.close()">Delete</button>
-					<input type="hidden" name="id" value=""/>
 				</div>
 			</form>
 			<form method="dialog">

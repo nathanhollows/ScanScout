@@ -191,6 +191,13 @@ func (s *instanceService) DeleteInstance(ctx context.Context, user *models.User,
 		return false, fmt.Errorf("beginning transaction: %w", err)
 	}
 
+	defer func() {
+		if p := recover(); p != nil {
+			tx.Rollback()
+			panic(p)
+		}
+	}()
+
 	err = s.instanceRepo.Delete(ctx, tx, instanceID)
 	if err != nil {
 		tx.Rollback()
@@ -207,6 +214,12 @@ func (s *instanceService) DeleteInstance(ctx context.Context, user *models.User,
 	if err != nil {
 		tx.Rollback()
 		return false, fmt.Errorf("deleting teams: %w", err)
+	}
+
+	err = s.locationService.DeleteByInstanceID(ctx, tx, instanceID)
+	if err != nil {
+		tx.Rollback()
+		return false, fmt.Errorf("deleting locations: %w", err)
 	}
 
 	err = tx.Commit()

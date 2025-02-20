@@ -9,6 +9,7 @@ import (
 	"github.com/nathanhollows/Rapua/v3/db"
 	"github.com/nathanhollows/Rapua/v3/models"
 	"github.com/nathanhollows/Rapua/v3/repositories"
+	"github.com/uptrace/bun"
 )
 
 type LocationService interface {
@@ -43,6 +44,8 @@ type LocationService interface {
 
 	// DeleteLocation deletes a location
 	DeleteLocation(ctx context.Context, locationID string) error
+	// DeleteByInstanceID deletes all locations for an instance
+	DeleteByInstanceID(ctx context.Context, tx *bun.Tx, instanceID string) error
 
 	// LoadCluesForLocation loads the clues for a specific location if they are not already loaded
 	LoadCluesForLocation(ctx context.Context, location *models.Location) error
@@ -356,30 +359,54 @@ func (s locationService) DeleteLocation(ctx context.Context, locationID string) 
 		}
 	}()
 
-	location, err := s.locationRepo.GetByID(ctx, locationID)
+	err = s.deleteLocation(ctx, tx, locationID)
 	if err != nil {
 		tx.Rollback()
-		return fmt.Errorf("finding location: %v", err)
+		return fmt.Errorf("deleting location: %v", err)
+	}
+	err = tx.Commit()
+	if err != nil {
+		tx.Rollback()
+		return fmt.Errorf("committing transaction: %v", err)
 	}
 
-	// Delete all related clues
-	err = s.clueRepo.DeleteByLocationID(ctx, locationID)
+	return nil
+}
+
+// DeleteByInstanceID deletes all locations for an instance.
+func (s locationService) DeleteByInstanceID(ctx context.Context, tx *bun.Tx, instanceID string) error {
+	locations, err := s.locationRepo.FindByInstance(ctx, instanceID)
 	if err != nil {
-		tx.Rollback()
+		return fmt.Errorf("finding all locations: %v", err)
+	}
+
+	for _, location := range locations {
+		err = s.deleteLocation(ctx, tx, location.ID)
+		if err != nil {
+			return fmt.Errorf("deleting location: %v", err)
+		}
+	}
+
+	return nil
+}
+
+// deleteLocation deletes a location and its related data.
+func (s locationService) deleteLocation(ctx context.Context, tx *bun.Tx, locationID string) error {
+	// Delete all related clues
+	err := s.clueRepo.DeleteByLocationIDWithTransaction(ctx, tx, locationID)
+	if err != nil {
 		return fmt.Errorf("deleting clues: %v", err)
 	}
 
 	// Delete all related blocks
 	err = s.blockRepo.DeleteByLocationID(ctx, tx, locationID)
 	if err != nil {
-		tx.Rollback()
 		return fmt.Errorf("deleting blocks: %v", err)
 	}
 
 	// Delete the location
 	err = s.locationRepo.Delete(ctx, tx, locationID)
 	if err != nil {
-		tx.Rollback()
 		return fmt.Errorf("deleting location: %v", err)
 	}
 
@@ -396,8 +423,8 @@ func (s locationService) DeleteLocation(ctx context.Context, locationID string) 
 			return fmt.Errorf("deleting marker: %v", err)
 		}
 	}
-
-	return tx.Commit()
+	// TODO: Tidy up the markers, delete any that are not used by any other locations
+	return nil
 }
 
 // LoadCluesForLocation loads the clues for a specific location if they are not already loaded.
