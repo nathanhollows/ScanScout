@@ -42,7 +42,13 @@ func init() {
 			return fmt.Errorf("add column template_id: %w", err)
 		}
 
-		// We don't need to update the IsTemplate column because it's a new column and is false by default.
+		_, err = db.NewUpdate().Model((*m20250219013821_Instance)(nil)).
+			Set("is_template = ?", false).
+			Exec(ctx)
+		if err != nil {
+			return fmt.Errorf("update is_template: %w", err)
+		}
+
 		return nil
 	}, func(ctx context.Context, db *bun.DB) error {
 		// Down migration.
