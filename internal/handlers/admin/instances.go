@@ -12,8 +12,15 @@ import (
 func (h *AdminHandler) Instances(w http.ResponseWriter, r *http.Request) {
 	user := h.UserFromContext(r.Context())
 
-	c := templates.Instances(user.Instances, user.CurrentInstance)
-	err := templates.Layout(c, *user, "Instances", "Instances").Render(r.Context(), w)
+	// We need to show both the instances and the templates
+	gameTemplates, err := h.TemplateService.Find(r.Context(), user.ID)
+	if err != nil {
+		h.handleError(w, r, "Instances: finding templates", "Error finding templates", "error", err, "instance_id", user.CurrentInstanceID)
+		return
+	}
+
+	c := templates.Instances(user.Instances, user.CurrentInstance, gameTemplates)
+	err = templates.Layout(c, *user, "Instances", "Instances").Render(r.Context(), w)
 	if err != nil {
 		h.handleError(w, r, "Instances: rendering template", "Error rendering template", "error", err, "instance_id", user.CurrentInstanceID)
 	}
@@ -107,7 +114,17 @@ func (h *AdminHandler) InstanceDelete(w http.ResponseWriter, r *http.Request) {
 	}
 
 	id := r.Form.Get("id")
-	confirmName := r.Form.Get("name")
+	confirmName := r.Form.Get("confirmname")
+
+	if id == "" {
+		h.handleError(w, r, "InstanceDelete: missing instance ID", "Could not find the instance ID", "instance_id", user.CurrentInstanceID)
+		return
+	}
+
+	if confirmName == "" {
+		h.handleError(w, r, "InstanceDelete: missing name", "Please type the game name to confirm", "instance_id", user.CurrentInstanceID)
+		return
+	}
 
 	if user.CurrentInstanceID == id {
 		err := templates.Toast(*flash.NewError("You cannot delete the instance you are currently using")).Render(r.Context(), w)
