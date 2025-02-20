@@ -25,6 +25,7 @@ type AdminHandler struct {
 	LocationService     services.LocationService
 	NotificationService services.NotificationService
 	TeamService         services.TeamService
+	TemplateService     services.TemplateService
 	UploadService       services.UploadService
 	UserService         services.UserService
 }
@@ -42,6 +43,7 @@ func NewAdminHandler(
 	locationService services.LocationService,
 	notificationService services.NotificationService,
 	teamService services.TeamService,
+	templateService services.TemplateService,
 	uploadService services.UploadService,
 	userService services.UserService,
 ) *AdminHandler {
@@ -58,6 +60,7 @@ func NewAdminHandler(
 		LocationService:     locationService,
 		NotificationService: notificationService,
 		TeamService:         teamService,
+		TemplateService:     templateService,
 		UploadService:       uploadService,
 		UserService:         userService,
 	}
