@@ -36,14 +36,14 @@ func (h *AdminHandler) InstancesCreate(w http.ResponseWriter, r *http.Request) {
 	}
 
 	name := r.FormValue("name")
-	instance, err := h.IntanceService.CreateInstance(r.Context(), name, user)
+	instance, err := h.InstanceService.CreateInstance(r.Context(), name, user)
 	if err != nil {
 		h.handleError(w, r, "InstancesCreate: creating instance", "Error creating instance", "error", err, "instance_id", user.CurrentInstanceID)
 		return
 	}
 
 	// Switch to the new instance
-	_, err = h.IntanceService.SwitchInstance(r.Context(), user, instance.ID)
+	_, err = h.InstanceService.SwitchInstance(r.Context(), user, instance.ID)
 	if err != nil {
 		h.handleError(w, r, "InstancesCreate: switching instance", "Error switching instance", "error", err)
 		return
@@ -65,13 +65,13 @@ func (h *AdminHandler) InstanceDuplicate(w http.ResponseWriter, r *http.Request)
 	id := r.Form.Get("id")
 	name := r.Form.Get("name")
 
-	instance, err := h.IntanceService.DuplicateInstance(r.Context(), user, id, name)
+	instance, err := h.InstanceService.DuplicateInstance(r.Context(), user, id, name)
 	if err != nil {
 		h.handleError(w, r, "InstanceDuplicate: duplicating instance", "Error duplicating instance", "error", err, "instance_id", user.CurrentInstanceID)
 		return
 	}
 
-	_, err = h.IntanceService.SwitchInstance(r.Context(), user, instance.ID)
+	_, err = h.InstanceService.SwitchInstance(r.Context(), user, instance.ID)
 	if err != nil {
 		h.handleError(w, r, "InstanceDuplicate: switching instance", "Error switching instance", "error", err, "instance_id", user.CurrentInstanceID)
 		return
@@ -90,7 +90,7 @@ func (h *AdminHandler) InstanceSwitch(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_, err := h.IntanceService.SwitchInstance(r.Context(), user, instanceID)
+	_, err := h.InstanceService.SwitchInstance(r.Context(), user, instanceID)
 	if err != nil {
 		h.handleError(w, r, "InstanceSwitch: switching instance", "Error switching instance", "error", err, "instance_id", user.CurrentInstanceID)
 		return
@@ -114,13 +114,12 @@ func (h *AdminHandler) InstanceDelete(w http.ResponseWriter, r *http.Request) {
 	}
 
 	id := r.Form.Get("id")
-	confirmName := r.Form.Get("confirmname")
-
 	if id == "" {
 		h.handleError(w, r, "InstanceDelete: missing instance ID", "Could not find the instance ID", "instance_id", user.CurrentInstanceID)
 		return
 	}
 
+	confirmName := r.Form.Get("confirmname")
 	if confirmName == "" {
 		h.handleError(w, r, "InstanceDelete: missing name", "Please type the game name to confirm", "instance_id", user.CurrentInstanceID)
 		return
@@ -134,7 +133,7 @@ func (h *AdminHandler) InstanceDelete(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_, err := h.IntanceService.DeleteInstance(r.Context(), user, id, confirmName)
+	_, err := h.InstanceService.DeleteInstance(r.Context(), user, id, confirmName)
 	if err != nil {
 		h.handleError(w, r, "InstanceDelete: deleting instance", "Error deleting instance", "error", err, "instance_id", user.CurrentInstanceID)
 		return

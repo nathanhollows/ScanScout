@@ -37,7 +37,7 @@ func (h *AdminHandler) Locations(w http.ResponseWriter, r *http.Request) {
 func (h *AdminHandler) LocationNew(w http.ResponseWriter, r *http.Request) {
 	user := h.UserFromContext(r.Context())
 
-	instances, err := h.IntanceService.FindInstanceIDsForUser(r.Context(), user.ID)
+	instances, err := h.InstanceService.FindInstanceIDsForUser(r.Context(), user.ID)
 	if err != nil {
 		h.handleError(w, r, "LocationNew: getting instances", "Error getting instances", "error", err)
 		return

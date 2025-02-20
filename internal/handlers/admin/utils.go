@@ -21,7 +21,7 @@ type AdminHandler struct {
 	FacilitatorService  services.FacilitatorService
 	GameManagerService  services.GameManagerService
 	GameplayService     services.GameplayService
-	IntanceService      services.InstanceService
+	InstanceService     services.InstanceService
 	LocationService     services.LocationService
 	NotificationService services.NotificationService
 	TeamService         services.TeamService
@@ -56,7 +56,7 @@ func NewAdminHandler(
 		FacilitatorService:  facilitatorService,
 		GameManagerService:  gameManagerService,
 		GameplayService:     gameplayService,
-		IntanceService:      instanceService,
+		InstanceService:     instanceService,
 		LocationService:     locationService,
 		NotificationService: notificationService,
 		TeamService:         teamService,
