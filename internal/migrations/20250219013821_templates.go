@@ -34,19 +34,20 @@ func init() {
 	Migrations.MustRegister(func(ctx context.Context, db *bun.DB) error {
 		_, err := db.NewAddColumn().Model((*m20250219013821_Instance)(nil)).ColumnExpr("is_template bool").Exec(ctx)
 		if err != nil {
-			return fmt.Errorf("add column is_template: %w", err)
+			return fmt.Errorf("20250219013821_templates.go: add column is_template: %w", err)
 		}
 
 		_, err = db.NewAddColumn().Model((*m20250219013821_Instance)(nil)).ColumnExpr("template_id varchar(36)").Exec(ctx)
 		if err != nil {
-			return fmt.Errorf("add column template_id: %w", err)
+			return fmt.Errorf("20250219013821_templates.go: add column template_id: %w", err)
 		}
 
 		_, err = db.NewUpdate().Model((*m20250219013821_Instance)(nil)).
 			Set("is_template = ?", false).
+			Where("is_template IS NULL").
 			Exec(ctx)
 		if err != nil {
-			return fmt.Errorf("update is_template: %w", err)
+			return fmt.Errorf("20250219013821_templates.go: update is_template: %w", err)
 		}
 
 		return nil
@@ -54,12 +55,12 @@ func init() {
 		// Down migration.
 		_, err := db.NewDropColumn().Model((*m20250219013821_Instance)(nil)).Column("is_template").Exec(ctx)
 		if err != nil {
-			return fmt.Errorf("drop column is_template: %w", err)
+			return fmt.Errorf("20250219013821_templates.go: drop column is_template: %w", err)
 		}
 
 		_, err = db.NewDropColumn().Model((*m20250219013821_Instance)(nil)).Column("template_id").Exec(ctx)
 		if err != nil {
-			return fmt.Errorf("drop column template_id: %w", err)
+			return fmt.Errorf("20250219013821_templates.go: drop column template_id: %w", err)
 		}
 
 		return nil

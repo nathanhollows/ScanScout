@@ -64,7 +64,7 @@ func init() {
 				Where("team.code = _data.code")
 			_, err = query.Exec(ctx)
 			if err != nil {
-				return fmt.Errorf("update teams: %w", err)
+				return fmt.Errorf("20241209090041_teams_id.go: update id: %w", err)
 			}
 		}
 
@@ -74,9 +74,12 @@ func init() {
 		// Down migration.
 		_, err := db.NewDropIndex().Model((*m20241209090041_Team)(nil)).Index("id").Exec(ctx)
 		if err != nil {
-			return fmt.Errorf("drop index id: %w", err)
+			return fmt.Errorf("20241209090041_teams_id.go: drop index id: %w", err)
 		}
 		_, err = db.NewDropColumn().Model((*m20241209090041_Team)(nil)).Column("id").Exec(ctx)
-		return fmt.Errorf("drop column id: %w", err)
+		if err != nil {
+			return fmt.Errorf("20241209090041_teams_id.go: drop column id: %w", err)
+		}
+		return nil
 	})
 }
