@@ -164,7 +164,6 @@ func (s locationService) DuplicateLocation(ctx context.Context, location models.
 	}
 
 	// Copy the blocks
-	fmt.Println("Copying blocks: ", len(location.Blocks))
 	for _, block := range location.Blocks {
 		block, err := s.blockRepo.GetByID(ctx, block.ID)
 		if err != nil {
