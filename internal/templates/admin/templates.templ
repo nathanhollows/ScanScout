@@ -34,7 +34,7 @@ templ Templates(templates []models.Instance) {
 		<!-- Templates list -->
 		<div id="template-list" class="join join-vertical w-full rounded-lg border border-base-300">
 			<div class="flex flex-row items-center gap-3 bg-base-200/80 rounded p-3 py-4 join-item">
-				<span class="font-bold text-base-content text-sm">
+				<span class="font-bold text-base-content text-sm overflow-hidden text-ellipsis whitespace-nowrap">
 					<span
 						id="template-count"
 						_="on htmx:afterSettle from body or keyup from #search-templates
@@ -188,7 +188,7 @@ templ templateItem(template models.Instance) {
 
 templ templateModals() {
 	<!-- Create template modal -->
-	<dialog id="create_template_modal" class="modal">
+	<dialog id="create_template_modal" class="modal modal-bottom sm:modal-middle">
 		<div class="modal-box prose">
 			<h3 class="text-lg font-bold">Save as template</h3>
 			<p class="pt-4">You are saving <code id="template-modal-instance-name"></code> as a template. The template will include all settings, locations, and content of the game. It will not include any teams or history.</p>
@@ -221,7 +221,7 @@ templ templateModals() {
 		</div>
 	</dialog>
 	<!-- Delete template modal -->
-	<dialog id="confirm_delete_template_modal" class="modal">
+	<dialog id="confirm_delete_template_modal" class="modal modal-bottom sm:modal-middle p-1">
 		<div class="modal-box prose outline outline-2 outline-offset-1 outline-error">
 			<h3 class="text-lg font-bold">Delete a template</h3>
 			<p class="pt-4">You are about to delete your <code id="delete-template-name"></code> template and any share links you may have generated. Games that were created from this template will not be impacted.</p>
@@ -243,8 +243,8 @@ templ templateModals() {
 		</div>
 	</dialog>
 	<!-- Launch template modal -->
-	<dialog id="launch_template_modal" class="modal">
-		<div class="modal-box prose">
+	<dialog id="launch_template_modal" class="modal modal-bottom sm:modal-middle">
+		<div class="modal-box prose overflow-y-visible">
 			<h3 class="text-lg font-bold">Launch a new game</h3>
 			<p>You are about to launch a new game from the <code id="launch-template-name"></code> template.</p>
 			<form hx-post="/admin/templates/launch" hx-swap="none">
@@ -255,6 +255,49 @@ templ templateModals() {
 					<input type="text" class="input input-bordered w-full" name="name" required autocomplete="off"/>
 					<input type="hidden" name="id" value=""/>
 				</label>
+				<div class="form-control my-5">
+					<label class="label cursor-pointer">
+						<span class="label-text flex items-center">
+							<div
+								class="dropdown dropdown-hover dropdown-top not-prose"
+							>
+								<div
+									tabindex="0"
+									role="button"
+									class="btn btn-circle btn-ghost btn-xs text-info"
+									onclick="event.preventDefault();"
+								>
+									<svg
+										tabindex="0"
+										xmlns="http://www.w3.org/2000/svg"
+										fill="none"
+										viewBox="0 0 24 24"
+										class="h-4 w-4 stroke-current"
+									>
+										<path
+											stroke-linecap="round"
+											stroke-linejoin="round"
+											stroke-width="2"
+											d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+										></path>
+									</svg>
+								</div>
+								<div
+									tabindex="0"
+									class="card compact dropdown-content bg-base-200 rounded-box z-[1] w-64 shadow"
+								>
+									<div tabindex="0" class="card-body">
+										<h2 class="card-title">Location codes</h2>
+										<p>Sharing location codes enables players in different games to scan the same QR codes and URLs. This is useful for games that are played in the same physical space, e.g., different content for adults and children.</p>
+										<p>Generating new location codes will create a new set of unique codes for this game. This is useful when adapting an existing game for a new space, e.g., a health and safety briefing for a new building.</p>
+									</div>
+								</div>
+							</div>
+							Generate new location codes?
+						</span>
+						<input type="checkbox" class="checkbox self-end" checked="checked"/>
+					</label>
+				</div>
 				<div class="modal-action">
 					<button
 						class="btn"
@@ -263,7 +306,7 @@ templ templateModals() {
 					>
 						Nevermind
 					</button>
-					<button type="submit" class="btn btn-primary">Save</button>
+					<button type="submit" class="btn btn-primary">Launch</button>
 				</div>
 			</form>
 			<form method="dialog">
@@ -272,7 +315,7 @@ templ templateModals() {
 		</div>
 	</dialog>
 	<!-- Share template modal -->
-	<dialog id="share_template_modal" class="modal">
+	<dialog id="share_template_modal" class="modal modal-bottom sm:modal-middle">
 		@ShareLinkModal()
 	</dialog>
 }
