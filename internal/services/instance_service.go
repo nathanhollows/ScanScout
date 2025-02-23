@@ -26,6 +26,8 @@ type InstanceService interface {
 	// DuplicateInstance duplicates an instance for the given user
 	DuplicateInstance(ctx context.Context, user *models.User, id, name string) (*models.Instance, error)
 
+	// FindByUserID returns all instances for the given user
+	FindByUserID(ctx context.Context, userID string) ([]models.Instance, error)
 	// FindInstanceIDsForUser returns the IDs of all instances for the given user
 	FindInstanceIDsForUser(ctx context.Context, userID string) ([]string, error)
 
@@ -142,6 +144,15 @@ func (s *instanceService) DuplicateInstance(ctx context.Context, user *models.Us
 	}
 
 	return newInstance, nil
+}
+
+// FindByUserID implements InstanceService.
+func (s *instanceService) FindByUserID(ctx context.Context, userID string) ([]models.Instance, error) {
+	instances, err := s.instanceRepo.FindByUserID(ctx, userID)
+	if err != nil {
+		return nil, fmt.Errorf("finding instances for user: %w", err)
+	}
+	return instances, nil
 }
 
 // FindInstanceIDsForUser implements InstanceService.

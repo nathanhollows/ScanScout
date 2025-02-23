@@ -132,6 +132,30 @@ func TestInstanceService(t *testing.T) {
 		}
 	})
 
+	t.Run("FindByUserID", func(t *testing.T) {
+		_, _ = svc.CreateInstance(context.Background(), "Game1", user)
+		_, _ = svc.CreateInstance(context.Background(), "Game2", user)
+
+		tests := []struct {
+			name    string
+			userID  string
+			wantErr bool
+		}{
+			{"Valid User", user.ID, false},
+			{"Invalid User", "non-existent", false}, // This is not an error, just an empty list
+		}
+
+		for _, tc := range tests {
+			t.Run(tc.name, func(t *testing.T) {
+				instances, err := svc.FindByUserID(context.Background(), tc.userID)
+				if tc.wantErr {
+					assert.Error(t, err)
+					assert.Nil(t, instances)
+				}
+			})
+		}
+	})
+
 	t.Run("DeleteInstance", func(t *testing.T) {
 		instance, _ := svc.CreateInstance(context.Background(), "GameToDelete", user)
 
