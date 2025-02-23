@@ -28,7 +28,7 @@ func (h *AdminHandler) TemplatesCreate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_, err := h.TemplateService.CreateFromInstance(r.Context(), user.ID, user.CurrentInstanceID, name)
+	_, err := h.TemplateService.CreateFromInstance(r.Context(), user.ID, id, name)
 	if err != nil {
 		h.handleError(w, r, "TemplateCreate: creating instance", "Error creating instance", "error", err, "instance_id", user.CurrentInstanceID)
 		return
@@ -44,6 +44,47 @@ func (h *AdminHandler) TemplatesCreate(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		h.handleError(w, r, "Instances: rendering template", "Error rendering template", "error", err, "instance_id", user.CurrentInstanceID)
 	}
+}
+
+// TemplatesLaunch launches an instance from a template.
+func (h *AdminHandler) TemplatesLaunch(w http.ResponseWriter, r *http.Request) {
+	user := h.UserFromContext(r.Context())
+
+	if err := r.ParseForm(); err != nil {
+		h.handleError(w, r, "TemplateCreate: parsing form", "Error parsing form", "error", err)
+		return
+	}
+
+	id := r.FormValue("id")
+	if id == "" {
+		h.handleError(w, r, "TemplateCreate: missing id", "Could not find the instance ID")
+		return
+	}
+
+	name := r.FormValue("name")
+	if name == "" {
+		h.handleError(w, r, "TemplateCreate: missing name", "Please provide a name for the template")
+		return
+	}
+
+	// Regenerate refers to location codes
+	regen := r.Form.Has("regenerate")
+
+	// Create a new instance from the template
+	newGame, err := h.TemplateService.LaunchInstance(r.Context(), user.ID, id, name, regen)
+	if err != nil {
+		h.handleError(w, r, "TemplateCreate: creating instance", "Error creating instance", "error", err, "user_id", user.ID)
+		return
+	}
+
+	// Switch to the new instance
+	_, err = h.InstanceService.SwitchInstance(r.Context(), user, newGame.ID)
+	if err != nil {
+		h.handleError(w, r, "InstancesCreate: switching instance", "Error switching instance", "error", err)
+		return
+	}
+
+	h.redirect(w, r, "/admin/instances")
 }
 
 // TemplatesDelete deletes a template.

@@ -250,6 +250,7 @@ func setupAdminRoutes(router chi.Router, adminHandler *admin.AdminHandler) {
 		r.Route("/templates", func(r chi.Router) {
 			r.Post("/create", adminHandler.TemplatesCreate)
 			r.Delete("/", adminHandler.TemplatesDelete)
+			r.Post("/launch", adminHandler.TemplatesLaunch)
 		})
 
 		r.Route("/media", func(r chi.Router) {
