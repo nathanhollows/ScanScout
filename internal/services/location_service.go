@@ -364,6 +364,12 @@ func (s locationService) DeleteLocation(ctx context.Context, locationID string) 
 		tx.Rollback()
 		return fmt.Errorf("deleting location: %v", err)
 	}
+
+	err = s.markerRepo.DeleteUnused(ctx, tx)
+	if err != nil {
+		return fmt.Errorf("deleting unused markers: %v", err)
+	}
+
 	err = tx.Commit()
 	if err != nil {
 		tx.Rollback()
@@ -385,6 +391,11 @@ func (s locationService) DeleteByInstanceID(ctx context.Context, tx *bun.Tx, ins
 		if err != nil {
 			return fmt.Errorf("deleting location: %v", err)
 		}
+	}
+
+	err = s.markerRepo.DeleteUnused(ctx, tx)
+	if err != nil {
+		return fmt.Errorf("deleting unused markers: %v", err)
 	}
 
 	return nil
@@ -410,20 +421,6 @@ func (s locationService) deleteLocation(ctx context.Context, tx *bun.Tx, locatio
 		return fmt.Errorf("deleting location: %v", err)
 	}
 
-	// Delete the marker if it is not used by any other locations
-	locations, err := s.locationRepo.FindLocationsByMarkerID(ctx, location.MarkerID)
-	if err != nil {
-		tx.Rollback()
-		return fmt.Errorf("finding locations by marker: %v", err)
-	}
-	if len(locations) == 0 {
-		err = s.markerRepo.Delete(ctx, location.MarkerID)
-		if err != nil {
-			tx.Rollback()
-			return fmt.Errorf("deleting marker: %v", err)
-		}
-	}
-	// TODO: Tidy up the markers, delete any that are not used by any other locations
 	return nil
 }
 
