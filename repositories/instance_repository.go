@@ -91,7 +91,7 @@ func (r *instanceRepository) FindByUserID(ctx context.Context, userID string) ([
 	instances := []models.Instance{}
 	err := r.db.NewSelect().
 		Model(&instances).
-		Where("user_id = ?", userID).
+		Where("user_id = ? AND is_template = ?", userID, false).
 		Scan(ctx)
 	if err != nil {
 		return nil, err
