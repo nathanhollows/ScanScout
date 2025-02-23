@@ -96,6 +96,61 @@ func (s *TemplateService) CreateFromInstance(ctx context.Context, userID, instan
 	return newInstance, nil
 }
 
+// LaunchInstance creates a new instance from a template.
+func (s *TemplateService) LaunchInstance(ctx context.Context, userID, templateID, name string, regen_location_codes bool) (*models.Instance, error) {
+	if userID == "" {
+		return nil, NewValidationError("userID")
+	}
+	if name == "" {
+		return nil, NewValidationError("name")
+	}
+
+	template, err := s.instanceRepo.GetByID(ctx, templateID)
+	if err != nil {
+		return nil, fmt.Errorf("finding template: %w", err)
+	}
+
+	if template.UserID != userID {
+		return nil, ErrPermissionDenied
+	}
+
+	if !template.IsTemplate {
+		return nil, errors.New("instance is not a template")
+	}
+
+	locations, err := s.locationService.FindByInstance(ctx, template.ID)
+	if err != nil {
+		return nil, fmt.Errorf("finding locations: %w", err)
+	}
+
+	newInstance := &models.Instance{
+		Name:       name,
+		UserID:     userID,
+		IsTemplate: false,
+	}
+
+	if err := s.instanceRepo.Create(ctx, newInstance); err != nil {
+		return nil, fmt.Errorf("creating instance: %w", err)
+	}
+
+	// Copy locations
+	for _, location := range locations {
+		_, err := s.locationService.DuplicateLocation(ctx, location, newInstance.ID)
+		if err != nil {
+			return nil, fmt.Errorf("duplicating location: %w", err)
+		}
+	}
+
+	// Copy settings
+	settings := template.Settings
+	settings.InstanceID = newInstance.ID
+	if err := s.instanceSettingsRepo.Create(ctx, &settings); err != nil {
+		return nil, fmt.Errorf("creating settings: %w", err)
+	}
+
+	return newInstance, nil
+}
+
 // GetByID retrieves a template by ID.
 func (s *TemplateService) GetByID(ctx context.Context, id string) (*models.Instance, error) {
 	instance, err := s.instanceRepo.GetByID(ctx, id)
