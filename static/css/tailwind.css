@@ -6615,6 +6615,10 @@ html:has(.drawer-toggle:checked) {
   max-width: 80rem;
 }
 
+.max-w-80 {
+  max-width: 20rem;
+}
+
 .max-w-full {
   max-width: 100%;
 }
@@ -6903,6 +6907,10 @@ html:has(.drawer-toggle:checked) {
   align-self: flex-start;
 }
 
+.self-end {
+  align-self: flex-end;
+}
+
 .self-center {
   align-self: center;
 }
@@ -6917,6 +6925,10 @@ html:has(.drawer-toggle:checked) {
 
 .overflow-y-auto {
   overflow-y: auto;
+}
+
+.overflow-y-visible {
+  overflow-y: visible;
 }
 
 .overflow-y-scroll {
@@ -9203,10 +9215,6 @@ html:has(.drawer-toggle:checked) {
 }
 
 @media (min-width: 640px) {
-  .sm\:visible {
-    visibility: visible;
-  }
-
   .sm\:mx-auto {
     margin-left: auto;
     margin-right: auto;
@@ -9222,10 +9230,6 @@ html:has(.drawer-toggle:checked) {
 
   .sm\:inline-block {
     display: inline-block;
-  }
-
-  .sm\:flex {
-    display: flex;
   }
 
   .sm\:inline-flex {
