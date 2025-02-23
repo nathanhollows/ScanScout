@@ -205,6 +205,7 @@ func (h *AdminHandler) LocationEditPost(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
+	markerID := location.MarkerID
 	err = h.LocationService.UpdateLocation(r.Context(), location, data)
 	if err != nil {
 		h.handleError(w, r, "LocationEditPost: updating location", "Error updating location", "error", err)
@@ -231,6 +232,11 @@ func (h *AdminHandler) LocationEditPost(w http.ResponseWriter, r *http.Request) 
 			h.handleError(w, r, "LocationEdit: updating clues", "Error updating clues", "error", err, "instance_id", user.CurrentInstanceID, "location_id", location.ID)
 			return
 		}
+	}
+
+	if markerID != location.MarkerID {
+		h.redirect(w, r, "/admin/locations/"+location.MarkerID)
+		return
 	}
 
 	h.handleSuccess(w, r, "Location updated")
