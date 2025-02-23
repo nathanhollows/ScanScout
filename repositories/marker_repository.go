@@ -49,6 +49,9 @@ func NewMarkerRepository(db *bun.DB) MarkerRepository {
 
 // Create saves or updates a marker in the database.
 func (r *markerRepository) Create(ctx context.Context, marker *models.Marker) error {
+	if marker.Name == "" {
+		return fmt.Errorf("marker name is required")
+	}
 	if marker.Code == "" {
 		// TODO: Remove magic number
 		marker.Code = helpers.NewCode(5)
@@ -61,6 +64,16 @@ func (r *markerRepository) Create(ctx context.Context, marker *models.Marker) er
 
 // Update updates a marker in the database.
 func (r *markerRepository) Update(ctx context.Context, marker *models.Marker) error {
+	if marker == nil {
+		return fmt.Errorf("marker is required")
+	}
+	if marker.Code == "" {
+		return fmt.Errorf("marker code is required")
+	}
+	if marker.Name == "" {
+		return fmt.Errorf("marker name is required")
+	}
+
 	_, err := r.db.
 		NewUpdate().
 		Model(marker).
@@ -114,6 +127,12 @@ func (r *markerRepository) FindNotInInstance(ctx context.Context, instanceID str
 
 // UpdateCoords updates the latitude and longitude of a marker in the database.
 func (r *markerRepository) UpdateCoords(ctx context.Context, marker *models.Marker, lat, lng float64) error {
+	if marker == nil {
+		return fmt.Errorf("marker is required")
+	}
+	if marker.Code == "" {
+		return fmt.Errorf("marker code is required")
+	}
 	marker.Lat = lat
 	marker.Lng = lng
 	_, err := r.db.NewUpdate().Model(marker).WherePK().Column("lat", "lng").Exec(ctx)
