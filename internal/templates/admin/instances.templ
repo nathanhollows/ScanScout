@@ -193,7 +193,7 @@ function handleModalAction(modalId, nameFieldId, defaultName = '', showInstanceN
 		return;
 	}
 
-  const { id, name } = event.target.dataset;
+  const { id, name } = event.currentTarget.dataset;
 	if (!id) {
 		console.error('Instance ID is required');
 		return;

@@ -330,7 +330,7 @@ templ ShareLinkModal() {
 			</div>
 			<div class="flex md:flex-row flex-col gap-4">
 				<div class="form-control w-1/2">
-					<label class="label">
+					<label class="label" for="link-duration">
 						<span class="label-text font-bold">Validity</span>
 					</label>
 					<select id="link-duration" name="duration" class="select select-bordered w-full" name="duration">
@@ -341,10 +341,11 @@ templ ShareLinkModal() {
 					</select>
 				</div>
 				<div class="form-control w-1/2">
-					<label class="label">
-						<span class="label-text font-bold">Usage limit</span>
+					<label class="label" for="link-limit">
+						<span class="label-text font-bold">Maximum uses</span>
 					</label>
 					<input
+						id="link-limit"
 						type="number"
 						class="input input-bordered w-full"
 						name="limit"
@@ -359,7 +360,7 @@ templ ShareLinkModal() {
 				<button
 					class="btn"
 					type="button"
-					onclick="share_modal.close()"
+					onclick="share_template_modal.close()"
 				>
 					Nevermind
 				</button>
