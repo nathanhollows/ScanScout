@@ -99,24 +99,75 @@ templ Templates(templates []models.Instance) {
 	@templateModals()
 }
 
+templ TemplateName(template models.Instance) {
+	<div
+		class="tooltip cursor-pointer"
+		data-tip="Click to rename"
+		hx-get={ fmt.Sprint("/admin/templates/", template.ID, "/edit/name") }
+		hx-target={ fmt.Sprint("#name-", template.ID) }
+		hx-swap="innerHTML"
+		_="on click send closeNameEdit"
+	>
+		{ template.Name }
+	</div>
+	<div class="text-xs font-semibold opacity-60">
+		<time>
+			if template.CreatedAt.Before(time.Now().AddDate(0, 0, -1)) {
+				{ fmt.Sprint("Created ", template.CreatedAt.Local().Format("02 Jan 2006")) }
+			} else {
+				{ fmt.Sprint("Created ", template.CreatedAt.Local().Format("3:04 PM")) }
+			}
+		</time>
+	</div>
+}
+
+templ TemplateNameEdit(template models.Instance) {
+	<form
+		hx-post={ fmt.Sprint("/admin/templates/", template.ID, "/edit/name") }
+		hx-target={ fmt.Sprint("#name-", template.ID) }
+		hx-swap="innerHTML"
+		hx-trigger="submit, keyup[key == 'Escape']"
+	>
+		<label class="input input-sm py-4 pr-1 input-bordered flex items-center gap-1">
+			<input
+				name="name"
+				type="text"
+				class="grow text-ellipsis"
+				value={ template.Name }
+				autoComplete="off"
+				autoFocus
+				tabIndex="0"
+			/>
+			<button
+				type="button"
+				hx-get={ fmt.Sprint("/admin/templates/", template.ID, "/name") }
+				hx-target={ fmt.Sprint("#name-", template.ID) }
+				hx-swap="innerHTML"
+				class="btn btn-xs btn-circle"
+				hx-trigger="click, closeNameEdit from:body"
+			>
+				<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x w-4 h-4"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg>
+			</button>
+			<button
+				type="submit"
+				class="btn btn-xs btn-circle"
+			>
+				<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-check w-4 h-4"><path d="M20 6 9 17l-5-5"></path></svg>
+			</button>
+		</label>
+	</form>
+}
+
 templ templateItem(template models.Instance) {
 	<div
 		class="template-item flex flex-row justify-between items-center gap-3 border-t border-base-300 border-collapse hover:bg-base-300 rounded-lg p-3 join-item bg-transparent transition-colors"
 	>
 		<!-- Template name -->
-		<div class="">
-			<div id="template-name">
-				{ template.Name }
-			</div>
-			<div class="text-xs font-semibold opacity-60">
-				<time>
-					if template.CreatedAt.Before(time.Now().AddDate(0, 0, -1)) {
-						{ fmt.Sprint("Created ", template.CreatedAt.Local().Format("02 Jan 2006")) }
-					} else {
-						{ fmt.Sprint("Created ", template.CreatedAt.Local().Format("3:04 PM")) }
-					}
-				</time>
-			</div>
+		<div
+			id={ fmt.Sprint("name-", template.ID) }
+			class="grow"
+		>
+			@TemplateName(template)
 		</div>
 		<span class="grow"></span>
 		<!-- Actions -->
@@ -295,7 +346,7 @@ templ templateModals() {
 							</div>
 							Generate new location codes?
 						</span>
-						<input type="checkbox" name="regenerate" class="checkbox self-end"/>
+						<input type="checkbox" name="regenerate" class="checkbox self-end" disabled/>
 					</label>
 				</div>
 				<div class="modal-action">
@@ -326,12 +377,11 @@ templ ShareLinkModal() {
 			<h3 class="text-lg font-bold">Share a template</h3>
 			<div class="prose py-4">
 				<p>Share a template with others by creating a shareable link. Anyone with the link will be able to create a new game from this template.</p>
-				<p>You may choose how long the link will be valid for and how many times it can be used.</p>
 			</div>
 			<div class="flex md:flex-row flex-col gap-4">
-				<div class="form-control w-1/2">
+				<div class="form-control sm:w-1/2">
 					<label class="label" for="link-duration">
-						<span class="label-text font-bold">Validity</span>
+						<span class="label-text">Validity</span>
 					</label>
 					<select id="link-duration" name="duration" class="select select-bordered w-full" name="duration">
 						<option value="always" selected>Never expires</option>
@@ -340,9 +390,9 @@ templ ShareLinkModal() {
 						<option value="month">1 month</option>
 					</select>
 				</div>
-				<div class="form-control w-1/2">
+				<div class="form-control sm:w-1/2">
 					<label class="label" for="link-limit">
-						<span class="label-text font-bold">Maximum uses</span>
+						<span class="label-text">Maximum uses</span>
 					</label>
 					<input
 						id="link-limit"
@@ -356,6 +406,47 @@ templ ShareLinkModal() {
 				</div>
 				<input type="hidden" name="id" value=""/>
 			</div>
+			<label class="label cursor-pointer">
+				<span class="label-text flex items-center pt-4">
+					<div
+						class="dropdown dropdown-hover dropdown-top not-prose"
+					>
+						<div
+							tabindex="0"
+							role="button"
+							class="btn btn-circle btn-ghost btn-xs text-info"
+							onclick="event.preventDefault();"
+						>
+							<svg
+								tabindex="0"
+								xmlns="http://www.w3.org/2000/svg"
+								fill="none"
+								viewBox="0 0 24 24"
+								class="h-4 w-4 stroke-current"
+							>
+								<path
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									stroke-width="2"
+									d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+								></path>
+							</svg>
+						</div>
+						<div
+							tabindex="0"
+							class="card compact dropdown-content bg-base-200 rounded-box z-[1] w-80 shadow"
+						>
+							<div tabindex="0" class="card-body">
+								<h2 class="card-title">Location codes</h2>
+								<p>Check this box to generate new location codes for every game launched using this template. Useful for adapting games to new sites.</p>
+								<p>Leave it unchecked to let game creators choose whether to reuse existing location codes or create new ones. Useful when running multiple games in the same space.</p>
+							</div>
+						</div>
+					</div>
+					Generate new location codes?
+				</span>
+				<input type="checkbox" name="regenerate" class="checkbox self-end" disabled/>
+			</label>
 			<div class="modal-action">
 				<button
 					class="btn"

@@ -6615,10 +6615,6 @@ html:has(.drawer-toggle:checked) {
   max-width: 80rem;
 }
 
-.max-w-80 {
-  max-width: 20rem;
-}
-
 .max-w-full {
   max-width: 100%;
 }
@@ -7310,6 +7306,10 @@ html:has(.drawer-toggle:checked) {
 
 .pl-2 {
   padding-left: 0.5rem;
+}
+
+.pr-1 {
+  padding-right: 0.25rem;
 }
 
 .pr-2 {
