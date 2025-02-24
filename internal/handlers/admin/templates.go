@@ -220,6 +220,8 @@ func (h *AdminHandler) TemplatesNameEditPost(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
+	h.handleSuccess(w, r, "Updated template name!")
+
 	if err := templates.TemplateName(*template).Render(r.Context(), w); err != nil {
 		h.Logger.Error("InstanceDelete: rendering template", "Error", err)
 	}
