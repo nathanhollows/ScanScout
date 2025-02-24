@@ -172,6 +172,25 @@ func (s *TemplateService) Find(ctx context.Context, userID string) ([]models.Ins
 	return instances, nil
 }
 
+// Update updates a template.
+func (s *TemplateService) Update(ctx context.Context, instance *models.Instance) error {
+	if instance == nil {
+		return NewValidationError("instance")
+	}
+	if instance.ID == "" {
+		return NewValidationError("instance.ID")
+	}
+	if instance.Name == "" {
+		return NewValidationError("instance.Name")
+	}
+
+	err := s.instanceRepo.Update(ctx, instance)
+	if err != nil {
+		return fmt.Errorf("updating instance: %w", err)
+	}
+	return nil
+}
+
 //
 // // FindInstanceIDsForUser implements InstanceService.
 // func (s *instanceService) FindInstanceIDsForUser(ctx context.Context, userID string) ([]string, error) {
