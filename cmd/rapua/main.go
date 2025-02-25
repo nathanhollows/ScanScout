@@ -168,6 +168,7 @@ func runApp(logger *slog.Logger, dbc *bun.DB) {
 	locationRepo := repositories.NewLocationRepository(dbc)
 	markerRepo := repositories.NewMarkerRepository(dbc)
 	notificationRepo := repositories.NewNotificationRepository(dbc)
+	shareLinkRepo := repositories.NewShareLinkRepository(dbc)
 	teamRepo := repositories.NewTeamRepository(dbc)
 	userRepo := repositories.NewUserRepository(dbc)
 	uploadRepo := repositories.NewUploadRepository(dbc)
@@ -197,7 +198,7 @@ func runApp(logger *slog.Logger, dbc *bun.DB) {
 		locationService, userService, teamService, instanceRepo, instanceSettingsRepo,
 	)
 	templateService := services.NewTemplateService(
-		transactor, locationService, userService, teamService, instanceRepo, instanceSettingsRepo,
+		transactor, locationService, userService, teamService, instanceRepo, instanceSettingsRepo, shareLinkRepo,
 	)
 	gameplayService := services.NewGameplayService(
 		checkInService, locationService, teamService, blockService, navigationService, markerRepo,
