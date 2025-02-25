@@ -16,8 +16,6 @@ import (
 type TemplateService struct {
 	transactor           db.Transactor
 	locationService      LocationService
-	userService          UserService
-	teamService          TeamService
 	instanceRepo         repositories.InstanceRepository
 	instanceSettingsRepo repositories.InstanceSettingsRepository
 	shareLinkRepo        repositories.ShareLinkRepository
@@ -26,8 +24,6 @@ type TemplateService struct {
 func NewTemplateService(
 	transactor db.Transactor,
 	locationService LocationService,
-	userService UserService,
-	teamService TeamService,
 	instanceRepo repositories.InstanceRepository,
 	instanceSettingsRepo repositories.InstanceSettingsRepository,
 	shareLinkRepo repositories.ShareLinkRepository,
@@ -35,8 +31,6 @@ func NewTemplateService(
 	return TemplateService{
 		transactor:           transactor,
 		locationService:      locationService,
-		userService:          userService,
-		teamService:          teamService,
 		instanceRepo:         instanceRepo,
 		instanceSettingsRepo: instanceSettingsRepo,
 		shareLinkRepo:        shareLinkRepo,
