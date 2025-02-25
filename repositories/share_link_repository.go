@@ -36,7 +36,6 @@ func (r *ShareLinkRepository) Create(ctx context.Context, link *models.ShareLink
 	// We always want to generate a new UUID for the link
 	link.ID = uuid.New().String()
 	link.CreatedAt = time.Now()
-	link.IsActive = true
 	link.UsedCount = 0
 	_, err := r.db.NewInsert().Model(link).Exec(ctx)
 	return err

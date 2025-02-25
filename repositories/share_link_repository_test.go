@@ -174,15 +174,7 @@ func TestShareLinkRepository_Use(t *testing.T) {
 			},
 			action: func(link *models.ShareLink) error {
 				err := repo.Use(context.Background(), link)
-				if err != nil {
-					return err
-				}
-
-				if link.IsActive {
-					return fmt.Errorf("link is still active")
-				}
-
-				return nil
+				return err
 			},
 			expectErr: true,
 		},
