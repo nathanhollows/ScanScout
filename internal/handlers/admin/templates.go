@@ -2,9 +2,11 @@ package handlers
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/go-chi/chi"
 	"github.com/nathanhollows/Rapua/v3/internal/flash"
+	"github.com/nathanhollows/Rapua/v3/internal/services"
 	templates "github.com/nathanhollows/Rapua/v3/internal/templates/admin"
 	"github.com/nathanhollows/Rapua/v3/models"
 )
@@ -220,9 +222,61 @@ func (h *AdminHandler) TemplatesNameEditPost(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	h.handleSuccess(w, r, "Updated template name!")
+	h.handleSuccess(w, r, "Updated template name")
 
 	if err := templates.TemplateName(*template).Render(r.Context(), w); err != nil {
 		h.Logger.Error("InstanceDelete: rendering template", "Error", err)
 	}
+}
+
+func (h *AdminHandler) TemplatesShare(w http.ResponseWriter, r *http.Request) {
+	user := h.UserFromContext(r.Context())
+	template, ok := h.getTemplateByID(w, r)
+	if !ok {
+		return
+	}
+
+	if err := templates.TemplateShareModal(*template).Render(r.Context(), w); err != nil {
+		h.handleError(w, r, "TemplateShare: rendering template", "Error rendering template", "error", err, "user_id", user.ID)
+	}
+}
+
+func (h *AdminHandler) TemplatesSharePost(w http.ResponseWriter, r *http.Request) {
+	user := h.UserFromContext(r.Context())
+
+	if err := r.ParseForm(); err != nil {
+		h.handleError(w, r, "TemplateSharePost: parsing form", "Error parsing form", "error", err, "user_id", user.ID)
+		return
+	}
+
+	usesStr := r.Form.Get("limit")
+	uses := 0
+	if usesStr != "" {
+		var err error
+		uses, err = strconv.Atoi(usesStr)
+		if err != nil {
+			h.handleError(w, r, "TemplateSharePost: parsing uses", "Error parsing uses", "error", err, "user_id", user.ID)
+			return
+		}
+	}
+
+	data := services.ShareLinkData{
+		TemplateID: r.Form.Get("id"),
+		Validity:   r.Form.Get("validity"),
+		MaxUses:    uses,
+		Regenerate: r.Form.Has("regenerate"),
+	}
+
+	link, err := h.TemplateService.CreateShareLink(r.Context(), user.ID, data)
+	if err != nil {
+		h.handleError(w, r, "TemplateSharePost: creating link", "Error creating link", "error", err, "user_id", user.ID)
+		_ = templates.TemplateShareModal(models.Instance{}).Render(r.Context(), w)
+		return
+	}
+
+	err = templates.ShareLinkCopyModal(link).Render(r.Context(), w)
+	if err != nil {
+		h.Logger.Error("TemplateSharePost: rendering template", "Error", err, "user_id", user.ID)
+	}
+
 }

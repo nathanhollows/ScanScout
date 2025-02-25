@@ -4,10 +4,13 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"github.com/nathanhollows/Rapua/v3/db"
+	"github.com/nathanhollows/Rapua/v3/helpers"
 	"github.com/nathanhollows/Rapua/v3/models"
 	"github.com/nathanhollows/Rapua/v3/repositories"
+	"github.com/uptrace/bun"
 )
 
 type TemplateService struct {
@@ -17,6 +20,7 @@ type TemplateService struct {
 	teamService          TeamService
 	instanceRepo         repositories.InstanceRepository
 	instanceSettingsRepo repositories.InstanceSettingsRepository
+	shareLinkRepo        repositories.ShareLinkRepository
 }
 
 func NewTemplateService(
@@ -26,6 +30,7 @@ func NewTemplateService(
 	teamService TeamService,
 	instanceRepo repositories.InstanceRepository,
 	instanceSettingsRepo repositories.InstanceSettingsRepository,
+	shareLinkRepo repositories.ShareLinkRepository,
 ) TemplateService {
 	return TemplateService{
 		transactor:           transactor,
@@ -34,6 +39,7 @@ func NewTemplateService(
 		teamService:          teamService,
 		instanceRepo:         instanceRepo,
 		instanceSettingsRepo: instanceSettingsRepo,
+		shareLinkRepo:        shareLinkRepo,
 	}
 }
 
@@ -189,6 +195,62 @@ func (s *TemplateService) Update(ctx context.Context, instance *models.Instance)
 		return fmt.Errorf("updating instance: %w", err)
 	}
 	return nil
+}
+
+type ShareLinkData struct {
+	TemplateID string
+	Validity   string
+	MaxUses    int
+	Regenerate bool
+}
+
+// CreateShareLink creates a share link for a template.
+func (s *TemplateService) CreateShareLink(ctx context.Context, userID string, data ShareLinkData) (string, error) {
+	if userID == "" {
+		return "", NewValidationError("userID")
+	}
+	if data.TemplateID == "" {
+		return "", NewValidationError("data.InstanceID")
+	}
+
+	instance, err := s.instanceRepo.GetByID(ctx, data.TemplateID)
+	if err != nil {
+		return "", fmt.Errorf("finding instance: %w", err)
+	}
+
+	if instance.UserID != userID {
+		return "", ErrPermissionDenied
+	}
+
+	shareLink := &models.ShareLink{
+		TemplateID:      instance.ID,
+		UserID:          userID,
+		MaxUses:         data.MaxUses,
+		CreatedAt:       time.Now(),
+		RegenerateCodes: data.Regenerate,
+	}
+
+	switch data.Validity {
+	case "always":
+		shareLink.ExpiresAt = bun.NullTime{Time: time.Now().AddDate(100, 0, 0)} // The lifetime of a tortoise
+	case "day":
+		shareLink.ExpiresAt = bun.NullTime{Time: time.Now().AddDate(0, 0, 1)}
+	case "week":
+		shareLink.ExpiresAt = bun.NullTime{Time: time.Now().AddDate(0, 0, 7)}
+	case "month":
+		shareLink.ExpiresAt = bun.NullTime{Time: time.Now().AddDate(0, 1, 0)}
+	default:
+		return "", NewValidationError("data.Validity")
+	}
+
+	err = s.shareLinkRepo.Create(ctx, shareLink)
+	if err != nil {
+		return "", fmt.Errorf("creating share link: %w", err)
+	}
+
+	url := helpers.URL("/templates/share/" + shareLink.ID)
+
+	return url, nil
 }
 
 //
