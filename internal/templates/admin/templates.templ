@@ -126,10 +126,11 @@ templ TemplateNameEdit(template models.Instance) {
 		hx-post={ fmt.Sprint("/admin/templates/", template.ID, "/edit/name") }
 		hx-target={ fmt.Sprint("#name-", template.ID) }
 		hx-swap="innerHTML"
-		hx-trigger="submit, keyup[key == 'Escape']"
+		hx-trigger="submit"
 	>
 		<label class="input input-sm py-4 pr-1 input-bordered flex items-center gap-1">
 			<input
+				id="name-input"
 				name="name"
 				type="text"
 				class="grow text-ellipsis"
@@ -137,6 +138,7 @@ templ TemplateNameEdit(template models.Instance) {
 				autoComplete="off"
 				autoFocus
 				tabIndex="0"
+				_="on keyup[key == 'Escape'] send closeNameEdit"
 			/>
 			<button
 				type="button"
@@ -186,7 +188,9 @@ templ templateItem(template models.Instance) {
 			<a
 				class="btn btn-sm inline-flex"
 				data-id={ fmt.Sprint(template.ID) }
-				onclick="shareTemplate()"
+				hx-get={ fmt.Sprint("/admin/templates/", template.ID, "/share") }
+				hx-target="#share_template_modal"
+				hx-swap="innerHTML"
 			>
 				<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-share-2 w-4 h-4"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" x2="15.42" y1="13.51" y2="17.49"></line><line x1="15.41" x2="8.59" y1="6.51" y2="10.49"></line></svg>
 				Share
@@ -212,7 +216,10 @@ templ templateItem(template models.Instance) {
 					<!-- Share -->
 					<li class="inline-block sm:hidden">
 						<a
-							onclick="share_modal.showModal()"
+							data-id={ fmt.Sprint(template.ID) }
+							hx-get={ fmt.Sprint("/admin/templates/", template.ID, "/share") }
+							hx-target="#share_template_modal"
+							hx-swap="innerHTML"
 						>
 							<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-share-2 w-4 h-4"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" x2="15.42" y1="13.51" y2="17.49"></line><line x1="15.41" x2="8.59" y1="6.51" y2="10.49"></line></svg>
 							Share
@@ -306,7 +313,8 @@ templ templateModals() {
 					<input type="text" class="input input-bordered w-full" name="name" required autocomplete="off"/>
 					<input type="hidden" name="id" value=""/>
 				</label>
-				<div class="form-control my-5">
+				<!-- TODO -->
+				<div class="form-control my-5 hidden">
 					<label class="label cursor-pointer">
 						<span class="label-text flex items-center">
 							<div
@@ -366,24 +374,32 @@ templ templateModals() {
 		</div>
 	</dialog>
 	<!-- Share template modal -->
-	<dialog id="share_template_modal" class="modal modal-bottom sm:modal-middle">
-		@ShareLinkModal()
-	</dialog>
+	<dialog
+		id="share_template_modal"
+		class="modal modal-bottom sm:modal-middle"
+		_="on htmx:afterSettle
+	share_template_modal.showModal()
+	"
+	></dialog>
 }
 
-templ ShareLinkModal() {
+templ TemplateShareModal(template models.Instance) {
 	<div class="modal-box">
-		<form hx-post="/admin/templates/share" hx-swap="none">
+		<form
+			hx-post={ fmt.Sprint("/admin/templates/", template.ID, "/share") }
+			hx-target="#share_template_modal"
+			hx-swap="innerHTML"
+		>
 			<h3 class="text-lg font-bold">Share a template</h3>
 			<div class="prose py-4">
 				<p>Share a template with others by creating a shareable link. Anyone with the link will be able to create a new game from this template.</p>
 			</div>
 			<div class="flex md:flex-row flex-col gap-4">
 				<div class="form-control sm:w-1/2">
-					<label class="label" for="link-duration">
+					<label class="label" for="link-validity">
 						<span class="label-text">Validity</span>
 					</label>
-					<select id="link-duration" name="duration" class="select select-bordered w-full" name="duration">
+					<select id="link-validity" name="validity" class="select select-bordered w-full">
 						<option value="always" selected>Never expires</option>
 						<option value="day">1 day</option>
 						<option value="week">1 week</option>
@@ -404,9 +420,10 @@ templ ShareLinkModal() {
 						min="1"
 					/>
 				</div>
-				<input type="hidden" name="id" value=""/>
+				<input type="hidden" name="id" value={ template.ID }/>
 			</div>
-			<label class="label cursor-pointer">
+			<!-- TODO -->
+			<label class="label cursor-pointer hidden">
 				<span class="label-text flex items-center pt-4">
 					<div
 						class="dropdown dropdown-hover dropdown-top not-prose"
