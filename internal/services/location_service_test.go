@@ -26,35 +26,6 @@ func setupLocationService(t *testing.T) (services.LocationService, func()) {
 	return locationService, cleanup
 }
 
-// TODO: Test the following methods:
-// type LocationService interface {
-// 	// FindMarkersNotInInstance finds all markers that are not in the given instance
-// 	FindMarkersNotInInstance(ctx context.Context, instanceID string, otherInstances []string) ([]models.Marker, error)
-//
-// 	// Update visitor stats for a location
-// 	IncrementVisitorStats(ctx context.Context, location *models.Location) error
-// 	// UpdateCoords updates the coordinates for a location
-// 	UpdateCoords(ctx context.Context, location *models.Location, lat, lng float64) error
-// 	// UpdateName updates the name of a location
-// 	UpdateName(ctx context.Context, location *models.Location, name string) error
-// 	// UpdateLocation updates a location
-// 	UpdateLocation(ctx context.Context, location *models.Location, data LocationUpdateData) error
-// 	// ReorderLocations accepts IDs of locations and reorders them
-// 	ReorderLocations(ctx context.Context, instanceID string, locationIDs []string) error
-//
-// 	// DeleteLocation deletes a location
-// 	DeleteLocation(ctx context.Context, locationID string) error
-// 	// DeleteByInstanceID deletes all locations for an instance
-// 	DeleteLocations(ctx context.Context, tx *bun.Tx, locations []models.Location) error
-//
-// 	// LoadCluesForLocation loads the clues for a specific location if they are not already loaded
-// 	LoadCluesForLocation(ctx context.Context, location *models.Location) error
-// 	// LoadCluesForLocations loads the clues for all given locations if they are not already loaded
-// 	LoadCluesForLocations(ctx context.Context, locations *[]models.Location) error
-// 	// LoadRelations loads the related data for a location
-// 	LoadRelations(ctx context.Context, location *models.Location) error
-// }
-
 func TestLocationService_CreateLocation(t *testing.T) {
 	service, cleanup := setupLocationService(t)
 	defer cleanup()
@@ -291,3 +262,31 @@ func TestLocationService_FindByInstance(t *testing.T) {
 		assert.Empty(t, locs)
 	})
 }
+
+// TODO: Test the following methods:
+// 	// FindMarkersNotInInstance finds all markers that are not in the given instance
+// 	FindMarkersNotInInstance(ctx context.Context, instanceID string, otherInstances []string) ([]models.Marker, error)
+
+// TODO: Test the following methods:
+// 	// Update visitor stats for a location
+// 	IncrementVisitorStats(ctx context.Context, location *models.Location) error
+// 	// UpdateCoords updates the coordinates for a location
+// 	UpdateCoords(ctx context.Context, location *models.Location, lat, lng float64) error
+// 	// UpdateName updates the name of a location
+// 	UpdateName(ctx context.Context, location *models.Location, name string) error
+// 	// UpdateLocation updates a location
+// 	UpdateLocation(ctx context.Context, location *models.Location, data LocationUpdateData) error
+// 	// ReorderLocations accepts IDs of locations and reorders them
+// 	ReorderLocations(ctx context.Context, instanceID string, locationIDs []string) error
+//
+// 	// DeleteLocation deletes a location
+// 	DeleteLocation(ctx context.Context, locationID string) error
+// 	// DeleteByInstanceID deletes all locations for an instance
+// 	DeleteLocations(ctx context.Context, tx *bun.Tx, locations []models.Location) error
+//
+// 	// LoadCluesForLocation loads the clues for a specific location if they are not already loaded
+// 	LoadCluesForLocation(ctx context.Context, location *models.Location) error
+// 	// LoadCluesForLocations loads the clues for all given locations if they are not already loaded
+// 	LoadCluesForLocations(ctx context.Context, locations *[]models.Location) error
+// 	// LoadRelations loads the related data for a location
+// 	LoadRelations(ctx context.Context, location *models.Location) error
