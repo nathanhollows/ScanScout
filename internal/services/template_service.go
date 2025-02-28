@@ -43,9 +43,19 @@ func (s *TemplateService) CreateFromInstance(ctx context.Context, userID, instan
 		return nil, NewValidationError("userID")
 	}
 
+	if instanceID == "" {
+		return nil, NewValidationError("instanceID")
+	}
+	if name == "" {
+		return nil, NewValidationError("name")
+	}
+
 	oldInstance, err := s.instanceRepo.GetByID(ctx, instanceID)
 	if err != nil {
 		return nil, fmt.Errorf("finding instance: %w", err)
+	}
+	if oldInstance == nil {
+		return nil, errors.New("instance not found")
 	}
 
 	if oldInstance.UserID != userID {
