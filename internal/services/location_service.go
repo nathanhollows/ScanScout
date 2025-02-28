@@ -45,7 +45,7 @@ type LocationService interface {
 	// DeleteLocation deletes a location
 	DeleteLocation(ctx context.Context, locationID string) error
 	// DeleteByInstanceID deletes all locations for an instance
-	DeleteByInstanceID(ctx context.Context, tx *bun.Tx, instanceID string) error
+	DeleteLocations(ctx context.Context, tx *bun.Tx, locations []models.Location) error
 
 	// LoadCluesForLocation loads the clues for a specific location if they are not already loaded
 	LoadCluesForLocation(ctx context.Context, location *models.Location) error
@@ -82,6 +82,13 @@ func NewLocationService(
 
 // CreateLocation creates a new location.
 func (s locationService) CreateLocation(ctx context.Context, instanceID, name string, lat, lng float64, points int) (models.Location, error) {
+	if name == "" {
+		return models.Location{}, NewValidationError("name")
+	}
+	if instanceID == "" {
+		return models.Location{}, NewValidationError("instanceID")
+	}
+
 	// Create the marker
 	marker, err := s.CreateMarker(ctx, name, lat, lng)
 	if err != nil {
@@ -104,6 +111,12 @@ func (s locationService) CreateLocation(ctx context.Context, instanceID, name st
 
 // CreateLocationFromMarker creates a new location from an existing marker.
 func (s locationService) CreateLocationFromMarker(ctx context.Context, instanceID, name string, points int, markerCode string) (models.Location, error) {
+	if name == "" {
+		return models.Location{}, NewValidationError("name")
+	}
+	if instanceID == "" {
+		return models.Location{}, NewValidationError("instanceID")
+	}
 	marker, err := s.markerRepo.GetByCode(ctx, markerCode)
 	if err != nil {
 		return models.Location{}, fmt.Errorf("finding marker: %v", err)
@@ -380,20 +393,15 @@ func (s locationService) DeleteLocation(ctx context.Context, locationID string) 
 }
 
 // DeleteByInstanceID deletes all locations for an instance.
-func (s locationService) DeleteByInstanceID(ctx context.Context, tx *bun.Tx, instanceID string) error {
-	locations, err := s.locationRepo.FindByInstance(ctx, instanceID)
-	if err != nil {
-		return fmt.Errorf("finding all locations: %v", err)
-	}
-
+func (s locationService) DeleteLocations(ctx context.Context, tx *bun.Tx, locations []models.Location) error {
 	for _, location := range locations {
-		err = s.deleteLocation(ctx, tx, location.ID)
+		err := s.deleteLocation(ctx, tx, location.ID)
 		if err != nil {
 			return fmt.Errorf("deleting location: %v", err)
 		}
 	}
 
-	err = s.markerRepo.DeleteUnused(ctx, tx)
+	err := s.markerRepo.DeleteUnused(ctx, tx)
 	if err != nil {
 		return fmt.Errorf("deleting unused markers: %v", err)
 	}
