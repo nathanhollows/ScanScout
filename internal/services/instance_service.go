@@ -14,7 +14,6 @@ import (
 type instanceService struct {
 	transactor           db.Transactor
 	locationService      LocationService
-	userService          UserService
 	teamService          TeamService
 	instanceRepo         repositories.InstanceRepository
 	instanceSettingsRepo repositories.InstanceSettingsRepository
@@ -33,15 +32,11 @@ type InstanceService interface {
 
 	// DeleteInstance deletes an instance for the given user
 	DeleteInstance(ctx context.Context, user *models.User, instanceID, confirmName string) (bool, error)
-
-	// SwitchInstance switches the user's current instance
-	SwitchInstance(ctx context.Context, user *models.User, instanceID string) (*models.Instance, error)
 }
 
 func NewInstanceService(
 	transactor db.Transactor,
 	locationService LocationService,
-	userService UserService,
 	teamService TeamService,
 	instanceRepo repositories.InstanceRepository,
 	instanceSettingsRepo repositories.InstanceSettingsRepository,
@@ -49,7 +44,6 @@ func NewInstanceService(
 	return &instanceService{
 		transactor:           transactor,
 		locationService:      locationService,
-		userService:          userService,
 		teamService:          teamService,
 		instanceRepo:         instanceRepo,
 		instanceSettingsRepo: instanceSettingsRepo,
@@ -74,12 +68,6 @@ func (s *instanceService) CreateInstance(ctx context.Context, name string, user 
 
 	if err := s.instanceRepo.Create(ctx, instance); err != nil {
 		return nil, fmt.Errorf("creating instance: %w", err)
-	}
-
-	user.CurrentInstanceID = instance.ID
-	err := s.userService.UpdateUser(ctx, user)
-	if err != nil {
-		return nil, fmt.Errorf("updating user: %w", err)
 	}
 
 	settings := &models.InstanceSettings{
@@ -195,6 +183,11 @@ func (s *instanceService) DeleteInstance(ctx context.Context, user *models.User,
 		return false, errors.New("cannot delete an instance that is currently in use")
 	}
 
+	for i, location := range instance.Locations {
+		s.locationService.LoadRelations(ctx, &location)
+		instance.Locations[i] = location
+	}
+
 	// Start transaction
 	tx, err := s.transactor.BeginTx(ctx, &sql.TxOptions{})
 	if err != nil {
@@ -227,7 +220,7 @@ func (s *instanceService) DeleteInstance(ctx context.Context, user *models.User,
 		return false, fmt.Errorf("deleting teams: %w", err)
 	}
 
-	err = s.locationService.DeleteByInstanceID(ctx, tx, instanceID)
+	err = s.locationService.DeleteLocations(ctx, tx, instance.Locations)
 	if err != nil {
 		tx.Rollback()
 		return false, fmt.Errorf("deleting locations: %w", err)
@@ -235,38 +228,8 @@ func (s *instanceService) DeleteInstance(ctx context.Context, user *models.User,
 
 	err = tx.Commit()
 	if err != nil {
-		tx.Rollback()
 		return false, fmt.Errorf("committing transaction: %w", err)
 	}
 
 	return true, nil
-}
-
-// SwitchInstance implements InstanceService.
-func (s *instanceService) SwitchInstance(ctx context.Context, user *models.User, instanceID string) (*models.Instance, error) {
-	if user == nil {
-		return nil, ErrUserNotAuthenticated
-	}
-
-	instance, err := s.instanceRepo.GetByID(ctx, instanceID)
-	if err != nil {
-		return nil, errors.New("instance not found")
-	}
-
-	if instance.IsTemplate {
-		return nil, errors.New("cannot switch to a template")
-	}
-
-	// Make sure the user has permission to switch to this instance
-	if instance.UserID != user.ID {
-		return nil, ErrPermissionDenied
-	}
-
-	user.CurrentInstanceID = instance.ID
-	err = s.userService.UpdateUser(ctx, user)
-	if err != nil {
-		return nil, fmt.Errorf("updating user: %w", err)
-	}
-
-	return instance, nil
 }

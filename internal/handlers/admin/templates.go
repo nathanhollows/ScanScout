@@ -115,7 +115,7 @@ func (h *AdminHandler) TemplatesLaunch(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Switch to the new instance
-	_, err = h.InstanceService.SwitchInstance(r.Context(), user, newGame.ID)
+	err = h.UserService.SwitchInstance(r.Context(), user, newGame.ID)
 	if err != nil {
 		h.handleError(w, r, "InstancesCreate: switching instance", "Error switching instance", "error", err)
 		return

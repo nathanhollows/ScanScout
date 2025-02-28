@@ -43,7 +43,7 @@ func (h *AdminHandler) InstancesCreate(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Switch to the new instance
-	_, err = h.InstanceService.SwitchInstance(r.Context(), user, instance.ID)
+	err = h.UserService.SwitchInstance(r.Context(), user, instance.ID)
 	if err != nil {
 		h.handleError(w, r, "InstancesCreate: switching instance", "Error switching instance", "error", err)
 		return
@@ -71,7 +71,7 @@ func (h *AdminHandler) InstanceDuplicate(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	_, err = h.InstanceService.SwitchInstance(r.Context(), user, instance.ID)
+	err = h.UserService.SwitchInstance(r.Context(), user, instance.ID)
 	if err != nil {
 		h.handleError(w, r, "InstanceDuplicate: switching instance", "Error switching instance", "error", err, "instance_id", user.CurrentInstanceID)
 		return
@@ -90,7 +90,7 @@ func (h *AdminHandler) InstanceSwitch(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_, err := h.InstanceService.SwitchInstance(r.Context(), user, instanceID)
+	err := h.UserService.SwitchInstance(r.Context(), user, instanceID)
 	if err != nil {
 		h.handleError(w, r, "InstanceSwitch: switching instance", "Error switching instance", "error", err, "instance_id", user.CurrentInstanceID)
 		return

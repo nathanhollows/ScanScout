@@ -35,7 +35,7 @@ func setupInstanceService(t *testing.T) (services.InstanceService, services.User
 	userService := services.NewUserService(transactor, userRepo, instanceRepo)
 	instanceService := services.NewInstanceService(
 		transactor,
-		locationService, userService, teamService, instanceRepo, instanceSettingsRepo,
+		locationService, teamService, instanceRepo, instanceSettingsRepo,
 	)
 
 	return instanceService, userService, cleanup
@@ -45,7 +45,7 @@ func TestInstanceService(t *testing.T) {
 	svc, userService, cleanup := setupInstanceService(t)
 	defer cleanup()
 
-	user := &models.User{ID: "user123", Password: "password"}
+	user := &models.User{ID: "user123", Password: "password", CurrentInstanceID: "instance123"}
 	err := userService.CreateUser(context.Background(), user, "password")
 	assert.NoError(t, err)
 	assert.NotEmpty(t, user.ID)
@@ -167,10 +167,38 @@ func TestInstanceService(t *testing.T) {
 			wantErr      bool
 			expectedBool bool
 		}{
-			{"Invalid, currently in use", instance.ID, "GameToDelete", user, true, true},
-			{"Mismatched Confirmation", instance.ID, "WrongName", user, true, false},
-			{"Invalid Instance ID", "invalid-id", "GameToDelete", user, true, false},
-			{"Nil User", instance.ID, "GameToDelete", nil, true, false},
+			{"Invalid, currently in use",
+				instance.ID,
+				"GameToDelete",
+				&models.User{
+					ID:                "user123",
+					Password:          "password",
+					CurrentInstanceID: instance.ID,
+				},
+				true,
+				true,
+			},
+			{"Mismatched Confirmation",
+				instance.ID,
+				"WrongName",
+				user,
+				true,
+				false,
+			},
+			{"Invalid Instance ID",
+				"invalid-id",
+				"GameToDelete",
+				user,
+				true,
+				false,
+			},
+			{"Nil User",
+				instance.ID,
+				"GameToDelete",
+				nil,
+				true,
+				false,
+			},
 		}
 
 		for _, tc := range tests {
@@ -187,32 +215,4 @@ func TestInstanceService(t *testing.T) {
 		}
 	})
 
-	t.Run("SwitchInstance", func(t *testing.T) {
-		instance, _ := svc.CreateInstance(context.Background(), "GameToSwitch", user)
-
-		tests := []struct {
-			name       string
-			instanceID string
-			user       *models.User
-			wantErr    bool
-		}{
-			{"Valid Switch", instance.ID, user, false},
-			{"Invalid ID", "invalid-id", user, true},
-			{"Nil User", instance.ID, nil, true},
-		}
-
-		for _, tc := range tests {
-			t.Run(tc.name, func(t *testing.T) {
-				switchedInstance, err := svc.SwitchInstance(context.Background(), tc.user, tc.instanceID)
-				if tc.wantErr {
-					assert.Error(t, err)
-					assert.Nil(t, switchedInstance)
-				} else {
-					assert.NoError(t, err)
-					assert.NotNil(t, switchedInstance)
-					assert.Equal(t, instance.ID, switchedInstance.ID)
-				}
-			})
-		}
-	})
 }
